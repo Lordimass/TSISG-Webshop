@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+import {createClient} from '@supabase/supabase-js'
 
 export default async (event, context) => {
     // Grab URL and Key from Netlify Env Variables.
