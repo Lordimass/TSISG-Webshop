@@ -5,6 +5,10 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function App() {
+  return getProductList();
+}
+
+function getProductList() {
   const [products, setData] = useState(null)
   const [error, setError] = useState(null)
 
@@ -41,5 +45,3 @@ export default function App() {
     )
   }
 }
-
-

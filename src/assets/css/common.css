@@ -1,0 +1,29 @@
+/************************ Variables ************************/
+:root {
+    --dark-purple: #501212;
+    --purple: #692230;
+    --yellow: #d7cfb5;
+}
+
+/************************ Common Styling ************************/
+body {
+    margin: 0;
+}
+
+#root {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+h1 {
+    margin: 0;
+    color: var(--yellow);
+    font-family: sans-serif
+}
+
+.content {
+    flex-grow: 1;
+    background-color: var(--yellow);
+}

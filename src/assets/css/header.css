@@ -1,0 +1,14 @@
+.header-main{
+    display: flex;
+    background-color: var(--purple);
+}
+
+.header-lower{
+    background-image: linear-gradient(var(--dark-purple), 10%, var(--purple));
+    min-height: 1em;
+}
+
+.header .logo {
+    height: 3em;
+    padding: 5%;
+}

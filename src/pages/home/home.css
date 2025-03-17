@@ -1,0 +1,21 @@
+.title-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-image: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//sherlocks.webp");
+    background-position: -50px;
+    min-height: 20em;
+
+    border-bottom-right-radius: 2em;
+    border-bottom-left-radius: 2em;
+}
+
+.title-section img {
+    width: 60%;
+    padding: 4em;
+    margin: 1em;
+    height: fit-content;
+    border-radius: 20%;
+    backdrop-filter: blur(4px);
+}

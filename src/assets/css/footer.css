@@ -1,0 +1,5 @@
+.footer {
+    justify-self: flex-end;
+    background-color: var(--purple);
+    min-height: 2vw;
+}
