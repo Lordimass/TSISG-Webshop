@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createClient } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_DATABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [products, setData] = useState(null)
+  const [error, setError] = useState(null)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await fetch(window.location.origin + "/.netlify/functions/getProducts")
+          .then((response) => response.json())
+          .then((data) => {
+            setData(data)
+          })
+      } catch (error) {
+        setError(error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return (
+      <h1>Error: {error.message}</h1>
+    )
+  } else if (products) {
+    const listProducts = products.map(product => 
+      <li key={product.sku}>{product.name} - {product.price}</li>
+    )
+    return (
+      <ul>{listProducts}</ul>
+    )
+  } else {
+    return (
+      <h1>Loading...</h1>
+    )
+  }
 }
 
-export default App
+
