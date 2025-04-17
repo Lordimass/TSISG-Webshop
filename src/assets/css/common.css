@@ -3,6 +3,14 @@
     --dark-purple: #501212;
     --purple: #692230;
     --yellow: #d7cfb5;
+    --missing-grey: rgb(141, 141, 141);
+}
+
+/************************ Fonts ************************/
+
+@font-face {
+    font-family: "Perfect Penmanship";
+    src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//KGPerfectPenmanship.otf") format("opentype");
 }
 
 /************************ Common Styling ************************/
@@ -17,9 +25,14 @@ body {
     justify-content: space-between;
 }
 
+p {
+    margin: 0;
+    font-family: "Perfect Penmanship"; 
+}
+
 h1 {
     margin: 0;
-    color: var(--yellow);
+    color: white;
     font-family: sans-serif
 }
 
@@ -27,3 +40,4 @@ h1 {
     flex-grow: 1;
     background-color: var(--yellow);
 }
+

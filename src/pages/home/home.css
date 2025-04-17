@@ -19,3 +19,8 @@
     border-radius: 20%;
     backdrop-filter: blur(4px);
 }
+
+.products {
+    display: flex;
+    flex-wrap: wrap;
+}
