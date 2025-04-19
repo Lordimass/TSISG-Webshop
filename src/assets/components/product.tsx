@@ -1,18 +1,26 @@
-import { useState, ReactElement } from 'react';
+import { useState, ReactElement, useEffect } from 'react';
 
 import "../css/product.css"
 
 type prodProps = {
-  sku: Number,
-  name: String,
-  price: Number
-  images: image[]
+  sku: number,
+  name: string,
+  price: number,
+  images: image[],
 }
 
 type image = {
   id: number,
   image_url: string,
   display_order: number
+}
+
+type productInBasket = {
+  sku: number,
+  name: string,
+  price: number,
+  basketQuantity: number,
+  images: image[]
 }
 
 export default function Product({ sku, name, price, images }: prodProps) {
@@ -106,8 +114,48 @@ export default function Product({ sku, name, price, images }: prodProps) {
     setQuantity(value)
   }
 
+  function setQuantity(quant: number) {
+    // Fetch the current basket contents
+    var basketString: string | null = localStorage.getItem("basket")
+    if (!basketString) { // Create basket if it doesn't exist
+      basketString = "{\"basket\": []}"
+    }
+    var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+
+    // Find product and set quantity
+    var found: boolean = false
+    for (let i = 0; i<basket.length; i++) {
+      var item: productInBasket = basket[i]
+      if (item.sku == sku) {
+        found = true
+        // Just remove it from the basket if 0
+        if (quant == 0) {
+          basket.splice(i, 1)
+          break
+        }
+        item.basketQuantity = quant
+        break
+      }
+    }
+    // If it wasn't found, create it
+    if (!found) {
+      basket.push({
+        "sku": sku,
+        "name": name,
+        "price": price,
+        "basketQuantity": quant,
+        "images": images
+      })
+    }
+
+    localStorage.setItem("basket",
+      JSON.stringify({"basket": basket})
+    )
+    setQuantityButActually(quant)
+  }
+
   
-  const [quantity, setQuantity] = useState(0); // Current quantity of product order
+  const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
   const max_order = 10; // Maximum possible product order
 
@@ -122,6 +170,28 @@ export default function Product({ sku, name, price, images }: prodProps) {
 
   // Format Price
   var string_price: string = "£" + price.toFixed(2)
+
+  // TODO: Get this to swap to modifier mode correctly, right now it loads
+  // the value correctly but stays on standard add to basket button mode
+  // until clicked.
+
+  // Check if item already in basket
+  useEffect(() => { // Only run on initial render
+    var basketString: string | null = localStorage.getItem("basket")
+    if (basketString) {
+      var basket: Array<productInBasket> = JSON.parse(basketString).basket
+      for (let i=0; i<basket.length; i++) {
+        let item: productInBasket = basket[i]
+        if (item.sku == sku) {
+          setQuantityButActually(item.basketQuantity)
+          setShowModifer(true)
+          updateQuantityDisplay()
+          break
+        }
+      }
+    }
+  }, [])
+
 
   return (
     <div className="product" id={"product-" + sku}>

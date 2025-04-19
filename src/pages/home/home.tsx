@@ -38,10 +38,15 @@ export default function Home() {
     products = []
   }
 
-
+  // This could pick from a list of random sexualities/genders
+  // This Website Is So TRANS
+  // This Website Is So LESBIAN
   return (<><Header /><div className="content">
     <div className="title-section">
-      <img src="https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//logo-wide.png" />
+      <div className='title-text'>
+        <h1>This Website Is So</h1>
+        <h1 className='title-main-word'>&lt; GAY &gt;</h1>
+      </div>
     </div>
     
     <div className='products'>{products}</div>

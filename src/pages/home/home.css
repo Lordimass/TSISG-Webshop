@@ -1,5 +1,6 @@
 .title-section {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
@@ -20,8 +21,49 @@
     backdrop-filter: blur(4px);
 }
 
+.title-section h1 {
+    user-select: none;
+    font-family: "Backso";
+    font-size: 5em;
+}
+
+.title-section .title-main-word {
+    font-size: 10em;
+}
+
 .products {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
+}
+
+.title-text {
+    padding: 1em;
+    margin: 2em;
+    text-align: center;
+    backdrop-filter: blur(7px);
+    border-radius: 10em;
+    line-height: 8em;
+}
+
+@media screen and (max-width: 1100px) {
+    
+    .title-section h1 {
+        user-select: none;
+        font-family: "Backso";
+        font-size: 7vw;
+    }
+    
+    .title-section .title-main-word {
+        font-size: 18vw;
+    }
+    
+    .title-text {
+        padding: 0.5em;
+        margin: 1em;
+        text-align: center;
+        backdrop-filter: blur(7px);
+        border-radius: 5vw;
+        line-height: 18vw;
+    }
 }

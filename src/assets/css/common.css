@@ -13,6 +13,11 @@
     src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//KGPerfectPenmanship.otf") format("opentype");
 }
 
+@font-face {
+    font-family: "Backso";
+    src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//Backso.otf");
+}
+
 /************************ Common Styling ************************/
 body {
     margin: 0;
