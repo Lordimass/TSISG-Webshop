@@ -5,7 +5,7 @@ export default function Header() {
     return (
         <div className="header">
             <div className="header-main">
-                <a href="/"><img 
+                <a href="/"><img
                     className="logo"
                     src="https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//logo.webp"
                 /></a>

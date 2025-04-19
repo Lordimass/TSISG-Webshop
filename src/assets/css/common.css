@@ -3,7 +3,7 @@
     --dark-purple: #501212;
     --purple: #692230;
     --yellow: #d7cfb5;
-    --missing-grey: rgb(141, 141, 141);
+    --jamie-grey: #838383;
 }
 
 /************************ Fonts ************************/
@@ -37,6 +37,8 @@ h1 {
 }
 
 .content {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
     background-color: var(--yellow);
 }

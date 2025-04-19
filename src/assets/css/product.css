@@ -1,14 +1,20 @@
 .product {
     display: flex;
     flex-direction: column;
+
     width: min-content;
     height: min-content;
+    min-width: 20em;
+    min-height: 33em;
+
     background-color: white;
     overflow:hidden;
     border-radius: 1em;
     color: white;
     margin: 1em;
-    transition: all 0.2s
+    transition: all 0.2s;
+
+    justify-content: space-between;
 }
 
 .product:hover {
@@ -19,24 +25,14 @@
     display: flex;
     height: 20em;
     width: 100%;
-    min-width: 20em;
     justify-content: center;
     background-size: 100%;
-    background-color: var(--missing-grey);
+    background-color: var(--jamie-grey);
 }
 
 .product-image-main {
     height: 100%;
-}
-
-.image-carousel img {
-    position:sticky;
-    z-index: 0;
-}
-
-.left-carousel-button {
-    position: relative;
-    right: 0;
+    user-select: none;
 }
 
 .bg-blurrer {
@@ -59,16 +55,25 @@
     font-size: larger;
 }
 
-.basket-button {
+.basket-modifier {
     display: flex;
     align-self: center;
+
     width: 90%;
     height: 4em;
-    border-radius: 1em;
-    background-color: var(--purple);
     margin: 0.5em;
 
     justify-content: center;
+}
+
+.basket-button {
+    display: flex;
+    justify-content: center;
+
+    width: 100%;
+    height: 100%;
+    background-color: var(--purple);
+    border-radius: 1em;
     transition: all 0.1s;
 }
 
@@ -84,8 +89,85 @@
 }
 
 .basket-button h1 {
-    margin: 0.3em;
+    margin: 0.3rem;
     height: 1em;
     align-self: center;
     user-select: none;
+}
+
+.prod-footer {
+    display: flex;
+    flex-direction: column;
+}
+
+.decrement-basket-quantity-button, .increment-basket-quantity-button {
+    background-color: var(--purple);
+    width: 100%;
+    text-align: center;
+    text-justify: center;
+    user-select: none;
+    transition: all 0.1s;
+}
+
+.decrement-basket-quantity-button:hover, .increment-basket-quantity-button:hover {
+    transform: scale(105%);
+    cursor: pointer;
+}
+
+.decrement-basket-quantity-button {
+    border-bottom-left-radius: 1em;
+    border-top-left-radius: 1em;
+}
+
+.increment-basket-quantity-button {
+    border-top-right-radius: 1em;
+    border-bottom-right-radius: 1em;
+}
+
+.basket-input {
+    font-family: "Perfect Penmanship";
+    text-align: center;
+    font-size: larger;
+    width: 200%;
+    border: 2px solid --jamie-grey;
+}
+
+@media screen and (max-width: 1100px)  {
+    .product {
+        flex-direction: row;
+        min-height: auto;
+        width: 100%;
+        min-height: auto;
+        height: 9em;
+    }
+
+    .product-image-main {
+        height: 100%;
+        width: max-content;
+    }
+
+    .product-image-container {
+        width: 40%;
+        height: 100%;
+    }
+
+    .product-text {
+        font-size: smaller;
+    }
+
+    .basket-modifier {
+        height: 2em;
+    }
+
+    .basket-button h1 {
+        font-size:x-large;
+    }
+
+    .prod-footer {
+        width: 100%;
+        height: 100%;
+        justify-content: space-between;
+    }
+
+
 }
