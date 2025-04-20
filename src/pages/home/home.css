@@ -28,14 +28,24 @@
 }
 
 .title-section .title-main-word {
-    font-size: 10em;
+    font-size: 8em;
+    text-wrap-mode: nowrap;
+    transition: transform 0.2s;
 }
 
-.products {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+.title-section .title-main-word:hover {
+    cursor: pointer;
 }
+
+.title-rotate {
+    animation: rotation 1s linear
+}
+
+@keyframes rotation {
+    from {transform:rotateY(0deg);}
+    to {transform: rotateY(360deg);}
+}
+
 
 .title-text {
     padding: 1em;
@@ -55,7 +65,7 @@
     }
     
     .title-section .title-main-word {
-        font-size: 18vw;
+        font-size: 12vw;
     }
     
     .title-text {

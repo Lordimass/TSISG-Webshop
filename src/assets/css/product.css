@@ -12,13 +12,8 @@
     border-radius: 1em;
     color: white;
     margin: 1em;
-    transition: all 0.2s;
 
     justify-content: space-between;
-}
-
-.product:hover {
-    transform: scale(102%);
 }
 
 .product-image-container {
@@ -101,12 +96,13 @@
 }
 
 .decrement-basket-quantity-button, .increment-basket-quantity-button {
+    display: flex;
     background-color: var(--purple);
     width: 100%;
-    text-align: center;
-    text-justify: center;
+    align-items: center;
+    justify-content: center;
     user-select: none;
-    transition: all 0.1s;
+    transition: transform 0.1s;
 }
 
 .decrement-basket-quantity-button:hover, .increment-basket-quantity-button:hover {

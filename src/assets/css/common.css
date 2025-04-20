@@ -41,6 +41,10 @@ h1 {
     font-family: sans-serif
 }
 
+a {
+    color: black;
+}
+
 .content {
     display: flex;
     flex-direction: column;

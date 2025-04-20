@@ -1,4 +1,4 @@
-import { useState, ReactElement, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import "../css/product.css"
 
@@ -102,9 +102,14 @@ export default function Product({ sku, name, price, images }: prodProps) {
       return
     }
     // Check number in range
-    if (value > max_order || value < 0) {
-      console.log("Out of range, resetting to " + quantity)
-      basketInput.value = quantity as unknown as string
+    if (value > max_order) {
+      basketInput.value = max_order as unknown as string
+      setQuantity(max_order)
+      return
+    } else if (value <= 0) {
+      basketInput.value = 0 as unknown as string
+      setQuantity(0)
+      setShowModifer(false)
       return
     }
     basketInput.value = value as unknown as string
@@ -171,10 +176,6 @@ export default function Product({ sku, name, price, images }: prodProps) {
   // Format Price
   var string_price: string = "£" + price.toFixed(2)
 
-  // TODO: Get this to swap to modifier mode correctly, right now it loads
-  // the value correctly but stays on standard add to basket button mode
-  // until clicked.
-
   // Check if item already in basket
   useEffect(() => { // Only run on initial render
     var basketString: string | null = localStorage.getItem("basket")
@@ -202,7 +203,7 @@ export default function Product({ sku, name, price, images }: prodProps) {
         }}
       >
         <div className="bg-blurrer"></div>
-        <img className="product-image-main" src={imageURL}></img>
+        <img className="product-image-main" src={imageURL} loading='lazy'></img>
         <div className="bg-blurrer"></div>
       </div>
 
