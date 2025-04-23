@@ -8,13 +8,28 @@ import "./home.css"
 import Products from '../../assets/components/products';
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
+var spinTimeout = false
 
 export default function Home() {
   function changeWord() {
+    if (spinTimeout) {
+      return
+    }
+    spinTimeout = true
+
     rotate(document.getElementById("title-word"))
+
+    words.splice(words.indexOf(word), 1)
+    var tempWord = word
+    var value: number = Math.floor(Math.random()*words.length)
+
     setTimeout(() => {
-      setWord(words[Math.floor(Math.random()* words.length)])
+      setWord(words[value])
+      words.push(word)
     }, 500)
+    setTimeout(() => {
+      spinTimeout = false
+    }, 1100)
     
   }
 
