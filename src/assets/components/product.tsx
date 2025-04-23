@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 
 import "../css/product.css"
 
+const trash_icon: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//trash.svg"
+
 type prodProps = {
   sku: number,
   name: string,
@@ -120,6 +122,9 @@ export default function Product({ sku, name, price, images }: prodProps) {
   }
 
   function setQuantity(quant: number) {
+    // Function needs to update the localStorage basket for persistence,
+    // it will also then update the actual quantity state for this product.
+
     // Fetch the current basket contents
     var basketString: string | null = localStorage.getItem("basket")
     if (!basketString) { // Create basket if it doesn't exist
@@ -153,45 +158,73 @@ export default function Product({ sku, name, price, images }: prodProps) {
       })
     }
 
+    // Save to localStorage
     localStorage.setItem("basket",
       JSON.stringify({"basket": basket})
     )
+    window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)
   }
 
+  function resetInputToBasket() {
+    // Resets the value in the HTMLInput to the value from the basket
+    // Called whenever the basket gets updated.
+
+    // Getting basket
+    var basketString: string | null = localStorage.getItem("basket");
+    if (basketString) {
+      var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+
+      // Iterating through basket to find product
+      for (let i=0; i<basket.length; i++) {
+        var item: productInBasket = basket[i];
+        if (item.sku == sku) {
+          // Set quantity variable to match basket
+          setQuantityButActually(item.basketQuantity);
+
+          if (item.basketQuantity > 0) {
+            setShowModifer(true)
+          } else {
+            setShowModifer(false)
+          }
+
+          // Update HTMLInput if it exists
+          const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
+          if (basketElement != null) {
+            const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+            basketInput.value = item.basketQuantity as unknown as string
+          }
+          return
+        }
+      }
+
+      // Run when not found in basket
+    
+      // Update HTMLInput to 0 if it exists
+      const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
+      if (basketElement != null) {
+        const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+        basketInput.value = "0"
+      }
+      setShowModifer(false)
+      setQuantityButActually(0)
+    }
+  }
   
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
   const max_order = 10; // Maximum possible product order
 
+  window.addEventListener("basketUpdate", resetInputToBasket)
+
   // Get image if it exists
-  images.sort(compareImages)
-  var imageURL: string | undefined
-  if (images.length > 0) {
-    imageURL = images[0].image_url
-  } else {
-    imageURL = undefined
-  }
+  var imageURL: string | undefined = getFirstImage(images)
 
   // Format Price
   var string_price: string = "£" + price.toFixed(2)
 
   // Check if item already in basket
-  useEffect(() => { // Only run on initial render
-    var basketString: string | null = localStorage.getItem("basket")
-    if (basketString) {
-      var basket: Array<productInBasket> = JSON.parse(basketString).basket
-      for (let i=0; i<basket.length; i++) {
-        let item: productInBasket = basket[i]
-        if (item.sku == sku) {
-          setQuantityButActually(item.basketQuantity)
-          setShowModifer(true)
-          updateQuantityDisplay()
-          break
-        }
-      }
-    }
-  }, [])
+  useEffect(() => {resetInputToBasket()}, [])
 
 
   return (
@@ -220,6 +253,185 @@ export default function Product({ sku, name, price, images }: prodProps) {
       </div>
     </div>
   )
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function BasketProduct({ sku, name, price, images }: prodProps) {
+  function increment() { // Increase quantity of this product
+    if (quantity >= max_order) {
+      return
+    }
+    setQuantity(quantity+1)
+  }
+
+  function decrement() {
+    if (quantity > 0) {
+      setQuantity(quantity-1)
+    }
+  }
+
+  function setQuantity(quant: number) {
+    // Function needs to update the localStorage basket for persistence,
+    // it will also then update the actual quantity state for this product.
+
+    // Fetch the current basket contents
+    var basketString: string | null = localStorage.getItem("basket")
+    if (!basketString) { // Create basket if it doesn't exist
+      basketString = "{\"basket\": []}"
+    }
+    var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+
+    // Find product and set quantity
+    var found: boolean = false
+    for (let i = 0; i<basket.length; i++) {
+      var item: productInBasket = basket[i]
+      if (item.sku == sku) {
+        found = true
+        // Just remove it from the basket if 0
+        if (quant == 0) {
+          basket.splice(i, 1)
+          break
+        }
+        item.basketQuantity = quant
+        break
+      }
+    }
+    // If it wasn't found, create it
+    if (!found) {
+      basket.push({
+        "sku": sku,
+        "name": name,
+        "price": price,
+        "basketQuantity": quant,
+        "images": images
+      })
+    }
+
+    // Save to localStorage
+    localStorage.setItem("basket",
+      JSON.stringify({"basket": basket})
+    )
+
+    window.dispatchEvent(new CustomEvent("basketUpdate"))
+    setQuantityButActually(quant)
+  }
+
+  function updateQuantity() {
+    // Updating quantity based on the contents of the HTMLInput
+
+    // Fetch HTMLElement
+    const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
+    if (basketElement == null) {
+      console.error("Couldn't find input box for basket-product-"+sku)
+      return
+    }
+    const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+
+    // Convert value to an integer
+    const value: number = parseInt(basketInput.value)
+
+    // Check input valid
+    if (Number.isNaN(value)) {
+      console.log("Invalid input, resetting to " + quantity)
+      basketInput.value = quantity as unknown as string
+      return
+    }
+    // Check number in range
+    if (value > max_order) {
+      setQuantity(max_order)
+      return
+    } else if (value <= 0) {
+      setQuantity(0)
+      return
+    }
+    
+    // Actually change the variable value
+    setQuantity(value)
+  }
+  
+  function resetInputToBasket() {
+    // Resets the value in the HTMLInput to the value from the basket
+    // Called whenever the basket gets updated from a different source
+    var basketString: string | null = localStorage.getItem("basket");
+    if (basketString) {
+      var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+      for (let i=0; i<basket.length; i++) {
+        var item: productInBasket = basket[i];
+        if (item.sku == sku) {
+          setQuantityButActually(item.basketQuantity);
+          const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
+          if (basketElement == null) {
+            return
+          }
+          const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+          basketInput.value = item.basketQuantity as unknown as string
+        }
+      }
+    }
+  }
+
+  const [quantity, setQuantityButActually] = useState(0);
+  var imageURL: string | undefined = getFirstImage(images);
+  var string_price: string = "£" + price.toFixed(2);
+  var max_order: number = 10;
+  window.addEventListener("basketUpdate", resetInputToBasket)
+
+  useEffect(() => {resetInputToBasket()}, [])
+
+
+  return (
+    <div className="basket-product" id={"product-" + sku}>
+      <div
+        className="basket-product-image-container"
+        style={{
+          backgroundImage: "url(" + imageURL + ")",
+        }}
+      >
+        <div className="bg-blurrer basket-left-blurrer"></div>
+        <img className="basket-product-image-main" src={imageURL} loading='lazy'></img>
+        <div className="bg-blurrer"></div>
+      </div>
+
+      <div className="basket-prod-footer">
+        <div className="basket-product-text">
+          <p className="product-name">{name}</p>
+          <p className="product-price">{string_price}</p>
+        </div>
+
+        <div className='basket-modifier'>
+          <div className='decrement-basket-quantity-button' onClick={decrement}>
+            <h1>-</h1>
+          </div>
+          <input 
+            id={'basket-basket-input-' + sku} 
+            className='basket-input' 
+            type='text'
+            inputMode='numeric'
+            onBlur={updateQuantity}
+            defaultValue={quantity}
+          />
+          <div className='increment-basket-quantity-button' onClick={increment}>
+            <h1>+</h1>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+function getFirstImage(images: Array<image>) {
+  images.sort(compareImages)
+  var imageURL: string | undefined
+  if (images.length > 0) {
+    imageURL = images[0].image_url
+  } else {
+    imageURL = undefined
+  }
+  return imageURL
 }
 
 function compareImages(a: image, b: image): number {

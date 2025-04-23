@@ -9,8 +9,6 @@ type props = {
 }
 
 export default function PageSelector({decrementCallback, incrementCallback, min, max}: props) {
-  console.log(max)
-  
   function decrement() {
     if (page > min) {
         if (decrementCallback) {

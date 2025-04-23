@@ -21,6 +21,8 @@
 /************************ Common Styling ************************/
 body {
     margin: 0;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 #root {
@@ -38,7 +40,7 @@ p {
 h1 {
     margin: 0;
     color: white;
-    font-family: sans-serif
+    font-family: "Backso"
 }
 
 a {

@@ -1,0 +1,141 @@
+.basket {
+    padding-right: 1em;
+    height: 3em;
+    user-select: none;
+    cursor: pointer;
+}
+
+.basket-grow {
+    animation: grow 0.25s linear;
+}
+
+@keyframes grow {
+    0% {transform: scale(100%);}
+    50% {transform: scale(115%);}
+    100% {transform: scale(100%);} 
+}
+
+.basket-item-count {
+    display: flex;
+    position:relative;
+    background-color: var(--dark-purple);
+    border-radius: 100%;
+    width: 2em;
+    height: 2em;
+    left: 1.7em;
+    top: -1.7em;
+
+    color: white;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.basket-item-count p {
+    margin-top: 0.3em;
+}
+
+.basket-display {
+    display: none;
+    flex-direction: column;
+
+    position: absolute;
+    width: 40em;
+    max-width: 85%;
+    height: 70vh;
+    background-color: var(--dark-purple);
+    right: 2.5%;
+    top: 7%;
+    z-index: 100;
+    border-radius: 1em;
+    padding: 1em;
+    box-shadow: 
+        1em 3em 1em rgba(0, 0, 0, 0.425);
+    color: white;
+}
+
+.basket-product {
+    display: flex;
+    background-color: white;
+    color: black;
+    border-radius: 1em;
+    margin: 0.3em;
+    justify-content: space-between;
+    
+    overflow: hidden;
+
+    flex-direction: row;
+    width: 98%;
+    min-height: 10em;
+    max-height: 10em;
+}
+
+.basket-product-image-main {
+    height: 100%;
+    user-select: none;
+    width: max-content;
+}
+
+.basket-product-image-container {
+    display: flex;
+    justify-content: center;
+    background-size: 100%;
+    background-color: var(--jamie-grey);
+    width: 30%;
+    overflow: hidden;
+}
+
+.basket-product-text {
+    display: flex;
+    flex-direction: column;
+    margin: 0.5em;
+}
+
+.basket-prod-footer {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.basket-left-blurrer {
+    border-top-left-radius: 1em;
+    border-bottom-left-radius: 1em;
+}
+
+.basketItems {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    margin-bottom: 1em;
+}
+
+.checkout {
+    background-color: var(--purple);
+    height: 4em;
+    border-radius: 1em;
+    line-height: 1em;
+    justify-items: center;
+    user-select: none;
+    cursor: pointer;
+}
+
+.checkout div {
+    display:flex;
+    justify-content: space-around;
+    align-items: center;
+    width: min-content;
+    height: 100%;
+}
+
+.checkout img {
+    height: 80%;
+}
+
+.checkout h1 {
+    margin-top: 0.4em;
+    margin-right: 0.5em;
+}

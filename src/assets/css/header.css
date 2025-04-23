@@ -8,7 +8,12 @@
     min-height: 1em;
 }
 
-.header .logo {
+.header .logo, .header .basket img {
     height: 3em;
     padding: 5%;
 }
+
+.header-spacer{
+    width: 100%;
+}
+
