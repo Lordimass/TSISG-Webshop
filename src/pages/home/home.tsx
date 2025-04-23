@@ -7,7 +7,7 @@ import React from 'react';
 import "./home.css"
 import Products from '../../assets/components/products';
 
-const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "BISEXUAL"]
+const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
 
 export default function Home() {
   function changeWord() {
@@ -19,7 +19,6 @@ export default function Home() {
   }
 
   const [word, setWord] = useState("GAY");
-  useEffect(() => {setWord(words[Math.floor(Math.random()* words.length)])}, [])
   // This could pick from a list of random sexualities/genders
   // This Website Is So TRANS
   // This Website Is So LESBIAN
