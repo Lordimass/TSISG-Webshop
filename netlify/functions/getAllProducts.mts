@@ -1,8 +1,7 @@
+import { Context } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-
-
-export default async function handler(_request: Request, context: any) {
+export default async function handler(_request: Request, _context: Context) {
   // Grab URL and Key from Netlify Env Variables.
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
