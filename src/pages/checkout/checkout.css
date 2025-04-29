@@ -1,0 +1,4 @@
+#payment-element, #address-element {
+    width: 50em;
+    max-width: 100%;
+}

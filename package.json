@@ -11,12 +11,17 @@
   },
   "dependencies": {
     "@netlify/functions": "^3.0.4",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^7.2.0",
     "@supabase/supabase-js": "^2.49.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.14.1",
+    "express": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
+    "stripe": "^18.0.0",
+    "stripe-cli": "^0.1.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {

@@ -55,7 +55,6 @@ export default function Basket() {
     }
 
     function toggleBasket() {
-        
         const basket = document.getElementById("basket-display")
         if (!basket) {
             return
@@ -105,7 +104,7 @@ export default function Basket() {
                 {basketItems}
             </div>
             <p> Subtotal: {basketPrice}</p>
-            <div className="checkout">
+            <div className="checkout" onClick={redirectToCheckout}>
                 <div>
                     <h1>Checkout</h1>
                     <img src={basket_icon_path}/>
@@ -113,4 +112,8 @@ export default function Basket() {
             </div>
         </div>
         </>)
+}
+
+function redirectToCheckout() {
+    window.location.href = "/checkout"
 }
