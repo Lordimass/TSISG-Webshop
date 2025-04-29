@@ -27,9 +27,7 @@ const shipping_options: Array<{shipping_rate: string}> = [
     {shipping_rate: "shr_1RHo2w2ER8SiRgqKQRlNi65f"}, // UK + Channel Islands
     {shipping_rate: "shr_1RHp552ER8SiRgqK8R9YmKAY"}, // Europe Zones 1, 2, 3
     {shipping_rate: "shr_1RHp5n2ER8SiRgqKk37pZDTa"}, // World Zones 1, 2, 3
-] // TODO: Provide this in the body of the request for createCheckoutSession, 
-// requires reworking the function a little to extract it but would make more
-// sense than having the same Array copy pasted twice.
+] 
 
 const appearance: {
   theme: "stripe" | "flat" | "night" | undefined
