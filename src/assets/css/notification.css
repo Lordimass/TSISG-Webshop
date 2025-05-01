@@ -1,0 +1,41 @@
+.notification {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+
+    top: 5%;
+    background-color: var(--bright-yellow);
+    padding: 1em;
+    border-top-right-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+    max-width: 90vw;
+    width: 22em;
+    z-index: 100;
+}
+
+.notif-head {
+    display: flex;
+    align-items: center;
+}
+
+.notification h2 {
+    font-family: "Perfect Penmanship";
+    height: 1em;
+    user-select: none;
+}
+
+.notif-head img {
+    height: 2em;
+    margin-right: 0.5em;
+}
+
+.close-notif {
+    font-family: "Perfect Penmanship";
+    user-select: none;
+    align-self: flex-start;
+    cursor: pointer;
+}
+
+.spacer {
+    flex-grow: 1;
+}
