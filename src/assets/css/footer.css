@@ -1,5 +1,7 @@
 .footer {
+    padding: 1em;
     display: flex;
+    flex-direction: column;
     
     justify-self: flex-end;
     background-color: var(--purple);
@@ -12,4 +14,9 @@
 
 .footer a {
     color: white;
+}
+
+.footer-policy-links {
+    font-size: smaller;
+    color: var(--jamie-grey);
 }
