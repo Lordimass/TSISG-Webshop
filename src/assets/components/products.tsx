@@ -35,15 +35,19 @@ export default function Products() {
         var start: number = (page-1)*productLoadChunks
         var end: number = Math.min(page*productLoadChunks, productData.length)
 
-        for (let i=start; i < end; i++) {
-        let product: prodDataElement = productData[i]
-        products.push(<Product
-            key={product.sku}
-            sku={product.sku}
-            name={product.name}
-            price={product.price}
-            images={product.images}
-        />)
+        for (let i=start; i < Math.min(end, productData.length); i++) {
+          let product: prodDataElement = productData[i]
+          if (!product.active) {
+            end++
+            continue;
+          }
+          products.push(<Product
+              key={product.sku}
+              sku={product.sku}
+              name={product.name}
+              price={product.price}
+              images={product.images}
+          />)
         }
     } else {
         products = []
