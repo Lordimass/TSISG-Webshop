@@ -4,8 +4,8 @@
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 
-import React, { useState, useEffect, FormEvent, ChangeEvent } from "react";
-import {loadStripe} from '@stripe/stripe-js';
+import React, { useState, useEffect, FormEvent, ChangeEvent, useRef } from "react";
+import {loadStripe, StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {
     AddressElement,
   CheckoutProvider,
@@ -16,6 +16,14 @@ import {
 import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
+import { CheckoutProducts } from "../../assets/components/products";
+import { notify } from "../../assets/components/notification";
+
+type image = {
+    id: number,
+    image_url: string,
+    display_order: number
+}
 
 const uk = ["GB", "GG", "JE", "IM"]
 const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "ES", "LU", "BE", "PT", "BG", "MT", "NL", "HR", "PL", "CY", "PT", "CZ", "RO", "EE", "SK", "FI", "SI", "GR", "HU", "SE", "IT", "AL", "MD", "AD", "ME", "AM", "MK", "AZ", "NO", "BY", "RU", "BA", "SM", "FO", "RS", "GE", "CH", "GI", "TJ", "GL", "TR", "IS", "TM", "KZ", "UA", "XK", "UZ", "KG", "VA", "LI"]
@@ -38,58 +46,22 @@ const appearance: {
 const options = { fetchClientSecret, elementsOptions: { appearance } };
 
 export default function Checkout() {
-    return (<><Header/><div className="content">
-        <CheckoutProvider stripe={stripePromise} options={options}>
-
-        <StripeCheckout/>
-
-        </CheckoutProvider>
-        </div><Footer/></>)
-}
-
-async function validateEmail(email: any, checkout: any) {
-    const updateResult = await checkout.updateEmail(email);
-    const isValid = updateResult.type !== "error";
-
-    return { isValid, message: !isValid ? updateResult.error.message : null};
-}
-
-function EmailInput({ email, setEmail, error, setError}: any) {
-    const checkout = useCheckout();
-
-    async function handleBlur() {
-        if (!email) {
-            return;
-        }
-
-        const {isValid, message} = await validateEmail(email, checkout);
-        if (!isValid) {
-            setError(message);
-        }
-    };
-
-    function handleChange(e: any) {
-        setError(null);
-        setEmail(e.target.value);
+    function setPrepared() {
+        setPreparing(false)
     }
+    const [preparing, setPreparing] = useState(true)
 
-    return (<>
-        <label>
-            Email<br/>
-            <input
-                id="email"
-                type="text"
-                value={email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                placeholder="you@example.com"
-            />
-        </label>
-        {error && <div id="email-errors">{error}</div>}
-    </>)
+    return (<><Header/><div className="content checkout-content">
+        {preparing ? <Loading/> : <></>}
+        
+        <CheckoutProvider stripe={stripePromise} options={options}>
+        <CheckoutAux onReady={setPrepared}/>
+        </CheckoutProvider>
+
+        </div><Footer/></>);
 }
 
-function StripeCheckout() {
+function CheckoutAux({onReady}: {onReady: Function}) {
     
     async function updateCountry() {
         const country = document.getElementById("country-select")
@@ -388,25 +360,31 @@ function StripeCheckout() {
             )
     }
 
-    const checkout = useCheckout();
-    const { updateShippingOption } = useCheckout()
-    const [countryCode, setCountryCode] = useState("0")
-    useEffect(() => {updateShippingOption(shipping_options[0].shipping_rate)}, [])
-    
-    const [email, setEmail] = useState('');
-    const [emailError, setEmailError] = useState(null);
-    const [message, setMessage] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+    async function handleSubmit(e: FormEvent) {
+        e.preventDefault()
         setIsLoading(true);
+
+        // Check that everything is ready
+        if (!checkout || typeof checkout.updateShippingAddress !== "function") {
+            console.warn("Checkout not ready or updateShippingAddress not yet available")
+            setIsLoading(false)
+            return
+        }
 
         // Set Address
         const addressElement = document.getElementById("address-input") as HTMLInputElement
         const postcodeElement = document.getElementById("postal-code-input") as HTMLInputElement
         const nameElement = document.getElementById("name-input") as HTMLInputElement
-
+        if (
+            !nameElement.value ||
+            !addressElement.value ||
+            !postcodeElement.value ||
+            countryCode == "0" 
+        ) {
+            notify("Address field can't be empty!")
+            setIsLoading(false)
+            return
+        }
         await checkout.updateShippingAddress({
             name: nameElement.value,
             address: {
@@ -420,39 +398,136 @@ function StripeCheckout() {
         const {isValid, message} = await validateEmail(email, checkout)
         if (!isValid) {
             setEmailError(message);
-            setMessage(message);
+            notify(message);
             setIsLoading(false);
             return;
         }
-
+        
+        console.log("Attempting to check out...")
         const error: any = await checkout.confirm();
-        setMessage(error.message);
+        if (error) {
+            notify(error.error.message)
+        }
         setIsLoading(false);
     };
-    return (
-        <form id="payment-form" onSubmit={handleSubmit}>
-            <label>Name<br/><input id="name-input" type="text"/></label><br/>
-            <EmailInput 
-                email={email} setEmail={setEmail}
-                error={emailError} setError={setEmailError}
-            /><br/>
-            <label>Address<br/><input id="address-input" type="text"/></label><br/>
-            <label>Postcode / ZIP Code<br/><input id="postal-code-input" type="text"/></label><br/>
-            <CountrySelect/><br/>
-            <h4>Payment</h4>
-            <PaymentElement id="payment-element"/>
-            <button disabled={isLoading} id="submit">
+
+    function remoteTriggerFormSubmit() {
+        formRef.current?.requestSubmit();
+    }
+
+    const checkout = useCheckout();
+    const { updateShippingOption } = useCheckout()
+    
+    const [countryCode, setCountryCode] = useState("0")
+    const [email, setEmail] = useState('');
+    const [emailError, setEmailError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const formRef = useRef<HTMLFormElement>(null);
+    
+    useEffect(() => {updateShippingOption(shipping_options[0].shipping_rate)}, [])
+
+    useEffect(redirectIfEmptyBasket, [])
+    return (<>
+        <div className="checkout-left" id="checkout-left">
+            <form id="payment-form" onSubmit={handleSubmit} ref={formRef}>
+                <label>Name<br/></label><input id="name-input" type="text"/><br/><br/>
+                <EmailInput 
+                    email={email} setEmail={setEmail}
+                    error={emailError} setError={setEmailError}
+                /><br/><br/>
+                <label>Address<br/></label><input id="address-input" type="text" autoComplete="street-address"/><br/><br/>
+                <label>Postcode / ZIP Code<br/></label><input id="postal-code-input" type="text"/><br/><br/>
+                <CountrySelect/><br/><br/>
+                <label>Payment</label>
+                <PaymentElement id="payment-element" onReady={() => {onReady()}}/>
+            </form>
+        </div>
+
+        <div className="checkout-right">
+            <CheckoutProducts/>
+            <p className="msg">To edit your basket, <a href="/">go back</a></p>
+            <CheckoutTotals checkoutTotal={checkout.total}/>
+            <button type="button" disabled={isLoading} id="submit" onClick={remoteTriggerFormSubmit}>
                 <span id="button-text">
                 {isLoading ? (
                     <div className="spinner" id="spinner">Processing Payment...</div>
                 ) : (
-                    `Pay ${checkout.total.total.amount} now`
+                    `Place Order!`
                 )}
                 </span>
             </button>
-            {/* Show any error or success messages */}
-            {message && <div id="payment-message">{message}</div>}
-        </form>
+        </div>
+    </>)
+}
+
+function Loading() {
+    return (<div className="loading-screen">
+        
+        <p>We're loading your basket...</p>
+        <div className="throbber"/>
+    </div>)
+}
+
+function redirectIfEmptyBasket() {
+    const basketString: string | null = localStorage.getItem("basket")
+
+    if (!basketString || basketString == "{\"basket\":[]}") {
+        window.location.href = "/"
+        console.log("Test?")
+    }
+}
+
+function EmailInput({ email, setEmail, error, setError}: any) {
+    const checkout = useCheckout();
+
+    async function handleBlur() {
+        if (!email) {
+            return;
+        }
+
+        const {isValid, message} = await validateEmail(email, checkout);
+        if (!isValid) {
+            setError(message);
+        }
+    };
+
+    function handleChange(e: any) {
+        setError(null);
+        setEmail(e.target.value);
+    }
+
+    return (<>
+        <label>
+            Email<br/>
+            <input
+                id="email"
+                type="text"
+                value={email}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                placeholder="you@example.com"
+            />
+        </label>
+        {error && <div id="email-errors">{error}</div>}
+    </>)
+}
+
+function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSummary}) {
+    return (
+    <div className="checkout-totals">
+        <div className="left">
+            <p>Subtotal</p>
+            <p>Shipping</p>
+            <p className="total">Total</p>
+        </div>
+        <div className="spacer"></div>
+        <div className="right">
+            <p>{checkoutTotal.subtotal.amount}</p>
+            <p>{checkoutTotal.shippingRate.amount}</p>
+            <div className="total"><p className="currency">GBP</p>{checkoutTotal.total.amount}</div>
+        </div>
+    </div>
     )
 }
 
@@ -492,3 +567,8 @@ async function fetchStripePrices(): Promise<Array<Object>> {
     return result;
 }
 
+async function validateEmail(email: any, checkout: any) {
+    const updateResult = await checkout.updateEmail(email);
+    const isValid = updateResult.type !== "error";
+    return { isValid, message: !isValid ? updateResult.error.message : null};
+}

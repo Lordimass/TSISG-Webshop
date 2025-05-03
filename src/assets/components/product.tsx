@@ -11,18 +11,25 @@ type prodProps = {
   images: image[],
 }
 
-type image = {
+export type image = {
   id: number,
   image_url: string,
   display_order: number
 }
 
-type productInBasket = {
+export type productInBasket = {
   sku: number,
   name: string,
   price: number,
   basketQuantity: number,
   images: image[]
+}
+
+type checkoutProductParams = {
+  image: string
+  name: string
+  quantity: number
+  total: number
 }
 
 export default function Product({ sku, name, price, images }: prodProps) {
@@ -422,6 +429,25 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
     </div>
   )
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function CheckoutProduct({image, name, quantity, total}: checkoutProductParams) {
+  return (<div className="checkout-product">
+      <div className='checkout-product-image-container' style={{backgroundImage: "url("+image+")"}}>
+        <div className="bg-blurrer"></div>
+        <img src={image}/>
+        <div className="bg-blurrer"></div>
+      </div>
+      <div className="checkout-product-text">
+          <p>{name} (x{quantity})</p>
+          <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
+      </div>
+  </div>)
+}
+
 
 function getFirstImage(images: Array<image>) {
   images.sort(compareImages)

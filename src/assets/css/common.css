@@ -3,6 +3,7 @@
     --dark-purple: #501212;
     --purple: #692230;
     --yellow: #d7cfb5;
+    --bright-yellow: #ffd970;
     --jamie-grey: #838383;
 }
 
@@ -52,5 +53,7 @@ a {
     flex-direction: column;
     flex-grow: 1;
     background-color: var(--yellow);
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 

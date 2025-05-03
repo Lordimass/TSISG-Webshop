@@ -168,6 +168,7 @@ export default async function handler(request: Request, _context: Context) {
         console.error(error.code + ": " + error.message)
         return
     }
+    console.log("ORDER PLACED")
     }
 
 }

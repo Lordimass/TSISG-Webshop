@@ -17,6 +17,11 @@ export default function Notifications() {
     useEffect(() => {
       function handler(e: any) {
         const newNotif = { id: Date.now(), message: e.detail.message };
+
+        if (typeof newNotif.message !== "string") {
+          console.error("Attempted to display notification, but type was not string! The message was " + newNotif.message)  
+          return
+        }
   
         // clear any previous timeout (so it won’t close the next one)
         if (timeoutRef.current) {

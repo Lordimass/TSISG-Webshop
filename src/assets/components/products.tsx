@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
+import { CheckoutProduct } from "./product"
+
+import { productInBasket, image } from "./product";
 
 import "../css/products.css"
 
@@ -9,6 +12,7 @@ type prodDataElement = {
   price: number,
   name: string,
   stock: number,
+  active: boolean
   images: {
     id: number,
     image_url: string,
@@ -72,6 +76,34 @@ export default function Products() {
     />
     </div>)
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export function CheckoutProducts() {
+  const basketString: string | null = localStorage.getItem("basket")
+  if (!basketString) {
+      return (<></>)
+  }
+  const basket: Array<productInBasket> = JSON.parse(basketString).basket
+  const els: Array<React.JSX.Element> = []
+
+  for (let i=0; i<basket.length; i++) {
+      const item: productInBasket = basket[i]
+      els.push(<CheckoutProduct
+          image = {item.images[0]?.image_url}
+          name = {item.name}
+          quantity={item.basketQuantity}
+          total = {item.price*item.basketQuantity}
+      />)
+  }
+  return (<div className="checkout-products">{els}</div>)
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function getProductList(): any {
     const [products, setData] = useState(null)

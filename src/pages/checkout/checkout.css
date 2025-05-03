@@ -1,4 +1,171 @@
-#payment-element, #address-element {
+.loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto auto;
+    align-self: center;
+}
+
+.loading-screen p {
+    margin-bottom: 2em;
+}
+
+.throbber {
+    border: 0.5em solid #f3f3f3; /* Light grey */
+    border-top: 0.5em solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 3em;
+    height: 3em;
+    animation: spin 2s linear infinite;
+}
+  
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#payment-form label {
+    font-family: "Perfect Penmanship";
+}
+
+#payment-form input, #payment-form select {
+    font-family: "Perfect Penmanship";
+    width: 90%;
+    height: 3.5em;
+    border-radius: 1em;
+    box-sizing: border-box;
+}
+
+#payment-element {
     width: 50em;
     max-width: 100%;
+}
+
+.checkout-content {
+    display: flex;
+    flex-direction: row;
+}
+
+.checkout-left, .checkout-right {
+    width: 50%;
+    min-height: 10em;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.checkout-right {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark-purple);
+    box-shadow:
+        -0.5em 0em 2em rgba(0,0,0,0.3);
+}
+
+.checkout-right .msg {
+    margin-top: 0.5em;
+    font-size: smaller;
+    color: var(--jamie-grey);
+}
+
+.checkout-right .msg a {
+    color: var(--jamie-grey);
+}
+
+.checkout-product {
+    margin: 0.2em;
+    display: flex;
+    background-color: white;
+    border-radius: 1em;
+}
+
+.checkout-product img {
+    height: 100%;
+}
+
+.checkout-product-image-container {
+    display: flex;
+    height: 7em;
+    width: 7em;
+    border-radius: 1em;
+    overflow: hidden;
+    margin-right: 1em
+}
+
+.checkout-product-text {
+    margin-top: 1em;
+}
+
+.checkout-product-price {
+    font-size: smaller;
+}
+
+.checkout-totals {
+    margin-top: 1em;
+    display: flex;
+    color: white;
+}
+
+.checkout-totals .left .total, .checkout-totals .right .total {
+    font-size: 1.3em;
+}
+
+.checkout-totals .right .total {
+    display: flex;
+    font-family: "Perfect Penmanship";
+}
+
+.total .currency {
+    margin: 0;
+    font-size: xx-small;
+    color: var(--jamie-grey);
+    user-select: none;
+}
+
+.checkout-totals .right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+#submit {
+    width: 90%;
+    height: 5em;
+    margin: 1em;
+    border-radius: 1em;
+
+    align-self: center;
+    cursor: pointer;
+    border: none;
+}
+
+#submit:disabled{
+    cursor: not-allowed;
+}
+
+#submit span {
+    position:relative;
+    top: 0.1em;
+    font-family: "Backso";
+    font-weight: 600;
+    font-size: xx-large;
+}
+
+.checkout-products {
+    max-height: 65%;
+    overflow-y: auto;
+}
+
+@media screen and (max-width: 700px) {
+    .checkout-content {
+        flex-direction: column;
+    }
+
+    .checkout-left, .checkout-right {
+        width: 100%;
+    }
+
+    .checkout-products {
+        max-height: 80vh;
+        overflow-x: scroll;
+    }
 }

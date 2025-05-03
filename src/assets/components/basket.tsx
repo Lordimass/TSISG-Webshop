@@ -17,6 +17,19 @@ display_order: number
 }
 
 export default function Basket() {
+    function redirectToCheckout() {
+        if (basketQuantity == 0) {
+            console.log("Dispatching")
+            window.dispatchEvent( new CustomEvent("notification", {
+                detail: {
+                    message: "You can't checkout without anything in your cart, silly!"
+                }
+            }))
+            toggleBasket()
+            return
+        }
+        window.location.href = "/checkout"
+    }
     const basket_icon_path: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//shopping-basket.svg"
     
     const [basketQuantity, changeBasketQuantity] = useState(0);
@@ -55,11 +68,20 @@ export default function Basket() {
     }
 
     function toggleBasket() {
+        // Get the basket
         const basket = document.getElementById("basket-display")
         if (!basket) {
             return
         }
         
+        // Use disable functionality only if on checkout page
+        const page = window.location.pathname
+        if (page == "/checkout") {
+            basket.style.display = "none"
+            return
+        }
+
+        // Toggle display mode
         var currentDisplay: string = basket.style.display
         if (currentDisplay == "flex") {
             basket.style.display = "none"
@@ -114,6 +136,3 @@ export default function Basket() {
         </>)
 }
 
-function redirectToCheckout() {
-    window.location.href = "/checkout"
-}
