@@ -12,7 +12,7 @@
 
 .throbber {
     border: 0.5em solid #f3f3f3; /* Light grey */
-    border-top: 0.5em solid #3498db; /* Blue */
+    border-top: 0.5em solid var(--purple);
     border-radius: 50%;
     width: 3em;
     height: 3em;
@@ -151,7 +151,7 @@
 }
 
 .checkout-products {
-    max-height: 65%;
+    max-height: 50vh;
     overflow-y: auto;
 }
 

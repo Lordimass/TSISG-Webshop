@@ -506,7 +506,7 @@ function EmailInput({ email, setEmail, error, setError}: any) {
                 value={email}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                placeholder="you@example.com"
+                placeholder="you@are.gay"
             />
         </label>
         {error && <div id="email-errors">{error}</div>}
@@ -541,7 +541,8 @@ async function fetchClientSecret(): Promise<string> {
         body: JSON.stringify({
             shipping_options: shipping_options,
             stripe_line_items: prices,
-            basket: localStorage.getItem("basket")
+            basket: localStorage.getItem("basket"),
+            origin: window.location.origin
         })
     })
     .then (

@@ -74,9 +74,12 @@ export default function Basket() {
             return
         }
         
-        // Use disable functionality only if on checkout page
+        // Use disable functionality only if on checkout or thankyou page
         const page = window.location.pathname
-        if (page == "/checkout") {
+        if (
+            page == "/checkout" ||
+            page == "/thankyou"
+        ) {
             basket.style.display = "none"
             return
         }

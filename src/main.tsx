@@ -7,6 +7,7 @@ import ReturnPolicy from './pages/policies/return-policy';
 import CancellationPolicy from './pages/policies/cancellation-policy';
 import ShippingPolicy from './pages/policies/shipping-policy';
 import PrivacyPolicy from './pages/policies/privacy-policy';
+import ThankYou from './pages/thankyou/thankyou';
 
 createRoot(document.getElementById('root') as HTMLElement).render(
     <BrowserRouter>
@@ -16,14 +17,12 @@ createRoot(document.getElementById('root') as HTMLElement).render(
 
         <Route path="checkout" element={<Checkout/>} />
 
-        <Route path="privacy" element={<PrivacyPolicy/>}/>
+        <Route path="thankyou" element={<ThankYou/>} />
 
+        <Route path="privacy" element={<PrivacyPolicy/>}/>
         <Route path="returns" element={<ReturnPolicy/>}/>
         <Route path="refunds" element={<ReturnPolicy/>}/>
-        <Route path="refunds and returns" element={<ReturnPolicy/>}/>
-
         <Route path="cancellations" element={<CancellationPolicy/>}/>
-
         <Route path="shipping" element={<ShippingPolicy/>}/>
 
       </Routes>

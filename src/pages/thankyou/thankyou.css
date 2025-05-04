@@ -1,0 +1,74 @@
+.thanks-box {
+    display: flex;
+    flex-direction: column;
+
+    align-self: center;
+    margin: auto auto;
+    width: 35em;
+    height: 40em;
+    max-width: 90%;
+    max-height: 60vh;
+    background-color: white;
+    border-radius: 1em;
+    overflow: hidden;
+}
+
+.thanks-top {
+    display: flex;
+    justify-content: center;
+    height: 30%;
+    background-color: var(--light-purple);
+}
+
+.order-confirmed-gif-container {
+    display: flex;
+    align-items: center;
+
+    flex-direction: column;
+    position: relative;
+    height: 160%;
+    top: 2em;
+    left: 0.7em;
+    user-select: none;
+}
+
+#order-confirmed-gif {
+    height: 90%;
+    z-index: 1;
+}
+
+#drop-shadow {
+    position: relative;
+    width: 10em;
+    height: 2em;
+    border-radius: 50%;
+    background-color: var(--jamie-grey);
+    top: -15%;
+    left: -5%;
+}
+
+.thanks-bottom {
+    height: 70%;
+    padding: 2em;
+    padding-top: 25%;
+    justify-items: center;
+    text-align: center;
+}
+
+.thanks-bottom h1 {
+    color: var(--blue-black);
+    margin-bottom: 1em;
+}
+
+.thanks-bottom p {
+    font-size: larger;
+}
+
+#go-home {
+    margin-top: 2em;
+    padding: 1.5em;
+    width: 20em;
+    border-radius: 1em;
+    font-family: "Perfect Penmanship";
+    cursor: pointer;
+}
