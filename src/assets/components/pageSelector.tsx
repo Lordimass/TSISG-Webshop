@@ -33,7 +33,7 @@ export default function PageSelector({decrementCallback, incrementCallback, min,
   return (
     <div className='pageSelector'>
       <div className='pageDecrementer' onClick={decrement}>-</div>
-      <div className='pageDisplay'>{page + " / " + max}</div>
+      <div className='pageDisplay'>{(max==0? "?" : page) + " / " + (max==0? "?" : max)}</div>
       <div className='pageIncrementer' onClick={increment}>+</div>
     </div>
 )
