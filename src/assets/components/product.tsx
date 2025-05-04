@@ -243,7 +243,7 @@ export default function Product({ sku, name, price, images }: prodProps) {
         }}
       >
         <div className="bg-blurrer"></div>
-        <img className="product-image-main" src={imageURL} loading='lazy'></img>
+        <img className="product-image-main" src={imageURL}></img>
         <div className="bg-blurrer"></div>
       </div>
 
