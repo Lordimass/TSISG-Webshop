@@ -19,6 +19,7 @@
     "express": "^5.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-ga4": "^2.1.0",
     "react-router-dom": "^7.3.0",
     "stripe": "^18.0.0",
     "stripe-cli": "^0.1.0",
