@@ -1,7 +1,14 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 
-const stripe = require('stripe')(process.env.STRIPE_KEY);
+var stripe: Stripe | null = null;
+if (process.env.STRIPE_KEY) {
+    stripe = new Stripe(process.env.STRIPE_KEY, {
+        apiVersion: '2025-03-31.basil',
+      });
+} else {
+    console.error("STRIPE_KEY does not exist!")
+}
 
 type productInBasket = {
     sku: number,
@@ -18,6 +25,10 @@ type productInBasket = {
   }
 
 export default async function handler(request: Request, _context: Context) {
+    if (!stripe) {
+        return
+    }
+
     var pricePointIDs: Array<Object> = [];
 
     const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
@@ -30,7 +41,7 @@ export default async function handler(request: Request, _context: Context) {
         const item: productInBasket = basket[i];
         var stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
         if (stripeItem) {
-            var price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price)
+            var price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price as string)
             if (price.unit_amount == item.price*100) {
                 pricePointIDs.push({
                     price: stripeItem.default_price as string, 
@@ -39,10 +50,10 @@ export default async function handler(request: Request, _context: Context) {
             } else {
                 var priceID = await stripe.prices.create({
                     currency: "gbp",
-                    unit_ammount: item.price*100
+                    unit_amount: item.price*100
                 })
                 pricePointIDs.push({
-                    price: priceID as string, 
+                    price: priceID as unknown as string, 
                     quantity: item.basketQuantity
                 })
             }

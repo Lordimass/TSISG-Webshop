@@ -1,4 +1,19 @@
 import { Context } from "@netlify/functions";
+import Stripe from 'stripe';
+import express from 'express';
+import { MetadataParam } from "@stripe/stripe-js";
+
+var stripe: Stripe | null = null;
+if (process.env.STRIPE_KEY) {
+    stripe = new Stripe(process.env.STRIPE_KEY, {
+        apiVersion: '2025-03-31.basil',
+      });
+} else {
+    console.error("STRIPE_KEY does not exist!")
+}
+
+const app = express();
+app.use(express.static('public'));
 
 type bodyJSONParams = {
     shipping_options: Array<{shipping_rate: string}>,
@@ -69,18 +84,16 @@ type metaBasket = {
     50?: string
 }
 
-const stripe = require("stripe")(process.env.STRIPE_KEY, {
-    apiVersion: "2025-03-31.basil",
-    });
-const express = require("express");
-const app = express();
-app.use(express.static("public"));
-
 export default async function handler(request: Request, _context: Context) {
+    if (!stripe) {
+        return
+    }
+    
     const body = request.body;
     const bodyText: string = await new Response(body).text();
     const bodyJSON: bodyJSONParams = JSON.parse(bodyText)
-    const compressedBasket: Object = compressBasket(bodyJSON.basket)
+    const compressedBasket: MetadataParam = compressBasket(bodyJSON.basket)
+
 
     const session = await stripe.checkout.sessions.create({
         ui_mode: "custom",
@@ -95,7 +108,7 @@ export default async function handler(request: Request, _context: Context) {
     return new Response(JSON.stringify(session))
 }
 
-function compressBasket(basket: string): Object {
+function compressBasket(basket: string): MetadataParam {
     // Stripe metadata can only contain 500 chars per value, so the basket
     // needs to be trimmed to contain only essential characters
     const basketArray: Array<{
