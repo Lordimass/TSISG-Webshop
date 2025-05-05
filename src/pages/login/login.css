@@ -1,0 +1,77 @@
+.login-box {
+    display: flex;
+    flex-direction: column;
+
+    align-self: center;
+    margin: auto auto;
+    width: 35em;
+    height: max-content;
+    max-width: 90%;
+    background-color: white;
+    border-radius: 1em;
+    overflow: hidden;
+
+    padding: 2em;
+    box-sizing: border-box;
+    align-items: center;
+}
+
+.login-box h1 {
+    text-align: center;
+    color: var(--blue-black);
+}
+
+.login-form {
+    width: 70%;
+}
+
+.login-box input {
+    height: 3em;
+    font-family: "Perfect Penmanship";
+    border-radius: 1em;
+    width: 100%;
+}
+
+.login-form label {
+    text-align: left;
+    font-family: "Perfect Penmanship";
+}
+
+#forgot-password {
+    font-size: small;
+    cursor: pointer;
+    text-decoration: underline;
+    text-align: right;
+}
+
+.under-password {
+    display: flex;
+    justify-content: space-between;
+    height: 1.2em;
+}
+
+.under-password img {
+    height: 100%;
+    cursor: pointer;
+}
+
+.login-error {
+    margin-top: 0.5em;
+    font-size: smaller;
+    color: var(--light-purple);
+}
+
+#submit, #logout {
+    background-color: var(--light-purple);
+    color: white;
+    margin: 0;
+    margin-top: 2em;
+    width: 100%;
+    border-radius: 1em;
+    font-family: "Perfect Penmanship";
+    cursor: pointer;
+}
+
+#already-logged-in {
+    text-align: center;
+}

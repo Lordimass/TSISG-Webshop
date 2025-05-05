@@ -10,6 +10,7 @@ import CancellationPolicy from './pages/policies/cancellation-policy';
 import ShippingPolicy from './pages/policies/shipping-policy';
 import PrivacyPolicy from './pages/policies/privacy-policy';
 import ThankYou from './pages/thankyou/thankyou';
+import LoginPage from './pages/login/login';
 
 function App() {
   const pathname: string = window.location.pathname
@@ -23,6 +24,8 @@ function App() {
         <Route path="checkout" element={<Checkout/>} />
   
         <Route path="thankyou" element={<ThankYou/>} />
+
+        <Route path='login' element={<LoginPage/>} />
   
         <Route path="privacy" element={<PrivacyPolicy/>}/>
         <Route path="returns" element={<ReturnPolicy/>}/>
