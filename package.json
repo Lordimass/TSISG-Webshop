@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && npm run build-manifest && vite build",
+    "build": "npm install && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "build-manifest": "node generate-asset-manifest.cjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@netlify/functions": "^3.0.4",
