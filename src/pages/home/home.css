@@ -54,6 +54,7 @@
     backdrop-filter: blur(7px);
     border-radius: 10em;
     line-height: 8em;
+    text-wrap-mode: nowrap;
 }
 
 @media screen and (max-width: 1100px) {
@@ -61,11 +62,11 @@
     .title-section h1 {
         user-select: none;
         font-family: "Backso";
-        font-size: 7vw;
+        font-size: 8vw;
     }
     
     .title-section .title-main-word {
-        font-size: 12vw;
+        font-size: 15vw;
     }
     
     .title-text {
@@ -74,6 +75,6 @@
         text-align: center;
         backdrop-filter: blur(7px);
         border-radius: 5vw;
-        line-height: 18vw;
+        line-height: 14vw;
     }
 }
