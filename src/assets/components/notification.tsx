@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "../css/notification.css";
-
-const info_icon =
-  "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//information.png";
+import { info_icon } from "../consts";
 
 type Notif = { id: number; message: string };
 

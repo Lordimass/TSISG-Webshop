@@ -1,6 +1,7 @@
 import { Component, ReactElement, useEffect, useState } from "react";
 import "../css/basket.css"
 import { BasketProduct } from "./product";
+import { basket_icon } from "../consts";
 
 type productInBasket = {
     sku: number,
@@ -30,7 +31,6 @@ export default function Basket() {
         }
         window.location.href = "/checkout"
     }
-    const basket_icon_path: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//shopping-basket.svg"
     
     const [basketQuantity, changeBasketQuantity] = useState(0);
     const [basketPrice, changeBasketPrice] = useState("£0.00");
@@ -117,7 +117,7 @@ export default function Basket() {
     
     return (<>
         <div className="basket" id="basket" onClick={toggleBasket}>
-            <img src={basket_icon_path}></img>
+            <img src={basket_icon}></img>
             <div className="basket-item-count" id="basket-item-count">
                 <p>{basketQuantity}</p>
             </div>
@@ -132,7 +132,7 @@ export default function Basket() {
             <div className="checkout" onClick={redirectToCheckout}>
                 <div>
                     <h1>Checkout</h1>
-                    <img src={basket_icon_path}/>
+                    <img src={basket_icon}/>
                 </div>
             </div>
         </div>

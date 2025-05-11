@@ -10,10 +10,9 @@ const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
 const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
 
-const show_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//show.webp"
-const hide_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//hide.webp"
 
 const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
+import { hide_icon, show_icon } from "../../assets/consts";
 
 export default function LoginPage() {
     function Login() {

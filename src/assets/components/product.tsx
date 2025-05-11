@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 
 import "../css/product.css"
 
-const trash_icon: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//trash.svg"
-
 type prodProps = {
   sku: number,
   name: string,
