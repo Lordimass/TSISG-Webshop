@@ -6,6 +6,7 @@ import { CheckoutProduct } from "./product"
 import { productInBasket, image } from "./product";
 
 import "../css/products.css"
+import { getProductList } from "../utils";
 
 type prodDataElement = {
   sku: number,
@@ -34,13 +35,29 @@ export default function Products() {
     const [page, setPage] = useState(1)
     const productData: Array<prodDataElement> = getProductList();
     var products: Array<React.JSX.Element> = [];
+    let pageCount = 0;
 
-    if (productData != undefined) {
+    const activeProductData: Array<prodDataElement> = []
+    for (let i=0; i<productData.length; i++) {
+        const product = productData[i]
+        const active = product.active && product.stock > 1;
+        if (active) {
+            activeProductData.push(product)
+        }
+    }
+
+
+    if (activeProductData) {
+        console.log(activeProductData)
         var start: number = (page-1)*productLoadChunks
-        var end: number = Math.min(page*productLoadChunks, productData.length)
+        var end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
-        for (let i=start; i < Math.min(end, productData.length); i++) {
-          let product: prodDataElement = productData[i]
+        for (let i=start; i < Math.min(end, activeProductData.length); i++) {
+          let product: prodDataElement|null = activeProductData[i]
+          if (!product) {
+            continue;
+          }
+
           if (!product.active) {
             end++
             continue;
@@ -51,18 +68,18 @@ export default function Products() {
               name={product.name}
               price={product.price}
               images={product.images}
+              stock={product.stock}
           />)
         }
-    } else {
-        products = []
-    }
-
-    let pageCount = 0;
-    if (productData) {
-        pageCount = Math.floor(productData.length/productLoadChunks);
+        
+        pageCount = Math.floor(activeProductData.length/productLoadChunks);
         if (productData.length % productLoadChunks != 0) {
             pageCount++
         }
+
+    } else {
+        products = []
+        pageCount = 0
     }
 
 
@@ -77,7 +94,6 @@ export default function Products() {
     </div>)
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,35 +116,3 @@ export function CheckoutProducts() {
   }
   return (<div className="checkout-products">{els}</div>)
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function getProductList(): any {
-    const [products, setData] = useState(null)
-    const [error, setError] = useState(null)
-  
-    useEffect(() => {
-      async function fetchData() {
-        try {
-          const data = await fetch(window.location.origin + "/.netlify/functions/getAllProducts")
-            .then((response) => response.json())
-            .then((data) => {
-              setData(data)
-            })
-        } catch (error: any) {
-          setError(error);
-        }
-      }
-  
-      fetchData();
-    }, []);
-  
-    if (error) {
-      console.error(error)
-    }
-    else if (products) {
-      return products
-    }
-  }

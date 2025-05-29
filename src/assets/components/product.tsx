@@ -7,6 +7,7 @@ type prodProps = {
   name: string,
   price: number,
   images: image[],
+  stock: number
 }
 
 export type image = {
@@ -30,7 +31,8 @@ type checkoutProductParams = {
   total: number
 }
 
-export default function Product({ sku, name, price, images }: prodProps) {
+export default function Product({ sku, name, price, images, stock }: prodProps) {
+  if (stock < 0) {stock = 0}
 
   function BasketModifier0Quant() { // Simple Add To Basket Button
     return (
@@ -218,7 +220,7 @@ export default function Product({ sku, name, price, images }: prodProps) {
   
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-  const max_order = 10; // Maximum possible product order
+  const max_order = Math.min(10, stock); // Maximum possible product order
 
   window.addEventListener("basketUpdate", resetInputToBasket)
 
