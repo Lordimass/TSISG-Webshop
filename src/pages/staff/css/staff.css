@@ -1,0 +1,33 @@
+#staff-portal-content {
+    flex-direction: row;
+}
+
+.sidebar {
+    display: flex;
+    background-color: var(--light-purple);
+    width: 3em;
+    flex-grow: 1;
+    justify-items: center;
+
+    /* HIDDEN WHILE THERE ARE NO OTHER PROGRAMMED TABS */
+    display: none; 
+}
+
+.tab-button {
+    width: 100%;
+    margin: 0.2em;
+    border-radius: 0.2em;
+    background-color: white;
+    height: min-content;
+    cursor: pointer;
+}
+
+.tab-button img {
+    width: 100%;
+}
+
+.staff-page-content {
+    width: 100%;
+    text-wrap-mode: nowrap;
+    overflow-x: auto;
+}

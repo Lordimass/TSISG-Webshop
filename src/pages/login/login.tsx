@@ -5,13 +5,8 @@ import Header from "../../assets/components/header";
 import "./login.css"
 import { notify } from "../../assets/components/notification";
 import { FormEvent, useEffect, useState } from "react";
-
-const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
-const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
-
-
-const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
+import { supabase, SUPABASE_ID } from "../home/home";
+import { getLoggedIn } from "../../assets/utils";
 import { hide_icon, show_icon } from "../../assets/consts";
 
 export default function LoginPage() {
@@ -26,7 +21,6 @@ export default function LoginPage() {
             const email = (document.getElementById("email") as HTMLInputElement).value
             const password = (document.getElementById("password") as HTMLInputElement).value
     
-    
             let signInResponse: AuthTokenResponsePassword | undefined = await supabase.auth.signInWithPassword({
                 email,
                 password
@@ -40,18 +34,28 @@ export default function LoginPage() {
              * email to determine which of these cases we have.
              */
             if (signInResponse?.error) { 
+                // Attempt sign up
                 let signUpResponse = await supabase?.auth.signUp({
                     email,
                     password
                 })
-    
+                
+                // CASE 2: If signup fails, the account must already exist and
+                // the password is incorrect.
                 if (signUpResponse.error || !signUpResponse.data.session) {
                     console.error("Password incorrect!")
                     setError("Password incorrect!")
+
+                // CASE 1: If this works then they didn't have
+                // an account in the first place and so can now sign up
                 } else {
                     console.log("Created account successfully!")
                     history.back()
                 }
+            /**
+             * Credentials are valid, navigate back to return to the
+             * action they were trying to complete.
+             */
             } else {
                 console.log(signInResponse?.data)
                 console.log("Signed in successfully!")
@@ -106,24 +110,32 @@ export default function LoginPage() {
         )
     }
 
-    async function updateLoggedIn() {
-        const response: UserResponse = await supabase?.auth.getUser();
-        if (response?.data.user == null) {
-            setLoggedIn(false);
-        } else {
-            setLoggedIn(true)
-        }
-    }
 
-    function logOut() {
-        supabase?.auth.signOut()
-        console.log("Logged out")
+    async function logOut() {
+        const res = await supabase.auth.signOut()
+        console.log("Logged out: " + res)
+        setLoggedIn(false)
     }
 
     supabase.auth.onAuthStateChange((event, session) => {
-        setLoggedIn(session?.user != null)})
+        if (event === "SIGNED_IN") {
+            setLoggedIn(true);
+        } else if (event === "SIGNED_OUT") {
+            setLoggedIn(false)
+        }
+    })
 
     const [loggedIn, setLoggedIn] = useState(false) 
+
+    useEffect(()=>{
+        const checkLoginStatus = async () => {
+            console.log("Checking if user is logged in")
+            const isLoggedIn = await getLoggedIn();
+            console.log(isLoggedIn)
+            setLoggedIn(isLoggedIn)
+        }
+        checkLoginStatus()
+    },[])
 
     return (<><Header/><div className="content">
         {loggedIn ? <LoggedIn/> : <Login/>}
@@ -133,3 +145,4 @@ export default function LoginPage() {
 function forgotNotImplemented() {
     notify("This function isn't implemented yet, contact support for help!")
 }
+

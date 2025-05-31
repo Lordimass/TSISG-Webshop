@@ -29,6 +29,7 @@ type checkoutProductParams = {
   name: string
   quantity: number
   total: number
+  sku?: number
 }
 
 export default function Product({ sku, name, price, images, stock }: prodProps) {
@@ -434,7 +435,14 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function CheckoutProduct({image, name, quantity, total}: checkoutProductParams) {
+export function CheckoutProduct({image, name, quantity, total, sku}: checkoutProductParams) {
+  // This component is used by the staff-portal order manager too,
+  // Extra information is shown in this view
+  const sku_string = sku ? "SKU: " + sku : null
+  const checkbox = sku ? 
+  <><div className='product-filler'/><input type='checkbox' className='product-checkbox'/></> :
+  null
+  
   return (<div className="checkout-product">
       <div className='checkout-product-image-container' style={{backgroundImage: "url("+image+")"}}>
         <div className="bg-blurrer"></div>
@@ -444,7 +452,9 @@ export function CheckoutProduct({image, name, quantity, total}: checkoutProductP
       <div className="checkout-product-text">
           <p>{name} (x{quantity})</p>
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
+          <p>{sku_string}</p>
       </div>
+      {checkbox}
   </div>)
 }
 

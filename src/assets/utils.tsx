@@ -2,8 +2,26 @@ import { User, UserResponse } from "@supabase/supabase-js";
 import { supabase } from "../pages/home/home";
 import { useEffect, useState } from "react";
 
+export async function getLoggedIn() {
+    const user: User | null = await getUser();
+    if (!user) {
+        return false;
+    } else {
+        return true
+    }
+}
+
+export async function getUser() {
+    const response: UserResponse = await supabase.auth.getUser();
+    return response.data.user
+}
+
 export function getProductList(): any {
     return fetchFromNetlifyFunction("getAllProducts")
+}
+
+export function getOrderList(): any {
+    return fetchFromNetlifyFunction("getAllOrders")
 }
 
 function fetchFromNetlifyFunction(func: string):any {

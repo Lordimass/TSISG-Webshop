@@ -11,6 +11,8 @@ import ShippingPolicy from './pages/policies/shipping-policy';
 import PrivacyPolicy from './pages/policies/privacy-policy';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
+import Staff from './pages/staff/staff';
+import Page404 from './pages/404/404';
 
 function App() {
   const pathname: string = window.location.pathname
@@ -26,12 +28,16 @@ function App() {
         <Route path="thankyou" element={<ThankYou/>} />
 
         <Route path='login' element={<LoginPage/>} />
+
+        <Route path="staff-portal" element={<Staff/>} />
   
         <Route path="privacy" element={<PrivacyPolicy/>}/>
         <Route path="returns" element={<ReturnPolicy/>}/>
         <Route path="refunds" element={<ReturnPolicy/>}/>
         <Route path="cancellations" element={<CancellationPolicy/>}/>
         <Route path="shipping" element={<ShippingPolicy/>}/>
+
+        <Route path="*" element={<Page404 />} />
       </Routes>
     </BrowserRouter>
   )

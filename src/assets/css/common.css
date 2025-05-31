@@ -7,6 +7,10 @@
     --bright-yellow: #ffd970;
     --jamie-grey: #838383;
     --blue-black: #011335;
+
+    --red: #FB4141;
+    --green: #16C47F;
+    --light-green: #b3ffe1;
 }
 
 /************************ Fonts ************************/
@@ -57,5 +61,9 @@ a {
     background-color: var(--yellow);
     overflow-x: auto;
     overflow-y: hidden;
+}
+
+button {
+    cursor: pointer;
 }
 

@@ -19,6 +19,7 @@ import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
 import { notify } from "../../assets/components/notification";
 import { eu, shipping_options, uk } from "../../assets/consts";
+import Throbber from "../../assets/components/throbber";
 
 const stripePromise = loadStripe("pk_test_51RH7r72ER8SiRgqK0BM99KsifUsGmhCJy0X6aGEAW2qNgZgYt0vdRpYeXHfhd2chkKyyq8eJqY4b0aXtfa4Bgq1h00N7HyccMG");
 
@@ -450,7 +451,7 @@ function Loading() {
     return (<div className="loading-screen">
         
         <p>We're loading your basket...</p>
-        <div className="throbber"/>
+        <Throbber/>
     </div>)
 }
 

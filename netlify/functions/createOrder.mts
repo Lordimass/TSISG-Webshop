@@ -118,7 +118,7 @@ export default async function handler(request: Request, _context: Context) {
 
     // Save Order
     var orderID: number | undefined;
-    {const {data, error} = await supabase
+    const {data, error} = await supabase
         .from("orders")
         .insert({
             email: dataObj.customer_details?.email,
@@ -128,7 +128,7 @@ export default async function handler(request: Request, _context: Context) {
             total_value: amount_total/100,
             postal_code: shipping_details?.address.postal_code
             })
-        .select()
+        .select() 
     if (error) {
         console.error(error.code + ": " + error.message)
         return
@@ -139,7 +139,7 @@ export default async function handler(request: Request, _context: Context) {
     if (!orderID) {
         console.error("Order ID not found in returned data " + data)
         return
-    }}
+    }
     
 
     // Save Order-Products
