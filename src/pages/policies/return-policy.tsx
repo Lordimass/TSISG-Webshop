@@ -8,7 +8,7 @@ export default function ReturnPolicy() {
 
     <div className="policy">
         <h1>Refund and Return Policy</h1> <br/>
-        <i>Last update 29th April 2025</i> <br/>
+        <i>Last update 2nd June 2025</i> <br/>
 
         We hope you are happy with your purchases from us. However, if you are not satisfied with your
         purchase you may contact us to request a full refund or an exchange. Please see below for more
@@ -20,7 +20,7 @@ export default function ReturnPolicy() {
 
         <h2>RETURN PROCESS</h2>
         To return an item, please email customer service at: <br/><br/>
-        <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a> <br/><br/>
+        <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a> <br/><br/>
         to request a refund and obtain a Return Merchandise Authorisation (RMA) number. After receiving an
         RMA number, place the item securely in its original packaging, and mail your return to the
         following address: <br/>
@@ -54,7 +54,7 @@ export default function ReturnPolicy() {
         <h2>QUESTIONS</h2>
         If you have any questions concerning our return policy, please contact us at: <br/>
         <br/>
-        <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a>
+        <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a>
     </div>
 
 

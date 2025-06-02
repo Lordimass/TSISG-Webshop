@@ -43,7 +43,7 @@ export default function LoginPage() {
                 // CASE 2: If signup fails, the account must already exist and
                 // the password is incorrect.
                 if (signUpResponse.error || !signUpResponse.data.session) {
-                    console.error("Password incorrect!")
+                    console.log("Password incorrect!")
                     setError("Password incorrect!")
 
                 // CASE 1: If this works then they didn't have

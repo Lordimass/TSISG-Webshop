@@ -8,7 +8,7 @@ export default function ShippingPolicy() {
 
     <div className="policy">
         <h1>Shipping Delivery Policy</h1> <br/>
-        <i>Last update 29th April 2025</i> <br/>
+        <i>Last update 2nd June 2025</i> <br/>
 
         Please carefully review our Shipping & Delivery Policy when purchasing
         our products. This policy will apply to any order you place with us.
@@ -55,7 +55,7 @@ export default function ShippingPolicy() {
         <h2>DO YOU DELIVER INTERNATIONALLY?</h2>
         We offer worldwide shipping.
 
-        For more information about customs processes, please contact support at <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a>
+        For more information about customs processes, please contact support at <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a>
         
         <br/><br/>
         Please note, we may be subject to various rules and restrictions in
@@ -79,7 +79,7 @@ export default function ShippingPolicy() {
         <h2>HOW CAN YOU CONTACT US ABOUT THIS POLICY?</h2>
         If you have any questions concerning our shipping and delivery policy, please contact us at: <br/>
         <br/>
-        <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a>
+        <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a>
 
     </div>
 

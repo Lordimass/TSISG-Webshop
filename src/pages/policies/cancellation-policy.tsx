@@ -8,7 +8,7 @@ export default function CancellationPolicy() {
 
     <div className="policy">
         <h1>Cancellation Policy</h1> <br/>
-        <i>Last update 29th April 2025</i> <br/>
+        <i>Last update 2nd June 2025</i> <br/>
 
         We hope that you look forward to receiving your purchases from us. 
         However, if you change your mind before receiving your item(s) you may
@@ -24,7 +24,7 @@ export default function CancellationPolicy() {
 
         <h2>CANCELLATION PROCESS</h2>
         To request a cancellation, please email customer service at:<br/><br/>
-        <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a> <br/><br/>
+        <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a> <br/><br/>
 
         <h2>REFUNDS</h2>
         After receiving your cancellation request, we will process your refund.
@@ -38,7 +38,7 @@ export default function CancellationPolicy() {
         <h2>QUESTIONS</h2>
         If you have any questions concerning our cancellation policy, please contact us at: <br/>
         <br/>
-        <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a>
+        <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a>
 
     </div>
 

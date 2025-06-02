@@ -8,20 +8,20 @@ export default function PrivacyPolicy() {
 
     <div className="policy">
         <h1>Privacy Policy</h1> <br/>
-        <i>Last update 29th April 2025</i> <br/>
+        <i>Last update 2nd June 2025</i> <br/>
 
-        This Privacy Notice for This Shop Is So Gay ('we', 'us', or 'our'), describes how and why we might access,
+        This Privacy Notice for XEFRA LTD, trading as THIS SHOP IS SO GAY ('we', 'us', or 'our'), describes how and why we might access,
         collect, store, use, and/or share ('process') your personal information when you use our services ('Services'),
         including when you:<br/>
         <ul>
-            <li>Visit any website of ours that links to this Privacy Notice</li>
+            <li>Visit our website at <a href="https://thisshopissogay.com">https://thisshopissogay.com</a>, or any website of ours that links to this Privacy Notice</li>
             <li>Engage with us in other related ways, including any sales, marketing, or events</li>
         </ul>
         
         Questions or concerns? Reading this Privacy Notice will help you understand your privacy rights and choices.
         We are responsible for making decisions about how your personal information is processed. If you do not agree
         with our policies and practices, please do not use our Services. If you still have any questions or concerns,
-        please contact us at <a href="mailto:sherlockholmesyorkimaginarium@gmail.com">sherlockholmesyorkimaginarium@gmail.com</a>.
+        please contact us at <a href="mailto:sherlockimaginarium@gmail.com">sherlockimaginarium@gmail.com</a>.
 
 
         <h2>SUMMARY OF KEY POINTS</h2>
@@ -285,7 +285,7 @@ export default function PrivacyPolicy() {
             However, please note that this will not affect the lawfulness of the processing before its withdrawal nor, when applicable law
             allows, will it affect the processing of your personal information conducted in reliance on lawful processing grounds other than consent. <br/><br/>
 
-            If you have questions or comments about your privacy rights, you may email us at sherlockholmesyorkimaginarium@gmail.com.
+            If you have questions or comments about your privacy rights, you may email us at sherlockimaginarium@gmail.com.
 
         <h2 id="privacy9">9. CONTROLS FOR DO-NOT-TRACK FEATURES</h2>
             Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track ('DNT') feature or setting you can
@@ -543,7 +543,7 @@ export default function PrivacyPolicy() {
 
             <h3>How to Exercise Your Rights</h3>
             To exercise these rights, you can contact us by submitting a data subject access request by emailing us at
-            sherlockholmesyorkimaginarium@gmail.com, or by referring to the contact details at the bottom of this document.<br/><br/>
+            sherlockimaginarium@gmail.com, or by referring to the contact details at the bottom of this document.<br/><br/>
 
             Under certain US state data protection laws, you can designate an authorised agent to make a request on your behalf. We may deny a request
             from an authorised agent that does not submit proof that they have been validly authorised to act on your behalf in accordance with applicable laws.<br/><br/>
@@ -559,7 +559,7 @@ export default function PrivacyPolicy() {
 
             <h3>Appeals</h3>
             Under certain US state data protection laws, if we decline to take action regarding your request, you may appeal our decision by emailing us at
-            sherlockholmesyorkimaginarium@gmail.com. We will inform you in writing of any action taken or not taken in response to the appeal, including a written
+            sherlockimaginarium@gmail.com. We will inform you in writing of any action taken or not taken in response to the appeal, including a written
             explanation of the reasons for the decisions. If your appeal is denied, you may submit a complaint to your state attorney general.
 
             <h3>California 'Shine The Light' Law</h3>
@@ -616,13 +616,13 @@ export default function PrivacyPolicy() {
             notification. We encourage you to review this Privacy Notice frequently to be informed of how we are protecting your information.
 
         <h2 id="privacy13">13. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2>
-            If you have questions or comments about this notice, you may email us at sherlockholmesyorkimaginarium@gmail.com or contact us by post at:<br/><br/>
+            If you have questions or comments about this notice, you may email us at sherlockimaginarium@gmail.com or contact us by post at:<br/><br/>
 
             <address>
-                This Shop Is So Gay<br/>
-                Sherlock Holmes Imaginarium<br/>
                 74 Low Petergate<br/>
-                York, North Yorkshire YO1 7HZ<br/>
+                York<br/>
+                North Yorkshire<br/>
+                YO1 7HZ<br/>
                 England<br/>
             </address>
 
