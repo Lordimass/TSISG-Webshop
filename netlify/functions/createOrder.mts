@@ -121,6 +121,7 @@ export default async function handler(request: Request, _context: Context) {
     const {data, error} = await supabase
         .from("orders")
         .insert({
+            id: dataObj.id,
             email: dataObj.customer_details?.email,
             street_address: shipping_details?.address.line1,
             name: shipping_details?.name,
