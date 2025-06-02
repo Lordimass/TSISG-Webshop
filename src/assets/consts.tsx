@@ -9,11 +9,8 @@ export const product_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1
 export const refund_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/refund.png";
 export const user_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/user.png";
 
-export const shipping_options: Array<{shipping_rate: string}> = [
-    {shipping_rate: "shr_1RHo2w2ER8SiRgqKQRlNi65f"}, // UK + Channel Islands
-    {shipping_rate: "shr_1RHp552ER8SiRgqK8R9YmKAY"}, // Europe Zones 1, 2, 3
-    {shipping_rate: "shr_1RHp5n2ER8SiRgqKk37pZDTa"}, // World Zones 1, 2, 3 (Anything not in UK, Channel Islands, or EU)
-] 
+export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
+console.log(shipping_options)
 
 // Region definitions for the purpose of shipping
 export const uk = ["GB", "GG", "JE", "IM"]

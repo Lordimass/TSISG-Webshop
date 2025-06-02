@@ -21,7 +21,7 @@ export function getProductList(): any {
 }
 
 export function getOrderList(): any {
-    return fetchFromNetlifyFunction("getAllOrders")
+  return fetchFromNetlifyFunction("getAllOrders")
 }
 
 function fetchFromNetlifyFunction(func: string):any {

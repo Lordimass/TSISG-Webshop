@@ -2,12 +2,12 @@ import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 
 var stripe: Stripe | null = null;
-if (process.env.STRIPE_KEY) {
-    stripe = new Stripe(process.env.STRIPE_KEY, {
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',
       });
 } else {
-    console.error("STRIPE_KEY does not exist!")
+    console.error("STRIPE_SECRET_KEY does not exist!")
 }
 
 type productInBasket = {
@@ -16,13 +16,13 @@ type productInBasket = {
     price: number,
     basketQuantity: number,
     images: image[]
-  }
+}
   
-  type image = {
+type image = {
     id: number,
     image_url: string,
     display_order: number
-  }
+}
 
 export default async function handler(request: Request, _context: Context) {
     if (!stripe) {
@@ -40,7 +40,8 @@ export default async function handler(request: Request, _context: Context) {
     for (let i = 0; i < basket.length; i++) {
         const item: productInBasket = basket[i];
         var stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
-        if (stripeItem) {
+        
+        if (stripeItem) { // If the item already exists on stripe, use it as is.
             var price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price as string)
             if (price.unit_amount == item.price*100) {
                 pricePointIDs.push({
@@ -58,7 +59,7 @@ export default async function handler(request: Request, _context: Context) {
                 })
             }
 
-        } else {
+        } else { // If it doesn't already exist, we'll need to create it.
             stripeItem = await stripe.products.create({
                 name: item.name,
                 images: getListOfImageURLS(item.images),

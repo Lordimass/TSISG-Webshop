@@ -4,13 +4,14 @@ import express from 'express';
 import { MetadataParam } from "@stripe/stripe-js";
 
 var stripe: Stripe | null = null;
-if (process.env.STRIPE_KEY) {
-    stripe = new Stripe(process.env.STRIPE_KEY, {
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',
       });
 } else {
-    console.error("STRIPE_KEY does not exist!")
+    console.error("STRIPE_SECRET_KEY does not exist!")
 }
+console.log(process.env.STRIPE_SECRET_KEY)
 
 const app = express();
 app.use(express.static('public'));
@@ -27,10 +28,10 @@ var allowed_countries: Array<string> = ["AC", "AD", "AE", "AF", "AG", "AI", "AL"
 // Metadata can contain up to 50 key-value pairs with the following constraints
 // const keyMaxCharacters: number = 40
 const valueMaxCharacters: number = 500
-// This metadata only contains basket but has keys up to 50 incase of crazy big
-// orders, it'll be pieced back together at the end of the webhook in
-// .netlify/functions/createOrder
 
+// This metadata only contains the basket string but has keys up to 50 
+// incase of crazy big orders, it'll be pieced back together at the end 
+// of the webhook in .netlify/functions/createOrder
 type metaBasket = {
     1: string
     2?: string
@@ -86,7 +87,10 @@ type metaBasket = {
 
 export default async function handler(request: Request, _context: Context) {
     if (!stripe) {
-        return
+        return new Response(null, {
+            status: 400,
+            statusText: "Failed to connect to stripe."
+        })
     }
     
     const body = request.body;
@@ -94,15 +98,15 @@ export default async function handler(request: Request, _context: Context) {
     const bodyJSON: bodyJSONParams = JSON.parse(bodyText)
     const compressedBasket: MetadataParam = compressBasket(bodyJSON.basket)
 
-
     const session = await stripe.checkout.sessions.create({
         ui_mode: "custom",
         line_items: bodyJSON.stripe_line_items,
         mode: "payment",
-        return_url: bodyJSON.origin + "/thankyou",
+        return_url: bodyJSON.origin + "/thankyou?session_id={CHECKOUT_SESSION_ID}",
         shipping_options: bodyJSON.shipping_options,
         shipping_address_collection: { allowed_countries: []},
-        metadata: compressedBasket
+        metadata: compressedBasket,
+        automatic_tax: {enabled: true}
     })
 
     return new Response(JSON.stringify(session))
@@ -158,10 +162,10 @@ function compressBasket(basket: string): MetadataParam {
     if (compressedBasketFullString.length > 0) {
         console.error("Basket too long to fit in metadata, will cause issues")
     }
+
     // TODO: Stop customer from ordering if there are too many items in the basket,
     // this isn't urgent because you'd have to order *a lot* of items (as in over
     // 1000 unique items) so it should be almost impossible to encounter unless
     // they're spending an obscene amount of money.
-
     return compressedBasketMeta;
 } 

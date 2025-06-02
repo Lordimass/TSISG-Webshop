@@ -112,6 +112,7 @@ export function CheckoutProducts() {
           name = {item.name}
           quantity={item.basketQuantity}
           total = {item.price*item.basketQuantity}
+          key={item.sku}
       />)
   }
   return (<div className="checkout-products">{els}</div>)

@@ -5,12 +5,12 @@
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 
 import React, { useState, useEffect, FormEvent, useRef } from "react";
-import {loadStripe, StripeCheckoutTotalSummary} from '@stripe/stripe-js';
+import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
 import {
     AddressElement,
-  CheckoutProvider,
-  PaymentElement,
-  useCheckout
+    CheckoutProvider,
+    PaymentElement,
+    useCheckout
 } from '@stripe/react-stripe-js';
 
 import "./checkout.css"
@@ -21,7 +21,11 @@ import { notify } from "../../assets/components/notification";
 import { eu, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 
-const stripePromise = loadStripe("pk_test_51RH7r72ER8SiRgqK0BM99KsifUsGmhCJy0X6aGEAW2qNgZgYt0vdRpYeXHfhd2chkKyyq8eJqY4b0aXtfa4Bgq1h00N7HyccMG");
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
+var stripePromise: Promise<Stripe | null> = new Promise(()=>{});
+if (STRIPE_KEY) {
+    stripePromise = loadStripe(STRIPE_KEY)
+}
 
 const appearance: {
   theme: "stripe" | "flat" | "night" | undefined
@@ -30,6 +34,18 @@ const appearance: {
 };
 
 const options = { fetchClientSecret, elementsOptions: { appearance } };
+const paymentElementOpts: StripePaymentElementOptions = {
+    fields: {
+        billingDetails: {
+            name: "never",
+            address: {
+                country: "never",
+                line1: "never",
+                postalCode: "never"
+            }
+        }
+    }
+}
 
 export default function Checkout() {
     function setPrepared() {
@@ -357,7 +373,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             return
         }
 
-        // Set Address
+        // Set Shipping/Billing Address
         const addressElement = document.getElementById("address-input") as HTMLInputElement
         const postcodeElement = document.getElementById("postal-code-input") as HTMLInputElement
         const nameElement = document.getElementById("name-input") as HTMLInputElement
@@ -371,14 +387,16 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             setIsLoading(false)
             return
         }
-        await checkout.updateShippingAddress({
+        const address: StripeCheckoutContact = {
             name: nameElement.value,
             address: {
                 country: countryCode,
                 line1: addressElement.value,
                 postal_code: postcodeElement.value
             }
-        })
+        }
+        await checkout.updateShippingAddress(address)
+        await checkout.updateBillingAddress(address)
 
         // Validate Email
         const {isValid, message} = await validateEmail(email, checkout)
@@ -426,7 +444,11 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 <label>Postcode / ZIP Code<br/></label><input id="postal-code-input" type="text"/><br/><br/>
                 <CountrySelect/><br/><br/>
                 <label>Payment</label>
-                <PaymentElement id="payment-element" onReady={() => {onReady()}}/>
+                <PaymentElement 
+                    id="payment-element" 
+                    onReady={() => {onReady()}}
+                    options={paymentElementOpts}
+                />
             </form>
         </div>
 

@@ -5,7 +5,6 @@ import Footer from "../../assets/components/footer";
 import Header from "../../assets/components/header";
 
 import "./thankyou.css"
-import Stripe from "stripe";
 
 const order_confirmed_gif: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//order-confirmed.gif"
 

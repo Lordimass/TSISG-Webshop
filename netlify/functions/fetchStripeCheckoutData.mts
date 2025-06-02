@@ -36,7 +36,7 @@ export default async function handler(request: Request, _context: Context) {
     }
     const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    // Attempt to fetch supabase data
+    // Attempt to fetch Supabase data
     var supabaseData;
     try {
     const { data, error } = await supabase.from("orders-compressed").select("*").eq("id", body.stripeSessionId)
