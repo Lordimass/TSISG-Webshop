@@ -9,8 +9,8 @@ import Stripe from "stripe";
 type Body = {stripeSessionId: string}
 
 var stripe: Stripe | null = null;
-if (process.env.STRIPE_KEY) {
-    stripe = new Stripe(process.env.STRIPE_KEY, {
+if (process.env.SECRET_STRIPE_KEY) {
+    stripe = new Stripe(process.env.SECRET_STRIPE_KEY, {
         apiVersion: '2025-03-31.basil',
       });
 } else {

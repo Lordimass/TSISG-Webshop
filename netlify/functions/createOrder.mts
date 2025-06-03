@@ -72,14 +72,14 @@ type orderProduct = {
 }
 
 type orderProdRecord = {
-    order_id?: number
+    order_id?: string
     product_sku: number,
     quantity: number,
     value: number
 }
 
 type orderRecord = {
-    id?: number
+    id?: string
     placed_at?: string,
     email: string,
     street_address: string,
@@ -108,71 +108,26 @@ export default async function handler(request: Request, _context: Context) {
 
     const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey)
 
-    // Get Details
-    const amount_total = dataObj.amount_total
-    if (!amount_total) {
-        console.error("Missing amount total")
-        return
-    }
-    const shipping_details = dataObj.collected_information?.shipping_details
-
-    // Save Order
-    var orderID: number | undefined;
-    const {data, error} = await supabase
-        .from("orders")
-        .insert({
-            id: dataObj.id,
-            email: dataObj.customer_details?.email,
-            street_address: shipping_details?.address.line1,
-            name: shipping_details?.name,
-            country: shipping_details?.address.country,
-            total_value: amount_total/100,
-            postal_code: shipping_details?.address.postal_code
-            })
-        .select() 
-    if (error) {
-        console.error(error.code + ": " + error.message)
-        return
-    }
-
-    const returnedRecord = data as orderRecord[]
-    orderID = returnedRecord[0].id
+    // Save the order record
+    const orderID = await saveOrder(dataObj, supabase)
     if (!orderID) {
-        console.error("Order ID not found in returned data " + data)
+        console.error("No order ID found, cannot finish saving order")
         return
     }
-    
 
-    // Save Order-Products
-    // -------------------
-    // Decode the metadata into an array of order products
-    {
+    // Decode metadata into an array of order products
     const orderProducts: Array<orderProduct> = decodeMeta(dataObj.metadata as metaBasket)
     console.log(orderProducts)
 
-    // Construct objects for Supabase records
-    var orderProdRecords: Array<orderProdRecord> = []
-    for (let i=0; i<orderProducts.length; i++) {
-        const product = orderProducts[i];
-        orderProdRecords.push({
-            order_id: orderID,
-            product_sku: product.sku,
-            quantity: product.quantity,
-            value: product.totalValue 
-        })
-    }
+    // Save the order-product record for each product
+    await saveOrderProducts(orderProducts, orderID, supabase)
 
-    // Save to Supabase
-    const {error} = await supabase
-        .from("order-products")
-        .insert(orderProdRecords)
-    if (error) {
-        console.error(error.code + ": " + error.message)
-        return
-    }
+    // Update stock
+    await updateStock(orderProducts, supabase)
+    
+    
     console.log("ORDER PLACED")
-    }
-
+    return new Response(null, {status: 200})
 }
 
 function decodeMeta(meta: metaBasket): Array<orderProduct> {
@@ -206,4 +161,109 @@ function decodeMeta(meta: metaBasket): Array<orderProduct> {
     }
 
     return basket;
+}
+
+async function saveOrder(dataObj: any, supabase: SupabaseClient) {
+    const shipping_details = dataObj.collected_information?.shipping_details
+    const amount_total = dataObj.amount_total
+
+    var orderID: string | undefined;
+    const {data, error} = await supabase
+        .from("orders")
+        .insert({
+            id: dataObj.id,
+            email: dataObj.customer_details?.email,
+            street_address: shipping_details?.address.line1,
+            name: shipping_details?.name,
+            country: shipping_details?.address.country,
+            total_value: amount_total/100,
+            postal_code: shipping_details?.address.postal_code
+            })
+        .select() 
+    if (error) {
+        console.error(error.code + ": " + error.message)
+        return
+    }
+
+    const returnedRecord = data as orderRecord[]
+    orderID = returnedRecord[0].id
+    if (!orderID) {
+        console.error("Order ID not found in returned data " + data)
+        return
+    }
+    return orderID
+}
+
+async function saveOrderProducts(orderProducts: Array<orderProduct>, orderID: string, supabase: SupabaseClient) {
+    // Construct objects for Supabase records
+    var orderProdRecords: Array<orderProdRecord> = []
+    for (let i=0; i<orderProducts.length; i++) {
+        const product = orderProducts[i];
+        orderProdRecords.push({
+            order_id: orderID,
+            product_sku: product.sku,
+            quantity: product.quantity,
+            value: product.totalValue 
+        })
+    }
+
+    // Save to Supabase
+    const {error} = await supabase
+        .from("order-products")
+        .insert(orderProdRecords)
+    if (error) {
+        console.error(error.code + ": " + error.message)
+        return
+    }
+}
+
+async function updateStock(products: Array<orderProduct>, supabase: SupabaseClient) {
+    // Fetch current stock first
+    let currStock: {sku: number, stock: number, edited?:boolean}[] = [];
+    const {data, error} = await supabase
+        .from("products")
+        .select("sku,stock")
+        .in("sku", products.map((product)=>product.sku))
+    if (error) {
+        console.error(error)
+    }
+    if (data) {
+        currStock = data
+    } else {
+        console.error("No stock returned from check")
+        return
+    }
+
+    // Adjust stock
+    for (let i=0; i<products.length; i++) {
+        const prod = products[i]
+        for (let k=0; k<currStock.length; k++) {
+            const stock_item = currStock[k]
+            if (stock_item.sku == prod.sku) {
+                stock_item.stock -= prod.quantity
+                stock_item.edited = true
+            }
+        }
+    }
+    
+    console.log("New stock:")
+    console.log(currStock)
+
+    // Save new values
+    for (let i=0; i<currStock.length; i++) {
+        const stock_item = currStock[i]
+        if (!stock_item.edited) {
+            console.error(
+                `Item with SKU ` + stock_item.sku + `has unchanged stock after checkout.
+                This signifies that something is very wrong.`
+            )
+        }
+        const {data, error} = await supabase
+            .from("products")
+            .update({stock: stock_item.stock})
+            .eq("sku", stock_item.sku)
+        if (error) {
+            console.error(error)
+        }
+    }
 }
