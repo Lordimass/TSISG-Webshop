@@ -28,7 +28,10 @@ export default async function handler(_request: Request, _context: Context) {
           image_url,
           display_order
         )
-      `);
+      `)
+      .eq("active", true)
+      .gt("stock", 0)
+      ;
 
     if (error) {
       return new Response(JSON.stringify(error.message), { status: 500 });

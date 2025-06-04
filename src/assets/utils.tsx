@@ -17,7 +17,7 @@ export async function getUser() {
 }
 
 export function getProductList(): any {
-    return fetchFromNetlifyFunction("getAllProducts")
+    return fetchFromNetlifyFunction("getProducts")
 }
 
 export function getOrderList(): any {

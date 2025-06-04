@@ -40,7 +40,7 @@ export default function Products() {
     const activeProductData: Array<prodDataElement> = []
     for (let i=0; i<productData.length; i++) {
         const product = productData[i]
-        const active = product.active && product.stock > 1;
+        const active = product.images.length>=1;
         if (active) {
             activeProductData.push(product)
         }
