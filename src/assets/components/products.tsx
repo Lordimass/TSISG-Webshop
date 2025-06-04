@@ -8,12 +8,13 @@ import { productInBasket, image } from "./product";
 import "../css/products.css"
 import { getProductList } from "../utils";
 
-type prodDataElement = {
+type product = {
   sku: number,
   price: number,
   name: string,
   stock: number,
   active: boolean
+  category_id: number
   images: {
     id: number,
     image_url: string,
@@ -33,27 +34,30 @@ export default function Products() {
     }
 
     const [page, setPage] = useState(1)
-    const productData: Array<prodDataElement> = getProductList();
+    const productData: Array<product> = getProductList();
     var products: Array<React.JSX.Element> = [];
     let pageCount = 0;
 
-    const activeProductData: Array<prodDataElement> = []
+    // Deactivate products with no images,
+    // Products with active=false or stock=0 are excluded from the query.
+    const activeProductData: Array<product> = []
     for (let i=0; i<productData.length; i++) {
         const product = productData[i]
-        const active = product.images.length>=1;
+        const active = product.images.length>=1; 
         if (active) {
             activeProductData.push(product)
         }
     }
+    activeProductData.sort(compareProducts)
 
-
-    if (activeProductData) {
+    // Create product elements if there are any products to display
+    if (activeProductData.length>0) {
         console.log(activeProductData)
         var start: number = (page-1)*productLoadChunks
         var end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
-          let product: prodDataElement|null = activeProductData[i]
+          let product: product|null = activeProductData[i]
           if (!product) {
             continue;
           }
@@ -116,4 +120,15 @@ export function CheckoutProducts() {
       />)
   }
   return (<div className="checkout-products">{els}</div>)
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function compareProducts(a: product, b: product) {
+    // Primary: Sort by category
+    if (a.category_id < b.category_id) return -1
+    if (a.category_id > b.category_id) return 1
+    // Secondary: Sort alphabetically
+    return a.name.localeCompare(b.name)
 }

@@ -23,6 +23,7 @@ export default async function handler(_request: Request, _context: Context) {
         name,
         stock,
         active,
+        category_id,
         images:product-images(
           id,
           image_url,
