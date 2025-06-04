@@ -7,7 +7,6 @@
 import React, { useState, useEffect, FormEvent, useRef } from "react";
 import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
 import {
-    AddressElement,
     CheckoutProvider,
     PaymentElement,
     useCheckout
@@ -57,7 +56,7 @@ export default function Checkout() {
         {preparing ? <Loading/> : <></>}
         
         <CheckoutProvider stripe={stripePromise} options={options}>
-        <CheckoutAux onReady={setPrepared}/>
+            <CheckoutAux onReady={setPrepared}/>
         </CheckoutProvider>
 
         </div><Footer/></>);

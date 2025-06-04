@@ -9,12 +9,12 @@ import Stripe from "stripe";
 type Body = {stripeSessionId: string}
 
 var stripe: Stripe | null = null;
-if (process.env.SECRET_STRIPE_KEY) {
-    stripe = new Stripe(process.env.SECRET_STRIPE_KEY, {
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',
       });
 } else {
-    console.error("STRIPE_KEY does not exist!")
+    console.error("STRIPE_SECRET_KEY does not exist!")
 }
 
 export default async function handler(request: Request, _context: Context) {

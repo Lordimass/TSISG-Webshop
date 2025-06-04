@@ -31,7 +31,7 @@ export default function ThankYou() {
         localStorage.removeItem("basket")
         window.dispatchEvent(new CustomEvent("basketUpdate"))
 
-        // GA4
+        // GA4 Tracking
         const session_id = new URLSearchParams(window.location.search).get("session_id")
         stripeWebhook(session_id)
         .then(response => {
@@ -42,20 +42,26 @@ export default function ThankYou() {
                 line_value: number,
                 product_name: string,
                 quantity: number,
-                sku: number
+                sku: number,
+                category: {id: number, name: string} 
             }[] = supabase.products
+
+            const amount_shipping = stripe.total_details.amount_shipping/100
+            const amount_tax = stripe.total_details.amount_tax/100
 
             ReactGA.event("purchase", {
                 transaction_id: supabase.id,
-                value: supabase.total_value,
-                shipping: stripe.shipping_cost.amount_total/100,
+                value: supabase.total_value-amount_shipping,
+                shipping: amount_shipping,
+                tax: amount_tax,
                 currency: "GBP",
                 items: products.map((prod) => {
                     return {
                         item_id: prod.sku,
                         item_name: prod.product_name,
                         quantity: prod.quantity,
-                        price: prod.line_value/prod.quantity
+                        price: prod.line_value/prod.quantity,
+                        item_category: prod.category.name
                     }
                 })
             })
