@@ -13,6 +13,7 @@ import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Staff from './pages/staff/staff';
 import Page404 from './pages/404/404';
+import DragNDrop from './pages/dragndrop/dragndrop';
 
 function App() {
   const pathname: string = window.location.pathname
@@ -36,6 +37,8 @@ function App() {
         <Route path="refunds" element={<ReturnPolicy/>}/>
         <Route path="cancellations" element={<CancellationPolicy/>}/>
         <Route path="shipping" element={<ShippingPolicy/>}/>
+
+        <Route path="dragndrop" element={<DragNDrop/>}/>
 
         <Route path="*" element={<Page404 />} />
       </Routes>

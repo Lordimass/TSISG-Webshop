@@ -24,6 +24,10 @@ export function getOrderList(): any {
   return fetchFromNetlifyFunction("getAllOrders")
 }
 
+export function getNoImageProds(): any {
+  return fetchFromNetlifyFunction("getNoImageProds")
+}
+
 function fetchFromNetlifyFunction(func: string):any {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
