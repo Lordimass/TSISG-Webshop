@@ -126,7 +126,7 @@ async function convertAndCompressToWebp(buffer: Buffer) {
   let outputBuffer = await sharp(buffer).webp({ quality }).toBuffer();
 
   // Reduce quality until size fits or minimum quality reached
-  while (outputBuffer.length > TARGET_IMAGE_SIZE && quality > 0) {
+  while (outputBuffer.length > TARGET_IMAGE_SIZE && quality > 1) {
     quality -= 10;
     if (quality <= 0) {
         quality = 1
