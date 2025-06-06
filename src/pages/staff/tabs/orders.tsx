@@ -15,7 +15,7 @@ type order = {
     street_address: string,
     postal_code: string,
     country: string,
-    customer_name: string,
+    name: string,
     fulfilled: boolean,
     total_value: number
     products: {
@@ -96,7 +96,7 @@ function Order({order}:{order:order}) {
     <div className={"order-main " + colourClass} id={"order-main-"+order.id}>
         <p className="order-id">ID: {order.id}</p>
         <p> 
-            Order for {order.customer_name}:
+            Order for {order.name}:
             {" " + dateString}.<br/>
             {order.fulfilled ? <b> FULFILLED</b> :
             timeDifference > overdue_threshold ? <b>OVERDUE BY {timeDifference-overdue_threshold} DAYS</b> :
@@ -109,7 +109,7 @@ function Order({order}:{order:order}) {
     <div className="order-details" style={{display: expanded?"flex":"none"}}>
         <div className="order-values">
             ID: {order.id} <br/>
-            Name: {order.customer_name}<br/>
+            Name: {order.name}<br/>
             Email: {order.email}<br/>
             Date Placed: {dateString}<br/>
             Time Placed: {date.getHours()}:{date.getMinutes()}:{date.getSeconds()}<br/>
