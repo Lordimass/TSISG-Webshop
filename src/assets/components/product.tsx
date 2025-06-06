@@ -399,7 +399,11 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
         }}
       >
         <div className="bg-blurrer basket-left-blurrer"></div>
-        <img className="basket-product-image-main" src={imageURL} loading='lazy'></img>
+        <img className="basket-product-image-main" 
+          src={imageURL} 
+          loading='lazy'
+          alt={name}
+        />
         <div className="bg-blurrer"></div>
       </div>
 
