@@ -82,6 +82,7 @@
     box-sizing: content-box;
     max-height: 2em;
     margin: 1em;
+    margin-top: 0;
     padding: 1em;
     border-radius: 1em;
     font-family: "Perfect Penmanship";
@@ -91,6 +92,11 @@
     width: 2em;
     height: 2em;
     margin: auto auto;
+}
+
+#order-fulfil-warning {
+    margin-top: 1em;
+    font-size: smaller;
 }
 
 

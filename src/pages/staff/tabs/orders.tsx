@@ -130,6 +130,7 @@ function Order({order}:{order:order}) {
             />)}
         </div>
         
+        <p id="order-fulfil-warning">Orders are only fulfilled once they have been dispatched!</p>
         <button className="fulfil-order" onClick={toggleFulfilment} disabled={toggleInProgress}>
             {
             toggleInProgress ? 

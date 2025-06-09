@@ -1,6 +1,11 @@
 // Creates an order record on the Supabase Database, 
 // including order-products records and an orders record.
 
+// TODO: Secure this somehow with a unique authorisation key so that the format
+// cannot be reverse-engineered to create orders at will. Possibly able to do
+// that with whatever Stripe passes as authorisation since this is only ever
+// caleld from their webhook
+
 import { Context } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
@@ -103,7 +108,7 @@ export default async function handler(request: Request, _context: Context) {
 
     // Validate that they were both successfully fetched.
     if (!supabaseUrl || !supabaseKey) {
-        return new Response("Supabase credentials not set", { status: 500 });
+        return new Response("Supabase credentials not set", { status: 401 });
     }
 
     const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey)
@@ -125,6 +130,11 @@ export default async function handler(request: Request, _context: Context) {
     // Update stock
     await updateStock(orderProducts, supabase)
     
+    // Create Royal Mail Order
+    const response = await createRMOrder(supabase, orderID)
+    if (response?.status != 200) {
+        return response;
+    }
     
     console.log("ORDER PLACED")
     return new Response(null, {status: 200})
@@ -266,4 +276,102 @@ async function updateStock(products: Array<orderProduct>, supabase: SupabaseClie
             console.error(error)
         }
     }
+}
+
+/**
+ * Creates an order on the Royal Mail Click & Drop API:
+ * https://business.parcel.royalmail.com/
+*/
+async function createRMOrder(supabase: SupabaseClient, orderId: string) {
+    // Get royalMailKey
+    const royalMailKey = process.env.ROYAL_MAIL_KEY;
+    if (!royalMailKey) {
+        return new Response("No Royal Mail API Key Found", {status: 401})
+    }
+    
+    // Fetch Orders with ID
+    const {error, data} = await supabase
+        .from("orders-compressed")
+        .select("*")
+        .eq("id", orderId)
+    if (error) {
+        return new Response(error.message, {status: 502})
+    }
+    
+    // IDs should map to unique Orders
+    if (data.length > 1) {
+        return new Response("More than one order mapped to this ID", {status: 409})
+    } else if (data.length == 0) {
+        return new Response("No orders mapped to this ID", {status: 400})
+    }
+    const order = data[0];
+
+    // Create RM Order
+    const subtotal = calculateOrderSubtotal(order.products)
+    const orderReference = orderId.slice(0,40) // API max order ref length is 40
+    const response = await fetch("https://api.parcel.royalmail.com/api/v1/orders", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${royalMailKey}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({"items": [ // There will only ever be one order submitted at a time through this.
+            { // https://api.parcel.royalmail.com/#tag/Orders/operation/CreateOrdersAsync
+                orderReference: orderReference,
+                recipient: {
+                    address: {
+                        fullName: order.name,
+                        addressLine1: order.street_address,
+                        city: "BLANK", // TODO: Find a solution to this
+                        postcode: order.postal_code,
+                        countryCode: order.country
+                    },
+                    emailAddress: order.email,
+                },
+                packages: [
+                    {
+                        weightInGrams: calculateOrderWeight(order.products),
+                        packageFormatIdentifier: "parcel", // TODO: Calculate which type is needed based on items
+                        contents: order.products.map((prod) => {return {
+                            name: prod.product_name,
+                            SKU: prod.sku,
+                            quantity: prod.quantity,
+                            unitValue: prod.line_value/prod.quantity,
+                            unitWeightInGrams: prod.weight,
+                            customsDescription: prod.customs_description,
+                            originCountryCode: prod.origin_country_code,
+                            customsDeclarationCategory: "saleOfGoods",
+                        }})
+                    }
+                ],
+                orderDate: order.placed_at,
+                subtotal: subtotal,
+                shippingCostCharged: order.total_value - subtotal,
+                total: order.total_value,
+            }
+        ]})
+    })
+
+    const respBody = JSON.parse(await new Response(response.body).text());
+    if (respBody.errorsCount > 0) {
+        return new Response(JSON.stringify(respBody.failedOrders[0].errors), {status: 502})
+    }
+}
+
+function calculateOrderSubtotal(items): number {
+    let val = 0;
+    for (let i=0; i<items.length; i++) {
+        const item = items[i]
+        val += item.line_value
+    }
+    return val
+}
+
+function calculateOrderWeight(items): number {
+    let weight = 0;
+    for (let i=0; i<items.length; i++) {
+        const item = items[i]
+        weight += item.weight
+    }
+    return weight
 }
