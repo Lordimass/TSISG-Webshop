@@ -1,7 +1,7 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 
-var stripe: Stripe | null = null;
+let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',
@@ -29,7 +29,7 @@ export default async function handler(request: Request, _context: Context) {
         return
     }
 
-    var pricePointIDs: Array<Object> = [];
+    const pricePointIDs: Array<Object> = [];
 
     const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
 
@@ -39,19 +39,20 @@ export default async function handler(request: Request, _context: Context) {
 
     for (let i = 0; i < basket.length; i++) {
         const item: productInBasket = basket[i];
-        var stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
+        let stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
+        const itemprice = Math.round(item.price*100) // Stripe requires prices in pennies
         
         if (stripeItem) { // If the item already exists on stripe, use it as is.
-            var price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price as string)
-            if (price.unit_amount == item.price*100) {
+            const price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price as string)
+            if (price.unit_amount == itemprice) {
                 pricePointIDs.push({
                     price: stripeItem.default_price as string, 
                     quantity: item.basketQuantity
                 })
             } else {
-                var priceID = await stripe.prices.create({
+                const priceID = await stripe.prices.create({
                     currency: "gbp",
-                    unit_amount: item.price*100
+                    unit_amount: itemprice 
                 })
                 pricePointIDs.push({
                     price: priceID as unknown as string, 
@@ -65,7 +66,7 @@ export default async function handler(request: Request, _context: Context) {
                 images: getListOfImageURLS(item.images),
                 default_price_data: {
                     currency: 'gbp',
-                    unit_amount: item.price*100
+                    unit_amount: itemprice // Stripe requires prices in pennies
                 }
             })
             if (stripeItem) {
@@ -95,7 +96,7 @@ function getProductOnStripe(
 }
 
 function getListOfImageURLS(images: image[]) {
-    var imageList: string[] = []
+    const imageList: string[] = []
     for (let i = 0; i < images.length; i++) {
         imageList.push(images[i].image_url)
     }
