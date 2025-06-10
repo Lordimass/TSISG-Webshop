@@ -138,8 +138,10 @@ either would make sense so I went with that.
         flex-direction: row;
         min-height: auto;
         width: 100%;
+        max-width: 100%;
         min-height: auto;
         height: 9em;
+        margin: 0.5em;
     }
 
     .product-image-main {
@@ -148,7 +150,9 @@ either would make sense so I went with that.
     }
 
     .product-image-container {
-        width: 40%;
+        min-width: 35%;
+        max-width: 35%;
+        overflow: hidden;
         height: 100%;
     }
 
