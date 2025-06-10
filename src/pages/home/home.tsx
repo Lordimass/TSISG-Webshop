@@ -42,7 +42,7 @@ export default function Home() {
   return (<><Header /><div className="content">
     <div className="title-section">
       <div className='title-text'>
-        <h1>This Website Is So</h1>
+        <h1>This Shop Is So</h1>
         <h1 id='title-word' className='title-main-word' onClick={changeWord}>&lt; {word} &gt;</h1>
       </div>
     </div>
