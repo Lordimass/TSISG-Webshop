@@ -70,17 +70,30 @@ type metaBasket = {
     50?: string
 }
 
-type orderProduct = {
+type metaOrderProduct = { // From compressed metadata
     sku: number
     quantity: number
     totalValue: number
 }
 
-type orderProdRecord = {
+type orderProdRecord = { // For order-products table
     order_id?: string
     product_sku: number,
     quantity: number,
     value: number
+}
+
+type orderProdCompressed = { // From orders-compressed
+    sku: number,
+    product_name: string,
+    weight: number,
+    customs_description: string,
+    origin_country_code: string,
+    package_type_override: string,
+    category: {id: number, name: string},
+    quantity: number,
+    line_value: number,
+    image_url: string
 }
 
 type orderRecord = {
@@ -93,6 +106,7 @@ type orderRecord = {
     fulfilled: boolean,
     total_value: number,
     postal_code: string,
+    products: orderProdCompressed[]
 }
 
 export default async function handler(request: Request, _context: Context) {
@@ -121,7 +135,7 @@ export default async function handler(request: Request, _context: Context) {
     }
 
     // Decode metadata into an array of order products
-    const orderProducts: Array<orderProduct> = decodeMeta(dataObj.metadata as metaBasket)
+    const orderProducts: Array<metaOrderProduct> = decodeMeta(dataObj.metadata as metaBasket)
     console.log(orderProducts)
 
     // Save the order-product record for each product
@@ -140,12 +154,12 @@ export default async function handler(request: Request, _context: Context) {
     return new Response(null, {status: 200})
 }
 
-function decodeMeta(meta: metaBasket): Array<orderProduct> {
+function decodeMeta(meta: metaBasket): Array<metaOrderProduct> {
     // Decodes the metadata compressed string of products in the order,
     // explanation for why this is necessary is at the top of this file,
     // above the definition of orderProduct
 
-    const basket: Array<orderProduct> = []
+    const basket: Array<metaOrderProduct> = []
 
     // Piece back together the compressed string
     var basketString: string = ""
@@ -162,7 +176,7 @@ function decodeMeta(meta: metaBasket): Array<orderProduct> {
     // Go through the array and parse it back into an array of objects
     var compressedBasketArray: Array<Array<string>> = JSON.parse(basketString);
     for (let i=0; i<compressedBasketArray.length; i++) {
-        const prod: orderProduct = {
+        const prod: metaOrderProduct = {
             sku: parseInt(compressedBasketArray[i][0]),
             quantity: parseInt(compressedBasketArray[i][1]),
             totalValue: parseFloat(compressedBasketArray[i][2])
@@ -204,7 +218,7 @@ async function saveOrder(dataObj: any, supabase: SupabaseClient) {
     return orderID
 }
 
-async function saveOrderProducts(orderProducts: Array<orderProduct>, orderID: string, supabase: SupabaseClient) {
+async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID: string, supabase: SupabaseClient) {
     // Construct objects for Supabase records
     var orderProdRecords: Array<orderProdRecord> = []
     for (let i=0; i<orderProducts.length; i++) {
@@ -227,7 +241,12 @@ async function saveOrderProducts(orderProducts: Array<orderProduct>, orderID: st
     }
 }
 
-async function updateStock(products: Array<orderProduct>, supabase: SupabaseClient) {
+async function updateStock(products: Array<metaOrderProduct>, supabase: SupabaseClient) {
+    // Don't update stock if this order was placed in dev mode
+    if (process.env.DEV) {
+        console.log("Stock was not updated for this order since it was not from production.")
+        return
+    }
     // Fetch current stock first
     let currStock: {sku: number, stock: number, edited?:boolean}[] = [];
     const {data, error} = await supabase
@@ -304,11 +323,13 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
     } else if (data.length == 0) {
         return new Response("No orders mapped to this ID", {status: 400})
     }
-    const order = data[0];
+    const order: orderRecord = data[0];
 
     // Create RM Order
     const subtotal = calculateOrderSubtotal(order.products)
     const orderReference = orderId.slice(0,40) // API max order ref length is 40
+    const orderWeight = calculateOrderWeight(order.products)
+    const packageFormat = calculatePackageFormat(order.products, orderWeight)
     const response = await fetch("https://api.parcel.royalmail.com/api/v1/orders", {
         method: "POST",
         headers: {
@@ -330,14 +351,14 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                 },
                 packages: [
                     {
-                        weightInGrams: calculateOrderWeight(order.products),
-                        packageFormatIdentifier: "parcel", // TODO: Calculate which type is needed based on items
+                        weightInGrams: orderWeight,
+                        packageFormatIdentifier: packageFormat,
                         contents: order.products.map((prod) => {return {
                             name: prod.product_name,
                             SKU: prod.sku,
                             quantity: prod.quantity,
                             unitValue: prod.line_value/prod.quantity,
-                            unitWeightInGrams: prod.weight,
+                            unitWeightInGrams: prod.weight ? prod.weight : 0, // Weight is nullable in database
                             customsDescription: prod.customs_description,
                             originCountryCode: prod.origin_country_code,
                             customsDeclarationCategory: "saleOfGoods",
@@ -374,4 +395,29 @@ function calculateOrderWeight(items): number {
         weight += item.weight
     }
     return weight
+}
+
+/**
+ * Calculates what type of parcel to use, currently only small or medium
+ * since these are seemingly the only options on RM Click & Drop.
+ * @param items The items in the order
+ * @param weight The total weight of the order
+ * @returns Either "mediumParcel" or "smallParcel"
+ */
+function calculatePackageFormat(items: orderProdCompressed[], weight?: number) {
+    if (!weight) {
+        weight = calculateOrderWeight(items)
+    }
+
+    if (weight > 2000) {
+        return "mediumParcel"
+    }
+
+    for (let i=0; i<items.length; i++) { // Check for overrides
+        const item = items[i];
+        if (item.package_type_override == "mediumParcel") {
+            return "mediumParcel";
+        }
+    }
+    return "smallParcel"
 }
