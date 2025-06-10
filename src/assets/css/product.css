@@ -5,6 +5,7 @@
     width: min-content;
     height: min-content;
     min-width: 20em;
+    max-width: 20em;
     min-height: 33em;
 
     background-color: white;

@@ -63,7 +63,7 @@ export async function handler(event: HandlerEvent) {
     const { data, error } = await supabase.storage
         .from("product-images")
         .upload(fileName, compressedBuffer, {
-            contentType: uploaded.mimetype,
+            contentType: "image/webp",
         })
     
     if (error) {
