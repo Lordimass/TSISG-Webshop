@@ -15,6 +15,7 @@ type product = {
   stock: number,
   active: boolean
   category_id: number
+  sort_order: number
   images: {
     id: number,
     image_url: string,
@@ -126,9 +127,12 @@ export function CheckoutProducts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function compareProducts(a: product, b: product) {
-    // Primary: Sort by category
+    // Primary: Sort by sort_order
+    if (a.sort_order < b.sort_order) return -1
+    if (a.sort_order > b.sort_order) return 1
+    // Secondary: Sort by category
     if (a.category_id < b.category_id) return -1
     if (a.category_id > b.category_id) return 1
-    // Secondary: Sort alphabetically
+    // Tertiary: Sort alphabetically
     return a.name.localeCompare(b.name)
 }

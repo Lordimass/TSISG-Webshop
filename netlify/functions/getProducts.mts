@@ -24,6 +24,7 @@ export default async function handler(_request: Request, _context: Context) {
         stock,
         active,
         category_id,
+        sort_order,
         images:product-images(
           id,
           image_url,
