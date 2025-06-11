@@ -106,7 +106,8 @@ type orderRecord = {
     fulfilled: boolean,
     total_value: number,
     postal_code: string,
-    products: orderProdCompressed[]
+    products: orderProdCompressed[],
+    city: string
 }
 
 export default async function handler(request: Request, _context: Context) {
@@ -187,21 +188,27 @@ function decodeMeta(meta: metaBasket): Array<metaOrderProduct> {
     return basket;
 }
 
-async function saveOrder(dataObj: any, supabase: SupabaseClient) {
-    const shipping_details = dataObj.collected_information?.shipping_details
-    const amount_total = dataObj.amount_total
+async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseClient) {
+    const shipping_details = dataObj.collected_information?.shipping_details;
+    const amount_total = dataObj.amount_total;
+    const customer_details = dataObj.customer_details;
+    if (!shipping_details || !amount_total || !customer_details) {
+        console.error("Stripe object was missing crucial details, couldn't save order")
+        return
+    }
 
     var orderID: string | undefined;
     const {data, error} = await supabase
         .from("orders")
         .insert({
             id: dataObj.id,
-            email: dataObj.customer_details?.email,
-            street_address: shipping_details?.address.line1,
-            name: shipping_details?.name,
-            country: shipping_details?.address.country,
+            email: customer_details.email,
+            street_address: shipping_details.address.line1,
+            name: shipping_details.name,
+            country: shipping_details.address.country,
             total_value: amount_total/100,
-            postal_code: shipping_details?.address.postal_code
+            postal_code: shipping_details.address.postal_code,
+            city: shipping_details.address.city
             })
         .select() 
     if (error) {
@@ -343,7 +350,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                     address: {
                         fullName: order.name,
                         addressLine1: order.street_address,
-                        city: "BLANK", // TODO: Find a solution to this
+                        city: order.city, // TODO: Find a solution to this
                         postcode: order.postal_code,
                         countryCode: order.country
                     },

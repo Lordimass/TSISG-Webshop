@@ -40,23 +40,25 @@ const paymentElementOpts: StripePaymentElementOptions = {
             address: {
                 country: "never",
                 line1: "never",
-                postalCode: "never"
+                postalCode: "never",
+                city: "never"
             }
         }
     }
 }
 
 export default function Checkout() {
-    function setPrepared() {
-        setPreparing(false)
-    }
     const [preparing, setPreparing] = useState(true)
+    
+    // If the user has nothing in their basket, they should not
+    // be on this page and will be redirected home
+    useEffect(redirectIfEmptyBasket, []) 
 
     return (<><Header/><div className="content checkout-content">
         {preparing ? <Loading/> : <></>}
         
         <CheckoutProvider stripe={stripePromise} options={options}>
-            <CheckoutAux onReady={setPrepared}/>
+            <CheckoutAux onReady={()=>{setPreparing(false)}}/>
         </CheckoutProvider>
 
         </div><Footer/></>);
@@ -362,6 +364,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     }
 
     async function handleSubmit(e: FormEvent) {
+        function fail(msg: string) {
+            notify(msg + " field cannot be empty!");
+            setIsLoading(false);
+        }
         e.preventDefault()
         setIsLoading(true);
 
@@ -373,24 +379,21 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
 
         // Set Shipping/Billing Address
-        const addressElement = document.getElementById("address-input") as HTMLInputElement
-        const postcodeElement = document.getElementById("postal-code-input") as HTMLInputElement
         const nameElement = document.getElementById("name-input") as HTMLInputElement
-        if (
-            !nameElement.value ||
-            !addressElement.value ||
-            !postcodeElement.value ||
-            countryCode == "0" 
-        ) {
-            notify("Address field can't be empty!")
-            setIsLoading(false)
-            return
-        }
+        const addressElement = document.getElementById("address-input") as HTMLInputElement
+        const cityElement = document.getElementById("city-input") as HTMLInputElement
+        const postcodeElement = document.getElementById("postal-code-input") as HTMLInputElement
+        if (!nameElement.value) {fail("Name"); return;}
+        if (!addressElement.value) {fail("Address"); return;}
+        if (!cityElement.value) {fail("City"); return;}
+        if (!postcodeElement.value) {fail("Postcode"); return;}
+
         const address: StripeCheckoutContact = {
             name: nameElement.value,
             address: {
                 country: countryCode,
                 line1: addressElement.value,
+                city: cityElement.value,
                 postal_code: postcodeElement.value
             }
         }
@@ -425,12 +428,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-
     const formRef = useRef<HTMLFormElement>(null);
     
     useEffect(() => {updateShippingOption(shipping_options[0].shipping_rate)}, [])
 
-    useEffect(redirectIfEmptyBasket, [])
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" onSubmit={handleSubmit} ref={formRef}>
@@ -440,6 +441,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     error={emailError} setError={setEmailError}
                 /><br/><br/>
                 <label>Address<br/></label><input id="address-input" type="text" autoComplete="street-address"/><br/><br/>
+                <label>City<br/></label><input id="city-input" type="text" autoComplete="address-level2"/><br/><br/>
                 <label>Postcode / ZIP Code<br/></label><input id="postal-code-input" type="text"/><br/><br/>
                 <CountrySelect/><br/><br/>
                 <label>Payment</label>
@@ -481,7 +483,6 @@ function redirectIfEmptyBasket() {
 
     if (!basketString || basketString == "{\"basket\":[]}") {
         window.location.href = "/"
-        console.log("Test?")
     }
 }
 
