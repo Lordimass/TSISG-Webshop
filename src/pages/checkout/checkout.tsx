@@ -19,6 +19,7 @@ import { CheckoutProducts } from "../../assets/components/products";
 import { notify } from "../../assets/components/notification";
 import { eu, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
+import { basket } from "../../assets/components/product";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 var stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -363,6 +364,63 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             )
     }
 
+    /**
+     * Checks whether all of the items in the basket are still in stock
+     * @returns <code>true</code> if stock is OK, <code>false</code> if it is not.
+     */
+    async function checkStock() {
+        // Can assume basket string exists given context
+        const basket: basket = JSON
+            .parse(localStorage.getItem("basket") as string)
+            .basket
+        
+        const response = await fetch("/.netlify/functions/checkStock", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(basket.map((prod) => {return {
+                sku: prod.sku,
+                basketQuantity: prod.basketQuantity,
+                name: prod.name
+            }}))
+        })
+        const body = await new Response(response.body).text()
+
+        if (!response.ok) {
+            console.error(body)
+            setError(<p className="checkout-error">{body}</p>)
+            return false
+        } else {
+            // If there were no discrepencies
+            if (response.status == 204) {
+                setError(<p></p>)
+                return true
+            }
+            const discrepencies: {
+                sku: number, 
+                name: string,
+                stock: number,
+                basketQuantity: number,
+            }[] = JSON.parse(body)
+
+            const err = <><p className="checkout-error">
+                <i>Too slow!</i><br/>Part of your order is now out of stock, head
+                back to the <a style={{color: "white"}} href="/">home page</a> to
+                change your order, then come back:<br/><br/></p>
+                {
+                    discrepencies.map((discrep) => <p 
+                    className="checkout-error" 
+                    key={discrep.sku}>
+                    We have {discrep.stock} "{discrep.name}" left, you
+                    tried to order {discrep.basketQuantity}
+                    </p>)
+                }
+                </>
+            
+            setError(err)
+            return false
+        }
+    }
+
     async function handleSubmit(e: FormEvent) {
         function fail(msg: string) {
             notify(msg + " field cannot be empty!");
@@ -408,6 +466,12 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             setIsLoading(false);
             return;
         }
+
+        // Check that products are still in stock.
+        if (!await checkStock()) {
+            setIsLoading(false);
+            return
+        }
         
         console.log("Attempting to check out...")
         const error: any = await checkout.confirm();
@@ -427,6 +491,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [countryCode, setCountryCode] = useState("0")
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState(null);
+    const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     
@@ -466,6 +531,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 )}
                 </span>
             </button>
+            {error}
         </div>
     </>)
 }

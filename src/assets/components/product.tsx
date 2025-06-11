@@ -24,6 +24,8 @@ export type productInBasket = {
   images: image[]
 }
 
+export type basket = productInBasket[]
+
 type checkoutProductParams = {
   image: string
   name: string
