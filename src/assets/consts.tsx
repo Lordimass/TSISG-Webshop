@@ -10,7 +10,6 @@ export const refund_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/
 export const user_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/user.png";
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
-console.log(shipping_options)
 
 // Region definitions for the purpose of shipping
 export const uk = ["GB", "GG", "JE", "IM"]

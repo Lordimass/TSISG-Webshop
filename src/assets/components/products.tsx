@@ -53,7 +53,6 @@ export default function Products() {
 
     // Create product elements if there are any products to display
     if (activeProductData.length>0) {
-        console.log(activeProductData)
         var start: number = (page-1)*productLoadChunks
         var end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
