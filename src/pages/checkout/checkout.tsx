@@ -11,7 +11,7 @@ import {
     PaymentElement,
     useCheckout
 } from '@stripe/react-stripe-js';
-
+import {Stripe as StripeNS} from "stripe";
 import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
@@ -22,7 +22,7 @@ import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
-var stripePromise: Promise<Stripe | null> = new Promise(()=>{});
+let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
 if (STRIPE_KEY) {
     stripePromise = loadStripe(STRIPE_KEY)
 }
@@ -429,6 +429,12 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         e.preventDefault()
         setIsLoading(true);
 
+        // Check that the session is still active
+        if (!await checkSessionStatus()) {
+            setIsLoading(false);
+            return
+        }
+
         // Check that everything is ready
         if (!checkout || typeof checkout.updateShippingAddress !== "function") {
             console.warn("Checkout not ready or updateShippingAddress not yet available")
@@ -469,7 +475,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
         // Check that products are still in stock.
         if (!await checkStock()) {
-            setIsLoading(false);
             return
         }
         
@@ -483,6 +488,34 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     function remoteTriggerFormSubmit() {
         formRef.current?.requestSubmit();
+    }
+
+    /**
+     * Checks if the session is still active, since they expire after a set time,
+     * if it's not warn the user that they should reload the page
+     * @returns <code>false</code> if the session is expired, 
+     * <code>true</code> if it is not
+     */
+    async function checkSessionStatus() {
+        const response = await fetch("/.netlify/functions/getCheckoutSession", {
+            method: "POST",
+            body: checkout.id
+        })
+        const body = await new Response(response.body).text()
+        if (!response.ok) {
+            console.error(body)
+            setError(<p className="checkout-error">{body}</p>)
+        }
+        const session: StripeNS.Checkout.Session = JSON.parse(body)
+        if (session.status != "open") {
+            setError(<p className="checkout-error">
+                This session has expired! Reload the page to fix it
+            </p>)
+            return false;
+        } else {
+            setError(<p></p>)
+            return true;
+        }
     }
 
     const checkout = useCheckout();

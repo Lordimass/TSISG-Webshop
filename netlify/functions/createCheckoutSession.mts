@@ -11,7 +11,6 @@ if (process.env.STRIPE_SECRET_KEY) {
 } else {
     console.error("STRIPE_SECRET_KEY does not exist!")
 }
-console.log(process.env.STRIPE_SECRET_KEY)
 
 const app = express();
 app.use(express.static('public'));
