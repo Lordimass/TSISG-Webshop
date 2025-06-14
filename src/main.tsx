@@ -15,6 +15,10 @@ import Staff from './pages/staff/staff';
 import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
 
+// For development environment, run `netlify dev` in the root directory of the project
+// Also run the following when developing anything to do with the checkout process 
+//    stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
+
 function App() {
   const pathname: string = window.location.pathname
   ReactGA.initialize("G-2RVF60NMM5")
