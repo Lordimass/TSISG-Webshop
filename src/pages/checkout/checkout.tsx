@@ -102,6 +102,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         <label>Country</label><br/>
         <select name="country" className="form-control" id="country-select" onChange={updateCountry} defaultValue={countryCode}>
                 <option value="0" label="Select a country ... ">Select a country ... </option>
+                {/* UK Only Shipping for now
                 <optgroup id="country-optgroup-Africa" label="Africa">
                     <option value="DZ" label="Algeria">Algeria</option>
                     <option value="AO" label="Angola">Angola</option>
@@ -319,7 +320,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     <option value="SE" label="Sweden">Sweden</option>
                     <option value="CH" label="Switzerland">Switzerland</option>
                     <option value="UA" label="Ukraine">Ukraine</option>
+                    */}
                     <option value="GB" label="United Kingdom">United Kingdom</option>
+                    {/*
                     <option value="VA" label="Vatican City">Vatican City</option>
                     <option value="AX" label="Åland Islands">Åland Islands</option>
                 </optgroup>
@@ -359,9 +362,13 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     <option value="VU" label="Vanuatu">Vanuatu</option>
                     <option value="WF" label="Wallis and Futuna">Wallis and Futuna</option>
                 </optgroup>
-            </select>
-            </>
-            )
+                */}
+        </select>
+        <p className="msg">
+            Shipping is currently limited to the United Kingdom. 
+            International shipping will be coming soon!
+        </p>
+        </>)
     }
 
     /**

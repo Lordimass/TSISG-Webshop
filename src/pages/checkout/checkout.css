@@ -47,13 +47,13 @@
         -0.5em 0em 2em rgba(0,0,0,0.3);
 }
 
-.checkout-right .msg {
+.checkout-right .msg, #payment-form .msg {
     margin-top: 0.5em;
     font-size: smaller;
     color: var(--jamie-grey);
 }
 
-.checkout-right .msg a {
+.checkout-right .msg a, #payment-form .msg a {
     color: var(--jamie-grey);
 }
 
