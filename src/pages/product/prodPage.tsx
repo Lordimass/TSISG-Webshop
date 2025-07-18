@@ -52,6 +52,7 @@ export default function ProdPage() {
             </h2>
             <div className="desc">
                 <Markdown>{product.description}</Markdown>
+                {/*<pre>{JSON.stringify(product, null, 2)}</pre> DEBUG LINE*/} 
             </div>
             <div className="spacer"/>
             <QuantityTicker/>

@@ -1,6 +1,13 @@
 import { Context } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Lightweight definition without most of the content
+// because its only necessary for modified properties
+type product = {
+    fetched_at? : string,
+    tags: any,
+}
+
 /**
  * Fetches a single product's associated Supabase data, given a sku
 */
@@ -25,17 +32,23 @@ export default async function handler(request: Request, _context: Context) {
         .from('products')
         .select(`
         *,
-        images:product-images(*),
-        category:product-categories(*)
+        images:product_images(*),
+        category:product_categories(*),
+        tags:product_tags(tags(*))
         `)
         .eq("sku", sku);
     if (error) {
         console.error(error.message)
         return new Response(JSON.stringify(error.message), { status: 500 });
     } else {
-        const product: {fetched_at? : string} = data[0] as unknown as {fetched_at? : string}
+        // Add time the data was fetched at, useful for debugging
+        let product: product = data[0] as unknown as product
         product.fetched_at = new Date().toISOString()
-        return new Response(JSON.stringify(data[0]), {
+
+        // Flatten the tags array
+        product = {...product, tags: product.tags.map(pt => pt.tags)}
+
+        return new Response(JSON.stringify(product), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
         });
