@@ -2,6 +2,7 @@ export const basket_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/
 export const info_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//information.png";
 export const show_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//show.webp";
 export const hide_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//hide.webp";
+export const back_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//back.webp"
 
 export const analytics_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/analytics.png";
 export const order_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/order.png";
@@ -10,6 +11,9 @@ export const refund_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/
 export const user_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/user.png";
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
+
+// The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
+export const max_product_order = 10
 
 // Region definitions for the purpose of shipping
 export const uk = ["GB", "GG", "JE", "IM"]

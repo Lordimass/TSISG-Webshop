@@ -373,7 +373,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     /**
      * Checks whether all of the items in the basket are still in stock
-     * @returns <code>true</code> if stock is OK, <code>false</code> if it is not.
+     * @returns true if stock is OK, false if it is not.
      */
     async function checkStock() {
         // Can assume basket string exists given context

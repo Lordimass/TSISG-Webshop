@@ -6,21 +6,40 @@ import { CheckoutProduct } from "./product"
 import { productInBasket, image } from "./product";
 
 import "../css/products.css"
-import { getProductList } from "../utils";
+import { useGetProductList } from "../utils";
 
-type product = {
+export type product = {
+  /** Unique identification number, arbitrary length */
   sku: number,
-  price: number,
+  /** Time at which the product was added to the database as an ISO date string */
+  inserted_at: string,
+  /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was valid */
+  fetched_at: string,
+  /** Customer facing name of the product */
   name: string,
+  /** Price of product in GBP inc. Tax */
+  price: number,
+  /** How many of the product are available to buy, accurate at fetched_at */
   stock: number,
-  active: boolean
-  category_id: number
-  sort_order: number
-  images: {
+  /** Whether or not the product is currently able to be added to baskets. Does <i>not</i> stop the product from being bought if it's already in the basket */
+  active: boolean,
+  /** Weight of one of this product in grams */
+  weight?: number, 
+  customs_description?: string,
+  origin_country_code?: string,
+  sort_order: number,
+  package_type_override?: string,
+  images: image[],
+  /** The ID of the category that this product is placed in <br/> DEPRECATED: Please use category.id */
+  category_id: number,
+  category: {
     id: number,
-    image_url: string,
-    display_order: number
-  }[]
+    created_at: string,
+    name: string,
+    description?: string
+  }
+  description?: string
+
 }
 
 const productLoadChunks: number = 20;
@@ -35,12 +54,15 @@ export default function Products() {
     }
 
     const [page, setPage] = useState(1)
-    const productData: Array<product> = getProductList();
+    const productData: Array<product> = useGetProductList();
+    if (!productData) { // List not loaded yet
+      return <></>
+    }
     var products: Array<React.JSX.Element> = [];
     let pageCount = 0;
 
     // Deactivate products with no images,
-    // Products with active=false or stock=0 are excluded from the query.
+    // Products with active=false or stock=0 are excluded from the query already.
     const activeProductData: Array<product> = []
     for (let i=0; i<productData.length; i++) {
         const product = productData[i]
@@ -68,11 +90,7 @@ export default function Products() {
           }
           products.push(<Product
               key={product.sku}
-              sku={product.sku}
-              name={product.name}
-              price={product.price}
-              images={product.images}
-              stock={product.stock}
+              product={product}
           />)
         }
         

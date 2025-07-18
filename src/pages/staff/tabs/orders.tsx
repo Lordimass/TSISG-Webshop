@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { daysOfWeek, monthsOfYear } from "../../../assets/consts"
-import { getOrderList } from "../../../assets/utils"
+import { useGetOrderList } from "../../../assets/utils"
 
 import "../css/orders.css"
 import { CheckoutProduct } from "../../../assets/components/product";
@@ -28,10 +28,10 @@ type order = {
 }
 
 export function OrderManager() {
-    const orders: order[] = getOrderList()
-    orders.sort(compareOrders)
+    const orders: order[] = useGetOrderList()
 
     if (orders) {
+        orders.sort(compareOrders)
         return (orders.map((order: any) => <Order key={order.id} order={order}/>))
     } else {
         return <></>

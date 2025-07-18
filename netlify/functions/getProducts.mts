@@ -8,7 +8,7 @@ export default async function handler(_request: Request, _context: Context) {
 
   // Validate that they were both successfully fetched.
   if (!supabaseUrl || !supabaseKey) {
-    return new Response("Supabase credentials not set", { status: 500 });
+    return new Response("Supabase credentials not set", { status: 401 });
   }
 
   const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
@@ -18,18 +18,9 @@ export default async function handler(_request: Request, _context: Context) {
     const { data, error } = await supabase
       .from('products')
       .select(`
-        sku,
-        price,
-        name,
-        stock,
-        active,
-        category_id,
-        sort_order,
-        images:product-images(
-          id,
-          image_url,
-          display_order
-        )
+        *,
+        images:product-images(*),
+        category:product-categories(*)
       `)
       .eq("active", true)
       .gt("stock", 0)
@@ -38,16 +29,18 @@ export default async function handler(_request: Request, _context: Context) {
     if (error) {
       return new Response(JSON.stringify(error.message), { status: 500 });
     } else {
+      const products: {fetched_at?: string}[] = data as unknown as {fetched_at?: string}[]
+      for (let i=0; i<products.length; i++) {
+        const product = products[i]
+        product.fetched_at = new Date().toISOString()
+      }
       return new Response(JSON.stringify(data), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     }
   } catch (err: any) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: err.message }),
-    };
+    return new Response(err.message, {status: 500});
   }
 };
 

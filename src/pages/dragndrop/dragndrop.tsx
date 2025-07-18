@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getLoggedIn, getNoImageProds, getUser } from "../../assets/utils";
+import { getLoggedIn, useGetNoImageProds, getUser } from "../../assets/utils";
 import "./dragndrop.css"
 import { supabase } from "../home/home";
 
@@ -9,7 +9,10 @@ type noImageProd = {
 }
 
 export default function DragNDrop() {
-    const prods: noImageProd[] = getNoImageProds()
+    const prods: noImageProd[] = useGetNoImageProds()
+    if (!prods) { // Prods still loading
+        return <></>
+    }
 
     return (<div>
         <p>{prods.length} Remaining on Last Reload</p>

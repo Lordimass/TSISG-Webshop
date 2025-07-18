@@ -14,6 +14,7 @@ import LoginPage from './pages/login/login';
 import Staff from './pages/staff/staff';
 import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
+import ProdPage from './pages/product/prodPage';
 
 // For development environment, run `netlify dev` in the root directory of the project
 // Also run the following when developing anything to do with the checkout process 
@@ -27,6 +28,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
+
+        <Route path="products/*" element={<ProdPage/>} />
   
         <Route path="checkout" element={<Checkout/>} />
   

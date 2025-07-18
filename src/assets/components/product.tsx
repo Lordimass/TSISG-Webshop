@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 
 import "../css/product.css"
+import { setBasketStringQuantity } from '../utils';
+import { product } from './products';
+import { basket_icon, max_product_order } from '../consts';
 
 type prodProps = {
   sku: number,
@@ -12,7 +15,10 @@ type prodProps = {
 
 export type image = {
   id: number,
+  alt?: string,
   image_url: string,
+  inserted_at: string,
+  product_sku: number,
   display_order: number
 }
 
@@ -34,13 +40,25 @@ type checkoutProductParams = {
   sku?: number
 }
 
-export default function Product({ sku, name, price, images, stock }: prodProps) {
+/**
+ * I apologise sincerely for the following code.
+ */
+export default function Product({ product }: {product: product}) {
+  // Redefining variables after changing parameter to accept
+  // full product instead of just select information. Done to
+  // avoid refactoring the whole component to use product.???
+  const sku = product.sku;
+  const name = product.name;
+  const price = product.price;
+  const images = product.images;
+  let stock = product.stock;
+
   if (stock < 0) {stock = 0}
 
   function BasketModifier0Quant() { // Simple Add To Basket Button
     return (
       <div className="basket-button" onClick={increment}>
-        <img className="basket-icon" src="https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//shopping-basket.svg"></img>
+        <img className="basket-icon" src={basket_icon}></img>
         <h1>+</h1>
       </div>
     )
@@ -69,14 +87,14 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
     if (quantity >= max_order) {
       return
     }
-    setQuantity(quantity+1)
+    setBasketStringQuantity(quantity+1)
     setShowModifer(true)
     updateQuantityDisplay()
   }
 
   function decrement() {
     if (quantity > 0) {
-      setQuantity(quantity-1)
+      setBasketStringQuantity(quantity-1)
     }
 
     if (quantity <= 1) {
@@ -108,30 +126,29 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
     const value: number = parseInt(basketInput.value)
 
     // Check input valid
-    if (Number.isNaN(value)) {
-      console.log("Invalid input, resetting to " + quantity)
+    if (Number.isNaN(+value)) {
       basketInput.value = quantity as unknown as string
       return
     }
     // Check number in range
-    if (value > max_order) {
+    if (+value > max_order) {
       basketInput.value = max_order as unknown as string
-      setQuantity(max_order)
+      setBasketStringQuantity(max_order)
       return
-    } else if (value <= 0) {
+    } else if (+value <= 0) {
       basketInput.value = 0 as unknown as string
-      setQuantity(0)
+      setBasketStringQuantity(0)
       setShowModifer(false)
       return
     }
-    basketInput.value = value as unknown as string
+    basketInput.value = +value as unknown as string
     
     
     // Actually change the variable value
-    setQuantity(value)
+    setBasketStringQuantity(+value)
   }
 
-  function setQuantity(quant: number) {
+  function setBasketStringQuantity(quant: number) {
     // Function needs to update the localStorage basket for persistence,
     // it will also then update the actual quantity state for this product.
 
@@ -220,10 +237,17 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
       setQuantityButActually(0)
     }
   }
+
+  /**
+   * Redirect user to the dedicated page for this product, also adds
+   */
+  function redirectToDedicatedPage() {
+    window.location.href = "/products/"+sku;
+  }
   
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-  const max_order = Math.min(10, stock); // Maximum possible product order
+  const max_order = Math.min(max_product_order, stock); // Maximum possible product order
 
   window.addEventListener("basketUpdate", resetInputToBasket)
 
@@ -236,10 +260,11 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
   // Check if item already in basket
   useEffect(() => {resetInputToBasket()}, [])
 
-
   return (
     <div className="product" id={"product-" + sku}>
+      {/* Product Image + Link to dedicated product page*/}
       <div
+        onClick={redirectToDedicatedPage}
         className="product-image-container"
         style={{
           backgroundImage: "url(" + imageURL + ")",
@@ -250,9 +275,13 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
         <div className="bg-blurrer"></div>
       </div>
 
+      {/* Bottom half of the product display */}
       <div className="prod-footer">
         <div className="product-text">
-          <p className="product-name">{name}</p>
+          {/* Product Name + Link to dedicated product page */}
+          <p className="product-name" onClick={redirectToDedicatedPage}>
+            {name}
+          </p>
           <p className="product-price">{string_price}</p>
         </div>
 
@@ -274,59 +303,15 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
     if (quantity >= max_order) {
       return
     }
-    setQuantity(quantity+1)
+    setBasketStringQuantity(quantity+1, sku, images, price, name)
+    setQuantityButActually(quantity+1)
   }
 
   function decrement() {
     if (quantity > 0) {
-      setQuantity(quantity-1)
+      setBasketStringQuantity(quantity-1, sku, images, price, name)
+      setQuantityButActually(quantity-1)
     }
-  }
-
-  function setQuantity(quant: number) {
-    // Function needs to update the localStorage basket for persistence,
-    // it will also then update the actual quantity state for this product.
-
-    // Fetch the current basket contents
-    var basketString: string | null = localStorage.getItem("basket")
-    if (!basketString) { // Create basket if it doesn't exist
-      basketString = "{\"basket\": []}"
-    }
-    var basket: Array<productInBasket> = JSON.parse(basketString).basket;
-
-    // Find product and set quantity
-    var found: boolean = false
-    for (let i = 0; i<basket.length; i++) {
-      var item: productInBasket = basket[i]
-      if (item.sku == sku) {
-        found = true
-        // Just remove it from the basket if 0
-        if (quant == 0) {
-          basket.splice(i, 1)
-          break
-        }
-        item.basketQuantity = quant
-        break
-      }
-    }
-    // If it wasn't found, create it
-    if (!found) {
-      basket.push({
-        "sku": sku,
-        "name": name,
-        "price": price,
-        "basketQuantity": quant,
-        "images": images
-      })
-    }
-
-    // Save to localStorage
-    localStorage.setItem("basket",
-      JSON.stringify({"basket": basket})
-    )
-
-    window.dispatchEvent(new CustomEvent("basketUpdate"))
-    setQuantityButActually(quant)
   }
 
   function updateQuantity() {
@@ -351,18 +336,21 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
     }
     // Check number in range
     if (value > max_order) {
-      setQuantity(max_order)
+      setBasketStringQuantity(max_order, sku, images, price, name)
+      setQuantityButActually(max_order)
       return
     } else if (value <= 0) {
-      setQuantity(0)
+      setBasketStringQuantity(0, sku, images, price, name)
+      setQuantityButActually(0)
       return
     }
     
     // Actually change the variable value
-    setQuantity(value)
+    setBasketStringQuantity(value, sku, images, price, name)
+    setQuantityButActually(value)
   }
   
-  function resetInputToBasket() {
+  function syncWithBasket() {
     // Resets the value in the HTMLInput to the value from the basket
     // Called whenever the basket gets updated from a different source
     var basketString: string | null = localStorage.getItem("basket");
@@ -378,6 +366,7 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
           }
           const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
           basketInput.value = item.basketQuantity as unknown as string
+          return
         }
       }
     }
@@ -387,9 +376,9 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
   var imageURL: string | undefined = getFirstImage(images);
   var string_price: string = "£" + price.toFixed(2);
   var max_order: number = 10;
-  window.addEventListener("basketUpdate", resetInputToBasket)
+  window.addEventListener("basketUpdate", syncWithBasket)
 
-  useEffect(() => {resetInputToBasket()}, [])
+  useEffect(() => {syncWithBasket()}, [])
 
 
   return (
@@ -484,4 +473,3 @@ function compareImages(a: image, b: image): number {
   }
   return 0;
 }
-
