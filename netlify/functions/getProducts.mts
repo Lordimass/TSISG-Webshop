@@ -19,8 +19,9 @@ export default async function handler(_request: Request, _context: Context) {
       .from('products')
       .select(`
         *,
-        images:product-images(*),
-        category:product-categories(*)
+        images:product_images(*),
+        category:product_categories(*),
+        tags:product_tags(tags(*))
       `)
       .eq("active", true)
       .gt("stock", 0)

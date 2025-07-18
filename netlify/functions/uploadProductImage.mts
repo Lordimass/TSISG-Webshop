@@ -61,7 +61,7 @@ export async function handler(event: HandlerEvent) {
 
     // Upload File to Supabase
     const { data, error } = await supabase.storage
-        .from("product-images")
+        .from("product_images")
         .upload(fileName, compressedBuffer, {
             contentType: "image/webp",
         })
@@ -74,11 +74,11 @@ export async function handler(event: HandlerEvent) {
     }
 
     // Then fetch its URL
-    const publicURL = supabase.storage.from("product-images").getPublicUrl(fileName).data.publicUrl
+    const publicURL = supabase.storage.from("product_images").getPublicUrl(fileName).data.publicUrl
 
     // Assign image to product
     const response = await supabase
-        .from("product-images")
+        .from("product_images")
         .insert({
             image_url: publicURL,
             product_sku: fields.sku[0] as unknown as number
