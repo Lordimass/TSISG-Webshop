@@ -1,5 +1,5 @@
 // Creates an order record on the Supabase Database, 
-// including order-products records and an orders record.
+// including order_products records and an orders record.
 
 // TODO: Secure this somehow with a unique authorisation key so that the format
 // cannot be reverse-engineered to create orders at will. Possibly able to do
@@ -76,7 +76,7 @@ type metaOrderProduct = { // From compressed metadata
     totalValue: number
 }
 
-type orderProdRecord = { // For order-products table
+type orderProdRecord = { // For order_products table
     order_id?: string
     product_sku: number,
     quantity: number,
@@ -139,7 +139,7 @@ export default async function handler(request: Request, _context: Context) {
     const orderProducts: Array<metaOrderProduct> = decodeMeta(dataObj.metadata as metaBasket)
     console.log(orderProducts)
 
-    // Save the order-product record for each product
+    // Save the order_product record for each product
     await saveOrderProducts(orderProducts, orderID, supabase)
 
     // Update stock
@@ -240,7 +240,7 @@ async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID
 
     // Save to Supabase
     const {error} = await supabase
-        .from("order-products")
+        .from("order_products")
         .insert(orderProdRecords)
     if (error) {
         console.error(error.code + ": " + error.message)

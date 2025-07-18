@@ -30,7 +30,7 @@ export default async function handler(_request: Request, _context: Context) {
         .select(`
         sku,
         name,
-        images:product-images(
+        images:product_images(
             id,
             image_url,
             display_order

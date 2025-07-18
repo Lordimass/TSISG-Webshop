@@ -39,7 +39,7 @@ export default async function handler(request: Request, _context: Context) {
     // Attempt to fetch Supabase data
     var supabaseData;
     try {
-    const { data, error } = await supabase.from("orders-compressed").select("*").eq("id", body.stripeSessionId)
+    const { data, error } = await supabase.from("orders_compressed").select("*").eq("id", body.stripeSessionId)
 
     if (error) {
         return new Response(JSON.stringify(error.message), { status: 500 });

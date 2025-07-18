@@ -18,18 +18,10 @@ export default async function handler(_request: Request, _context: Context) {
     const { data, error } = await supabase
       .from('products')
       .select(`
-        sku,
-        price,
-        name,
-        stock,
-        active,
-        category_id,
-        sort_order,
-        images:product-images(
-          id,
-          image_url,
-          display_order
-        )
+        *,
+        images:product_images(*),
+        category:product_categories(*),
+        tags:product_tags(tags(*))
       `)
       .eq("active", true)
       .gt("stock", 0)
