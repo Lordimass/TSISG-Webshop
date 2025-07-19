@@ -28,6 +28,7 @@ export default async function handler(_request: Request, _context: Context) {
       ;
 
     if (error) {
+      console.error(error.message)
       return new Response(JSON.stringify(error.message), { status: 500 });
     } else {
       return new Response(JSON.stringify(data), {
@@ -36,10 +37,8 @@ export default async function handler(_request: Request, _context: Context) {
       });
     }
   } catch (err: any) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: err.message }),
-    };
+    console.error(err.message)
+    return new Response(JSON.stringify(err.message), {status: 500})
   }
 };
 
