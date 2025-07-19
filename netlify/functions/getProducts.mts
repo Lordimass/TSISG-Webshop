@@ -28,6 +28,7 @@ export default async function handler(_request: Request, _context: Context) {
       ;
 
     if (error) {
+      console.error(error.message)
       return new Response(JSON.stringify(error.message), { status: 500 });
     } else {
       const products: {fetched_at?: string}[] = data as unknown as {fetched_at?: string}[]
@@ -41,7 +42,8 @@ export default async function handler(_request: Request, _context: Context) {
       });
     }
   } catch (err: any) {
-    return new Response(err.message, {status: 500});
+    console.error(err.message)
+    return new Response(JSON.stringify(err.message), {status: 500})
   }
 };
 
