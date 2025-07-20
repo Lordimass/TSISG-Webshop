@@ -18,6 +18,24 @@ export async function getUser() {
     return response.data.user
 }
 
+export async function getJWTToken() {
+  // Get Access Token
+  const {data: { session }, error: sessionError} = await supabase.auth.getSession();
+  if (sessionError || !session?.access_token) {
+    // Not Logged In
+    return;
+  }
+
+  // Confirm its still valid
+  {const {data: {user}, error: sessionError} = await supabase.auth.getUser()
+  if (sessionError || !user) {
+    // Invalid Session
+    return
+  }}
+
+  return session.access_token
+}
+
 // The following hooks are used for calling Netlify Functions
 function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boolean, data?: any, error?: any} {
   const [data, setData] = useState(null)
@@ -64,6 +82,42 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
     loading: loading,
     data: data,
     error: error
+  }
+}
+
+export async function fetchFromNetlifyFunction(func: string, body?: string): Promise<{data?: any, error?: any}> {
+  let [dat, err] = [undefined, undefined]
+  const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
+
+  try {
+    // Standard case where no body supplied
+    if (!body) {
+      await fetch(endpoint)
+      .then((response) => response.json())
+      .then((data) => {
+        dat = data
+      })
+      
+    // Alternative POST case
+    } else {
+      await fetch(endpoint, {
+        method: "POST",
+        body: body
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        dat = data
+      })
+    }
+
+  } catch (error: any) {
+    console.error(error)
+    err = error;
+  }
+
+  return {
+    data: dat,
+    error: err
   }
 }
 
@@ -134,4 +188,26 @@ export function setBasketStringQuantity(quant: number, sku: number, images: imag
   )
 
   window.dispatchEvent(new CustomEvent("basketUpdate"))
+}
+
+/**
+ * Checks whether a given value is able to be converted to a number
+ * @param value 
+ */
+export function isNumeric(value: string): boolean {
+  return !Number.isNaN(value);
+}
+
+/**
+ * Attempt to parse a string as JSON and return it, if it's not valid then just return the string again.
+ * Helpful for logging when you don't know what the string is but want to log it nicely.
+ * @param value String to attempt to parse
+ * @returns Either the start string or a JSON object
+ */
+export function softParseJSON(value: string): any {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
 }

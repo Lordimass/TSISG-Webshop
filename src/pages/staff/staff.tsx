@@ -4,12 +4,10 @@ import { supabase } from "../home/home";
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
 import { getUser } from "../../assets/utils";
-import { analytics_icon, order_icon, product_icon, refund_icon, user_icon } from "../../assets/consts";
+import { analytics_icon, hierarchy, order_icon, product_icon, refund_icon, user_icon } from "../../assets/consts";
 
 import "./css/staff.css"
 import { OrderManager } from "./tabs/orders";
-
-const hierarchy: string[] = ["staff", "manager", "superuser"]
 
 type tab = {
     // The name of the tab to display

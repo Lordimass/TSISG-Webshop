@@ -13,8 +13,10 @@ export type product = {
   sku: number,
   /** Time at which the product was added to the database as an ISO date string */
   inserted_at: string,
-  /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was valid */
+  /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was last confirmed valid */
   fetched_at: string,
+  /** The time which this data was last edited as an ISO date string. */
+  last_edited: string
   /** Customer facing name of the product */
   name: string,
   /** Price of product in GBP inc. Tax */
@@ -39,6 +41,11 @@ export type product = {
     description?: string
   }
   description?: string
+  tags: {
+    id: number,
+    created_at: string,
+    name: string
+  }[]
 
 }
 

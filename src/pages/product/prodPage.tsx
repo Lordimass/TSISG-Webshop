@@ -3,29 +3,46 @@ import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
 import { product } from "../../assets/components/products"
 import SquareImageBox from "../../assets/components/squareImageBox"
-import { back_icon, basket_icon, max_product_order } from "../../assets/consts"
-import { setBasketStringQuantity, useGetProduct } from "../../assets/utils"
+import { back_icon, basket_icon, blank_product, EditableProductProp, editableProductProps, max_product_order, PERMISSIONS } from "../../assets/consts"
+import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softParseJSON, useGetProduct } from "../../assets/utils"
 import "./prodPage.css"
 import { productInBasket } from "../../assets/components/product"
 import Markdown from "react-markdown"
+import { LoginContext } from "../../main"
+import { notify } from "../../assets/components/notification"
 
 const ProductContext = createContext<{
-    basketQuant: number | undefined, 
-    setBasketQuant: React.Dispatch<React.SetStateAction<number>> | undefined,
-    product: product | undefined
-}>({basketQuant: undefined, setBasketQuant: undefined, product: undefined});
+    basketQuant?: number, 
+    setBasketQuant?: React.Dispatch<React.SetStateAction<number>>,
+    setProduct?: React.Dispatch<React.SetStateAction<product>>
+    product: product
+    originalProd: product
+}>({product: blank_product, originalProd: blank_product});
+
+const EditableProductPropContext = createContext<{
+    originalProd: product
+    product: product,
+    setProduct?: React.Dispatch<React.SetStateAction<product>>
+    productProp?: EditableProductProp
+}>({product: blank_product, originalProd: blank_product})
 
 export default function ProdPage() {
+    const loginContext = useContext(LoginContext)
+
     const sku = extractSKU()
-
     const [basketQuant, setBasketQuant] = useState(0)
-    const [product, setProduct] = useState<product|null>(null);
-    const prod = useGetProduct(sku)
-    useEffect(() => {setProduct(prod)})
-
-    if (!product) {
-        return
-    }
+    const [product, setProduct] = useState<product>(blank_product);
+    // Original prod used for reset buttons in editor
+    const [originalProd, setOriginalProd] = useState<product>(blank_product);
+    const [isEditMode, setIsEditMode] = useState(false)
+    const prod = useGetProduct(sku); 
+    useEffect(() => {
+        if (prod) {
+            setProduct(prod)
+            setOriginalProd(prod)
+        }
+    }, [prod])
+    useEffect(() => setIsEditMode(loginContext.role.value > PERMISSIONS.editProducts), [loginContext])
 
     const priceSplit = product.price.toString().split(".")
     const priceMajor = priceSplit[0]
@@ -34,31 +51,175 @@ export default function ProdPage() {
         priceMinorString = "0"
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
-    
-    
-    return (<><Header/><div className="content prodPage"><ProductContext value={{
-        basketQuant, setBasketQuant, product}}>
+
+    return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
+        basketQuant, setBasketQuant, product, setProduct, originalProd}}>
         <a className="go-home-button" href="/">
             <img src={back_icon}/>
             <h1>Go Home</h1>
         </a>
+        {isEditMode ? 
+        <p className="logged-in-disclaimer">
+            You see additional information on this page because you
+            are <a href="/login">logged into</a> an account with special
+            access.
+        </p> : <></>}
         <div className="product-box">
             <div className="image"><SquareImageBox images={product.images} size="100%"/></div>
-            <h1 className="title">{product.name}</h1>
+            <h1 className="title">
+                {product.name}
+                {isEditMode ? <><br/><div className="sku">SKU{sku}</div></> : <></>}
+            </h1>
             <h2 className="price">
                 <span style={{fontSize: "0.7em"}}>£</span>
                 {priceMajor}
                 <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
             </h2>
+            <div className="tags">{product.tags.map((tag) => (
+                <div className="tag" key={tag.id}>{tag.name}</div>
+                ))}</div>
             <div className="desc">
                 <Markdown>{product.description}</Markdown>
                 {/*<pre>{JSON.stringify(product, null, 2)}</pre> DEBUG LINE*/} 
             </div>
-            <div className="spacer"/>
             <QuantityTicker/>
         </div>
-    </ProductContext></div><Footer/></>)
-}  
+
+        {isEditMode ? <ProductEditor/> : <></>}
+    </ProductContext.Provider></div><Footer/></>)
+}
+
+function ProductEditor() {
+    async function fetchNewData() {
+        const response = await fetchFromNetlifyFunction("getProduct", JSON.stringify({sku: product.sku}))
+        if (!response.error && response.data && setProduct) {
+            setProduct(response.data)
+        }
+        
+    }
+
+    const {product, setProduct, originalProd} = useContext(ProductContext)
+    if (!product) {
+        return
+    }
+
+    return (<div className="product-editor">
+        <div className="product-editor-grid">
+            {editableProductProps.map((productProp) => 
+            <EditableProductPropContext.Provider 
+                value={{product, setProduct, productProp, originalProd}} 
+                key={productProp.propName}
+            >
+                <EditableProdPropBox/>
+            </EditableProductPropContext.Provider>)}
+        </div>
+        <button className="refresh-product" onClick={fetchNewData}>Refresh Data</button>
+    </div>)
+}
+
+function EditableProdPropBox() {
+    /**
+     * Updates the given product live on screen and internally within Supabase.
+     * @param key A keyof the product type as a string. The key of the value to change
+     * @param value The new value to map the key to. Automatically parsed to the right type for the given key
+     * @param constraint A boolean method which returns true if the value is valid, false if not.
+     */
+    async function updateProduct(key: keyof product, value: any, constraint: (value: string) => boolean) {
+        function assignTypedValue<K extends keyof product>( // Parse string to right type using mapped parser from productTypeMap
+            key: K,
+            val: string,
+            target: Partial<product>
+        ) {
+        const parser = productTypeMap[key];
+        if (parser) {
+            target[key] = parser(val);
+        } else { // Fallback to raw string if no parser provided
+            target[key] = val as product[K]
+        }
+        }
+
+        const valid = constraint(value)
+        if (!valid) {
+            notify(`Value for ${key} is invalid.`)
+            return
+        }
+        if (!setProduct) {return}
+
+        const newProduct: product = {...product}
+        assignTypedValue(key, value, newProduct)
+
+        // Get JWT Access Token to authorise updating database
+        const jwt = await getJWTToken(); 
+        try {
+            const res = await fetch(window.location.origin + '/.netlify/functions/updateProductData', {
+            method: 'POST',
+            headers: {Authorization: `Bearer ${jwt}`},
+            body: JSON.stringify(newProduct),
+            });
+
+            const body = softParseJSON(await res.text())
+            if (!res.ok) {
+                console.error(body)
+                notify(body.message ? body.message : body)
+                return
+            } else {
+                console.log(body)
+            }
+        } catch (err: any) {
+            console.error(err);
+            notify(err.toString())
+            return
+        }
+
+        setProduct(newProduct)
+    }
+
+    const inputBox = useRef<HTMLTextAreaElement>(null);
+    const {product, productProp, setProduct, originalProd} = useContext(EditableProductPropContext)
+
+    if (!productProp) {
+        return
+    }
+
+    // Auto-resize text field when value changes
+    useEffect(() => {
+        if (inputBox.current && productProp) {
+            const newVal = product[productProp?.propName]
+            inputBox.current.value = newVal ? newVal.toString() : ""
+            autoResizeTextarea(inputBox.current)
+        }
+    }, [product])
+
+    
+
+    return <div className="editable-prop" id={productProp.propName.toString()+"-editable-prop"}>
+        <div className="editable-prop-title">
+            {productProp.displayName}
+            {productProp.tooltip ? <span className="superscript tooltipable">[?]<span className="tooltip">{productProp.tooltip}</span></span> : <></>}
+        </div>
+        <div className="editable-prop-input-box">
+            {productProp.prefix ? <p>{productProp.prefix}</p> : <></>}
+            <textarea 
+                className="prop-editor-input"
+                id={productProp.propName.toString()+"-editor-input"}
+                defaultValue={product[productProp.propName] || product[productProp.propName] == null ? product[productProp.propName]?.toString() : "Error: Invalid Key Value"}
+                onInput={(e) => autoResizeTextarea(e.currentTarget)}
+                ref={(el) => {autoResizeTextarea(el); inputBox.current = el}}
+            />
+            {productProp.postfix ? <p>{productProp.postfix}</p> : <></>}
+        </div>
+        <div className="prop-buttons">
+            <button 
+                className="update-prop-button" 
+                onClick={() => {updateProduct(productProp.propName, inputBox.current?.value, productProp.constraint)}}
+            >Update</button>
+            <button 
+                className="reset-prop-button" 
+                onClick={() => {updateProduct(productProp.propName, originalProd[productProp.propName], () => true)}}
+            >Reset</button>
+        </div>
+    </div>
+}
 
 function QuantityTicker() {
     function increment() {
@@ -203,4 +364,50 @@ function extractSKU(): number {
     const skuString = path[path.length-1]
     // Convert to number type and return
     return skuString as unknown as number; 
+}
+
+function autoResizeTextarea(el: HTMLTextAreaElement | null) {
+  if (el) {
+    el.style.height = 'auto'; // Reset
+    el.style.height = `${el.scrollHeight + 10}px`; // Set to scroll height
+  }
+}
+
+// Mapping of keys for the product type to parsers to convert from strings to the respective type for that key
+const productTypeMap: Partial<Record<keyof product, (val: string) => any>> = {
+    name: (val) => val,
+    weight: (val) => {
+        const num = parseFloat(val);
+        if (isNaN(num) || num <= 0) {throw new Error("Invalid weight string wasn't caught by a constraint.")}
+        return num
+    },
+    sort_order: (val) => {
+        const num = parseInt(val, 10);
+        if (isNaN(num)) {throw new Error("Invalid sort_order string wasn't caught by a constraint.")}
+        return num
+    },
+    stock: (val) => {
+        const num = parseInt(val, 10);
+        if (isNaN(num)) {throw new Error("Invalid stock string wasn't caught by a constraint.")}
+        return num
+    },
+    category_id: (val) => {
+        const num = parseInt(val, 10);
+        if (isNaN(num)) {throw new Error("Invalid category_id string wasn't caught by a constraint.")}
+        return num
+    },
+    price: (val) => {
+        const num = parseFloat(val);
+        if (isNaN(num)) {throw new Error("Invalid price string wasn't caught by a constraint.")}
+        return num;
+    },
+    customs_description: (val) => val,
+    active: (val) => {
+        val = val.toLowerCase()
+        if (val === "true") return true;
+        if (val === "false") return false;
+        throw new Error("Invalid boolean wasn't caught by constraint.");
+    },
+    origin_country_code: (val) => val,
+    description: (val) => val
 }

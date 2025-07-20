@@ -1,13 +1,13 @@
 .product-box {
     display: grid; 
     grid-template-columns: 1fr 2fr; 
-    grid-template-rows: auto auto max-content auto; 
+    grid-template-rows: auto auto auto 1fr auto; 
     gap: 0 20px; 
     grid-template-areas: 
         "image title"
         "image price"
+        "image tags"
         "image desc"
-        "image spacer"
         "image ticker";
 
     margin: 1em;
@@ -15,7 +15,7 @@
     width: calc(100% - 2em);
     background-color: white;
     /* Mostly so that it doesn't disappear while testing/developing */
-    min-height: 25vh; 
+    min-height: 25vh;
     box-sizing: border-box;
 
     border-radius: 1.5em;
@@ -23,8 +23,6 @@
 
 .product-box .image { 
     grid-area: image;
-    width: 100%;
-    overflow: hidden;
 }
 
 .product-box .price {
@@ -32,7 +30,7 @@
     color: black;
     font-weight: 200;
     font-size: 2em;
-    min-width: 0
+    min-width: 0;
 }
 
 .product-box .title {
@@ -75,6 +73,10 @@
     font-size: 2em;
 }
 
+.logged-in-disclaimer {
+    margin-left: 1em;
+}
+
 .prod-page-basket-button {
     grid-area: ticker;
 }
@@ -91,11 +93,96 @@
     transform: scale(102%);
 }
 
+.tags {
+    display: flex;
+    gap: 0 3px;
+    height: min-content;
+}
+
+.tag {
+    background-color: var(--jamie-grey);
+    height: min-content;
+    padding: 5px;
+    border-radius: 10px;
+    color: white;
+    font-family: "Perfect Penmanship";
+    font-size: 0.8em;
+    user-select: none;
+}
+
+.title .sku {
+    font-size: 0.4em;
+    font-weight: 600;
+    line-height: 0.4em;
+    margin-bottom: 1em;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.product-editor {
+    margin: 1em;
+    padding: 1em;
+    width: calc(100% - 2em);
+    background-color: white;
+    /* Mostly so that it doesn't disappear while testing/developing */
+    min-height: 2em; 
+    box-sizing: border-box;
+    border-radius: 1.5em;
+}
+
+.product-editor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 8px 10px;
+}
+
+.prop-editor-input {
+    width: 100%;
+    border: none;
+    box-sizing: border-box;
+    resize: none;
+    min-height: 1em;
+}
+
+.editable-prop {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    width: 100%;
+    gap: 0 0;
+    height: min-content;
+}
+
+.editable-prop-title {
+    height: min-content;
+}
+
+.editable-prop-input-box {
+    display: flex;
+    border: 1px black solid;
+    margin-left: 10px;
+}
+
+.editable-prop-input-box p {
+    user-select: none;
+}
+
+.update-prop-button {
+    height: min-content;
+}
+
+.prop-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.refresh-product {
+    margin-top: 10px;
+}
+
 @media screen and (max-width: 1100px)  {
     .product-box {
         display: flex;
         flex-direction: column; 
-        gap: 20px 0; 
+        gap: 0px 0; 
 
         margin: 10px;
         padding: 15px;
@@ -103,8 +190,13 @@
         border-radius: 10px;
     }
 
+    .product-editor-grid {
+        grid-template-columns: 1fr;
+    }
+
     .product-box .title {
         font-size: 3em;
+        margin-top: 10px;
     }
 
     .product-box .price {
@@ -115,5 +207,23 @@
         height: 4em;
         width: 100%;
         margin: 0;
+    }
+
+    .editable-prop {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        width: 100%;
+    }
+
+    .product-editor {
+        grid-template-columns: 1fr;
+    }
+
+    .editable-prop-input-box {
+        margin-left: 0;
+    }
+    
+    .prop-buttons {
+        flex-direction: row;
     }
 }

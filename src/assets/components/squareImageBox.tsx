@@ -126,7 +126,9 @@ export default function SquareImageBox({
 
   useEffect(() => {
     if (containerRef.current) {
-      const updateSize = () => setContainerWidth(containerRef.current!.offsetWidth);
+      function updateSize() {
+        setContainerWidth(containerRef.current!.offsetWidth)
+      };
       updateSize();
       window.addEventListener("resize", updateSize);
       return () => window.removeEventListener("resize", updateSize);
@@ -172,14 +174,14 @@ export default function SquareImageBox({
           style={{
             transform: `translateX(${ -index * containerWidth + dragOffset }px)`,
             transition: isDragging ? 'none' : 'transform 0.3s ease',
-            width: `${(extendedImages.length || 1) * 100}%`,
+            width: `${containerWidth * extendedImages.length}px`,
           }}
         >
           {extendedImages.map((img, i) => (
             <div 
               className="square-image-carousel-slide" 
               key={i}
-              style={{ flex: `0 0 ${100 / extendedImages.length}%` }}
+              style={{ width: `${containerWidth}px`, flex: `0 0 ${containerWidth}px` }}
             >
               <img
                 src={img.image_url}

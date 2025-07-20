@@ -131,7 +131,7 @@ export default function LoginPage() {
         const checkLoginStatus = async () => {
             console.log("Checking if user is logged in")
             const isLoggedIn = await getLoggedIn();
-            console.log(isLoggedIn)
+            console.log(isLoggedIn ? "User was already logged in" : "User is not logged in")
             setLoggedIn(isLoggedIn)
         }
         checkLoginStatus()
