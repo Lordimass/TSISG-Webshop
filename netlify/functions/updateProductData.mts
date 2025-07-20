@@ -13,7 +13,7 @@ export default async function handler(request: Request, _context: Context) {
     const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // Validate that they were both successfully fetched.
+    // Validate that they were both successfully fetched
     if (!supabaseUrl || !supabaseKey) {
         return new Response("Supabase credentials not set", { status: 500 });
     }
