@@ -42,7 +42,7 @@ export default function ProdPage() {
             setOriginalProd(prod)
         }
     }, [prod])
-    useEffect(() => setIsEditMode(loginContext.role.value > PERMISSIONS.editProducts), [loginContext])
+    useEffect(() => setIsEditMode(loginContext.role.value >= PERMISSIONS.editProducts), [loginContext])
 
     const priceSplit = product.price.toString().split(".")
     const priceMajor = priceSplit[0]

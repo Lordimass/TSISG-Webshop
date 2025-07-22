@@ -4,7 +4,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const hierarchy: string[] = ["staff", "manager", "superuser"]
 
 export default async function handler(request: Request, _context: Context) {
-    console.log("HAII")
     if (request.method !== 'POST') {
         return new Response("Method Not Allowed", {status: 405});
     }
@@ -78,7 +77,7 @@ async function authorise(request: Request, supabase: SupabaseClient) {
     }
 
     // Check if user rank is high enough.
-    if (!(hierarchy.indexOf(user.user.app_metadata.role) > 1)) {
+    if (!(hierarchy.indexOf(user.user.app_metadata.role) >= 1)) {
         return new Response("Forbidden: User not allowed", {status: 403})
     }
 
