@@ -6,7 +6,11 @@
     font-family: sans-serif;
 }
 
-.policy h1 {
+.policy p {
+    font-family: sans-serif;
+}
+
+.policy h1, .policy h2 {
     color: black;
     font-family: sans-serif;
 }
