@@ -56,3 +56,8 @@ function fetchFromNetlifyFunction(func: string):any {
   }
   return []
 }
+
+export async function fetchPolicy(name: string): Promise<string>{
+  const resp = await fetch(`https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/policies//${name}.md`)
+  return resp.text()
+}
