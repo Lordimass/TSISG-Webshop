@@ -211,3 +211,8 @@ export function softParseJSON(value: string): any {
     return value
   }
 }
+
+export async function fetchPolicy(name: string): Promise<string>{
+  const resp = await fetch(`https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/policies//${name}.md`)
+  return resp.text()
+}
