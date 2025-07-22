@@ -125,6 +125,7 @@ export const blank_product: product = {
     sku: 0,
     inserted_at: new Date().toISOString(),
     fetched_at: new Date().toISOString(),
+    last_edited: new Date().toISOString(),
     name: "...",
     price: 0,
     stock: 0,
