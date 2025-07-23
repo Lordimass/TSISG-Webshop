@@ -1,7 +1,9 @@
 import { Context } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const hierarchy: string[] = ["staff", "manager", "superuser"]
+const PERMISSIONS = {
+    price: "edit_price"
+}
 
 export default async function handler(request: Request, _context: Context) {
     if (request.method !== 'POST') {
@@ -10,20 +12,28 @@ export default async function handler(request: Request, _context: Context) {
 
     // Grab Supabase URL and Key from Netlify Env Variables.
     const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-    // Validate that they were both successfully fetched
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.split(' ')[1];
+
+    // Validate that they were all successfully fetched
     if (!supabaseUrl || !supabaseKey) {
         return new Response("Supabase credentials not set", { status: 500 });
+    } else if (!token) {
+        return new Response("Failed to extract Auth Token", {status: 403})
     }
-    let supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+
+    let supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
+        global: {headers: {Authorization: `Bearer ${token}`}}
+    });
 
     // Authorise Request
-    const AuthorisationResult = await authorise(request, supabase)
+    const AuthorisationResult = await authorise(token, supabase)
     if (!AuthorisationResult.ok) {
         return AuthorisationResult
     }
-    const token: string = await AuthorisationResult.text()
+    const [userPerms, uid]: string[] = JSON.parse(await AuthorisationResult.text())
     
     // Extract product from body
     const body: string = await request.text()
@@ -40,7 +50,7 @@ export default async function handler(request: Request, _context: Context) {
             .from("products")
             .update({
                 name: prod.name,
-                price: prod.price,
+                price: userPerms.includes(PERMISSIONS.price) ? prod.price : undefined,
                 // TODO: This is problematic, if the stock changes in the time it takes for someone to edit a product, this will overwrite the change, making stock keeping inaccurate.
                 stock: prod.stock, 
                 category_id: prod.category.id,
@@ -62,24 +72,18 @@ export default async function handler(request: Request, _context: Context) {
     }
 }
 
-async function authorise(request: Request, supabase: SupabaseClient) {
-    // Extract token from Authorization header
-    const authHeader = request.headers.get("authorization") || request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return new Response("Unauthorized: Missing token", {status: 401})
-    }
-    const token = authHeader.split(' ')[1];
-
+async function authorise(token: string, supabase: SupabaseClient) {
     // Verify JWT and get user data
     const { data: user, error } = await supabase.auth.getUser(token);
     if (error || !user) {
         return new Response("Unauthorized: Invalid token", {status: 401})
     }
 
-    // Check if user rank is high enough.
-    if (!(hierarchy.indexOf(user.user.app_metadata.role) >= 1)) {
+    // Check if user has permissions
+    const perms = user.user.app_metadata.permissions
+    if (!perms.includes("edit_products")) {
         return new Response("Forbidden: User not allowed", {status: 403})
     }
 
-    return new Response(token, {status: 200});
+    return new Response(JSON.stringify([perms, user.user.id]), {status: 200});
 };

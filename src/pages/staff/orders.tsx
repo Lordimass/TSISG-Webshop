@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
-import { daysOfWeek, monthsOfYear } from "../../../assets/consts"
-import { useGetOrderList } from "../../../assets/utils"
+import { useContext, useEffect, useState } from "react";
+import { daysOfWeek, monthsOfYear } from "../../assets/consts"
+import { useGetOrderList } from "../../assets/utils"
 
-import "../css/orders.css"
-import { CheckoutProduct } from "../../../assets/components/product";
-import Throbber from "../../../assets/components/throbber";
+import "./css/orders.css"
+import { CheckoutProduct } from "../../assets/components/product";
+import Throbber from "../../assets/components/throbber";
+import { LoginContext } from "../../main";
+import Header from "../../assets/components/header";
+import Footer from "../../assets/components/footer";
 
 const overdue_threshold: number = 7;
 
@@ -27,15 +30,21 @@ type order = {
     }[]
 }
 
-export function OrderManager() {
+export function OrderManager() { 
     const orders: order[] = useGetOrderList()
+    const loginContext = useContext(LoginContext)
+    const [accessible, setAccessible] = useState(false)
+    useEffect(() => {
+        setAccessible(loginContext.permissions.includes("manage_orders"))
+    }, [loginContext]) 
 
-    if (orders) {
-        orders.sort(compareOrders)
-        return (orders.map((order: any) => <Order key={order.id} order={order}/>))
-    } else {
-        return <></>
-    }
+    return (<><Header/><div className="content" id="order-manager-content">
+        {
+            accessible ? 
+            orders ? (orders.map((order: any) => <Order key={order.id} order={order}/>)) : <></> 
+            : <NotLoggedIn/>
+        }
+        </div><Footer/></>)
 }
 
 function Order({order}:{order:order}) {
@@ -144,6 +153,17 @@ function Order({order}:{order:order}) {
     </div></>)
 }
 
+function NotLoggedIn() {
+    return (
+        <div className="login-box">
+            <p style={{textAlign: "center"}}>
+                You're not logged in to an account with access to this page.
+                If you believe this is a mistake, first, <a href="/login">check that you're logged in</a>.
+                Failing this, contact support and we can help you out!
+            </p>
+        </div>
+    )
+}
 
 function compareOrders(a:order, b:order) {
     const dateA = new Date(a.placed_at)

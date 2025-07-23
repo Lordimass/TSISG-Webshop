@@ -8,12 +8,6 @@ export const show_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/ob
 export const hide_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//hide.webp";
 export const back_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//back.webp"
 
-export const analytics_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/analytics.png";
-export const order_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/order.png";
-export const product_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/products.png";
-export const refund_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/refund.png";
-export const user_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/staff-portal-tab-icons/user.png";
-
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
 
 /*
@@ -23,10 +17,6 @@ Each of these numbers are the minimum rank value required (inclusive) to perform
 -1 signifies a logged out user, while other rank values map to the index of the rank name in the hierarchy below.
 */
 export const hierarchy: string[] = ["staff", "manager", "superuser"]
-
-export const PERMISSIONS = {
-    editProducts: 1
-}
 
 // The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
 export const max_product_order = 10
@@ -40,7 +30,6 @@ export const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday
 export const monthsOfYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 // Editable Product Properties
-
 export type EditableProductProp = {
     propName: keyof product
     displayName: string
@@ -50,6 +39,12 @@ export type EditableProductProp = {
     prefix?: string
     /** String to display next to display name as a hint for what should go in the box */
     tooltip?: string
+    /** 
+     * The permission required to edit this prop, by default all props are editable under the
+     * edit_products permission, key allows specification of a further required permission.
+     * These values also need to be kept up to date in updateProductData to be secure.
+    */
+    permission?: string
     /** Boolean method which returns true if the value passed is a valid value for this prop, false if not. */
     constraint: (value: string) => boolean
 }
@@ -57,22 +52,31 @@ export type EditableProductProp = {
 // When updating this, don't forget to also provide a parser in prodPage.tsx to allow conversion to the right type for the prop.
 export const editableProductProps: EditableProductProp[] = [
     {
+        propName: "sku",
+        displayName: "SKU",
+        tooltip: "The ID of this product.",
+        permission: "NON-EDITABLE PROP",
+        constraint: (_value: string) => false // Never editable
+    },
+    {
+        propName: "inserted_at",
+        displayName: "Created At",
+        tooltip: "Timestamp at which this product was created",
+        permission: "NON-EDITABLE PROP",
+        constraint: (_value: string) => false // Never editable
+    },
+    {
         propName: "name",
         displayName: "Name",
         tooltip: "User facing name of the product. Max 50 characters.",
         constraint: (value: string) => typeof value == "string" && value.length <= 50
     },
     {
-        propName: "weight",
-        displayName: "Weight",
-        postfix: "grams",
-        tooltip: "The weight of a single product in grams.",
-        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
-    },
-    {
-        propName: "sort_order",
-        displayName: "Sort Order",
-        tooltip: "The order in which products are primarily sorted in, lower values appear sooner in the list.",
+        propName: "price",
+        displayName: "Price",
+        tooltip: "The price of the product in GBP",
+        postfix: "GBP",
+        permission: "edit_price",
         constraint: (value: string) => isNumeric(value)
     },
     {
@@ -88,11 +92,17 @@ export const editableProductProps: EditableProductProp[] = [
         constraint: (value: string) => isNumeric(value)
     },
     {
-        propName: "price",
-        displayName: "Price",
-        tooltip: "The price of the product in GBP",
-        postfix: "GBP",
-        constraint: (value: string) => isNumeric(value)
+        propName: "active",
+        displayName: "Active",
+        tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
+        constraint: (value: string) => value.toLowerCase() == "true" || value.toLowerCase() == "false"
+    },
+    {
+        propName: "weight",
+        displayName: "Weight",
+        postfix: "grams",
+        tooltip: "The weight of a single product in grams.",
+        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
     },
     {
         propName: "customs_description",
@@ -101,23 +111,37 @@ export const editableProductProps: EditableProductProp[] = [
         constraint: (value: string) => typeof value == "string" && value.length < 50
     },
     {
-        propName: "active",
-        displayName: "Active",
-        tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
-        constraint: (value: string) => value.toLowerCase() == "true" || value.toLowerCase() == "false"
-    },
-    {
         propName: "origin_country_code",
         displayName: "Origin Country Code",
         tooltip: "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
         constraint: (value: string) => typeof value == "string" && value.length == 3
     },
     {
+        propName: "sort_order",
+        displayName: "Sort Order",
+        tooltip: "The order in which products are primarily sorted in, lower values appear sooner in the list.",
+        constraint: (value: string) => isNumeric(value)
+    },
+    {
         propName: "description",
         displayName: "Description",
         tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
         constraint: (value: string) => typeof value == "string"
-    }
+    },
+    {
+        propName: "last_edited",
+        displayName: "Last Edited",
+        tooltip: "Timestamp at which this product was last edited",
+        permission: "NON-EDITABLE PROP",
+        constraint: (_value: string) => false // Never editable
+    },
+    {
+        propName: "last_edited_by",
+        displayName: "Last Edited By",
+        tooltip: "The ID of the last person to edit this product",
+        permission: "NON-EDITABLE PROP",
+        constraint: (_value: string) => false // Never editable
+    },
 ]
 
 // Blank product as fallback before a product is fetched

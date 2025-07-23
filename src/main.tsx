@@ -7,14 +7,14 @@ import React, { createContext, useEffect, useState } from 'react'
 import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
-import Staff from './pages/staff/staff';
 import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
 import ProdPage from './pages/product/prodPage';
-import { getLoggedIn, getUser } from './assets/utils';
+import { getUser } from './assets/utils';
 import { User } from '@supabase/supabase-js';
 import { hierarchy } from './assets/consts';
 import Policy from './pages/policies/policies';
+import { OrderManager } from './pages/staff/orders';
 
 // For development environment, run `netlify dev` in the root directory of the project
 // Also run the following when developing anything to do with the checkout process 
@@ -23,16 +23,14 @@ import Policy from './pages/policies/policies';
 export const LoginContext = createContext<{
   loggedIn: boolean
   user: User | null
-  role: role
+  permissions: string[]
 }>({
   loggedIn: false,
   user: null,
-  role: {
-    value: -1,
-    name: null
-  }
+  permissions: []
 })
 
+/** DEPRECATED: Please use permissions list instead */
 type role = {
   value: number,
   name: string | null
@@ -44,12 +42,8 @@ function App() {
     setUser(userResponse)
     setLoggedIn(!!userResponse)
     if (userResponse) {
-      const name = userResponse.app_metadata.role
-      if (name) {
-        setRole({name: name, value: hierarchy.indexOf(name)})
-      } else {
-        setRole({name: null, value: -1})
-      }
+      const permissions = userResponse.app_metadata.permissions
+      setPermissions(permissions ? permissions : [])
     }
   }
 
@@ -61,7 +55,7 @@ function App() {
   // Login Checking
   const [loggedIn, setLoggedIn] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [role, setRole] = useState<role>({value: -1, name: null})
+  const [permissions, setPermissions] = useState([])
 
   // If auth state changes, reauthorise user.
   useEffect(() => {
@@ -77,7 +71,7 @@ function App() {
   useEffect(() => {updateLoginContext()}, [])
 
   return (
-    <LoginContext.Provider value={{loggedIn, user, role}}><BrowserRouter>
+    <LoginContext.Provider value={{loggedIn, user, permissions}}><BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
 
@@ -89,7 +83,7 @@ function App() {
 
         <Route path='login' element={<LoginPage/>} />
 
-        <Route path="staff-portal" element={<Staff/>} />
+        <Route path="staff/orders" element={<OrderManager/>} />
   
         <Route path="privacy" element={<Policy file_name='privacy-policy'/>}/>
         <Route path="returns" element={<Policy file_name='returns'/>}/>

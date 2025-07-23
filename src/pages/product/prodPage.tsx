@@ -3,7 +3,7 @@ import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
 import { product } from "../../assets/components/products"
 import SquareImageBox from "../../assets/components/squareImageBox"
-import { back_icon, basket_icon, blank_product, EditableProductProp, editableProductProps, max_product_order, PERMISSIONS } from "../../assets/consts"
+import { back_icon, basket_icon, blank_product, EditableProductProp, editableProductProps, max_product_order } from "../../assets/consts"
 import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softParseJSON, useGetProduct } from "../../assets/utils"
 import "./prodPage.css"
 import { productInBasket } from "../../assets/components/product"
@@ -42,7 +42,7 @@ export default function ProdPage() {
             setOriginalProd(prod)
         }
     }, [prod])
-    useEffect(() => setIsEditMode(loginContext.role.value >= PERMISSIONS.editProducts), [loginContext])
+    useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
 
     const priceSplit = product.price.toString().split(".")
     const priceMajor = priceSplit[0]
@@ -110,14 +110,14 @@ function ProductEditor() {
                 value={{product, setProduct, productProp, originalProd}} 
                 key={productProp.propName}
             >
-                <EditableProdPropBox/>
+                <EditableProdPropBox fetchNewData={fetchNewData}/>
             </EditableProductPropContext.Provider>)}
         </div>
         <button className="refresh-product" onClick={fetchNewData}>Refresh Data</button>
     </div>)
 }
 
-function EditableProdPropBox() {
+function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     /**
      * Updates the given product live on screen and internally within Supabase.
      * @param key A keyof the product type as a string. The key of the value to change
@@ -172,14 +172,24 @@ function EditableProdPropBox() {
         }
 
         setProduct(newProduct)
+        fetchNewData()
     }
 
+    const loginContext = useContext(LoginContext)
     const inputBox = useRef<HTMLTextAreaElement>(null);
     const {product, productProp, setProduct, originalProd} = useContext(EditableProductPropContext)
+    const [editable, setEditable] = useState(false);
 
     if (!productProp) {
         return
     }
+
+    // Set edit permissions
+    useEffect(()=>{
+        productProp.permission ? 
+        setEditable(loginContext.permissions.includes(productProp.permission)) :
+        setEditable(loginContext.permissions.includes("edit_products"))
+    }, [loginContext])
 
     // Auto-resize text field when value changes
     useEffect(() => {
@@ -205,6 +215,7 @@ function EditableProdPropBox() {
                 defaultValue={product[productProp.propName] || product[productProp.propName] == null ? product[productProp.propName]?.toString() : "Error: Invalid Key Value"}
                 onInput={(e) => autoResizeTextarea(e.currentTarget)}
                 ref={(el) => {autoResizeTextarea(el); inputBox.current = el}}
+                disabled={!editable}
             />
             {productProp.postfix ? <p>{productProp.postfix}</p> : <></>}
         </div>
@@ -212,10 +223,12 @@ function EditableProdPropBox() {
             <button 
                 className="update-prop-button" 
                 onClick={() => {updateProduct(productProp.propName, inputBox.current?.value, productProp.constraint)}}
+                disabled={!editable}
             >Update</button>
             <button 
                 className="reset-prop-button" 
                 onClick={() => {updateProduct(productProp.propName, originalProd[productProp.propName], () => true)}}
+                disabled={!editable}
             >Reset</button>
         </div>
     </div>

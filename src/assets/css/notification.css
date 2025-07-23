@@ -37,6 +37,7 @@
     height: 1em;
     user-select: none;
     color: black;
+    margin: 1em 0 1em 0;
 }
 
 .notif-head img {

@@ -17,6 +17,8 @@ export type product = {
   fetched_at: string,
   /** The time which this data was last edited as an ISO date string. */
   last_edited: string
+  /** The last person to edit this product */
+  last_edited_by?: string
   /** Customer facing name of the product */
   name: string,
   /** Price of product in GBP inc. Tax */

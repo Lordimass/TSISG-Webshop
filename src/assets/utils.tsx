@@ -41,6 +41,7 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setIsLoading] = useState(true)
+  let errored = false
 
   const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
 
@@ -50,9 +51,17 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
         // Standard case where no body supplied
         if (!body) {
           await fetch(endpoint)
-          .then((response) => response.json())
+          .then((response) => {
+            errored = response.status != 200; 
+            return response.json();
+          })
           .then((data) => {
-            setData(data)
+            if (errored) {
+              console.error(data)
+              setError(data)
+            } else {
+              setData(data)
+            }
             setIsLoading(false)
           })
           
@@ -62,9 +71,17 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
             method: "POST",
             body: body
           })
-          .then((response) => response.json())
+          .then((response) => {
+            errored = response.status != 200; 
+            return response.json();
+          })
           .then((data) => {
-            setData(data)
+            if (errored) {
+              console.error(data)
+              setError(data)
+            } else {
+              setData(data)
+            }
             setIsLoading(false)
           })
         }
