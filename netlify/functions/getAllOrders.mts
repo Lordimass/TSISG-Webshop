@@ -15,7 +15,7 @@ export default async function handler(_request: Request, _context: Context) {
 
   // Attempt to fetch data
   try {
-    const { data, error } = await supabase.from("orders-compressed").select("*")
+    const { data, error } = await supabase.from("orders_compressed").select("*")
 
     if (error) {
       return new Response(JSON.stringify(error.message), { status: 500 });
