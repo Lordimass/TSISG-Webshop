@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
-import { daysOfWeek, monthsOfYear } from "../../../assets/consts"
-import { getOrderList } from "../../../assets/utils"
+import { useContext, useEffect, useState } from "react";
+import { getJWTToken, getOrderList } from "../../assets/utils";
+import { daysOfWeek, monthsOfYear } from "../../assets/consts";
+import { CheckoutProduct } from "../../assets/components/product";
+import Throbber from "../../assets/components/throbber";
 
-import "../css/orders.css"
-import { CheckoutProduct } from "../../../assets/components/product";
-import Throbber from "../../../assets/components/throbber";
+import "./css/orders.css"
+import { LoginContext } from "../../main";
+import Header from "../../assets/components/header";
+import Footer from "../../assets/components/footer";
 
 const overdue_threshold: number = 7;
 
@@ -28,14 +31,22 @@ type order = {
 }
 
 export function OrderManager() {
-    const orders: order[] = getOrderList()
-    orders.sort(compareOrders)
+    const loginContext = useContext(LoginContext)
+    const [accessible, setAccessible] = useState(false)
 
-    if (orders) {
-        return (orders.map((order: any) => <Order key={order.id} order={order}/>))
-    } else {
-        return <></>
-    }
+    useEffect(() => {
+        setAccessible(loginContext.permissions.includes("manage_orders"))
+    }, [loginContext]) 
+
+    let orders: order[] = getOrderList(getJWTToken())
+    orders.sort(compareOrders)
+    return (<><Header/><div className="content" id="order-manager-content">
+        {
+            accessible ? 
+            orders ? (orders.map((order: any) => <Order key={order.id} order={order}/>)) : <></> 
+            : <NotLoggedIn/>
+        }
+        </div><Footer/></>)
 }
 
 function Order({order}:{order:order}) {
@@ -120,14 +131,14 @@ function Order({order}:{order:order}) {
         </div>
 
         <div className="order-products">
-            {order.products.map(prod => <CheckoutProduct 
+            {order.products ? order.products.map(prod => <CheckoutProduct 
                 image={prod.image_url}
                 name={prod.product_name}
                 quantity={prod.quantity}
                 total={prod.line_value}
                 sku={prod.sku}
                 key={prod.sku}
-            />)}
+            />) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>
         
         <p id="order-fulfil-warning">Orders are only fulfilled once they have been dispatched!</p>
@@ -144,6 +155,17 @@ function Order({order}:{order:order}) {
     </div></>)
 }
 
+function NotLoggedIn() {
+    return (
+        <div className="login-box">
+            <p style={{textAlign: "center"}}>
+                You're not logged in to an account with access to this page.
+                If you believe this is a mistake, first, <a href="/login">check that you're logged in</a>.
+                Failing this, contact support and we can help you out!
+            </p>
+        </div>
+    )
+}
 
 function compareOrders(a:order, b:order) {
     const dateA = new Date(a.placed_at)
