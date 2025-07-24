@@ -20,7 +20,7 @@ app.use(express.static('public'));
 type bodyJSONParams = {
     shipping_options: Array<{shipping_rate: string}>,
     stripe_line_items: Array<Object>,
-    basket: basketItem[]
+    basket: {basket:basketItem[]}
     origin: string
 }
 
@@ -103,8 +103,9 @@ export default async function handler(request: Request, _context: Context) {
     const bodyText: string = await new Response(body).text();
     const bodyJSON: bodyJSONParams = JSON.parse(bodyText)
 
-    let basket: basketItem[] = bodyJSON.basket
+    let basket: basketItem[] = bodyJSON.basket.basket
     const compressedBasket: MetadataParam = compressBasket(basket)
+    console.log(compressedBasket)
 
     const session = await stripe.checkout.sessions.create({
         ui_mode: "custom",
