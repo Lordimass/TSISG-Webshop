@@ -499,7 +499,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     /**
      * Checks if the session is still active, since they expire after a set time,
-     * if it's not warn the user that they should reload the page
+     * if it's not, warn the user that they should reload the page
      * @returns <code>false</code> if the session is expired, 
      * <code>true</code> if it is not
      */
