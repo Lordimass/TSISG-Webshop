@@ -482,6 +482,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
         // Check that products are still in stock.
         if (!await checkStock()) {
+            setIsLoading(false)
             return
         }
         
@@ -646,7 +647,8 @@ function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSumm
 }
 
 async function fetchClientSecret(): Promise<string> {
-    var prices: Array<Object> = await fetchStripePrices()
+    let prices: Array<Object> = await fetchStripePrices()
+    let basketString = localStorage.getItem("basket")
     const result = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",
         headers: {
@@ -655,7 +657,7 @@ async function fetchClientSecret(): Promise<string> {
         body: JSON.stringify({
             shipping_options: shipping_options,
             stripe_line_items: prices,
-            basket: localStorage.getItem("basket"),
+            basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
             origin: window.location.origin
         })
     })
@@ -667,7 +669,7 @@ async function fetchClientSecret(): Promise<string> {
 }
 
 async function fetchStripePrices(): Promise<Array<Object>> {
-    const result = await fetch(".netlify/functions/getStripePrices", {
+    const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -675,11 +677,13 @@ async function fetchStripePrices(): Promise<Array<Object>> {
         body: JSON.stringify(localStorage.getItem("basket"))
     })
     .then (
-        function(value) {return value.json()},
+        async function(value) {return await value.json()},
         function(error) {console.error(error); return error}
     )
-
-    return result;
+    console.log({pricePointIDs, basket})
+    localStorage.setItem("basket", JSON.stringify({basket}))
+    
+    return pricePointIDs;
 }
 
 async function validateEmail(email: any, checkout: any) {
