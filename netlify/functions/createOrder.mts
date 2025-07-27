@@ -286,7 +286,7 @@ async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID
 
 async function updateStock(products: Array<metaOrderProduct>, supabase: SupabaseClient) {
     // Don't update stock if this order was placed in dev mode
-    if (process.env.DEV) {
+    if (process.env.ENVIRONMENT != "PRODUCTION") {
         console.log("Stock was not updated for this order since it was not from production.")
         return
     }

@@ -12,14 +12,25 @@ import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
 import Policy from './pages/policies/policies';
 
-// For development environment, run `netlify dev` in the root directory of the project
-// Also run the following when developing anything to do with the checkout process 
-//    stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
+// Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
+//  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
+//  - Automatically updates STRIPE_WEBHOOK_SECRET in .env to the fresh local development test key. 
+//  - Runs netlify dev.
+// THIS WILL TAKE A MINUTE OR SO TO FINISH LAUCHING.
+
+// Stripe CLI login expires every 90 days, run stripe login to refresh this if you receive an authentication error.
 
 function App() {
   const pathname: string = window.location.pathname
-  ReactGA.initialize("G-2RVF60NMM5")
-  ReactGA.send({hitType:"pageview", page:pathname, title:pathname})
+  const dev = import.meta.env.VITE_ENVIRONMENT == "DEVELOPMENT"
+  console.log (dev ? "In a development environment" : "")
+  ReactGA.initialize("G-2RVF60NMM5", {gaOptions: {debug_mode: dev}})
+  ReactGA.send({
+    hitType: "pageview", 
+    page: pathname, 
+    title: pathname,
+    environment: import.meta.env.VITE_ENVIRONMENT
+  })
   return (
     <BrowserRouter>
       <Routes>
