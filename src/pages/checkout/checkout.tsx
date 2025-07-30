@@ -4,7 +4,7 @@
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 
-import React, { useState, useEffect, FormEvent, useRef } from "react";
+import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
 import {
     CheckoutProvider,
@@ -16,10 +16,10 @@ import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
-import { notify } from "../../assets/components/notification";
 import { eu, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
+import { NotificationsContext, SiteSettingsContext } from "../../app";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -66,6 +66,7 @@ export default function Checkout() {
 }
 
 function CheckoutAux({onReady}: {onReady: Function}) {
+    const {notify} = useContext(NotificationsContext)
     
     async function updateCountry() {
         const country = document.getElementById("country-select")
@@ -535,8 +536,18 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const siteSettings = useContext(SiteSettingsContext)
+    const [killSwitch, setKillSwitch] = useState<boolean>(false)
+    let killSwitchMessage = null
+    if (killSwitch) {
+        killSwitchMessage = siteSettings.kill_switch.message
+    }
+    useEffect(() => {
+        setKillSwitch(siteSettings.kill_switch && siteSettings.kill_switch.enabled )
+    }, [siteSettings])
     
     useEffect(() => {updateShippingOption(shipping_options[0].shipping_rate)}, [])
+    const DEV = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
 
     return (<>
         <div className="checkout-left" id="checkout-left">
@@ -563,7 +574,8 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             <CheckoutProducts/>
             <p className="msg">To edit your basket, <a href="/">go back</a></p>
             <CheckoutTotals checkoutTotal={checkout.total}/>
-            <button type="button" disabled={isLoading} id="submit" onClick={remoteTriggerFormSubmit}>
+            <p className="msg">{killSwitchMessage}</p>
+            <button type="button" disabled={isLoading || (killSwitch && !DEV)} id="submit" onClick={remoteTriggerFormSubmit}>
                 <span id="button-text">
                 {isLoading ? (
                     <div className="spinner" id="spinner">Processing Payment...</div>

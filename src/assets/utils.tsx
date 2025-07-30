@@ -23,7 +23,7 @@ export async function getUser() {
  * @param jwt Promise of JWT Auth Token
  * @returns Data or error
  */
-function fetchFromNetlifyFunction(func: string, body?:string, jwt?: Promise<string | undefined>):any {
+export function fetchFromNetlifyFunction(func: string, body?:string, jwt?: Promise<string | undefined>):any {
   const [data, setData] = useState<any>(null)
   const [error, setError] = useState<any>(null)
   let errored = false

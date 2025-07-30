@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
 import "../css/product.css"
+import { max_product_order } from '../consts';
 
 type prodProps = {
   sku: number,
@@ -223,7 +224,7 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
   
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-  const max_order = Math.min(10, stock); // Maximum possible product order
+  const max_order = Math.min(max_product_order, stock); // Maximum possible product order
 
   window.addEventListener("basketUpdate", resetInputToBasket)
 
@@ -269,7 +270,7 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function BasketProduct({ sku, name, price, images }: prodProps) {
+export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   function increment() { // Increase quantity of this product
     if (quantity >= max_order) {
       return
@@ -386,7 +387,7 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
   const [quantity, setQuantityButActually] = useState(0);
   var imageURL: string | undefined = getFirstImage(images);
   var string_price: string = "£" + price.toFixed(2);
-  var max_order: number = 10;
+  var max_order: number = Math.min(max_product_order, stock);
   window.addEventListener("basketUpdate", resetInputToBasket)
 
   useEffect(() => {resetInputToBasket()}, [])

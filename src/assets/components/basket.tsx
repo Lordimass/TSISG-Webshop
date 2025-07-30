@@ -1,14 +1,16 @@
-import { Component, ReactElement, useEffect, useState } from "react";
+import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "../css/basket.css"
 import { BasketProduct } from "./product";
 import { basket_icon } from "../consts";
+import { NotificationsContext, SiteSettingsContext } from "../../app";
 
 type productInBasket = {
     sku: number,
     name: string,
     price: number,
     basketQuantity: number,
-    images: image[]
+    images: image[],
+    stock: number
 }
 
 type image = {
@@ -20,20 +22,12 @@ display_order: number
 export default function Basket() {
     function redirectToCheckout() {
         if (basketQuantity == 0) {
-            console.log("Dispatching")
-            window.dispatchEvent( new CustomEvent("notification", {
-                detail: {
-                    message: "You can't checkout without anything in your cart, silly!"
-                }
-            }))
+            notify("You can't checkout without anything in your cart, silly!")
             toggleBasket()
             return
         }
         window.location.href = "/checkout"
     }
-    
-    const [basketQuantity, changeBasketQuantity] = useState(0);
-    const [basketPrice, changeBasketPrice] = useState("£0.00");
 
     function updateBasketQuantity() {
         var basketQuantTemp: number = 0
@@ -93,10 +87,24 @@ export default function Basket() {
         }
     }
 
+    const siteSettings = useContext(SiteSettingsContext)
+    const {notify} = useContext(NotificationsContext)
+
+    const [basketQuantity, changeBasketQuantity] = useState(0);
+    const [basketPrice, changeBasketPrice] = useState("£0.00");
+    const [killSwitch, setKillSwitch] = useState<boolean>(false)
+    let killSwitchMessage = null
+    if (killSwitch) {
+        killSwitchMessage = siteSettings.kill_switch.message
+    }
+    useEffect(() => {
+        setKillSwitch(siteSettings.kill_switch && siteSettings.kill_switch.enabled )
+    }, [siteSettings])
+
     // Update basket quantity on first render only
     useEffect(updateBasketQuantity,[]) 
     // Listen for basket updates
-    window.addEventListener("basketUpdate", updateBasketQuantity);
+    useEffect(() => {window.addEventListener("basketUpdate", updateBasketQuantity);}, [])
 
     var basketItems: Array<ReactElement> = []
     var basket: Array<productInBasket> = []
@@ -112,6 +120,7 @@ export default function Basket() {
             name={prod.name}
             price={prod.price}
             images={prod.images}
+            stock={prod.stock}
         />)
     }
     
@@ -129,7 +138,11 @@ export default function Basket() {
                 {basketItems}
             </div>
             <p> Subtotal: {basketPrice}</p>
-            <div className="checkout" onClick={redirectToCheckout}>
+            <p style={{color: "var(--jamie-grey)"}}> {killSwitchMessage} </p>
+            <div 
+            className="checkout" 
+            onClick={killSwitch ? ()=>{} : redirectToCheckout} 
+            style={killSwitch ? {backgroundColor: "var(--jamie-grey)", cursor: "not-allowed"} : {}}>
                 <div>
                     <h1>Checkout</h1>
                     <img src={basket_icon}/>
