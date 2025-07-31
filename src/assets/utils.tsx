@@ -1,6 +1,7 @@
 import { User, UserResponse } from "@supabase/supabase-js";
 import { supabase } from "../pages/home/home";
 import { useEffect, useState } from "react";
+import { daysOfWeek, monthsOfYear } from "./consts";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();
@@ -120,4 +121,17 @@ export async function getJWTToken() {
   }}
 
   return session.access_token
+}
+
+export function dateToDateString(date: Date) {
+  return daysOfWeek[date.getDay()] +
+      " " + date.getDate() +
+      " " + monthsOfYear[date.getMonth()] + 
+      " " + date.getFullYear();
+}
+
+export function dateToTimeString(date: Date) {
+  return date.getHours().toString().padStart(2, "0") + ":" 
+  + date.getMinutes().toString().padStart(2, "0") + ":" 
+  + date.getSeconds().toString().padStart(2, "0")
 }

@@ -386,7 +386,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                     address: {
                         fullName: order.name,
                         addressLine1: order.street_address,
-                        city: order.city, // TODO: Find a solution to this
+                        city: order.city,
                         postcode: order.postal_code,
                         countryCode: order.country
                     },

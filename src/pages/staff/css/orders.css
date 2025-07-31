@@ -99,6 +99,18 @@
     font-size: smaller;
 }
 
+.delivery-cost {
+    display: flex;
+    margin-top: 1em;
+}
+
+.delivery-cost input {
+    width: 4ch;
+    font-family: "Perfect Penmanship";
+    height: 1em;
+    margin-right: 1ch;
+}
+
 
 @media screen and (max-width: 1100px) {
     .order {
