@@ -8,6 +8,15 @@ import "./thankyou.css"
 
 const order_confirmed_gif: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//order-confirmed.gif"
 
+type StripeProduct = {
+    image_url: string,
+    line_value: number,
+    product_name: string,
+    quantity: number,
+    sku: number,
+    category: {id: number, name: string} 
+}
+
 export default function ThankYou() {
     useEffect(() => {
         async function stripeWebhook(session_id: string|null) {
@@ -37,14 +46,7 @@ export default function ThankYou() {
         .then(response => {
             const stripe = response.stripe
             const supabase = response.supabase
-            const products: {
-                image_url: string,
-                line_value: number,
-                product_name: string,
-                quantity: number,
-                sku: number,
-                category: {id: number, name: string} 
-            }[] = supabase.products
+            const products: StripeProduct[] = supabase.products
 
             const amount_shipping = stripe.total_details.amount_shipping/100
             const amount_tax = stripe.total_details.amount_tax/100

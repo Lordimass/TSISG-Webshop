@@ -3,11 +3,11 @@ import Footer from "../../assets/components/footer";
 import Header from "../../assets/components/header";
 
 import "./login.css"
-import { notify } from "../../assets/components/notification";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
 import { supabase, SUPABASE_ID } from "../home/home";
 import { getLoggedIn } from "../../assets/utils";
 import { hide_icon, show_icon } from "../../assets/consts";
+import { NotificationsContext } from "../../app";
 
 export default function LoginPage() {
     function Login() {
@@ -65,6 +65,7 @@ export default function LoginPage() {
     
         const [showPass, setShowPass] = useState(false)
         const [error, setError] = useState<string | null>(null)
+        const {notify} = useContext(NotificationsContext)
     
         return (
             <div className="login-box">
@@ -80,7 +81,7 @@ export default function LoginPage() {
                         placeholder="********"/>
                     <div className="under-password">
                         <img onClick={()=>{setShowPass(!showPass)}} src={showPass ? show_icon : hide_icon}/>
-                        <p onClick={forgotNotImplemented} id="forgot-password">I forgot my password</p>
+                        <p onClick={() => {forgotNotImplemented(notify)}} id="forgot-password">I forgot my password</p>
                     </div>
                     
                     <button onClick={login} id="submit">Sign Up / Sign In</button>
@@ -142,7 +143,7 @@ export default function LoginPage() {
     </div><Footer/></>)
 }
 
-function forgotNotImplemented() {
+function forgotNotImplemented(notify: (msg: string) => void) {
     notify("This function isn't implemented yet, contact support for help!")
 }
 

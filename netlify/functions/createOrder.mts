@@ -83,7 +83,7 @@ type orderProdRecord = { // For order_products table
     value: number
 }
 
-type orderProdCompressed = { // From orders-compressed
+type orderProdCompressed = { // From orders_compressed
     sku: number,
     product_name: string,
     weight: number,
@@ -110,7 +110,19 @@ type orderRecord = {
     city: string
 }
 
+var stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2025-03-31.basil',
+      });
+} else {
+    console.error("STRIPE_SECRET_KEY does not exist!")
+}
+
 export default async function handler(request: Request, _context: Context) {
+    if (!stripe) {
+        return new Response("Stripe object didn't initialise", {status: 500})
+    }
     const body = request.body;
     const bodyText: string = await new Response(body).text();
     const bodyJSON: Stripe.CheckoutSessionCompletedEvent = JSON.parse(bodyText)
@@ -127,6 +139,30 @@ export default async function handler(request: Request, _context: Context) {
     }
 
     const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey)
+
+    // Authenticate request.
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+    if (!endpointSecret) {
+        return new Response("No Stripe endpoint secret set", {status: 401})
+    }
+    const sig = request.headers.get("stripe-signature");
+    if (!sig) {
+        return new Response("No Stripe signature received", {status: 401})
+    }
+
+    let stripeEvent: Stripe.Event
+    try {
+        stripeEvent = stripe.webhooks.constructEvent(
+            bodyText,
+            sig,
+            endpointSecret
+        )
+    } catch (err) {
+        console.error("Failed to verify webhook signature: ", err.message)
+        return new Response("Failed to verify webhook signature", {status: 400})
+    }
+
+    console.log("Verified Stripe Event.")
 
     // Save the order record
     const orderID = await saveOrder(dataObj, supabase)
@@ -250,7 +286,7 @@ async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID
 
 async function updateStock(products: Array<metaOrderProduct>, supabase: SupabaseClient) {
     // Don't update stock if this order was placed in dev mode
-    if (process.env.DEV) {
+    if (process.env.VITE_ENVIRONMENT != "PRODUCTION") {
         console.log("Stock was not updated for this order since it was not from production.")
         return
     }
@@ -317,7 +353,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
     
     // Fetch Orders with ID
     const {error, data} = await supabase
-        .from("orders-compressed")
+        .from("orders_compressed")
         .select("*")
         .eq("id", orderId)
     if (error) {
@@ -350,7 +386,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                     address: {
                         fullName: order.name,
                         addressLine1: order.street_address,
-                        city: order.city, // TODO: Find a solution to this
+                        city: order.city,
                         postcode: order.postal_code,
                         countryCode: order.country
                     },

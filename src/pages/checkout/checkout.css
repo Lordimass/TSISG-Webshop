@@ -125,6 +125,7 @@
 
 #submit:disabled{
     cursor: not-allowed;
+    background-color: var(--jamie-grey);
 }
 
 #submit span {

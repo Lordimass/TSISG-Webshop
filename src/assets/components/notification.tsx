@@ -1,22 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "../css/notification.css";
 import { info_icon } from "../consts";
+import { NotificationsContext } from "../../app";
 
 type Notif = { id: number; message: string };
 
 export default function Notifications() {
-  const [queue, setQueue] = useState<Notif[]>([]);
+  const {newNotif} = useContext(NotificationsContext)
+  const [internalQueue, setQueue] = useState<Notif[]>([]);
   const [visibleNotif, setVisibleNotif] = useState<Notif | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<number>(null);
 
-  // 1) enqueue incoming events
+  // 1) enqueue incoming notifs
   useEffect(() => {
     const handler = (e: any) => {
-      const msg = e.detail?.message;
-      if (typeof msg === "string") {
-        setQueue((q) => [...q, { id: Date.now(), message: msg }]);
-      }
+      const id = newNotif.current.id
+      const message = newNotif.current.message
+      setQueue((q) => [...q, { id, message }]);
     };
     window.addEventListener("notification", handler);
     return () => window.removeEventListener("notification", handler);
@@ -24,17 +25,16 @@ export default function Notifications() {
 
   // 2) when nothing is showing, dequeue the next
   useEffect(() => {
-    if (!visibleNotif && queue.length > 0) {
-      const [next, ...rest] = queue;
+    if (!visibleNotif && internalQueue.length > 0) {
+      const [next, ...rest] = internalQueue;
       setQueue(rest);
       setVisibleNotif(next);
     }
-  }, [queue, visibleNotif]);
+  }, [internalQueue, visibleNotif]);
 
   // 3) whenever a new visibleNotif appears, trigger slide‑in then auto‑dismiss
   useEffect(() => {
     if (!visibleNotif) return;
-
     // ensure it starts hidden
     setIsVisible(false);
 
@@ -76,8 +76,4 @@ export default function Notifications() {
       <p>{visibleNotif.message}</p>
     </div>
   );
-}
-
-export function notify(message: string) {
-  window.dispatchEvent(new CustomEvent("notification", { detail: { message } }));
 }

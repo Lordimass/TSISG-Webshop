@@ -4,7 +4,7 @@
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 
-import React, { useState, useEffect, FormEvent, useRef } from "react";
+import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
 import {
     CheckoutProvider,
@@ -16,10 +16,10 @@ import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
-import { notify } from "../../assets/components/notification";
-import { eu, shipping_options, uk } from "../../assets/consts";
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
+import { NotificationsContext, SiteSettingsContext } from "../../app";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -66,6 +66,7 @@ export default function Checkout() {
 }
 
 function CheckoutAux({onReady}: {onReady: Function}) {
+    const {notify} = useContext(NotificationsContext)
     
     async function updateCountry() {
         const country = document.getElementById("country-select")
@@ -459,6 +460,21 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         if (!cityElement.value) {fail("City"); return;}
         if (!postcodeElement.value) {fail("Postcode"); return;}
 
+        // Validate field lengths.
+        if (cityElement.value.length > CITY_FIELD_MAX_LENGTH) {
+            notify(`City name must be ${CITY_FIELD_MAX_LENGTH} characters or less!`)
+            setIsLoading(false)
+            return
+        } else if (
+            nameElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+            || addressElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+            || postcodeElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+        ) {
+            notify(`Address, name, and postcode fields must all be ${ADDRESS_FIELD_MAX_LENGTH} or less!`)
+            setIsLoading(false)
+            return
+        }
+
         const address: StripeCheckoutContact = {
             name: nameElement.value,
             address: {
@@ -482,6 +498,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
         // Check that products are still in stock.
         if (!await checkStock()) {
+            setIsLoading(false)
             return
         }
         
@@ -499,7 +516,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     /**
      * Checks if the session is still active, since they expire after a set time,
-     * if it's not warn the user that they should reload the page
+     * if it's not, warn the user that they should reload the page
      * @returns <code>false</code> if the session is expired, 
      * <code>true</code> if it is not
      */
@@ -534,8 +551,18 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
+    const siteSettings = useContext(SiteSettingsContext)
+    const [killSwitch, setKillSwitch] = useState<boolean>(false)
+    let killSwitchMessage = null
+    if (killSwitch) {
+        killSwitchMessage = siteSettings.kill_switch.message
+    }
+    useEffect(() => {
+        setKillSwitch(siteSettings.kill_switch && siteSettings.kill_switch.enabled )
+    }, [siteSettings])
     
     useEffect(() => {updateShippingOption(shipping_options[0].shipping_rate)}, [])
+    const DEV = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
 
     return (<>
         <div className="checkout-left" id="checkout-left">
@@ -562,7 +589,8 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             <CheckoutProducts/>
             <p className="msg">To edit your basket, <a href="/">go back</a></p>
             <CheckoutTotals checkoutTotal={checkout.total}/>
-            <button type="button" disabled={isLoading} id="submit" onClick={remoteTriggerFormSubmit}>
+            <p className="msg">{killSwitchMessage}</p>
+            <button type="button" disabled={isLoading || (killSwitch && !DEV)} id="submit" onClick={remoteTriggerFormSubmit}>
                 <span id="button-text">
                 {isLoading ? (
                     <div className="spinner" id="spinner">Processing Payment...</div>
@@ -646,7 +674,8 @@ function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSumm
 }
 
 async function fetchClientSecret(): Promise<string> {
-    var prices: Array<Object> = await fetchStripePrices()
+    let prices: Array<Object> = await fetchStripePrices()
+    let basketString = localStorage.getItem("basket")
     const result = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",
         headers: {
@@ -655,7 +684,7 @@ async function fetchClientSecret(): Promise<string> {
         body: JSON.stringify({
             shipping_options: shipping_options,
             stripe_line_items: prices,
-            basket: localStorage.getItem("basket"),
+            basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
             origin: window.location.origin
         })
     })
@@ -667,7 +696,7 @@ async function fetchClientSecret(): Promise<string> {
 }
 
 async function fetchStripePrices(): Promise<Array<Object>> {
-    const result = await fetch(".netlify/functions/getStripePrices", {
+    const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -675,11 +704,12 @@ async function fetchStripePrices(): Promise<Array<Object>> {
         body: JSON.stringify(localStorage.getItem("basket"))
     })
     .then (
-        function(value) {return value.json()},
+        async function(value) {return await value.json()},
         function(error) {console.error(error); return error}
     )
-
-    return result;
+    localStorage.setItem("basket", JSON.stringify({basket}))
+    
+    return pricePointIDs;
 }
 
 async function validateEmail(email: any, checkout: any) {

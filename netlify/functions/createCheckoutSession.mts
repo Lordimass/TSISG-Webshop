@@ -2,6 +2,8 @@ import { Context } from "@netlify/functions";
 import Stripe from 'stripe';
 import express from 'express';
 import { MetadataParam } from "@stripe/stripe-js";
+import { createClient } from "@supabase/supabase-js";
+import { error } from "console";
 
 var stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -18,11 +20,16 @@ app.use(express.static('public'));
 type bodyJSONParams = {
     shipping_options: Array<{shipping_rate: string}>,
     stripe_line_items: Array<Object>,
-    basket: string
+    basket: {basket:basketItem[]}
     origin: string
 }
 
-var allowed_countries: Array<string> = ["AC", "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", "CR", "CV", "CW", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FO", "FR", "GA", "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF", "MG", "MK", "ML", "MM", "MN", "MO", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN", "PR", "PS", "PT", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SZ", "TA", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VN", "VU", "WF", "WS", "XK", "YE", "YT", "ZA", "ZM", "ZW", "ZZ"]
+type basketItem = {
+    sku: number,
+    basketQuantity: number,
+    images: Array<Object>
+    price: number
+}
 
 // Metadata can contain up to 50 key-value pairs with the following constraints
 // const keyMaxCharacters: number = 40
@@ -95,7 +102,10 @@ export default async function handler(request: Request, _context: Context) {
     const body = request.body;
     const bodyText: string = await new Response(body).text();
     const bodyJSON: bodyJSONParams = JSON.parse(bodyText)
-    const compressedBasket: MetadataParam = compressBasket(bodyJSON.basket)
+
+    let basket: basketItem[] = bodyJSON.basket.basket
+    const compressedBasket: MetadataParam = compressBasket(basket)
+    console.log(compressedBasket)
 
     const session = await stripe.checkout.sessions.create({
         ui_mode: "custom",
@@ -111,23 +121,18 @@ export default async function handler(request: Request, _context: Context) {
     return new Response(JSON.stringify(session))
 }
 
-function compressBasket(basket: string): MetadataParam {
-    // Stripe metadata can only contain 500 chars per value, so the basket
-    // needs to be trimmed to contain only essential characters
-    const basketArray: Array<{
-        sku: number,
-        basketQuantity: number,
-        images: Array<Object>
-        price: number
-    }> = JSON.parse(basket).basket
-
+/**
+ * Stripe metadata can only contain 500 chars per value, so the basket
+ * needs to be trimmed to contain only essential characters
+*/
+function compressBasket(basket: basketItem[]): MetadataParam {
     // Compress into array of arrays with corresponding indices
     // 0: sku
     // 1: basketQuantity
     // 2: totalValue
     var compressedBasketArray: Array<Array<string>> = []
-    for (let i = 0; i < basketArray.length; i++) {
-        const item = basketArray[i]
+    for (let i = 0; i < basket.length; i++) {
+        const item = basket[i]
         compressedBasketArray.push([
                 item.sku.toString(),
                 item.basketQuantity.toString(),

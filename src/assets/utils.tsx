@@ -3,6 +3,7 @@ import { supabase } from "../pages/home/home";
 import { useEffect, useState } from "react";
 import { product } from "./components/products";
 import { image, productInBasket } from "./components/product";
+import { daysOfWeek, monthsOfYear } from "./consts";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();
@@ -18,39 +19,29 @@ export async function getUser() {
     return response.data.user
 }
 
-export async function getJWTToken() {
-  // Get Access Token
-  const {data: { session }, error: sessionError} = await supabase.auth.getSession();
-  if (sessionError || !session?.access_token) {
-    // Not Logged In
-    return;
-  }
-
-  // Confirm its still valid
-  {const {data: {user}, error: sessionError} = await supabase.auth.getUser()
-  if (sessionError || !user) {
-    // Invalid Session
-    return
-  }}
-
-  return session.access_token
-}
-
-// The following hooks are used for calling Netlify Functions
-function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boolean, data?: any, error?: any} {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(null)
+/**
+ * Calls the given Netlify function with the given body and JWT Auth token if supplied
+ * @param func The name of the function to run
+ * @param body The body for the function (Optional)
+ * @param jwt Promise of JWT Auth Token
+ * @returns Data or error
+ */
+export function useFetchFromNetlifyFunction(func: string, body?:string, jwt?: Promise<string | undefined>): {loading: boolean, data?: any, error?: any} {
+  const [data, setData] = useState<any>(null)
+  const [error, setError] = useState<any>(null)
   const [loading, setIsLoading] = useState(true)
   let errored = false
-
+  
   const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
-
+  
   useEffect(() => {
     async function fetchData() {
+      const jwtString = await jwt
       try {
         // Standard case where no body supplied
         if (!body) {
-          await fetch(endpoint)
+          // Supply JWT as auth if supplied
+          await fetch(endpoint, {headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}}) 
           .then((response) => {
             errored = response.status != 200; 
             return response.json();
@@ -59,9 +50,7 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
             if (errored) {
               console.error(data)
               setError(data)
-            } else {
-              setData(data)
-            }
+            } else {setData(data)}
             setIsLoading(false)
           })
           
@@ -69,7 +58,9 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
         } else {
           await fetch(endpoint, {
             method: "POST",
-            body: body
+            body: body,
+            // Supply JWT as auth if supplied
+            headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}
           })
           .then((response) => {
             errored = response.status != 200; 
@@ -79,9 +70,7 @@ function useFetchFromNetlifyFunction(func: string, body?: string): {loading: boo
             if (errored) {
               console.error(data)
               setError(data)
-            } else {
-              setData(data)
-            }
+            } else {setData(data)}
             setIsLoading(false)
           })
         }
@@ -139,22 +128,22 @@ export async function fetchFromNetlifyFunction(func: string, body?: string): Pro
 }
 
 export function useGetProductList(): product[] {
-  const {data, error} = useFetchFromNetlifyFunction("getProducts")
+  const {data} = useFetchFromNetlifyFunction("getProducts")
   return data
 }
 
-export function useGetOrderList(): any {
-  const {data, error} = useFetchFromNetlifyFunction("getAllOrders")
+export function useGetOrderList(jwt: Promise<string | undefined>): any {
+  const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, jwt)
   return data
 }
 
 export function useGetNoImageProds(): any {
-  const {data, error} = useFetchFromNetlifyFunction("getNoImageProds")
+  const {data} = useFetchFromNetlifyFunction("getNoImageProds")
   return data
 }
 
 export function useGetProduct(sku: number): product {
-  const {data, error} = useFetchFromNetlifyFunction("getProduct", JSON.stringify({sku:sku}))
+  const {data} = useFetchFromNetlifyFunction("getProduct", JSON.stringify({sku:sku}))
   return data
 }
 
@@ -232,4 +221,35 @@ export function softParseJSON(value: string): any {
 export async function fetchPolicy(name: string): Promise<string>{
   const resp = await fetch(`https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/policies//${name}.md`)
   return resp.text()
+}
+
+export async function getJWTToken() {
+  // Get Access Token
+  const {data: { session }, error: sessionError} = await supabase.auth.getSession();
+  if (sessionError || !session?.access_token) {
+    // Not Logged In
+    return;
+  }
+
+  // Confirm its still valid
+  {const {data: {user}, error: sessionError} = await supabase.auth.getUser()
+  if (sessionError || !user) {
+    // Invalid Session
+    return
+  }}
+
+  return session.access_token
+}
+
+export function dateToDateString(date: Date) {
+  return daysOfWeek[date.getDay()] +
+      " " + date.getDate() +
+      " " + monthsOfYear[date.getMonth()] + 
+      " " + date.getFullYear();
+}
+
+export function dateToTimeString(date: Date) {
+  return date.getHours().toString().padStart(2, "0") + ":" 
+  + date.getMinutes().toString().padStart(2, "0") + ":" 
+  + date.getSeconds().toString().padStart(2, "0")
 }

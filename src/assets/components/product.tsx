@@ -17,8 +17,8 @@ export type image = {
   id: number,
   alt?: string,
   image_url: string,
-  inserted_at: string,
-  product_sku: number,
+  inserted_at?: string,
+  product_sku?: number,
   display_order: number
 }
 
@@ -298,7 +298,7 @@ export default function Product({ product }: {product: product}) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function BasketProduct({ sku, name, price, images }: prodProps) {
+export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   function increment() { // Increase quantity of this product
     if (quantity >= max_order) {
       return
@@ -375,11 +375,9 @@ export function BasketProduct({ sku, name, price, images }: prodProps) {
   const [quantity, setQuantityButActually] = useState(0);
   var imageURL: string | undefined = getFirstImage(images);
   var string_price: string = "£" + price.toFixed(2);
-  var max_order: number = 10;
+  var max_order: number = Math.min(max_product_order, stock);
   window.addEventListener("basketUpdate", syncWithBasket)
-
   useEffect(() => {syncWithBasket()}, [])
-
 
   return (
     <div className="basket-product" id={"product-" + sku}>
