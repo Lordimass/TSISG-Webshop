@@ -16,7 +16,7 @@ import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
-import { eu, shipping_options, uk } from "../../assets/consts";
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
 import { NotificationsContext, SiteSettingsContext } from "../../app";
@@ -460,6 +460,21 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         if (!cityElement.value) {fail("City"); return;}
         if (!postcodeElement.value) {fail("Postcode"); return;}
 
+        // Validate field lengths.
+        if (cityElement.value.length > CITY_FIELD_MAX_LENGTH) {
+            notify(`City name must be ${CITY_FIELD_MAX_LENGTH} characters or less!`)
+            setIsLoading(false)
+            return
+        } else if (
+            nameElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+            || addressElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+            || postcodeElement.value.length > ADDRESS_FIELD_MAX_LENGTH
+        ) {
+            notify(`Address, name, and postcode fields must all be ${ADDRESS_FIELD_MAX_LENGTH} or less!`)
+            setIsLoading(false)
+            return
+        }
+
         const address: StripeCheckoutContact = {
             name: nameElement.value,
             address: {
@@ -692,7 +707,6 @@ async function fetchStripePrices(): Promise<Array<Object>> {
         async function(value) {return await value.json()},
         function(error) {console.error(error); return error}
     )
-    console.log({pricePointIDs, basket})
     localStorage.setItem("basket", JSON.stringify({basket}))
     
     return pricePointIDs;
