@@ -1,4 +1,3 @@
-import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ReactGA from "react-ga4"
 
@@ -9,11 +8,11 @@ import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
-import { fetchFromNetlifyFunction, getUser } from './assets/utils';
+import { getUser, useFetchFromNetlifyFunction } from './assets/utils';
 import { User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
-import ReactDOM from 'react-dom';
+import ProdPage from "./pages/product/prodPage";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -63,11 +62,10 @@ export function App() {
   }
 
   // Fetching Site Settings
-  let siteSettings = fetchFromNetlifyFunction("getSiteSettings");
-  if ( // Set to empty object if it errored or hasn't finished running yet
-    typeof siteSettings == "string" ||
-    Object.prototype.toString.call(siteSettings) === '[object Array]'
-  ) {
+  let response = useFetchFromNetlifyFunction("getSiteSettings");
+  let siteSettings = response.data
+  // Set to empty object if it errored or hasn't finished running yet
+  if (typeof siteSettings == "string" || !siteSettings) {
     siteSettings = {}
   }
 
@@ -128,6 +126,8 @@ export function App() {
       <Routes>
         <Route index element={<Home />} />
   
+        <Route path="products/*" element={<ProdPage/>} />
+
         <Route path="checkout" element={<Checkout/>} />
   
         <Route path="thankyou" element={<ThankYou/>} />

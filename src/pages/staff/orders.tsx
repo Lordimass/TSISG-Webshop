@@ -45,7 +45,7 @@ type Order = {
     }
 }
 export function OrderManager() { 
-    const orders: Order[] = useGetOrderList(getJWTToken())
+    const orders: Order[] = useGetOrderList(getJWTToken()) || []
     orders.sort(compareOrders)
     const loginContext = useContext(LoginContext)
     const [accessible, setAccessible] = useState(false)

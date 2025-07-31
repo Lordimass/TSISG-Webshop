@@ -8,8 +8,7 @@ import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softPar
 import "./prodPage.css"
 import { productInBasket } from "../../assets/components/product"
 import Markdown from "react-markdown"
-import { LoginContext } from "../../main"
-import { notify } from "../../assets/components/notification"
+import { LoginContext, NotificationsContext } from "../../app"
 
 const ProductContext = createContext<{
     basketQuant?: number, 
@@ -176,6 +175,8 @@ function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}
     }
 
     const loginContext = useContext(LoginContext)
+    const {notify} = useContext(NotificationsContext)
+
     const inputBox = useRef<HTMLTextAreaElement>(null);
     const {product, productProp, setProduct, originalProd} = useContext(EditableProductPropContext)
     const [editable, setEditable] = useState(false);
