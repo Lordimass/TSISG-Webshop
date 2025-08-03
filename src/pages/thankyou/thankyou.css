@@ -5,9 +5,9 @@
     align-self: center;
     margin: auto auto;
     width: 35em;
-    height: 40em;
+    height: min-content;
     max-width: 90%;
-    max-height: 60vh;
+    margin: 1em;
     background-color: white;
     border-radius: 1em;
     overflow: hidden;
@@ -26,21 +26,21 @@
 
     flex-direction: column;
     position: relative;
-    height: 160%;
+    height: 170px;
     top: 2em;
     left: 0.7em;
     user-select: none;
 }
 
 #order-confirmed-gif {
-    height: 90%;
+    height: 13em;
     z-index: 1;
 }
 
 #drop-shadow {
     position: relative;
     width: 10em;
-    height: 2em;
+    min-height: 2em;
     border-radius: 50%;
     background-color: var(--jamie-grey);
     top: -15%;
