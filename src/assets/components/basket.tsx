@@ -111,6 +111,11 @@ export default function Basket() {
     const basketString: string | null = localStorage.getItem("basket")
     if (basketString) {
         basket = JSON.parse(basketString).basket
+        // Handle broken basket
+        if (!basket) {
+            basket = []
+            localStorage.removeItem("basket")
+        }
     }
     for (let i = 0; i < basket.length; i++) {
         var prod : productInBasket = basket[i]

@@ -123,9 +123,8 @@ export default async function handler(request: Request, _context: Context) {
     if (!stripe) {
         return new Response("Stripe object didn't initialise", {status: 500})
     }
-    const body = request.body;
-    const bodyText: string = await new Response(body).text();
-    const bodyJSON: Stripe.CheckoutSessionCompletedEvent = JSON.parse(bodyText)
+    const body = await request.text()
+    const bodyJSON: Stripe.CheckoutSessionCompletedEvent = JSON.parse(body)
     const dataObj = bodyJSON.data.object
 
     // Grab URL and Key from Netlify Env Variables.
@@ -153,7 +152,7 @@ export default async function handler(request: Request, _context: Context) {
     let stripeEvent: Stripe.Event
     try {
         stripeEvent = stripe.webhooks.constructEvent(
-            bodyText,
+            body,
             sig,
             endpointSecret
         )
