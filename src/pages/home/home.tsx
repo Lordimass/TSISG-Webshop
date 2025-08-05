@@ -7,6 +7,7 @@ import React from 'react';
 import "./home.css"
 import Products from '../../assets/components/products';
 import { createClient } from '@supabase/supabase-js';
+import { page_title } from '../../assets/consts';
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
 var spinTimeout = false
@@ -40,6 +41,13 @@ export default function Home() {
 
   const [word, setWord] = useState("GAY");
   return (<><Header /><div className="content">
+    <title>{page_title}</title>
+    <meta name="description" content={`
+      The official online shop for This Shop Is So Gay in York! 
+      We sell queer and LGBT merchandise of all kinds and deliver
+      it straight to your door :D`
+    }/>
+
     <div className="title-section">
       <div className='title-text'>
         <h1>This Shop Is So</h1>

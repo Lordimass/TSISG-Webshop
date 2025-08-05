@@ -72,6 +72,9 @@ export default function ThankYou() {
     })
 
     return (<><Header/><div className="content">
+        <title>Thank you for your order!</title>
+        <meta name="robots" content="noindex"/>
+
         <div className="thanks-box">
             <div className="thanks-top">
                 <div className="order-confirmed-gif-container">

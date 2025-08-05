@@ -14,6 +14,7 @@ import { User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import ReactDOM from 'react-dom';
+import { keywords_meta, page_title } from './assets/consts';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -120,7 +121,14 @@ export function App() {
   }, [])
 
 
-  return (
+  return (<>
+    <meta name='author' content='Sam Knight'/>
+    <meta name='author' content='Lordimass'/>
+    <meta name='creator' content='Sam Knight'/>
+    <meta name='creator' content='Lordimass'/>
+    <meta name='generator' content='react'/>
+    <meta name='keywords' content={keywords_meta}/>
+
     <LoginContext.Provider value={{loggedIn, user, permissions}}>
     <SiteSettingsContext.Provider value={siteSettings}>
     <NotificationsContext.Provider value={{newNotif, notify}}>
@@ -149,7 +157,7 @@ export function App() {
     </BrowserRouter>
     </NotificationsContext.Provider>
     </SiteSettingsContext.Provider>
-    </LoginContext.Provider>
+    </LoginContext.Provider></>
   )
 }
 

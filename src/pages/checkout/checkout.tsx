@@ -16,7 +16,7 @@ import "./checkout.css"
 import Header from "../../assets/components/header"
 import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
-import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, shipping_options, uk } from "../../assets/consts";
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, page_title, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
 import { NotificationsContext, SiteSettingsContext } from "../../app";
@@ -56,6 +56,9 @@ export default function Checkout() {
     useEffect(redirectIfEmptyBasket, []) 
 
     return (<><Header/><div className="content checkout-content">
+        <title>{page_title} - Checkout</title>
+        <meta name="robots" content="noindex"/>
+        
         {preparing ? <Loading/> : <></>}
         
         <CheckoutProvider stripe={stripePromise} options={options}>

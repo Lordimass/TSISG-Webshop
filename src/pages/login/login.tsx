@@ -6,7 +6,7 @@ import "./login.css"
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { supabase, SUPABASE_ID } from "../home/home";
 import { getLoggedIn } from "../../assets/utils";
-import { hide_icon, show_icon } from "../../assets/consts";
+import { hide_icon, page_title, show_icon } from "../../assets/consts";
 import { NotificationsContext } from "../../app";
 
 export default function LoginPage() {
@@ -139,6 +139,9 @@ export default function LoginPage() {
     },[])
 
     return (<><Header/><div className="content">
+        <title>{page_title} - Login</title>
+        <meta name="robots" content="noindex"/>
+
         {loggedIn ? <LoggedIn/> : <Login/>}
     </div><Footer/></>)
 }

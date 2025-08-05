@@ -58,6 +58,9 @@ export function OrderManager() {
     let orders: Order[] = getOrderList(getJWTToken())
     orders.sort(compareOrders)
     return (<><Header/><div className="content" id="order-manager-content">
+        <title>TSISG STAFF - Order Manager</title>
+        <meta name="robots" content="noindex"/>
+
         {
             accessible ? 
             orders ? (orders.map((order: any) => <Order key={order.id} order={order}/>)) : <></> 

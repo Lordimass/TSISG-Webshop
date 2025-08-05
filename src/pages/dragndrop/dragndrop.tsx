@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getLoggedIn, getNoImageProds, getUser } from "../../assets/utils";
 import "./dragndrop.css"
 import { supabase } from "../home/home";
+import { page_title } from "../../assets/consts";
 
 type noImageProd = {
     sku: number,
@@ -72,6 +73,9 @@ function NoImageProd({prod}: {prod:noImageProd}) {
     };
 
     return (<li className="noImProd">
+        <title>{page_title} - Drag 'n' Drop</title>
+        <meta name="robots" content="noindex"/>
+        
         {JSON.stringify(prod)}
         <div 
             onDragOver={(e) => {e.preventDefault();}} 
