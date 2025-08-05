@@ -24,7 +24,7 @@ export default async function handler(request: Request, _context: Context) {
             statusText: "Failed to connect to stripe."
         })
     }
-    const body: Body = JSON.parse(await new Response(request.body).text());
+    const body: Body = await request.json()
 
     // Grab URL and Key from Netlify Env Variables.
     const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
@@ -54,7 +54,13 @@ export default async function handler(request: Request, _context: Context) {
     }
 
     // Fetch stripe data
-    const stripeData = await stripe.checkout.sessions.retrieve(body.stripeSessionId)
+    let stripeData
+    try {
+        stripeData = await stripe.checkout.sessions.retrieve(body.stripeSessionId)
+    } catch (e) {
+        console.error(e)
+    }
+    
     return new Response(JSON.stringify({
         supabase: supabaseData[0],
         stripe: stripeData
