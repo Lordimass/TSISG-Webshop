@@ -114,8 +114,8 @@
 }
 
 .checkout-right #submit {
-    height: 5em;
     margin: 1em;
+    padding: 1em;
     border-radius: 1em;
 
     align-self: center;
@@ -128,7 +128,7 @@
     background-color: var(--jamie-grey);
 }
 
-#submit span {
+#submit #button-text {
     position:relative;
     top: 0.1em;
     font-family: "Backso";
