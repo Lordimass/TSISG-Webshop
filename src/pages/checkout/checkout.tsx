@@ -19,7 +19,7 @@ import { CheckoutProducts } from "../../assets/components/products";
 import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, page_title, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
 import { basket } from "../../assets/components/product";
-import { NotificationsContext, SiteSettingsContext } from "../../app";
+import { LoginContext, NotificationsContext, SiteSettingsContext } from "../../app";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -45,6 +45,27 @@ const paymentElementOpts: StripePaymentElementOptions = {
                 city: "never"
             }
         }
+    }
+}
+
+/**
+ * Debug method to test Apple Pay
+ */
+async function checkCanMakePayment() {
+    const pr = (await stripePromise)?.paymentRequest({
+        country: "GB",
+        currency: "gbp",
+        total: {
+        label: "Test Item",
+        amount: 1,
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+    })
+    if (!pr) {
+        return `[PAYMENT REQUEST FAILED TO INITIALISE]`
+    } else {
+        return `pr.canMakePayment() => ${JSON.stringify(await pr.canMakePayment())}`
     }
 }
 
@@ -545,6 +566,17 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
     }
 
+    const [debugInfo, setDebugInfo] = useState("")
+    useEffect(() => {
+        async function get() {
+            if (loginContext.permissions.includes("debug")) {
+                setDebugInfo(await checkCanMakePayment())
+            }
+        }
+        get()
+    }, [])
+
+    const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
     const { updateShippingOption } = useCheckout()
     
@@ -604,6 +636,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             </button>
             {error}
         </div>
+        {debugInfo ? debugInfo : ""}
     </>)
 }
 
