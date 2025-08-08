@@ -234,15 +234,24 @@ function NotLoggedIn() {
 function compareOrders(a:Order, b:Order) {
     const dateA = new Date(a.placed_at)
     const dateB = new Date(b.placed_at)
+    // Place fulfilled orders after unfulfilled orders
     if (a.fulfilled && !b.fulfilled) {
         return 1
     } else if (b.fulfilled && !a.fulfilled) {
         return -1
+    // Place oldest unfullfilled orders first
+    } else if (!a.fulfilled && !b.fulfilled) {
+        return dateA < dateB 
+        ? -1 
+        : dateA == dateB
+            ? 0 
+            : 1
+    // Place most recent fulfilled orders first
     } else {
-        return dateA < dateB ?
-        -1 :
-        dateA == dateB ?
-        0 :
-        1
+        return dateA < dateB 
+        ? 1 
+        : dateA == dateB 
+            ? 0
+            : -1
     }
 }
