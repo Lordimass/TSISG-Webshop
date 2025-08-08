@@ -48,12 +48,10 @@ export default function Basket() {
 
     function toggleBasket() {
         // Get the basket
-        const basket = document.getElementById("basket-display")
-        if (!basket) {
-            return
-        }
+        const basket = menuRef.current
+        if (!basket) return
         
-        // Use disable functionality only if on checkout or thankyou page
+        // Don't open on checkout and thank you pages
         const page = window.location.pathname
         if (
             page == "/checkout" ||
@@ -64,8 +62,8 @@ export default function Basket() {
         }
 
         // Toggle display mode
-        var currentDisplay: string = basket.style.display
-        if (currentDisplay == "flex") {
+        setIsOpen(!isOpen)
+        if (isOpen) {
             basket.style.display = "none"
         } else {
             basket.style.display = "flex"
@@ -77,6 +75,11 @@ export default function Basket() {
 
     const [basketQuantity, changeBasketQuantity] = useState(0);
     const [basketPrice, changeBasketPrice] = useState("£0.00");
+    const [isOpen, setIsOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLDivElement>(null);
+
+    // Disable checkout button in case of kill switch enabled
     const [killSwitch, setKillSwitch] = useState<boolean>(false)
     let killSwitchMessage = null
     if (killSwitch) {
@@ -91,6 +94,34 @@ export default function Basket() {
     // Listen for basket updates
     useEffect(() => {window.addEventListener("basketUpdate", updateBasketQuantity);}, [])
 
+    // Check for clicks outside of the basket container to close the basket.
+    useEffect(() => {
+        function handleClickOutside(event: any) {
+            // If click is outside the menu element, close it
+            let close = false
+            if (menuRef.current && buttonRef.current) {
+                close = (
+                    !menuRef.current.contains(event.target) &&
+                    !buttonRef.current.contains(event.target)
+                )
+            }
+            if (menuRef.current && !menuRef.current.contains(event.target) && close) {
+                toggleBasket();
+            }
+        }
+
+        // Bind listener when menu is open
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        // Cleanup when menu closes or component unmounts
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isOpen])
+
+    // Fetch the current contents of the basket and display it
     var basketItems: Array<ReactElement> = []
     var basket: Array<productInBasket> = []
     const basketString: string | null = localStorage.getItem("basket")
@@ -115,14 +146,14 @@ export default function Basket() {
     }
     
     return (<>
-        <div className="basket" id="basket" onClick={toggleBasket}>
+        <div className="basket" id="basket" onClick={() => {toggleBasket()}} ref={buttonRef}>
             <img src={basket_icon}></img>
             <div className="basket-item-count" id="basket-item-count">
                 <p>{basketQuantity}</p>
             </div>
         </div>
 
-        <div className="basket-display" id="basket-display">
+        <div className="basket-display" id="basket-display" ref={menuRef}>
             <p> Basket ({basketQuantity} items)</p>
             <div className="basketItems">
                 {basketItems}
