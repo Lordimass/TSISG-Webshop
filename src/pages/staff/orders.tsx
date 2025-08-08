@@ -178,7 +178,7 @@ function Order({order}:{order:Order}) {
                 key={prod.sku}
             />) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>
-        {!order.dispatched 
+        {!order.fulfilled
         ? <div className="delivery-cost">
             <p>Royal Mail Delivery Cost: £</p>
             <input placeholder="0.00" ref={deliveryCostInput}/>
@@ -186,23 +186,31 @@ function Order({order}:{order:Order}) {
             </div>
         : <></>}
         
-        <p id="order-fulfil-warning">
-            {order.dispatched  
-            ? "This order has been dispatched to Royal Mail, you should mark it as fulfilled!" 
-            : "This order has not yet been dispatched to Royal Mail, you should not mark this order as fulfilled unless you're certain it's been sent out."}
-        </p>
+        <p id="order-fulfil-warning">{
+            order.fulfilled
+            ? ""
+            : order.dispatched  
+                ? "This order has been dispatched to Royal Mail, you should mark it as fulfilled!" 
+                : "This order has not yet been dispatched to Royal Mail, you should not mark this order as fulfilled unless you're certain it's been sent out."
+            
+
+        }</p>
         <button 
             className="fulfil-order" 
             onClick={toggleFulfilment} 
             disabled={toggleInProgress}
-            style={{backgroundColor: order.dispatched ? "var(--green)" : "var:(--jamie-grey)"}}
+            style={{backgroundColor: order.fulfilled ? "var(--red)": (order.dispatched ? "var(--green)" : "var:(--jamie-grey)")}}
         >
             {
             toggleInProgress ? 
             <Throbber extraClass="order-throbber"/> :
-            <p>{order.dispatched && !order.fulfilled 
-                ? "M" 
-                : "(NOT RECOMMENDED) Force m"}ark order as <b>{order.fulfilled ? "unfulfilled" : "fulfilled"}</b></p>
+            <p>{
+                !order.fulfilled 
+                ? order.dispatched 
+                    ? <>Mark order as <b>fulfilled</b></> 
+                    : <>(NOT RECOMMENDED) Force mark order as <b>fulfilled</b></>
+                : <>Mark order as <b>unfulfilled</b></>  
+            }</p>
             }
         </button>
 
