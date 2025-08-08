@@ -114,6 +114,9 @@
 }
 
 .checkout {
+    display: flex;
+    justify-content: center;
+
     background-color: var(--purple);
     height: 4em;
     border-radius: 1em;
