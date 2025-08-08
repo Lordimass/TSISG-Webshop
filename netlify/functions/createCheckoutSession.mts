@@ -111,6 +111,7 @@ export default async function handler(request: Request, _context: Context) {
         ui_mode: "custom",
         line_items: bodyJSON.stripe_line_items,
         mode: "payment",
+        currency: "gbp",
         return_url: bodyJSON.origin + "/thankyou?session_id={CHECKOUT_SESSION_ID}",
         shipping_options: bodyJSON.shipping_options,
         shipping_address_collection: { allowed_countries: []},
@@ -118,7 +119,9 @@ export default async function handler(request: Request, _context: Context) {
         automatic_tax: {enabled: true}
     })
 
-    return new Response(JSON.stringify(session))
+    return new Response(JSON.stringify(session), {status: 200, headers: {
+            'Access-Control-Allow-Origin': '*'
+        }})
 }
 
 /**

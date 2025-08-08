@@ -17,6 +17,7 @@ type productInBasket = {
     price: number,
     basketQuantity: number,
     images: image[]
+    stock: number
 }
   
 type image = {

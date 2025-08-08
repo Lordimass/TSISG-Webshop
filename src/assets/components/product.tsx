@@ -23,6 +23,7 @@ export type productInBasket = {
   price: number,
   basketQuantity: number,
   images: image[]
+  stock: number
 }
 
 export type basket = productInBasket[]
@@ -165,7 +166,8 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
         "name": name,
         "price": price,
         "basketQuantity": quant,
-        "images": images
+        "images": images,
+        "stock": stock
       })
     }
 
@@ -317,7 +319,8 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
         "name": name,
         "price": price,
         "basketQuantity": quant,
-        "images": images
+        "images": images,
+        "stock": stock
       })
     }
 
@@ -388,6 +391,7 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   var imageURL: string | undefined = getFirstImage(images);
   var string_price: string = "£" + price.toFixed(2);
   var max_order: number = Math.min(max_product_order, stock);
+  console.log()
   window.addEventListener("basketUpdate", resetInputToBasket)
 
   useEffect(() => {resetInputToBasket()}, [])

@@ -635,8 +635,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 </span>
             </button>
             {error}
+            {debugInfo ? debugInfo : ""}
         </div>
-        {debugInfo ? debugInfo : ""}
+        
     </>)
 }
 

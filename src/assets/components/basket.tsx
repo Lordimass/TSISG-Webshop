@@ -1,23 +1,8 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "../css/basket.css"
-import { BasketProduct } from "./product";
+import { BasketProduct, productInBasket } from "./product";
 import { basket_icon } from "../consts";
 import { NotificationsContext, SiteSettingsContext } from "../../app";
-
-type productInBasket = {
-    sku: number,
-    name: string,
-    price: number,
-    basketQuantity: number,
-    images: image[],
-    stock: number
-}
-
-type image = {
-id: number,
-image_url: string,
-display_order: number
-}
 
 export default function Basket() {
     function redirectToCheckout() {
