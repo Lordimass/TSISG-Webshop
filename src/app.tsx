@@ -132,6 +132,10 @@ export function App() {
     <LoginContext.Provider value={{loggedIn, user, permissions}}>
     <SiteSettingsContext.Provider value={siteSettings}>
     <NotificationsContext.Provider value={{newNotif, notify}}>
+    {/**
+     * Make sure to update sitemap.mts (Netlify function) to include new static pages
+     * in the sitemap 
+    */}
     <BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
