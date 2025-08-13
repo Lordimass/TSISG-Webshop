@@ -2,31 +2,18 @@ import { useState, useEffect } from 'react';
 
 import "../css/product.css"
 import { max_product_order } from '../consts';
+import { ImageData, ProductData, ProductInBasket } from '../../lib/types';
+import { getFirstImage } from '../../lib/lib';
+import { supabase } from '../../app';
+import SquareImageBox from './squareImageBox';
 
 type prodProps = {
   sku: number,
   name: string,
   price: number,
-  images: image[],
+  images: ImageData[],
   stock: number
 }
-
-export type image = {
-  id: number,
-  image_url: string,
-  display_order: number
-}
-
-export type productInBasket = {
-  sku: number,
-  name: string,
-  price: number,
-  basketQuantity: number,
-  images: image[]
-  stock: number
-}
-
-export type basket = productInBasket[]
 
 type checkoutProductParams = {
   image: string
@@ -36,7 +23,11 @@ type checkoutProductParams = {
   sku?: number
 }
 
-export default function Product({ sku, name, price, images, stock }: prodProps) {
+export default function Product({prod} : {prod: ProductData}) {
+  // Redefining variables from old parameter list
+  // to save refactoring the whole component
+  let {sku, name, price, images, stock} = prod
+
   if (stock < 0) {stock = 0}
 
   function BasketModifier0Quant() { // Simple Add To Basket Button
@@ -88,7 +79,7 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
 
   function updateQuantityDisplay() {
     // Updating the value displayed in the quantity box
-    var basketInput = document.getElementById("basket-input-" + sku);
+    let basketInput = document.getElementById("basket-input-" + sku);
     if (basketInput == null) {
       return
     }
@@ -138,16 +129,16 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
     // it will also then update the actual quantity state for this product.
 
     // Fetch the current basket contents
-    var basketString: string | null = localStorage.getItem("basket")
+    let basketString: string | null = localStorage.getItem("basket")
     if (!basketString) { // Create basket if it doesn't exist
       basketString = "{\"basket\": []}"
     }
-    var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+    let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
     // Find product and set quantity
-    var found: boolean = false
+    let found: boolean = false
     for (let i = 0; i<basket.length; i++) {
-      var item: productInBasket = basket[i]
+      let item: ProductInBasket = basket[i]
       if (item.sku == sku) {
         found = true
         // Just remove it from the basket if 0
@@ -184,13 +175,13 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
     // Called whenever the basket gets updated.
 
     // Getting basket
-    var basketString: string | null = localStorage.getItem("basket");
+    let basketString: string | null = localStorage.getItem("basket");
     if (basketString) {
-      var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+      let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
       // Iterating through basket to find product
       for (let i=0; i<basket.length; i++) {
-        var item: productInBasket = basket[i];
+        let item: ProductInBasket = basket[i];
         if (item.sku == sku) {
           // Set quantity variable to match basket
           setQuantityButActually(item.basketQuantity);
@@ -227,14 +218,40 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
   const max_order = Math.min(max_product_order, stock); // Maximum possible product order
+  const [imageURL, setImageURL] = useState(supabase.storage
+    .from("transformed-product-images")
+    .getPublicUrl(prod.images[0].name.replace(/\.[^.]+$/, '.webp'))
+    .data.publicUrl
+  )
 
   window.addEventListener("basketUpdate", resetInputToBasket)
 
-  // Get image if it exists
-  var imageURL: string | undefined = getFirstImage(images)
+  // Check if transformed image exists, and fallback to untransformed if not
+  useEffect(() => {
+    async function exists(path: string) {
+      const { data, error } = await supabase
+        .storage
+        .from("transformed-product-images")
+        .list('', { search: path });
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+      
+      const exist = data.some(item => item.name === path);
+      if (!exist) {
+        setImageURL(supabase.storage
+          .from("product-images")
+          .getPublicUrl(prod.images[0].name)
+          .data.publicUrl)
+      }
+    }
+    exists(prod.images[0].name.replace(/\.[^.]+$/, '.webp'))
+  }, [])
 
   // Format Price
-  var string_price: string = "£" + price.toFixed(2)
+  const string_price: string = "£" + price.toFixed(2)
 
   // Check if item already in basket
   useEffect(() => {resetInputToBasket()}, [])
@@ -242,23 +259,14 @@ export default function Product({ sku, name, price, images, stock }: prodProps) 
 
   return (
     <div className="product" id={"product-" + sku}>
-      <div
-        className="product-image-container"
-        style={{
-          backgroundImage: "url(" + imageURL + ")",
-        }}
-      >
-        <div className="bg-blurrer"></div>
-        <img className="product-image-main" src={imageURL}></img>
-        <div className="bg-blurrer"></div>
-      </div>
+      <SquareImageBox image_url={imageURL} size='100%'/>
 
       <div className="prod-footer">
         <div className="product-text">
           <p className="product-name">{name}</p>
           <p className="product-price">{string_price}</p>
         </div>
-
+        <div className='spacer'/>
         <div className='basket-modifier'>
           {showModifier ? <BasketModifier/> : <BasketModifier0Quant/>}
         </div>
@@ -291,16 +299,16 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
     // it will also then update the actual quantity state for this product.
 
     // Fetch the current basket contents
-    var basketString: string | null = localStorage.getItem("basket")
+    let basketString: string | null = localStorage.getItem("basket")
     if (!basketString) { // Create basket if it doesn't exist
       basketString = "{\"basket\": []}"
     }
-    var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+    let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
     // Find product and set quantity
-    var found: boolean = false
+    let found: boolean = false
     for (let i = 0; i<basket.length; i++) {
-      var item: productInBasket = basket[i]
+      let item: ProductInBasket = basket[i]
       if (item.sku == sku) {
         found = true
         // Just remove it from the basket if 0
@@ -369,11 +377,11 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   function resetInputToBasket() {
     // Resets the value in the HTMLInput to the value from the basket
     // Called whenever the basket gets updated from a different source
-    var basketString: string | null = localStorage.getItem("basket");
+    let basketString: string | null = localStorage.getItem("basket");
     if (basketString) {
-      var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+      let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
       for (let i=0; i<basket.length; i++) {
-        var item: productInBasket = basket[i];
+        let item: ProductInBasket = basket[i];
         if (item.sku == sku) {
           setQuantityButActually(item.basketQuantity);
           const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
@@ -388,31 +396,46 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   }
 
   const [quantity, setQuantityButActually] = useState(0);
-  var imageURL: string | undefined = getFirstImage(images);
-  var string_price: string = "£" + price.toFixed(2);
-  var max_order: number = Math.min(max_product_order, stock);
+  const [imageURL, setImageURL] = useState(supabase.storage
+    .from("transformed-product-images")
+    .getPublicUrl(images[0].name.replace(/\.[^.]+$/, '.webp'))
+    .data.publicUrl
+  )
+  let string_price: string = "£" + price.toFixed(2);
+  let max_order: number = Math.min(max_product_order, stock);
   console.log()
   window.addEventListener("basketUpdate", resetInputToBasket)
+
+  // Check if transformed image exists, and fallback to untransformed if not
+  useEffect(() => {
+    async function exists(path: string) {
+      const { data, error } = await supabase
+        .storage
+        .from("transformed-product-images")
+        .list('', { search: path });
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+      
+      const exist = data.some(item => item.name === path);
+      if (!exist) {
+        setImageURL(supabase.storage
+          .from("product-images")
+          .getPublicUrl(images[0].name)
+          .data.publicUrl)
+      }
+    }
+    exists(images[0].name.replace(/\.[^.]+$/, '.webp'))
+  }, [])
 
   useEffect(() => {resetInputToBasket()}, [])
 
 
   return (
     <div className="basket-product" id={"product-" + sku}>
-      <div
-        className="basket-product-image-container"
-        style={{
-          backgroundImage: "url(" + imageURL + ")",
-        }}
-      >
-        <div className="bg-blurrer basket-left-blurrer"></div>
-        <img className="basket-product-image-main" 
-          src={imageURL} 
-          loading='lazy'
-          alt={name}
-        />
-        <div className="bg-blurrer"></div>
-      </div>
+      <SquareImageBox image_url={imageURL} size='100%'/>
 
       <div className="basket-prod-footer">
         <div className="basket-product-text">
@@ -468,25 +491,3 @@ export function CheckoutProduct({image, name, quantity, total, sku}: checkoutPro
       {checkbox}
   </div>)
 }
-
-
-function getFirstImage(images: Array<image>) {
-  images.sort(compareImages)
-  var imageURL: string | undefined
-  if (images.length > 0) {
-    imageURL = images[0].image_url
-  } else {
-    imageURL = undefined
-  }
-  return imageURL
-}
-
-function compareImages(a: image, b: image): number {
-  if (a.display_order < b.display_order) {
-    return -1;
-  } else if (b.display_order < a.display_order) {
-    return 1;
-  }
-  return 0;
-}
-

@@ -6,7 +6,6 @@ import Header from "../../assets/components/header";
 
 import "./thankyou.css"
 import { fetchFromNetlifyFunction } from "../../assets/utils";
-import { supabase } from "../home/home";
 
 const order_confirmed_gif: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//order-confirmed.gif"
 

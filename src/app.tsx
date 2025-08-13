@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ReactGA from "react-ga4"
 
-import Home, { supabase } from './pages/home/home';
+import Home from './pages/home/home';
 import React, { createContext, RefObject, useEffect, useRef, useState } from 'react'
 import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
@@ -10,11 +10,10 @@ import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
 import DragNDrop from './pages/dragndrop/dragndrop';
 import { fetchFromNetlifyFunction, getUser } from './assets/utils';
-import { User } from '@supabase/supabase-js';
+import { createClient, User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
-import ReactDOM from 'react-dom';
-import { keywords_meta, page_title } from './assets/consts';
+import { keywords_meta } from './assets/consts';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -32,6 +31,13 @@ export const LoginContext = createContext<{
   user: null,
   permissions: []
 })
+
+// TODO: Rename Netlify Environment Variables to VITE_[NAME] to use them in the frontend here.
+// This will require refactoring of Netlify functions to use the new variables.
+export const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
+export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
+export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 
 export const SiteSettingsContext = createContext<any>({})
 

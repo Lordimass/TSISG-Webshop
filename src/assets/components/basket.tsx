@@ -1,8 +1,9 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "../css/basket.css"
-import { BasketProduct, productInBasket } from "./product";
+import { BasketProduct } from "./product";
 import { basket_icon } from "../consts";
 import { NotificationsContext, SiteSettingsContext } from "../../app";
+import { ProductInBasket } from "../../lib/types";
 
 export default function Basket() {
     function redirectToCheckout() {
@@ -20,9 +21,9 @@ export default function Basket() {
 
         const basketString: string | null = localStorage.getItem("basket");
         if (basketString) {
-            var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+            var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
             for (let i=0; i<basket.length; i++) {
-                var item: productInBasket = basket[i];
+                var item: ProductInBasket = basket[i];
                 basketQuantTemp += item.basketQuantity;
                 basketPriceTemp += item.price * item.basketQuantity;
             }
@@ -123,7 +124,7 @@ export default function Basket() {
 
     // Fetch the current contents of the basket and display it
     var basketItems: Array<ReactElement> = []
-    var basket: Array<productInBasket> = []
+    var basket: Array<ProductInBasket> = []
     const basketString: string | null = localStorage.getItem("basket")
     if (basketString) {
         basket = JSON.parse(basketString).basket
@@ -134,7 +135,7 @@ export default function Basket() {
         }
     }
     for (let i = 0; i < basket.length; i++) {
-        var prod : productInBasket = basket[i]
+        var prod : ProductInBasket = basket[i]
         basketItems.push(<BasketProduct 
             key={prod.sku}
             sku={prod.sku}

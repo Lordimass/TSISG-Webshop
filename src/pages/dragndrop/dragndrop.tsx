@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { getLoggedIn, getNoImageProds, getUser } from "../../assets/utils";
+import { useState } from "react";
+import { getNoImageProds } from "../../assets/utils";
 import "./dragndrop.css"
-import { supabase } from "../home/home";
 import { page_title } from "../../assets/consts";
+import { supabase } from "../../app";
 
 type noImageProd = {
     sku: number,

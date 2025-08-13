@@ -1,7 +1,7 @@
 import { User, UserResponse } from "@supabase/supabase-js";
-import { supabase } from "../pages/home/home";
 import { useEffect, useState } from "react";
 import { daysOfWeek, monthsOfYear } from "./consts";
+import { supabase } from "../app";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();

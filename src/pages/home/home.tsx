@@ -12,11 +12,6 @@ import { page_title } from '../../assets/consts';
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
 var spinTimeout = false
 
-export const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
-export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
-export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
-
 export default function Home() {
   function changeWord() {
     if (spinTimeout) {

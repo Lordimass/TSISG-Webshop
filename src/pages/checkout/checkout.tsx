@@ -18,8 +18,8 @@ import Footer from "../../assets/components/footer"
 import { CheckoutProducts } from "../../assets/components/products";
 import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, page_title, shipping_options, uk } from "../../assets/consts";
 import Throbber from "../../assets/components/throbber";
-import { basket } from "../../assets/components/product";
 import { LoginContext, NotificationsContext, SiteSettingsContext } from "../../app";
+import { Basket } from "../../lib/types";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -402,7 +402,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
      */
     async function checkStock() {
         // Can assume basket string exists given context
-        const basket: basket = JSON
+        const basket: Basket = JSON
             .parse(localStorage.getItem("basket") as string)
             .basket
         

@@ -1,37 +1,12 @@
-import { useEffect, useState } from "react";
+import "../css/products.css"
+
+import { useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-
-import { productInBasket, image } from "./product";
-
-import "../css/products.css"
 import { getProductList } from "../utils";
-
-type product = {
-  sku: number,
-  /** Time at which the product was added to the database as an ISO date string */
-  inserted_at: string,
-  /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was last confirmed valid */
-  fetched_at: string,
-  /** The time which this data was last edited as an ISO date string. */
-  last_edited: string
-  /** The last person to edit this product */
-  last_edited_by?: string
-  /** Customer facing name of the product */
-  name: string,
-  /** Price of product in GBP inc. Tax */
-  price: number,
-  stock: number,
-  active: boolean
-  category_id: number
-  sort_order: number
-  images: {
-    id: number,
-    image_url: string,
-    display_order: number
-  }[]
-}
+import { ProductData, ProductInBasket } from "../../lib/types";
+import { compareImages, compareProducts } from "../../lib/sortMethods";
 
 const productLoadChunks: number = 20;
 
@@ -45,17 +20,18 @@ export default function Products() {
     }
 
     const [page, setPage] = useState(1)
-    const productData: Array<product> = getProductList();
+    const productData: Array<ProductData> = getProductList();
     var products: Array<React.JSX.Element> = [];
     let pageCount = 0;
 
     // Deactivate products with no images,
     // Products with active=false or stock=0 are excluded from the query.
-    const activeProductData: Array<product> = []
+    const activeProductData: Array<ProductData> = []
     for (let i=0; i<productData.length; i++) {
         const product = productData[i]
         const active = product.images.length>=1; 
         if (active) {
+            product.images.sort(compareImages)
             activeProductData.push(product)
         }
     }
@@ -67,7 +43,7 @@ export default function Products() {
         var end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
-          let product: product|null = activeProductData[i]
+          let product: ProductData|null = activeProductData[i]
           if (!product) {
             continue;
           }
@@ -77,12 +53,8 @@ export default function Products() {
             continue;
           }
           products.push(<Product
+              prod={product}
               key={product.sku}
-              sku={product.sku}
-              name={product.name}
-              price={product.price}
-              images={product.images}
-              stock={product.stock}
           />)
         }
         
@@ -116,11 +88,11 @@ export function CheckoutProducts() {
   if (!basketString) {
       return (<></>)
   }
-  const basket: Array<productInBasket> = JSON.parse(basketString).basket
+  const basket: Array<ProductInBasket> = JSON.parse(basketString).basket
   const els: Array<React.JSX.Element> = []
 
   for (let i=0; i<basket.length; i++) {
-      const item: productInBasket = basket[i]
+      const item: ProductInBasket = basket[i]
       els.push(<CheckoutProduct
           image = {item.images[0]?.image_url}
           name = {item.name}
@@ -134,14 +106,3 @@ export function CheckoutProducts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function compareProducts(a: product, b: product) {
-    // Primary: Sort by sort_order
-    if (a.sort_order < b.sort_order) return -1
-    if (a.sort_order > b.sort_order) return 1
-    // Secondary: Sort by category
-    if (a.category_id < b.category_id) return -1
-    if (a.category_id > b.category_id) return 1
-    // Tertiary: Sort alphabetically
-    return a.name.localeCompare(b.name)
-}

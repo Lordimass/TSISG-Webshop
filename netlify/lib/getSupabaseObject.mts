@@ -1,17 +1,26 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-export default async function getSupabaseObject(authHeader?: string): Promise<{error?: Response, supabase?: SupabaseClient}> {
+/**
+ * Initialises a Supabase Client object.
+ * @param authHeader The JWT token for the request, not required, will not be used if serviceRole = true 
+ * @param serviceRole 
+ * @returns 
+ */
+export default async function getSupabaseObject(authHeader?: string, serviceRole?: boolean): Promise<{error?: Response, supabase?: SupabaseClient}> {
   // Grab URL and Key from Netlify Env Variables.
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
   const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl || !supabaseKey) {
+  if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
     return {error: new Response("Supabase credentials not set", { status: 500 })};
   }
 
   let supabase: SupabaseClient | undefined
 
-  if (authHeader) {
+  if (serviceRole) {
+    supabase = createClient(supabaseUrl, supabaseServiceKey)
+  } else if (authHeader) {
     supabase = createClient(supabaseUrl, supabaseKey, {
         global: {headers: {Authorization: authHeader}}
     });
@@ -20,5 +29,4 @@ export default async function getSupabaseObject(authHeader?: string): Promise<{e
   }
 
   return {supabase}
-
 }

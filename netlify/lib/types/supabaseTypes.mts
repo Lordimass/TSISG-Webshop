@@ -25,3 +25,11 @@ export type OrdersCompressed = {
         image_irl: string
     }[]
 }
+
+export type WebhookPayload = {
+  type: 'UPDATE' | 'INSERT' | 'DELETE'
+  table: string
+  schema: string
+  record: any
+  old_record: any
+}

@@ -4,10 +4,9 @@ import Header from "../../assets/components/header";
 
 import "./login.css"
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { supabase, SUPABASE_ID } from "../home/home";
 import { getLoggedIn } from "../../assets/utils";
 import { hide_icon, page_title, show_icon } from "../../assets/consts";
-import { NotificationsContext } from "../../app";
+import { NotificationsContext, supabase, SUPABASE_ID } from "../../app";
 
 export default function LoginPage() {
     function Login() {
