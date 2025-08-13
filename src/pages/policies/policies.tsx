@@ -9,7 +9,7 @@ import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import { page_title } from "../../assets/consts";
 
-export default function Policy({file_name}: {file_name: string}) {
+export default function Policy({file_name, title}: {file_name: string, title: string}) {
     const [md, setMd] = useState<string | null>(null)
     useEffect(() => {
         async function getPolicy() {
@@ -19,7 +19,7 @@ export default function Policy({file_name}: {file_name: string}) {
     }, [])
 
     return (<><Header/><div className="content">
-    <title>{page_title} - Policy</title>
+    <title>TSISG - {title}</title>
     
     <div className="policy"><Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>{md}</Markdown></div>
     

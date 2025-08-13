@@ -70,6 +70,7 @@ export default function ThankYou() {
     return (<><Header/><div className="content">
         <title>Thank you for your order!</title>
         <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/thankyou'/>
 
         <div className="thanks-box">
             <div className="thanks-top">

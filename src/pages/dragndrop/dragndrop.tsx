@@ -75,6 +75,7 @@ function NoImageProd({prod}: {prod:noImageProd}) {
     return (<li className="noImProd">
         <title>{page_title} - Drag 'n' Drop</title>
         <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/dragndrop'/>
         
         {JSON.stringify(prod)}
         <div 

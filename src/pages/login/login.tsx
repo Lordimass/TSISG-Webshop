@@ -140,6 +140,7 @@ export default function LoginPage() {
     return (<><Header/><div className="content">
         <title>{page_title} - Login</title>
         <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/login'/>
 
         {loggedIn ? <LoggedIn/> : <Login/>}
     </div><Footer/></>)

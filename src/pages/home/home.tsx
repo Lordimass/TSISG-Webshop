@@ -37,6 +37,7 @@ export default function Home() {
   const [word, setWord] = useState("GAY");
   return (<><Header /><div className="content">
     <title>{page_title}</title>
+    <link rel='canonical' href='https://thisshopissogay.com'/>
     <meta name="description" content={`
       The official online shop for This Shop Is So Gay in York! 
       We sell queer and LGBT merchandise of all kinds and deliver

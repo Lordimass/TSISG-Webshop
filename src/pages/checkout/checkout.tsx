@@ -79,6 +79,7 @@ export default function Checkout() {
     return (<><Header/><div className="content checkout-content">
         <title>{page_title} - Checkout</title>
         <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/checkout'/>
         
         {preparing ? <Loading/> : <></>}
         

@@ -60,6 +60,7 @@ export function OrderManager() {
     return (<><Header/><div className="content" id="order-manager-content">
         <title>TSISG STAFF - Order Manager</title>
         <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/staff/orders'/>
 
         {
             accessible ? 
