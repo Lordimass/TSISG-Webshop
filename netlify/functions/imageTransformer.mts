@@ -60,7 +60,7 @@ export default async function handler(request: Request, _context: Context): Prom
         // Transform
         const untransformed: ArrayBuffer = await downloadData.arrayBuffer()
         const transformed: Buffer<ArrayBufferLike> = await sharp(untransformed)
-            .resize(620)
+            .resize(320)
             .toFormat("webp", {quality: 50, smartSubsample: true, smartDeblock: true, effort: 6})
             .toBuffer();
 

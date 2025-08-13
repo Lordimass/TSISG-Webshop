@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import "../css/product.css"
 import { max_product_order } from '../consts';
 import { ImageData, ProductData, ProductInBasket } from '../../lib/types';
-import { getFirstImage } from '../../lib/lib';
 import { supabase } from '../../app';
 import SquareImageBox from './squareImageBox';
 

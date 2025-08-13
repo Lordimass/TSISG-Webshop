@@ -14,6 +14,7 @@ import { createClient, User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import { keywords_meta } from './assets/consts';
+import { refreshBasket } from './lib/lib';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -93,6 +94,17 @@ export function App() {
 
   }, [siteSettings])
 
+  // Update Basket if its been longer than 10 minutes
+  useEffect(() => {
+    const basketString = localStorage.getItem("basket")
+    if (!basketString) return
+    const basketObj = JSON.parse(basketString)
+    if (!basketObj.lastUpdated) refreshBasket()
+    const timeSinceUpdate = (new Date().getTime()) - (new Date(basketObj.lastUpdated).getTime())
+    if (timeSinceUpdate > 600000) {
+      refreshBasket()
+    }
+    }, [])
 
   // Login Checking
   const [loggedIn, setLoggedIn] = useState(false)
