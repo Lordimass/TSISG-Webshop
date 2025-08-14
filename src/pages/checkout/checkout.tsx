@@ -535,10 +535,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         setIsLoading(false);
     };
 
-    function remoteTriggerFormSubmit() {
-        formRef.current?.requestSubmit();
-    }
-
     /**
      * Checks if the session is still active, since they expire after a set time,
      * if it's not, warn the user that they should reload the page
@@ -602,7 +598,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     return (<>
         <div className="checkout-left" id="checkout-left">
-            <form id="payment-form" onSubmit={handleSubmit} ref={formRef}>
+            <form id="payment-form" ref={formRef}>
                 <label>Name<br/></label><input id="name-input" type="text"/><br/><br/>
                 <EmailInput 
                     email={email} setEmail={setEmail}
@@ -626,7 +622,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             <p className="msg">To edit your basket, <a href="/">go back</a></p>
             <CheckoutTotals checkoutTotal={checkout.total}/>
             <p className="msg">{killSwitchMessage}</p>
-            <button type="button" disabled={isLoading || (killSwitch && !DEV)} id="submit" onClick={remoteTriggerFormSubmit}>
+            <button type="button" disabled={isLoading || (killSwitch && !DEV)} id="submit" onClick={handleSubmit}>
                 <span id="button-text">
                 {isLoading ? (
                     <div className="spinner" id="spinner">Processing Payment...</div>
