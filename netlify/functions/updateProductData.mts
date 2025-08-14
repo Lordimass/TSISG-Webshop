@@ -53,7 +53,7 @@ export default async function handler(request: Request, _context: Context) {
                 price: userPerms.includes(PERMISSIONS.price) ? prod.price : undefined,
                 // TODO: This is problematic, if the stock changes in the time it takes for someone to edit a product, this will overwrite the change, making stock keeping inaccurate.
                 stock: prod.stock, 
-                category_id: prod.category.id,
+                category_id: prod.category_id,
                 active: prod.active,
                 weight: prod.weight,
                 customs_description: prod.customs_description,

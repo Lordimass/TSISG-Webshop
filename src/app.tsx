@@ -12,7 +12,7 @@ import { getUser, useFetchFromNetlifyFunction } from './assets/utils';
 import { User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
-import ProdPage from "./pages/product/prodPage";
+import ProdPage from "./pages/products/prodPage";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed

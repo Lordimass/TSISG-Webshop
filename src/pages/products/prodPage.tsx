@@ -1,14 +1,16 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react"
+import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react"
 import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
 import { product } from "../../assets/components/products"
 import SquareImageBox from "../../assets/components/squareImageBox"
-import { back_icon, basket_icon, blank_product, EditableProductProp, editableProductProps, max_product_order } from "../../assets/consts"
-import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softParseJSON, useGetProduct } from "../../assets/utils"
+import { back_icon, basket_icon, blank_product, max_product_order } from "../../assets/consts"
+import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softParseJSON, updateProductData, useFetchFromNetlifyFunction, useGetProduct } from "../../assets/utils"
 import "./prodPage.css"
 import { productInBasket } from "../../assets/components/product"
 import Markdown from "react-markdown"
 import { LoginContext, NotificationsContext } from "../../app"
+import { category_prod_prop, EditableProductProp, editableProductProps } from "./editableProductProps"
+import { prodPropParsers } from "./prodPropParsers"
 
 const ProductContext = createContext<{
     basketQuant?: number, 
@@ -75,7 +77,7 @@ export default function ProdPage() {
                 <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
             </h2>
             <div className="tags">{product.tags.map((tag) => (
-                <div className="tag" key={tag.id}>{tag.name}</div>
+                <div className="tag" key={tag.name}>{tag.name}</div>
                 ))}</div>
             <div className="desc">
                 <Markdown>{product.description}</Markdown>
@@ -94,7 +96,10 @@ function ProductEditor() {
         if (!response.error && response.data && setProduct) {
             setProduct(response.data)
         }
-        
+        const tagsResp = await fetchFromNetlifyFunction("getPropertyLists")
+        if (!response.error && response.data && setProduct) {
+            propLists = tagsResp.data
+        }
     }
 
     const {product, setProduct, originalProd} = useContext(ProductContext)
@@ -102,8 +107,25 @@ function ProductEditor() {
         return
     }
 
+    // Fetch prop lists
+    let propLists: {
+        tags: {id: number, name: string}[], 
+        categories: {id: number, name: string}[]
+    } | undefined = useFetchFromNetlifyFunction("getPropertyLists").data
+    
+    // Compile HTMLOptionElement's to use in datalist.
+    let catOpts: ReactElement[] = []
+    if (propLists && propLists.categories) {
+        catOpts = propLists.categories.map((cat) => <option value={cat.name} key={cat.id}>{cat.name}</option>)
+    } else {
+        catOpts = []
+    }
+
+    const inputBox = useRef<HTMLInputElement>(null);
+
     return (<div className="product-editor">
         <div className="product-editor-grid">
+            {/* All standard text field properties */}
             {editableProductProps.map((productProp) => 
             <EditableProductPropContext.Provider 
                 value={{product, setProduct, productProp, originalProd}} 
@@ -111,12 +133,20 @@ function ProductEditor() {
             >
                 <EditableProdPropBox fetchNewData={fetchNewData}/>
             </EditableProductPropContext.Provider>)}
+            
+            {/* Category field editor */}
+            <EditableProductPropContext.Provider value={{product, setProduct, productProp: category_prod_prop, originalProd}}>
+                <EditableProdPropBox fetchNewData={fetchNewData} inputField={<>
+                    <input list="category-options" id={category_prod_prop.propName+"-editor-input"} placeholder={product.category.name} ref={inputBox}/>
+                    <datalist id="category-options" defaultValue={product.category.name}>{catOpts}</datalist>
+                </>}/>
+            </EditableProductPropContext.Provider>
         </div>
         <button className="refresh-product" onClick={fetchNewData}>Refresh Data</button>
     </div>)
 }
 
-function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}) {
+function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Promise<void>, inputField?: ReactElement}) {
     /**
      * Updates the given product live on screen and internally within Supabase.
      * @param key A keyof the product type as a string. The key of the value to change
@@ -124,17 +154,29 @@ function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}
      * @param constraint A boolean method which returns true if the value is valid, false if not.
      */
     async function updateProduct(key: keyof product, value: any, constraint: (value: string) => boolean) {
-        function assignTypedValue<K extends keyof product>( // Parse string to right type using mapped parser from productTypeMap
+        async function assignTypedValue<K extends keyof product>( // Parse string to right type using mapped parser from productTypeMap
             key: K,
             val: string,
             target: Partial<product>
         ) {
-        const parser = productTypeMap[key];
-        if (parser) {
-            target[key] = parser(val);
-        } else { // Fallback to raw string if no parser provided
-            target[key] = val as product[K]
+            const parser = prodPropParsers[key];
+            if (parser) {
+                target[key] = await parser(val);
+            } else { // Fallback to raw string if no parser provided
+                target[key] = val as product[K]
+            }
         }
+
+        // When the inputField is specified, the value of `value` will be undefined since the ref cannot point to it.
+        // In this case we have to find the input box from the context.
+        if (!value) {
+            const unvalidatedInputField = document.getElementById(category_prod_prop.propName + "-editor-input")
+            if (unvalidatedInputField && unvalidatedInputField.tagName == "INPUT") {
+                const inputField = unvalidatedInputField as HTMLInputElement
+                value = inputField.value
+                inputField.value = ""
+                inputField.placeholder = value
+            }
         }
 
         const valid = constraint(value)
@@ -145,32 +187,11 @@ function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}
         if (!setProduct) {return}
 
         const newProduct: product = {...product}
-        assignTypedValue(key, value, newProduct)
-
-        // Get JWT Access Token to authorise updating database
-        const jwt = await getJWTToken(); 
-        try {
-            const res = await fetch(window.location.origin + '/.netlify/functions/updateProductData', {
-            method: 'POST',
-            headers: {Authorization: `Bearer ${jwt}`},
-            body: JSON.stringify(newProduct),
-            });
-
-            const body = softParseJSON(await res.text())
-            if (!res.ok) {
-                console.error(body)
-                notify(body.message ? body.message : body)
-                return
-            } else {
-                console.log(body)
-            }
-        } catch (err: any) {
-            console.error(err);
-            notify(err.toString())
-            return
-        }
-
-        setProduct(newProduct)
+        // Assign the changed value
+        await assignTypedValue(key, value, newProduct)
+        // Update on Supabase
+        await updateProductData(newProduct)
+        // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         fetchNewData()
     }
 
@@ -210,14 +231,15 @@ function EditableProdPropBox({fetchNewData}: {fetchNewData: () => Promise<void>}
         </div>
         <div className="editable-prop-input-box">
             {productProp.prefix ? <p>{productProp.prefix}</p> : <></>}
+            {inputField ? inputField : 
             <textarea 
                 className="prop-editor-input"
                 id={productProp.propName.toString()+"-editor-input"}
-                defaultValue={product[productProp.propName] || product[productProp.propName] == null ? product[productProp.propName]?.toString() : "Error: Invalid Key Value"}
+                defaultValue={product[productProp.propName] == null ? product[productProp.propName]?.toString() : "Error: Invalid Key Value"}
                 onInput={(e) => autoResizeTextarea(e.currentTarget)}
                 ref={(el) => {autoResizeTextarea(el); inputBox.current = el}}
                 disabled={!editable}
-            />
+            />}
             {productProp.postfix ? <p>{productProp.postfix}</p> : <></>}
         </div>
         <div className="prop-buttons">
@@ -385,43 +407,4 @@ function autoResizeTextarea(el: HTMLTextAreaElement | null) {
     el.style.height = 'auto'; // Reset
     el.style.height = `${el.scrollHeight + 10}px`; // Set to scroll height
   }
-}
-
-// Mapping of keys for the product type to parsers to convert from strings to the respective type for that key
-const productTypeMap: Partial<Record<keyof product, (val: string) => any>> = {
-    name: (val) => val,
-    weight: (val) => {
-        const num = parseFloat(val);
-        if (isNaN(num) || num <= 0) {throw new Error("Invalid weight string wasn't caught by a constraint.")}
-        return num
-    },
-    sort_order: (val) => {
-        const num = parseInt(val, 10);
-        if (isNaN(num)) {throw new Error("Invalid sort_order string wasn't caught by a constraint.")}
-        return num
-    },
-    stock: (val) => {
-        const num = parseInt(val, 10);
-        if (isNaN(num)) {throw new Error("Invalid stock string wasn't caught by a constraint.")}
-        return num
-    },
-    category_id: (val) => {
-        const num = parseInt(val, 10);
-        if (isNaN(num)) {throw new Error("Invalid category_id string wasn't caught by a constraint.")}
-        return num
-    },
-    price: (val) => {
-        const num = parseFloat(val);
-        if (isNaN(num)) {throw new Error("Invalid price string wasn't caught by a constraint.")}
-        return num;
-    },
-    customs_description: (val) => val,
-    active: (val) => {
-        val = val.toLowerCase()
-        if (val === "true") return true;
-        if (val === "false") return false;
-        throw new Error("Invalid boolean wasn't caught by constraint.");
-    },
-    origin_country_code: (val) => val,
-    description: (val) => val
 }

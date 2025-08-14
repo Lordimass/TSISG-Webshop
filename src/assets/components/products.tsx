@@ -44,8 +44,7 @@ export type product = {
   }
   description?: string
   tags: {
-    id: number,
-    created_at: string,
+    created_at: string
     name: string
   }[]
 

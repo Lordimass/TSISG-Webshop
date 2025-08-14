@@ -26,9 +26,13 @@ export async function getUser() {
  * @param jwt Promise of JWT Auth Token
  * @returns Data or error
  */
-export function useFetchFromNetlifyFunction(func: string, body?:string, jwt?: Promise<string | undefined>): {loading: boolean, data?: any, error?: any} {
+export function useFetchFromNetlifyFunction(
+  func: string, 
+  body?:string, 
+  jwt?: Promise<string | undefined>
+): {loading: boolean, data?: any, error?: any} {
   const [data, setData] = useState<any>(null)
-  const [error, setError] = useState<any>(null)
+  const [error, setError] = useState<any>(null)  
   const [loading, setIsLoading] = useState(true)
   let errored = false
   
@@ -91,28 +95,34 @@ export function useFetchFromNetlifyFunction(func: string, body?:string, jwt?: Pr
   }
 }
 
-export async function fetchFromNetlifyFunction(func: string, body?: string): Promise<{data?: any, error?: any}> {
+export async function fetchFromNetlifyFunction(
+  func: string, 
+  body?: string, 
+  jwt?: Promise<string | undefined>
+): Promise<{data?: any, error?: any}> {
   let [dat, err] = [undefined, undefined]
   const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
+  const jwtString = await jwt
 
   try {
     // Standard case where no body supplied
     if (!body) {
-      await fetch(endpoint)
-      .then((response) => response.json())
+      await fetch(endpoint, {headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}})
+      .then((response) => response.text())
       .then((data) => {
-        dat = data
+        dat = softParseJSON(data)
       })
       
     // Alternative POST case
     } else {
       await fetch(endpoint, {
         method: "POST",
-        body: body
+        body: body,
+        headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}
       })
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then((data) => {
-        dat = data
+        dat = softParseJSON(data)
       })
     }
 
@@ -132,8 +142,8 @@ export function useGetProductList(): product[] {
   return data
 }
 
-export function useGetOrderList(jwt: Promise<string | undefined>): any {
-  const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, jwt)
+export function useGetOrderList(): any {
+  const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, getJWTToken())
   return data
 }
 
@@ -144,6 +154,19 @@ export function useGetNoImageProds(): any {
 
 export function useGetProduct(sku: number): product {
   const {data} = useFetchFromNetlifyFunction("getProduct", JSON.stringify({sku:sku}))
+  return data
+}
+
+/**
+ * Creates a new product category if it doesn't already exist and returns the ID
+ */
+export async function getCategoryID(name: string): Promise<number> {
+  const {data} = await fetchFromNetlifyFunction("getCategoryID", name, getJWTToken())
+  return data.id
+}
+
+export async function updateProductData(product: product) {
+  const {data} = await fetchFromNetlifyFunction("updateProductData", JSON.stringify(product), getJWTToken())
   return data
 }
 
