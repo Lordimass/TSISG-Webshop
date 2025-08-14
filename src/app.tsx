@@ -101,10 +101,8 @@ export function App() {
     const basketObj = JSON.parse(basketString)
     if (!basketObj.lastUpdated) refreshBasket()
     const timeSinceUpdate = (new Date().getTime()) - (new Date(basketObj.lastUpdated).getTime())
-    if (timeSinceUpdate > 600000) {
-      refreshBasket()
-    }
-    }, [])
+    if (timeSinceUpdate > 600000) refreshBasket()
+  }, [])
 
   // Login Checking
   const [loggedIn, setLoggedIn] = useState(false)

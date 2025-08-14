@@ -395,11 +395,18 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
   }
 
   const [quantity, setQuantityButActually] = useState(0);
-  const [imageURL, setImageURL] = useState(supabase.storage
-    .from("transformed-product-images")
-    .getPublicUrl(images[0].name.replace(/\.[^.]+$/, '.webp'))
-    .data.publicUrl
-  )
+  const [imageURL, setImageURL] = useState<undefined | string>(undefined)
+  // If the user's basket is yet to be updated with new data (from old system using image_url)
+  // images[0].name will be undefined, so it has to check its existence first.
+  useEffect(() => {
+    if (images[0].name) {
+      setImageURL(supabase.storage
+      .from("transformed-product-images")
+      .getPublicUrl(images[0].name.replace(/\.[^.]+$/, '.webp'))
+      .data.publicUrl)
+    }
+  }, [])
+
   let string_price: string = "£" + price.toFixed(2);
   let max_order: number = Math.min(max_product_order, stock);
   console.log()
@@ -426,6 +433,7 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
           .data.publicUrl)
       }
     }
+    if (!images[0].name) return
     exists(images[0].name.replace(/\.[^.]+$/, '.webp'))
   }, [])
 
