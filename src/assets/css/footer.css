@@ -20,3 +20,8 @@
     font-size: smaller;
     color: var(--jamie-grey);
 }
+
+.policy-separator {
+    margin-left: 0.5ch;
+    margin-right: 0.5ch;
+}

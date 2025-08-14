@@ -42,14 +42,14 @@ export default function Product({prod} : {prod: ProductData}) {
     return (<>
       <div className='decrement-basket-quantity-button' onClick={decrement}>
         <h1>-</h1>
-      </div>
-      <input 
+      </div><input 
         id={'basket-input-' + sku} 
         className='basket-input' 
         type='text'
         inputMode='numeric'
         onBlur={updateQuantity}
         defaultValue={quantity}
+        aria-label='Quantity'
       />
       <div className='increment-basket-quantity-button' onClick={increment}>
         <h1>+</h1>
@@ -461,6 +461,7 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
             inputMode='numeric'
             onBlur={updateQuantity}
             defaultValue={quantity}
+            aria-label='Quantity'
           />
           <div className='increment-basket-quantity-button' onClick={increment}>
             <h1>+</h1>

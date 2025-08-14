@@ -188,12 +188,14 @@ export default function SquareImageBox({
                 alt=""
                 aria-hidden="true"
                 className="square-image-blur"
+                loading='lazy'
               />
               <div className="square-image-center">
                 <img
                   src={img.image_url}
                   alt={img.alt}
                   className="square-image-foreground"
+                  loading='lazy'
                 />
               </div>
             </div>
@@ -206,12 +208,14 @@ export default function SquareImageBox({
             alt=""
             aria-hidden="true"
             className="square-image-blur"
+            loading='lazy'
           />
           <div className="square-image-center">
             <img
               src={image_url}
               alt={alt}
               className="square-image-foreground"
+              loading='lazy'
             />
           </div>
         </div>
