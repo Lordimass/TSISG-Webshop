@@ -164,11 +164,11 @@ export function App() {
 
         <Route path="staff/orders" element={<OrderManager/>} />
   
-        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy'/>}/>
-        <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy'/>}/>
-        <Route path="refunds" element={<Policy file_name='returns' title='Refunds & Returns Policy'/>}/>
-        <Route path="cancellations" element={<Policy file_name='cancellation' title='Cancellation Policy'/>}/>
-        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy'/>}/>
+        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
+        <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+        <Route path="refunds" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+        <Route path="cancellations" element={<Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
+        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
 
         <Route path="dragndrop" element={<DragNDrop/>}/>
 
