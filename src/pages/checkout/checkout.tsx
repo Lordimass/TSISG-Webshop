@@ -3,23 +3,24 @@
 
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
+// This is done automatically by launch-dev-server.ps1 ^
+
+import "./checkout.css"
+
+import Header from "../../assets/components/header"
+import Footer from "../../assets/components/footer"
+import Throbber from "../../assets/components/throbber";
+import { CheckoutProducts } from "../../assets/components/products";
+
+import { LoginContext, NotificationsContext, SiteSettingsContext } from "../../app";
+import { checkCanMakePayment, fetchClientSecret, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, page_title, shipping_options, uk } from "../../assets/consts";
+import { Basket } from "../../lib/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
-import {
-    CheckoutProvider,
-    PaymentElement,
-    useCheckout
-} from '@stripe/react-stripe-js';
+import {CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import "./checkout.css"
-import Header from "../../assets/components/header"
-import Footer from "../../assets/components/footer"
-import { CheckoutProducts } from "../../assets/components/products";
-import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, eu, page_title, shipping_options, uk } from "../../assets/consts";
-import Throbber from "../../assets/components/throbber";
-import { LoginContext, NotificationsContext, SiteSettingsContext } from "../../app";
-import { Basket } from "../../lib/types";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
@@ -45,27 +46,6 @@ const paymentElementOpts: StripePaymentElementOptions = {
                 city: "never"
             }
         }
-    }
-}
-
-/**
- * Debug method to test Apple Pay
- */
-async function checkCanMakePayment() {
-    const pr = (await stripePromise)?.paymentRequest({
-        country: "GB",
-        currency: "gbp",
-        total: {
-        label: "Test Item",
-        amount: 1,
-        },
-        requestPayerName: true,
-        requestPayerEmail: true,
-    })
-    if (!pr) {
-        return `[PAYMENT REQUEST FAILED TO INITIALISE]`
-    } else {
-        return `pr.canMakePayment() => ${JSON.stringify(await pr.canMakePayment())}`
     }
 }
 
@@ -567,7 +547,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     useEffect(() => {
         async function get() {
             if (loginContext.permissions.includes("debug")) {
-                setDebugInfo(await checkCanMakePayment())
+                setDebugInfo(await checkCanMakePayment(stripePromise))
             }
         }
         get()
@@ -646,14 +626,6 @@ function Loading() {
     </div>)
 }
 
-function redirectIfEmptyBasket() {
-    const basketString: string | null = localStorage.getItem("basket")
-
-    if (!basketString || basketString == "{\"basket\":[]}") {
-        window.location.href = "/"
-    }
-}
-
 function EmailInput({ email, setEmail, error, setError}: any) {
     const checkout = useCheckout();
 
@@ -705,49 +677,4 @@ function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSumm
         </div>
     </div>
     )
-}
-
-async function fetchClientSecret(): Promise<string> {
-    let prices: Array<Object> = await fetchStripePrices()
-    let basketString = localStorage.getItem("basket")
-    const result = await fetch(".netlify/functions/createCheckoutSession", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            shipping_options: shipping_options,
-            stripe_line_items: prices,
-            basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
-            origin: window.location.origin
-        })
-    })
-    .then (
-        function(value) {return value.json()},
-        function(error) {return error}    
-    )
-    return result.client_secret
-}
-
-async function fetchStripePrices(): Promise<Array<Object>> {
-    const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(localStorage.getItem("basket"))
-    })
-    .then (
-        async function(value) {return await value.json()},
-        function(error) {console.error(error); return error}
-    )
-    localStorage.setItem("basket", JSON.stringify({basket}))
-    
-    return pricePointIDs;
-}
-
-async function validateEmail(email: any, checkout: any) {
-    const updateResult = await checkout.updateEmail(email);
-    const isValid = updateResult.type !== "error";
-    return { isValid, message: !isValid ? updateResult.error.message : null};
 }

@@ -96,6 +96,11 @@ export function App() {
 
   // Update Basket if its been longer than 10 minutes
   useEffect(() => {
+    // Not necessary on checkout page since a refresh
+    // is done serverside as part of checkout 
+    // initialisation anyways
+    if (window.location.pathname == "/checkout") return
+
     const basketString = localStorage.getItem("basket")
     if (!basketString) return
     const basketObj = JSON.parse(basketString)

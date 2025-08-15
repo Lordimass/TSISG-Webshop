@@ -15,7 +15,7 @@ type prodProps = {
 }
 
 type checkoutProductParams = {
-  image: string
+  image?: string
   name: string
   quantity: number
   total: number
@@ -404,6 +404,10 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
       .from("transformed-product-images")
       .getPublicUrl(images[0].name.replace(/\.[^.]+$/, '.webp'))
       .data.publicUrl)
+    } else if (images[0].image_url){ // Fallback to old system
+      setImageURL(images[0].image_url)
+    } else { // Couldn't find an image at all... strange.
+      setImageURL(undefined)
     }
   }, [])
 
@@ -442,7 +446,7 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
 
   return (
     <div className="basket-product" id={"product-" + sku}>
-      <SquareImageBox image_url={imageURL} size='100%'/>
+      <SquareImageBox image_url={imageURL} size='100%' loading='eager'/>
 
       <div className="basket-prod-footer">
         <div className="basket-product-text">
@@ -486,11 +490,7 @@ export function CheckoutProduct({image, name, quantity, total, sku}: checkoutPro
   null
   
   return (<div className="checkout-product">
-      <div className='checkout-product-image-container' style={{backgroundImage: "url("+image+")"}}>
-        <div className="bg-blurrer"></div>
-        <img src={image}/>
-        <div className="bg-blurrer"></div>
-      </div>
+      <SquareImageBox image_url={image} size='100%' loading='eager'/>
       <div className="checkout-product-text">
           <p>{name} (x{quantity})</p>
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>

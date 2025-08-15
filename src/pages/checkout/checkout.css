@@ -64,21 +64,11 @@
     border-radius: 1em;
 }
 
-.checkout-product img {
-    height: 100%;
-}
-
-.checkout-product-image-container {
-    display: flex;
-    height: 7em;
-    width: 7em;
-    border-radius: 1em;
-    overflow: hidden;
-    margin-right: 1em
-}
-
 .checkout-product-text {
+    font-size: 1.4rem;
     margin-top: 1em;
+    width: 350%;
+    margin: 20px;
 }
 
 .checkout-product-price {
@@ -146,6 +136,11 @@
 }
 
 @media screen and (max-width: 700px) {
+    .checkout-product-text {
+        font-size: large;
+        width: 150%;
+    }
+
     .checkout-content {
         flex-direction: column;
     }

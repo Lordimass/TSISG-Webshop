@@ -1,5 +1,7 @@
 import { Context } from '@netlify/functions';
 import getSupabaseObject from '../lib/getSupabaseObject.mts';
+import { ProductData } from '../lib/types/supabaseTypes.mts';
+import { compareImages } from '../lib/sortMethods.mts';
 
 const SELECT_QUERY = `
   *,
@@ -54,7 +56,7 @@ export default async function handler(request: Request, _context: Context) {
   });
 };
 
-function flattenProducts(products) {
+function flattenProducts(products: ProductData[]): ProductData[] {
   return products.map(product => {
     const images = (product.images || []).map((img: any) => {
       const obj = img.storage_object ?? {};
@@ -74,6 +76,8 @@ function flattenProducts(products) {
         metadata: obj.metadata ?? null,
       };
     });
+    console.log(images)
+    images.sort(compareImages)
 
     return {
       ...product,

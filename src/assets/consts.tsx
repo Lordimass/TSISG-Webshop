@@ -5,11 +5,14 @@ export const hide_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/ob
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
 
+/** The maximum number of any one product that can be ordered */
 export const max_product_order: number = 10
+/** The number of products per page */
+export const productLoadChunks: number = 20;
 
-// The default page title, usually followed by something else like " - 404 Not Found"
+/** The default page title, usually followed by something else like " - 404 Not Found" */
 export const page_title: string = "This Shop Is So GAY"
-// The keywords meta tag to include on every page, this can be added to to include extra tags
+/** The keywords meta tag to include on every page, this can be added to to include extra tags */
 export const keywords_meta: string = "gay,queer,lgbt,lgbtq,lgbtq+,shop,quality,pin badges,gift,bisexual,trans,transgender,bi,pansexual,pan,"
 
 // Region definitions for the purpose of shipping

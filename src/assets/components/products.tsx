@@ -6,9 +6,9 @@ import Product from "./product";
 import { CheckoutProduct } from "./product"
 import { getProductList } from "../utils";
 import { ProductData, ProductInBasket } from "../../lib/types";
-import { compareImages, compareProducts } from "../../lib/sortMethods";
-
-const productLoadChunks: number = 20;
+import { compareProducts } from "../../lib/sortMethods";
+import { productLoadChunks } from "../consts";
+import { supabase } from "../../app";
 
 export default function Products() {
     function incrementPage() {
@@ -31,7 +31,6 @@ export default function Products() {
         const product = productData[i]
         const active = product.images.length>=1; 
         if (active) {
-            product.images.sort(compareImages)
             activeProductData.push(product)
         }
     }
@@ -92,17 +91,26 @@ export function CheckoutProducts() {
   const els: Array<React.JSX.Element> = []
 
   for (let i=0; i<basket.length; i++) {
-      const item: ProductInBasket = basket[i]
-      els.push(<CheckoutProduct
-          image = {item.images[0]?.image_url}
-          name = {item.name}
-          quantity={item.basketQuantity}
-          total = {item.price*item.basketQuantity}
-          key={item.sku}
-      />)
+    let imageURL: undefined | string = undefined
+    const prod: ProductInBasket = basket[i]
+    if (prod.images[0].name) {
+        imageURL = supabase.storage
+            .from("transformed-product-images")
+            .getPublicUrl(prod.images[0].name.replace(/\.[^.]+$/, '.webp'))
+            .data.publicUrl
+    } else if (prod.images[0].image_url){ // Fallback to old system
+        imageURL = prod.images[0].image_url
+    } else { // Couldn't find an image at all... strange.
+        imageURL = undefined
+    }
+
+    els.push(<CheckoutProduct
+        image = {imageURL}
+        name = {prod.name}
+        quantity={prod.basketQuantity}
+        total = {prod.price*prod.basketQuantity}
+        key={prod.sku}
+    />)
   }
   return (<div className="checkout-products">{els}</div>)
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
