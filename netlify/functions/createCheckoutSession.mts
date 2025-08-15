@@ -2,8 +2,6 @@ import { Context } from "@netlify/functions";
 import Stripe from 'stripe';
 import express from 'express';
 import { MetadataParam } from "@stripe/stripe-js";
-import { createClient } from "@supabase/supabase-js";
-import { error } from "console";
 
 var stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
