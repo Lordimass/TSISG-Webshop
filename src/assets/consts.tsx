@@ -1,6 +1,4 @@
-import { Type } from "typescript";
-import { product } from "./components/products";
-import { isNumeric } from "./utils";
+import { ProductData } from "../lib/types";
 
 export const basket_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//shopping-basket.svg";
 export const info_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//information.png";
@@ -12,6 +10,13 @@ export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(impor
 
 // The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
 export const max_product_order: number = 10
+/** The number of products per page */
+export const productLoadChunks: number = 20;
+
+/** The default page title, usually followed by something else like " - 404 Not Found" */
+export const page_title: string = "This Shop Is So GAY"
+/** The keywords meta tag to include on every page, this can be added to to include extra tags */
+export const keywords_meta: string = "gay,queer,lgbt,lgbtq,lgbtq+,shop,quality,pin badges,gift,bisexual,trans,transgender,bi,pansexual,pan,"
 
 // Region definitions for the purpose of shipping
 export const uk = ["GB", "GG", "JE", "IM"]
@@ -26,7 +31,7 @@ export const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday
 export const monthsOfYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
 // Blank product as fallback before a product is fetched
-export const blank_product: product = {
+export const blank_product: ProductData = {
     sku: 0,
     inserted_at: new Date().toISOString(),
     fetched_at: new Date().toISOString(),
@@ -43,5 +48,9 @@ export const blank_product: product = {
         created_at: new Date().toISOString(),
         name: "...",
     },
-    tags: []
+    tags: [],
+    weight: 0,
+    customs_description: "",
+    description: "",
+    origin_country_code: ""
 }

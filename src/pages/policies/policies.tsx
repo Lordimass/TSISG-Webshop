@@ -8,7 +8,7 @@ import { fetchPolicy } from "../../assets/utils";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
-export default function Policy({file_name}: {file_name: string}) {
+export default function Policy({file_name, title, canonical}: {file_name: string, title: string, canonical: string}) {
     const [md, setMd] = useState<string | null>(null)
     useEffect(() => {
         async function getPolicy() {
@@ -18,7 +18,17 @@ export default function Policy({file_name}: {file_name: string}) {
     }, [])
 
     return (<><Header/><div className="content">
-    <div className="policy"><Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>{md}</Markdown></div>
+    <title>TSISG - {title}</title>
+    <link rel='canonical' href={'https://thisshopissogay.com/' + canonical}/>
+    
+    <div className="policy">
+        <Markdown 
+            remarkPlugins={[remarkGfm]} 
+            rehypePlugins={[rehypeSlug]}
+        >
+            {md}
+        </Markdown>
+    </div>
     
     </div><Footer/></>)
 }

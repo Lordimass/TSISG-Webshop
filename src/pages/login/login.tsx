@@ -4,10 +4,9 @@ import Header from "../../assets/components/header";
 
 import "./login.css"
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { supabase, SUPABASE_ID } from "../home/home";
 import { getLoggedIn } from "../../assets/utils";
-import { hide_icon, show_icon } from "../../assets/consts";
-import { NotificationsContext } from "../../app";
+import { hide_icon, page_title, show_icon } from "../../assets/consts";
+import { NotificationsContext, supabase, SUPABASE_ID } from "../../app";
 
 export default function LoginPage() {
     function Login() {
@@ -118,7 +117,7 @@ export default function LoginPage() {
         setLoggedIn(false)
     }
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((event: string) => {
         if (event === "SIGNED_IN") {
             setLoggedIn(true);
         } else if (event === "SIGNED_OUT") {
@@ -139,6 +138,10 @@ export default function LoginPage() {
     },[])
 
     return (<><Header/><div className="content">
+        <title>{page_title} - Login</title>
+        <meta name="robots" content="noindex"/>
+        <link rel='canonical' href='https://thisshopissogay.com/login'/>
+
         {loggedIn ? <LoggedIn/> : <Login/>}
     </div><Footer/></>)
 }

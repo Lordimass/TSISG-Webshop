@@ -1,10 +1,10 @@
 .content-404 {
     align-items: center;
     font-size: 10vw;
+    padding: 30px;
 }
 
 #h404 {
-    margin-top: 3rem;
     height: 2em;
     user-select: none;
 }

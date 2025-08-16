@@ -7,24 +7,10 @@ import React from 'react';
 import "./home.css"
 import Products from '../../assets/components/products';
 import { createClient } from '@supabase/supabase-js';
+import { page_title } from '../../assets/consts';
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
 var spinTimeout = false
-
-// Generate UUID for anonymous users
-const id = localStorage.getItem('anon-id') || crypto.randomUUID()
-localStorage.setItem('anon-id', id)
-
-export const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
-export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
-export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
-export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY, {
-  global: {
-    headers: {
-      "client-id": id
-    }
-  }
-})
 
 export default function Home() {
   function changeWord() {
@@ -50,6 +36,14 @@ export default function Home() {
 
   const [word, setWord] = useState("GAY");
   return (<><Header /><div className="content">
+    <title>{page_title}</title>
+    <link rel='canonical' href='https://thisshopissogay.com'/>
+    <meta name="description" content={`
+      The official online shop for This Shop Is So Gay in York! 
+      We sell queer and LGBT merchandise of all kinds and deliver
+      it straight to your door :D`
+    }/>
+
     <div className="title-section">
       <div className='title-text'>
         <h1>This Shop Is So</h1>

@@ -1,9 +1,8 @@
 import { User, UserResponse } from "@supabase/supabase-js";
-import { supabase } from "../pages/home/home";
 import { useEffect, useState } from "react";
-import { product } from "./components/products";
-import { image, productInBasket } from "./components/product";
 import { daysOfWeek, monthsOfYear } from "./consts";
+import { supabase } from "../app";
+import { ImageData, ProductData, ProductInBasket } from "../lib/types";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();
@@ -137,7 +136,7 @@ export async function fetchFromNetlifyFunction(
   }
 }
 
-export function useGetProductList(): product[] {
+export function useGetProductList(): ProductData[] {
   const {data} = useFetchFromNetlifyFunction("getProducts")
   return data
 }
@@ -152,7 +151,7 @@ export function useGetNoImageProds(): any {
   return data
 }
 
-export function useGetProduct(sku: number): product {
+export function useGetProduct(sku: number): ProductData {
   const {data} = useFetchFromNetlifyFunction("getProduct", JSON.stringify({sku:sku}))
   return data
 }
@@ -165,7 +164,7 @@ export async function getCategoryID(name: string): Promise<number> {
   return data.id
 }
 
-export async function updateProductData(product: product) {
+export async function updateProductData(product: ProductData) {
   const {data} = await fetchFromNetlifyFunction("updateProductData", JSON.stringify(product), getJWTToken())
   return data
 }
@@ -174,7 +173,7 @@ export async function updateProductData(product: product) {
  * Given a new quantity and relevant information on a product to associate it with,
  * update the local storage basket to contain that new quantity
  */
-export function setBasketStringQuantity(quant: number, sku: number, images: image[], price: number, name: string) {
+export function setBasketStringQuantity(prod: ProductData | ProductInBasket, quant: number) {
   // Function needs to update the localStorage basket for persistence,
   // it will also then update the actual quantity state for this product.
 
@@ -183,13 +182,13 @@ export function setBasketStringQuantity(quant: number, sku: number, images: imag
   if (!basketString) { // Create basket if it doesn't exist
     basketString = "{\"basket\": []}"
   }
-  var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+  var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
   // Find product and set quantity
   var found: boolean = false
   for (let i = 0; i<basket.length; i++) {
-    var item: productInBasket = basket[i]
-    if (item.sku == sku) {
+    var item: ProductInBasket = basket[i]
+    if (item.sku == prod.sku) {
       found = true
       // Just remove it from the basket if 0
       if (quant == 0) {
@@ -203,11 +202,12 @@ export function setBasketStringQuantity(quant: number, sku: number, images: imag
   // If it wasn't found, create it
   if (!found) {
     basket.push({
-      "sku": sku,
-      "name": name,
-      "price": price,
+      "sku": prod.sku,
+      "name": prod.name,
+      "price": prod.price,
       "basketQuantity": quant,
-      "images": images
+      "images": prod.images,
+      "stock": prod.stock
     })
   }
 

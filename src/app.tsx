@@ -1,18 +1,19 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ReactGA from "react-ga4"
 
-import Home, { supabase } from './pages/home/home';
+import Home from './pages/home/home';
 import React, { createContext, RefObject, useEffect, useRef, useState } from 'react'
 import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
-import DragNDrop from './pages/dragndrop/dragndrop';
 import { getUser, useFetchFromNetlifyFunction } from './assets/utils';
-import { User } from '@supabase/supabase-js';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import ProdPage from "./pages/products/prodPage";
+import { createClient, User } from '@supabase/supabase-js';
+import { keywords_meta } from './assets/consts';
+import { refreshBasket } from './lib/lib';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -30,6 +31,13 @@ export const LoginContext = createContext<{
   user: null,
   permissions: []
 })
+
+// TODO: Rename Netlify Environment Variables to VITE_[NAME] to use them in the frontend here.
+// This will require refactoring of Netlify functions to use the new variables.
+export const SUPABASE_ID = "iumlpfiybqlkwoscrjzt"
+export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
+export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
+export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 
 export const SiteSettingsContext = createContext<any>({})
 
@@ -84,6 +92,20 @@ export function App() {
 
   }, [siteSettings])
 
+  // Update Basket if its been longer than 10 minutes
+  useEffect(() => {
+    // Not necessary on checkout page since a refresh
+    // is done serverside as part of checkout 
+    // initialisation anyways
+    if (window.location.pathname == "/checkout") return
+
+    const basketString = localStorage.getItem("basket")
+    if (!basketString) return
+    const basketObj = JSON.parse(basketString)
+    if (!basketObj.lastUpdated) refreshBasket()
+    const timeSinceUpdate = (new Date().getTime()) - (new Date(basketObj.lastUpdated).getTime())
+    if (timeSinceUpdate > 600000) refreshBasket()
+  }, [])
 
   // Login Checking
   const [loggedIn, setLoggedIn] = useState(false)
@@ -118,10 +140,21 @@ export function App() {
   }, [])
 
 
-  return (
+  return (<>
+    <meta name='author' content='Sam Knight'/>
+    <meta name='author' content='Lordimass'/>
+    <meta name='creator' content='Sam Knight'/>
+    <meta name='creator' content='Lordimass'/>
+    <meta name='generator' content='react'/>
+    <meta name='keywords' content={keywords_meta}/>
+
     <LoginContext.Provider value={{loggedIn, user, permissions}}>
     <SiteSettingsContext.Provider value={siteSettings}>
     <NotificationsContext.Provider value={{newNotif, notify}}>
+    {/**
+     * Make sure to update sitemap.mts (Netlify function) to include new static pages
+     * in the sitemap 
+    */}
     <BrowserRouter>
       <Routes>
         <Route index element={<Home />} />
@@ -136,20 +169,18 @@ export function App() {
 
         <Route path="staff/orders" element={<OrderManager/>} />
   
-        <Route path="privacy" element={<Policy file_name='privacy-policy'/>}/>
-        <Route path="returns" element={<Policy file_name='returns'/>}/>
-        <Route path="refunds" element={<Policy file_name='returns'/>}/>
-        <Route path="cancellations" element={<Policy file_name='cancellation'/>}/>
-        <Route path="shipping" element={<Policy file_name='shipping'/>}/>
-
-        <Route path="dragndrop" element={<DragNDrop/>}/>
+        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
+        <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+        <Route path="refunds" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+        <Route path="cancellations" element={<Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
+        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
 
         <Route path="*" element={<Page404/>} />
       </Routes>
     </BrowserRouter>
     </NotificationsContext.Provider>
     </SiteSettingsContext.Provider>
-    </LoginContext.Provider>
+    </LoginContext.Provider></>
   )
 }
 

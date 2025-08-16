@@ -1,9 +1,9 @@
-import { product } from "../../assets/components/products"
 import { isNumeric } from "../../assets/utils"
+import { ProductData } from "../../lib/types"
 
 // Editable Product Properties
 export type EditableProductProp = {
-    propName: keyof product
+    propName: keyof ProductData
     displayName: string
     /** String to display after input field (e.g. units) */
     postfix?: string

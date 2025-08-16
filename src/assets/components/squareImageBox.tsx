@@ -6,9 +6,10 @@ type SquareImageBoxProps = {
   alt?: string;
   size?: string;
   images?: {
-    image_url: string;
+    image_url?: string;
     alt?: string;
   }[];
+  loading?: "eager" | "lazy"
 };
 
 /**
@@ -22,6 +23,7 @@ type SquareImageBoxProps = {
  * @param size Size of the box as a dynamic CSS string, defaults to 200px.
  * @param images An array of objects with image_url:string and alt:string (optional). Will render an image carousel
  * if this is supplied
+ * @param loading Loading eagerness of images, "eager" or "lazy"
  * @returns 
  */
 export default function SquareImageBox({
@@ -29,6 +31,7 @@ export default function SquareImageBox({
   alt,
   size = '200px',
   images,
+  loading = "lazy"
 }: SquareImageBoxProps) {
   function handleTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
@@ -175,6 +178,7 @@ export default function SquareImageBox({
             transform: `translateX(${ -index * containerWidth + dragOffset }px)`,
             transition: isDragging ? 'none' : 'transform 0.3s ease',
             width: `${containerWidth * extendedImages.length}px`,
+            height: `${containerWidth}px`
           }}
         >
           {extendedImages.map((img, i) => (
@@ -188,12 +192,14 @@ export default function SquareImageBox({
                 alt=""
                 aria-hidden="true"
                 className="square-image-blur"
+                loading='lazy'
               />
               <div className="square-image-center">
                 <img
                   src={img.image_url}
                   alt={img.alt}
                   className="square-image-foreground"
+                  loading='lazy'
                 />
               </div>
             </div>
@@ -206,12 +212,14 @@ export default function SquareImageBox({
             alt=""
             aria-hidden="true"
             className="square-image-blur"
+            loading='lazy'
           />
           <div className="square-image-center">
             <img
               src={image_url}
               alt={alt}
               className="square-image-foreground"
+              loading='lazy'
             />
           </div>
         </div>

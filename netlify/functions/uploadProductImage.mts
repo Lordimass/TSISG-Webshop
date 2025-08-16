@@ -4,6 +4,7 @@ import formidable from 'formidable';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import { Readable } from 'stream';
+import { formatBytes } from '../lib/lib.mts';
 
 const TARGET_IMAGE_SIZE = 150 * 1024
 const ALLOWED_UIDS = ["9f76379b-8c04-47c6-b950-b7e159e7859b"]
@@ -109,16 +110,6 @@ function bufferToReadable(buffer: Buffer) {
       this.push(null);
     }
   });
-}
-
-function formatBytes(bytes: number): string {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let i = 0;
-  while (bytes >= 1024 && i < units.length - 1) {
-    bytes /= 1024;
-    i++;
-  }
-  return `${bytes.toFixed(2)} ${units[i]}`;
 }
 
 async function convertAndCompressToWebp(buffer: Buffer) {

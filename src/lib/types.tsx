@@ -16,13 +16,30 @@ export type ProductData = {
   price: number
   stock: number
   active: boolean
+  /** DEPRECATED: Please use category.id instead */
   category_id: number
+  /** The category the product belongs to */
+  category: {
+    id: number
+    created_at: string
+    name: string
+  }
   sort_order: number
   images: ImageData[]
+  /** Weight of the product in grams */
+  weight: number
+  /** Description for customs forms */
+  customs_description: string
+  /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
+  origin_country_code: string
+  /** The user facing description of the product */
+  description: string
+  /** The tags attached to the product */
+  tags: TagData[]
 }
 
 export type ImageData = {
-    alt: string | null
+    alt: string | undefined
     bucket_id: string
     display_order: number
     id: UUID
@@ -34,38 +51,18 @@ export type ImageData = {
     product_sku: number
 }
 
-export type OrdersCompressed = {
-    placed_at: string
-    email: string
-    street_address: string
-    country: string
-    name: string
-    fulfilled: boolean
-    total_value: number
-    postal_code: string
-    id: string
-    city: string
-    delivery_cost?: number
-    products: {
-        sku: number
-        product_name: string
-        weight: number
-        customs_description: string
-        origin_country_code: string
-        package_type_override: string
-        category: {
-            id: number
-            name: string
-        }
-        line_value: number
-        image_irl: string
-    }[]
+export type TagData = {
+  name: string
+  created_at: string
 }
 
-export type WebhookPayload = {
-  type: 'UPDATE' | 'INSERT' | 'DELETE'
-  table: string
-  schema: string
-  record: any
-  old_record: any
+export type Basket = ProductInBasket[]
+export type ProductInBasket = {
+  sku: number,
+  name: string,
+  price: number,
+  basketQuantity: number,
+  images: ImageData[]
+  stock: number
 }
+

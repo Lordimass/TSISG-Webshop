@@ -20,3 +20,20 @@
     font-size: smaller;
     color: var(--jamie-grey);
 }
+
+.policy-separator {
+    color: var(--jamie-grey);
+}
+
+.policy-separator {
+    margin-left: 0.5ch;
+    margin-right: 0.5ch;
+}
+
+.footer-company-information {
+    font-size: 0.8em;
+}
+
+.footer .additional-links {
+    text-align: center;
+}

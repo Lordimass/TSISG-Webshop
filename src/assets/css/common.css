@@ -57,11 +57,13 @@ h2 {
 }
 
 a {
+    font-family: "Perfect Penmanship";
     color: black;
 }
 
 .content {
     display: flex;
+    min-height: 75vh;
     flex-direction: column;
     flex-grow: 1;
     background-color: var(--yellow);

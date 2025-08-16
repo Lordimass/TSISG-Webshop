@@ -1,6 +1,7 @@
 import { Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe'
+import getSupabaseObject from "../lib/getSupabaseObject.mts";
 
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -17,6 +18,7 @@ type productInBasket = {
     price: number,
     basketQuantity: number,
     images: image[]
+    stock: number
 }
   
 type image = {
@@ -25,25 +27,20 @@ type image = {
     display_order: number
 }
 
-export default async function handler(request: Request, _context: Context) {
-    if (!stripe) {
-        return
-    }
+export default async function handler(request: Request, context: Context) {
+    if (!stripe) throw new Error(
+        "Stripe client not initialised, check STRIPE_SECRET_KEY environment variable"
+    );
 
     const pricePointIDs: Array<Object> = [];
     const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
 
-    const body = request.body;
-    const bodyText: string = await new Response(body).text();
-    let basket: productInBasket[] = JSON.parse(JSON.parse(bodyText)).basket;
+    let basket = await request.json()
 
-    // Check prices are accurate
-    const priceCheckResp = await updateBasketData(basket);
-    if (!priceCheckResp.ok) {
-        return priceCheckResp
-    } else {
-        basket = await priceCheckResp.json()
-    }
+    // Verify and update basket data with up to date information
+    const priceCheckResp = await updateBasketData(basket, context);
+    if (!priceCheckResp.ok) return priceCheckResp
+    else basket = await priceCheckResp.json()
 
     for (let i = 0; i < basket.length; i++) {
         const item: productInBasket = basket[i];
@@ -106,45 +103,36 @@ export default async function handler(request: Request, _context: Context) {
 
 /**
  * Update price and images information to make sure it matches the database and hasn't been tampered with
+ * 
+ * This has to be done as part of the stripe prices fetch flow to ensure there's no possibility for bad
+ * actors to tamper with the basket before its sent to this function
 */ 
-async function updateBasketData(basket: productInBasket[]) {
-    // Grab URL and Key from Netlify Env Variables.
-    const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-    // Validate that they were both successfully fetched.
-    if (!supabaseUrl || !supabaseKey) {
-        return new Response("Supabase credentials not set", { status: 401 });
+async function updateBasketData(basket: productInBasket[], context: Context) {
+    // Fetch products
+    const resp = await fetch(context.url.origin + "/.netlify/functions/getProducts", {
+        method: "POST",
+        body: JSON.stringify(basket.map((i)=>i.sku))
+    })
+    if (!resp.ok) {
+        return new Response("Failed to verify product data", {status: 502})
     }
+    const freshProducts = await resp.json()
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    try {
-        const {data, error} = await supabase
-            .from("products")
-            .select("sku, price, images:product_images(*)")
-            .in("sku", basket.map((i)=>i.sku))
-        if (error) {
-            return new Response(error.message, {status: 502})
-        }
-
-        // Check and ammend prices 
-        for (let i=0; i<basket.length; i++) {
-            const basketItem = basket[i]
-            for (let j=0; j<data.length; j++) {
-                const dataItem = data[i]
-                if (dataItem.sku == basketItem.sku) {
-                    basketItem.price = dataItem.price
-                    basketItem.images = dataItem.images
-                }
+    // Check and ammend prices 
+    for (let i=0; i<basket.length; i++) {
+        const basketItem = basket[i]
+        for (let j=0; j<freshProducts.length; j++) {
+            const dataItem = freshProducts[i]
+            if (dataItem.sku == basketItem.sku) {
+                basketItem.price = dataItem.price
+                basketItem.images = dataItem.images
             }
         }
-        return new Response(JSON.stringify(basket), {status: 200})
-        
-    } catch (error) {
-        return new Response(JSON.stringify(error), {status: 500})
     }
+    
+    return new Response(JSON.stringify(basket), {status: 200})
 }
+
 
 function getProductOnStripe(
     stripeProducts: Array<Stripe.Product>, 

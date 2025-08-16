@@ -1,29 +1,29 @@
 import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react"
 import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
-import { product } from "../../assets/components/products"
 import SquareImageBox from "../../assets/components/squareImageBox"
 import { back_icon, basket_icon, blank_product, max_product_order } from "../../assets/consts"
-import { fetchFromNetlifyFunction, getJWTToken, setBasketStringQuantity, softParseJSON, updateProductData, useFetchFromNetlifyFunction, useGetProduct } from "../../assets/utils"
+import { fetchFromNetlifyFunction, setBasketStringQuantity, updateProductData, useFetchFromNetlifyFunction, useGetProduct } from "../../assets/utils"
 import "./prodPage.css"
-import { productInBasket } from "../../assets/components/product"
 import Markdown from "react-markdown"
 import { LoginContext, NotificationsContext } from "../../app"
 import { category_prod_prop, EditableProductProp, editableProductProps } from "./editableProductProps"
 import { prodPropParsers } from "./prodPropParsers"
+import { ProductData, ProductInBasket } from "../../lib/types"
+import { getImageURL } from "../../lib/lib"
 
 const ProductContext = createContext<{
     basketQuant?: number, 
     setBasketQuant?: React.Dispatch<React.SetStateAction<number>>,
-    setProduct?: React.Dispatch<React.SetStateAction<product>>
-    product: product
-    originalProd: product
+    setProduct?: React.Dispatch<React.SetStateAction<ProductData>>
+    product: ProductData
+    originalProd: ProductData
 }>({product: blank_product, originalProd: blank_product});
 
 const EditableProductPropContext = createContext<{
-    originalProd: product
-    product: product,
-    setProduct?: React.Dispatch<React.SetStateAction<product>>
+    originalProd: ProductData
+    product: ProductData,
+    setProduct?: React.Dispatch<React.SetStateAction<ProductData>>
     productProp?: EditableProductProp
 }>({product: blank_product, originalProd: blank_product})
 
@@ -32,9 +32,9 @@ export default function ProdPage() {
 
     const sku = extractSKU()
     const [basketQuant, setBasketQuant] = useState(0)
-    const [product, setProduct] = useState<product>(blank_product);
+    const [product, setProduct] = useState<ProductData>(blank_product);
     // Original prod used for reset buttons in editor
-    const [originalProd, setOriginalProd] = useState<product>(blank_product);
+    const [originalProd, setOriginalProd] = useState<ProductData>(blank_product);
     const [isEditMode, setIsEditMode] = useState(false)
     const prod = useGetProduct(sku); 
     useEffect(() => {
@@ -53,6 +53,17 @@ export default function ProdPage() {
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
 
+    const [images, setImages] = useState<{ image_url?: string, alt?: string }[]>([])
+    useEffect(() => {
+        if (product) {
+            setImages(product.images.map((image) => {
+                return {
+                    image_url: getImageURL(image),
+                    alt: image.alt
+                }
+            }))
+        }
+    }, [product])
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
         basketQuant, setBasketQuant, product, setProduct, originalProd}}>
         <a className="go-home-button" href="/">
@@ -66,7 +77,7 @@ export default function ProdPage() {
             access.
         </p> : <></>}
         <div className="product-box">
-            <div className="image"><SquareImageBox images={product.images} size="100%"/></div>
+            <div className="image"><SquareImageBox images={images} size="100%"/></div>
             <h1 className="title">
                 {product.name}
                 {isEditMode ? <><br/><div className="sku">SKU{sku}</div></> : <></>}
@@ -153,17 +164,17 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
      * @param value The new value to map the key to. Automatically parsed to the right type for the given key
      * @param constraint A boolean method which returns true if the value is valid, false if not.
      */
-    async function updateProduct(key: keyof product, value: any, constraint: (value: string) => boolean) {
-        async function assignTypedValue<K extends keyof product>( // Parse string to right type using mapped parser from productTypeMap
+    async function updateProduct(key: keyof ProductData, value: any, constraint: (value: string) => boolean) {
+        async function assignTypedValue<K extends keyof ProductData>( // Parse string to right type using mapped parser from productTypeMap
             key: K,
             val: string,
-            target: Partial<product>
+            target: Partial<ProductData>
         ) {
             const parser = prodPropParsers[key];
             if (parser) {
                 target[key] = await parser(val);
             } else { // Fallback to raw string if no parser provided
-                target[key] = val as product[K]
+                target[key] = val as ProductData[K]
             }
         }
 
@@ -186,7 +197,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         }
         if (!setProduct) {return}
 
-        const newProduct: product = {...product}
+        const newProduct: ProductData = {...product}
         // Assign the changed value
         await assignTypedValue(key, value, newProduct)
         // Update on Supabase
@@ -297,13 +308,7 @@ function QuantityTicker() {
         // It may not exist if, e.g. basketQuant is 0
         setInputValue(newQuantity.toString())
 
-        setBasketStringQuantity(
-            newQuantity, 
-            product.sku, 
-            product.images, 
-            product.price, 
-            product.name
-        )
+        setBasketStringQuantity(product, newQuantity)
         setBasketQuant(newQuantity)
     }
 
@@ -318,9 +323,9 @@ function QuantityTicker() {
 
         var basketString: string | null = localStorage.getItem("basket");
         if (basketString) {
-            var basket: Array<productInBasket> = JSON.parse(basketString).basket;
+            var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
             for (let i=0; i<basket.length; i++) {
-                var item: productInBasket = basket[i];
+                var item: ProductInBasket = basket[i];
                 if (item.sku == product.sku) {
                     setBasketQuant(item.basketQuantity);
 
