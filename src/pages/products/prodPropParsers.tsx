@@ -54,4 +54,11 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
         if (isNaN(ID)) {throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)}
         return ID
     },
+
+    // Convert tags string to array of tag names
+    tags: async (val) => {
+        if (!val) throw new Error("Tags string is empty");
+        const tags = val.split(",").map(tag => tag.trim());
+        return tags;
+    }
 }

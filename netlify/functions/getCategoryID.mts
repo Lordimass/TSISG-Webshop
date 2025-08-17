@@ -1,6 +1,5 @@
 import { Context } from '@netlify/functions';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import getSupabaseObject from '../lib/getSupabaseObject.mts';
+import getSupabaseClient from '../lib/getSupabaseClient.mts';
 
 /**
  * Gets the ID of a category, given its name as the body. 
@@ -11,7 +10,7 @@ export default async function handler(request: Request, _context: Context) {
     if (!authHeader) {
         return new Response("No Authorization supplied", {status: 403})
     }
-    const {error, supabase} = await getSupabaseObject(authHeader)
+    const {error, supabase} = await getSupabaseClient(authHeader)
     if (error) {return error}
     const name = await request.text()
     console.log(`Extracted Tag Name from request: ${name}`)

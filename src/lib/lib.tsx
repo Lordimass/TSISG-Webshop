@@ -34,6 +34,11 @@ export async function refreshBasket() {
   localStorage.setItem("basket", JSON.stringify({basket, lastUpdated: (new Date()).toISOString()}))
 }
 
+/**
+ * Gets the public URL of a product image
+ * @param image The image data
+ * @returns The public URL of the image, or undefined if not found
+ */
 export function getImageURL(image: ImageData): string | undefined {
   if (image.name) {
     return (supabase.storage
@@ -45,4 +50,17 @@ export function getImageURL(image: ImageData): string | undefined {
   } else { // Couldn't find an image at all... strange.
     return undefined
   }
+}
+
+/**
+ * Opens a JSON object in a new browser tab
+ * @param obj The JSON object to open
+ */
+export function openObjectInNewTab(obj: any) {
+  const jsonString = JSON.stringify(obj, null, 2); // pretty-print
+
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  window.open(url, "_blank");
 }

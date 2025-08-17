@@ -1,13 +1,12 @@
 import { Context } from '@netlify/functions';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import getSupabaseObject from '../lib/getSupabaseObject.mts';
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 
 export default async function handler(request: Request, _context: Context) {
     const authHeader = request.headers.get("Authorization")
     if (!authHeader) {
         return new Response("No Authorization supplied", {status: 403})
     }
-    const {error, supabase} = await getSupabaseObject(authHeader)
+    const {error, supabase} = await getSupabaseClient(authHeader)
     if (error) {return error}
     
     const {id, delivery_cost} = await request.json();

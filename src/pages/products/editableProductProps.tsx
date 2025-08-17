@@ -116,3 +116,10 @@ export const category_prod_prop: EditableProductProp = {
     tooltip: "The name of the category to place this product in, can be used to create new categories if one with the given name doesn't already exist",
     constraint: (_value: string) => true
 }
+
+export const tags_prod_prop: EditableProductProp = {
+    propName: "tags",
+    displayName: "Tags",
+    tooltip: "A comma separated list of tags associated with this product",
+    constraint: (_value: string) => true
+}

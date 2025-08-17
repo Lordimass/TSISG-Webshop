@@ -1,5 +1,5 @@
 import { Context } from '@netlify/functions';
-import getSupabaseObject from '../lib/getSupabaseObject.mts';
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import { ProductData } from '../lib/types/supabaseTypes.mts';
 import { compareImages } from '../lib/sortMethods.mts';
 
@@ -24,7 +24,7 @@ const SELECT_QUERY = `
 `
 
 export default async function handler(request: Request, _context: Context) {
-  const {supabase, error: supErr} = await getSupabaseObject()
+  const {supabase, error: supErr} = await getSupabaseClient()
   if (supErr) return supErr
 
   // Function can accept a list of skus to fetch, instead of fetching all
@@ -76,7 +76,6 @@ function flattenProducts(products: ProductData[]): ProductData[] {
         metadata: obj.metadata ?? null,
       };
     });
-    console.log(images)
     images.sort(compareImages)
 
     return {

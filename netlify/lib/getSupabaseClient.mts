@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  * @param serviceRole 
  * @returns 
  */
-export default async function getSupabaseObject(authHeader?: string, serviceRole?: boolean): Promise<{error?: Response, supabase?: SupabaseClient}> {
+export default async function getSupabaseClient(authHeader?: string, serviceRole?: boolean): Promise<{error?: Response, supabase?: SupabaseClient}> {
   // Grab URL and Key from Netlify Env Variables.
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
   const supabaseKey = process.env.SUPABASE_ANON_KEY;

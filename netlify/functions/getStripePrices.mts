@@ -1,7 +1,5 @@
 import { Context } from "@netlify/functions";
-import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe'
-import getSupabaseObject from "../lib/getSupabaseObject.mts";
 
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
