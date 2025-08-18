@@ -25,7 +25,10 @@ export async function checkCanMakePayment(stripePromise: Promise<Stripe | null>)
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
 
-    if (!basketString || basketString == "{\"basket\":[]}") {
+    if (!basketString 
+        || basketString == "{\"basket\":[]}" 
+        || basketString == "{}"
+    ) {
         window.location.href = "/"
     }
 }
@@ -65,7 +68,7 @@ export async function fetchStripePrices(): Promise<Array<Object>> {
         async function(value) {return await value.json()},
         function(error) {console.error(error); return error}
     )
-    localStorage.setItem("basket", JSON.stringify({basket}))
+    localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
     
     return pricePointIDs;
 }

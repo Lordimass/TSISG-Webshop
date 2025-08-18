@@ -129,8 +129,10 @@ export default function Product({prod} : {prod: ProductData}) {
 
     // Fetch the current basket contents
     let basketString: string | null = localStorage.getItem("basket")
-    if (!basketString) { // Create basket if it doesn't exist
-      basketString = "{\"basket\": []}"
+    let freshBasket = false
+    if (!basketString || basketString == "{\"basket\":[]}" || basketString == "{}") { // Create basket if it doesn't exist
+      basketString = `{"basket": []}`
+      freshBasket = true
     }
     let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
@@ -163,7 +165,9 @@ export default function Product({prod} : {prod: ProductData}) {
 
     // Save to localStorage
     localStorage.setItem("basket",
-      JSON.stringify({"basket": basket})
+      JSON.stringify(freshBasket 
+        ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
+        : {"basket": basket})
     )
     window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)
@@ -299,8 +303,10 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
 
     // Fetch the current basket contents
     let basketString: string | null = localStorage.getItem("basket")
-    if (!basketString) { // Create basket if it doesn't exist
+    let freshBasket = false
+    if (!basketString || basketString == "{\"basket\":[]}" || basketString == "{}") { // Create basket if it doesn't exist
       basketString = "{\"basket\": []}"
+      freshBasket = true
     }
     let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
@@ -333,9 +339,10 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
 
     // Save to localStorage
     localStorage.setItem("basket",
-      JSON.stringify({"basket": basket})
+      JSON.stringify(freshBasket 
+        ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
+        : {"basket": basket})
     )
-
     window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)
   }

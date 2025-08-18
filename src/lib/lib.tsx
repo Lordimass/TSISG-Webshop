@@ -30,5 +30,5 @@ export async function refreshBasket() {
       }
     })
   })
-  localStorage.setItem("basket", JSON.stringify({basket, lastUpdated: (new Date()).toISOString()}))
+  localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
 }
