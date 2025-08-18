@@ -1,5 +1,5 @@
 import { Stripe } from "@stripe/stripe-js"
-import { shipping_options } from "../../assets/consts"
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, POSTAL_CODE_FIELD_MAX_LENGTH, shipping_options } from "../../assets/consts"
 
 /**
  * Debug method to test Apple Pay
@@ -70,8 +70,26 @@ export async function fetchStripePrices(): Promise<Array<Object>> {
     return pricePointIDs;
 }
 
-export async function validateEmail(email: any, checkout: any) {
+export async function validateEmail(email: string, checkout: any) {
     const updateResult = await checkout.updateEmail(email);
     const isValid = updateResult.type !== "error";
     return { isValid, message: !isValid ? updateResult.error.message : null};
+}
+
+export function validateCity(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= CITY_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `City name must be at most ${CITY_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
+}
+
+export function validateAddress(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= ADDRESS_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `Address must be at most ${ADDRESS_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
+}
+
+export function validatePostalCode(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= POSTAL_CODE_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `Postal code must be at most ${POSTAL_CODE_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
 }
