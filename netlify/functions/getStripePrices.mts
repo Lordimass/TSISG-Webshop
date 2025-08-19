@@ -1,7 +1,5 @@
 import { Context } from "@netlify/functions";
-import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe'
-import getSupabaseObject from "../lib/getSupabaseObject.mts";
 
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -28,6 +26,7 @@ type image = {
 }
 
 export default async function handler(request: Request, context: Context) {
+    console.log(process.env.STRIPE_SECRET_KEY)
     if (!stripe) throw new Error(
         "Stripe client not initialised, check STRIPE_SECRET_KEY environment variable"
     );
