@@ -6,7 +6,8 @@ import "./login.css"
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { getLoggedIn } from "../../assets/utils";
 import { hide_icon, page_title, show_icon } from "../../assets/consts";
-import { NotificationsContext, supabase, SUPABASE_ID } from "../../app";
+import { supabase, SUPABASE_ID } from "../../app";
+import { NotificationsContext } from "../../assets/components/notification";
 
 export default function LoginPage() {
     function Login() {

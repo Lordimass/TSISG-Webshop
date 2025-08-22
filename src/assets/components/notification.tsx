@@ -1,9 +1,16 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
 import "../css/notification.css";
 import { info_icon } from "../consts";
-import { NotificationsContext } from "../../app";
 
-type Notif = { id: number; message: string };
+export type Notif = { id: number; message: string; duration?: number };
+
+export const NotificationsContext = createContext<{
+  newNotif: RefObject<Notif>,
+  notify: (message: string) => void
+}>({
+  newNotif: {current: {id: Date.now(), message: "NullMessage"}},
+  notify: (message: string) => {console.error(`Notify method does not exist, failed to notify with message: ${message}`)}
+})
 
 export default function Notifications() {
   const {newNotif} = useContext(NotificationsContext)
@@ -17,7 +24,8 @@ export default function Notifications() {
     const handler = (e: any) => {
       const id = newNotif.current.id
       const message = newNotif.current.message
-      setQueue((q) => [...q, { id, message }]);
+      const duration = newNotif.current.duration
+      setQueue((q) => [...q, { id, message, duration }]);
     };
     window.addEventListener("notification", handler);
     return () => window.removeEventListener("notification", handler);
@@ -41,8 +49,12 @@ export default function Notifications() {
     // next tick: add the "visible" class so CSS transition runs
     const id1 = window.setTimeout(() => setIsVisible(true), 20);
 
-    // schedule slide‑out after 5s
-    timeoutRef.current = window.setTimeout(() => setIsVisible(false), 5020);
+    // schedule slide‑out after 5s or duration
+    if (visibleNotif.duration) {
+      timeoutRef.current = window.setTimeout(() => setIsVisible(false), (visibleNotif.duration*1000+20));
+    } else {
+      timeoutRef.current = window.setTimeout(() => setIsVisible(false), 5020);
+    }
 
     return () => {
       clearTimeout(id1);

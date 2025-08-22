@@ -12,7 +12,7 @@ import Footer from "../../assets/components/footer"
 import Throbber from "../../assets/components/throbber";
 import { CheckoutProducts } from "../../assets/components/products";
 
-import { LoginContext, NotificationsContext, SiteSettingsContext } from "../../app";
+import { LoginContext, SiteSettingsContext } from "../../app";
 import { checkCanMakePayment, fetchClientSecret, redirectIfEmptyBasket, validateAddress, validateCity, validateEmail, validatePostalCode } from "./checkoutFunctions";
 import { uk, eu, page_title, shipping_options } from "../../assets/consts";
 import { Basket } from "../../lib/types";
@@ -22,6 +22,7 @@ import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, S
 import {CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
 import CountryOptgroups from "./countryOptgroups";
+import { NotificationsContext } from "../../assets/components/notification";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 let stripePromise: Promise<Stripe | null> = new Promise(()=>{});

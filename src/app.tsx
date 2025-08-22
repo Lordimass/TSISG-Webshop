@@ -15,6 +15,7 @@ import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import { keywords_meta } from './assets/consts';
 import { refreshBasket } from './lib/lib';
+import { Notif, NotificationsContext } from './assets/components/notification';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -42,16 +43,6 @@ export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 
 export const SiteSettingsContext = createContext<any>({})
 
-export const NotificationsContext = createContext<{
-  newNotif: RefObject<Notif>,
-  notify: (message: string) => void
-}>({
-  newNotif: {current: {id: Date.now(), message: "NullMessage"}},
-  notify: (message: string) => {console.error(`Notify method does not exist, failed to notify with message: ${message}`)}
-})
-type Notif = { id: number; message: string };
-
-
 export function App() {
   async function updateLoginContext() {
     const userResponse = await getUser()
@@ -65,8 +56,8 @@ export function App() {
 
   // Set up notification queue
   let newNotif = useRef<Notif>({id: Date.now(), message: "NullMessage"})
-  function notify(msg: string) {
-    newNotif.current = {id: Date.now(), message: msg}
+  function notify(msg: string, duration?: number) {
+    newNotif.current = {id: Date.now(), message: msg, duration}
     window.dispatchEvent(new CustomEvent("notification"))
   }
 
@@ -80,6 +71,7 @@ export function App() {
   }
 
   // Notify if kill switch enabled, ONLY on start of session
+  // Also notify session_notif if in time range
   useEffect(() => {
     const killSwitchNotified = sessionStorage.getItem('killSwitchNotified')
     if (
@@ -91,7 +83,19 @@ export function App() {
       console.log("== KILL SWITCH ENABLED ==")
       notify(siteSettings.kill_switch.message)
     }
-
+    const sessionNotifNotified = sessionStorage.getItem("sessionNotifNotified")
+    const sessionNotif = siteSettings.session_notif
+    const now = new Date()
+    console.log(sessionNotif)
+    if (
+      !sessionNotifNotified
+      && sessionNotif
+      && +(new Date(sessionNotif.endTime)) > +now // Coerce dates to numbers
+      && +(new Date(sessionNotif.startTime)) < +now
+    ) {
+      sessionStorage.setItem("sessionNotifNotified", "true")
+      notify(sessionNotif.message, sessionNotif.duration ?? undefined)
+    }
   }, [siteSettings])
 
   // Update Basket if its been longer than 10 minutes
