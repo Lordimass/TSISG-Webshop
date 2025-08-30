@@ -1,5 +1,7 @@
 import { Stripe } from "@stripe/stripe-js"
 import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, POSTAL_CODE_FIELD_MAX_LENGTH, shipping_options } from "../../assets/consts"
+import { getGAClientId, getGASessionId } from "../../lib/analytics"
+import ReactGA from "react-ga4"
 
 /**
  * Debug method to test Apple Pay
@@ -34,8 +36,13 @@ export function redirectIfEmptyBasket() {
 }
 
 export async function fetchClientSecret(): Promise<string> {
-    let prices: Array<Object> = await fetchStripePrices()
-    let basketString = localStorage.getItem("basket")
+    const prices: Array<Object> = await fetchStripePrices()
+    const basketString = localStorage.getItem("basket")
+    const gaClientID = getGAClientId();
+    const gaSessionID = await getGASessionId();
+    console.log("GA Client ID:", gaClientID)
+    console.log("GA Session ID:", gaSessionID)
+
     const result = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",
         headers: {
@@ -45,7 +52,9 @@ export async function fetchClientSecret(): Promise<string> {
             shipping_options: shipping_options,
             stripe_line_items: prices,
             basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
-            origin: window.location.origin
+            origin: window.location.origin,
+            gaClientID,
+            gaSessionID
         })
     })
     .then (

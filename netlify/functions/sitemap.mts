@@ -1,3 +1,7 @@
+/**
+ * Sitemap generation for SEO, hosted at /sitemap.xml in production
+ */
+
 import type { Context } from "@netlify/functions";
 
 type Route = {

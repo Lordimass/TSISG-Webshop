@@ -1,5 +1,5 @@
 import { Context } from '@netlify/functions';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import getSupabaseObject from '../lib/getSupabaseObject.mts';
 import { OrdersCompressed as SbOrder } from '../lib/types/supabaseTypes.mts';
 import { OrderFromPageable as RmOrder} from '../lib/types/royalMailTypes.mts';

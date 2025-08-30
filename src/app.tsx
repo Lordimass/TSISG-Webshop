@@ -1,9 +1,8 @@
-import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ReactGA from "react-ga4"
 
 import Home from './pages/home/home';
-import React, { createContext, RefObject, useEffect, useRef, useState } from 'react'
+import React, { createContext, useEffect, useRef, useState } from 'react'
 import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
@@ -86,7 +85,6 @@ export function App() {
     const sessionNotifNotified = sessionStorage.getItem("sessionNotifNotified")
     const sessionNotif = siteSettings.session_notif
     const now = new Date()
-    console.log(sessionNotif)
     if (
       !sessionNotifNotified
       && sessionNotif
@@ -134,15 +132,15 @@ export function App() {
   // GA4 Page View Analytics
   useEffect(() => {
     const pathname: string = window.location.pathname
-    const dev = import.meta.env.VITE_ENVIRONMENT == "DEVELOPMENT"
-    console.log (dev ? "In a development environment" : "")
-    ReactGA.initialize("G-2RVF60NMM5", {gaOptions: {debug_mode: dev}})
+    const dev = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+    if (dev) console.log("In a development environment")
+    ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID, {gaOptions: {debug_mode: dev}})
     ReactGA.send({
-    hitType: "pageview", 
-    page: pathname, 
-    title: pathname,
-    environment: import.meta.env.VITE_ENVIRONMENT
-  })  
+      hitType: "pageview", 
+      page: pathname, 
+      title: pathname,
+      environment: import.meta.env.VITE_ENVIRONMENT
+    })
   }, [])
 
 

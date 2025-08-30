@@ -137,14 +137,7 @@ export default function Basket() {
     }
     for (let i = 0; i < basket.length; i++) {
         var prod : ProductInBasket = basket[i]
-        basketItems.push(<BasketProduct 
-            key={prod.sku}
-            sku={prod.sku}
-            name={prod.name}
-            price={prod.price}
-            images={prod.images}
-            stock={prod.stock}
-        />)
+        basketItems.push(<BasketProduct prod={prod} key={prod.sku}/>)
     }
     
     return (<>

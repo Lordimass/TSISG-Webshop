@@ -82,7 +82,6 @@ function flattenProducts(products: ProductData[]): ProductData[] {
         metadata: obj.metadata ?? null,
       };
     });
-    console.log(images)
     images.sort(compareImages)
 
     return {

@@ -19,6 +19,7 @@ export type ProductData = {
   category_id: number
   sort_order: number
   images: ImageData[]
+  category: CategoryData
 }
 
 export type ImageData = {
@@ -34,6 +35,13 @@ export type ImageData = {
     product_sku: number
 }
 
+export type CategoryData = {
+  id: number,
+  created_at: string
+  name: string,
+  description?: string
+}
+
 export type Basket = ProductInBasket[]
 export type ProductInBasket = {
   sku: number,
@@ -42,5 +50,6 @@ export type ProductInBasket = {
   basketQuantity: number,
   images: ImageData[]
   stock: number
+  category: CategoryData
 }
 

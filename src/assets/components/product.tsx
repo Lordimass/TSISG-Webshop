@@ -159,7 +159,8 @@ export default function Product({prod} : {prod: ProductData}) {
         "price": price,
         "basketQuantity": quant,
         "images": images,
-        "stock": stock
+        "stock": stock,
+        "category": prod.category
       })
     }
 
@@ -283,7 +284,8 @@ export default function Product({prod} : {prod: ProductData}) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
+export function BasketProduct({ prod }: {prod: ProductInBasket}) {
+  const { sku, name, price, images, stock } = prod;
   function increment() { // Increase quantity of this product
     if (quantity >= max_order) {
       return
@@ -333,7 +335,8 @@ export function BasketProduct({ sku, name, price, images, stock }: prodProps) {
         "price": price,
         "basketQuantity": quant,
         "images": images,
-        "stock": stock
+        "stock": stock,
+        "category": prod.category
       })
     }
 
