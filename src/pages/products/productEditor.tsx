@@ -7,8 +7,9 @@ import { ProductContext } from "./prodPage"
 import MultiAutocomplete from "../../assets/components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
 import { openObjectInNewTab } from "../../lib/lib"
 import { prodPropParsers } from "./prodPropParsers"
-import { LoginContext, NotificationsContext } from "../../app"
+import { LoginContext } from "../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
+import { NotificationsContext } from "../../assets/components/notification"
 
 const EditableProductPropContext = createContext<{
     originalProd: ProductData

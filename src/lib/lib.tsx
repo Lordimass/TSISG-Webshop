@@ -24,10 +24,7 @@ export async function refreshBasket() {
   basket.forEach((basketProd) => {
     newProducts.forEach((newProduct) => {
       if (newProduct.sku === basketProd.sku) {
-        basketProd.images = newProduct.images
-        basketProd.name = newProduct.name
-        basketProd.price = newProduct.price
-        basketProd.stock = newProduct.stock
+        basketProd = { ...newProduct, basketQuantity: basketProd.basketQuantity }
       }
     })
   })

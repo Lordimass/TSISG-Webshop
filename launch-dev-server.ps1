@@ -1,80 +1,34 @@
-$envFile = ".env"
-
-Write-Host "Starting Stripe listener..."
-$psi = New-Object System.Diagnostics.ProcessStartInfo
-$psi.FileName = "stripe"
-$psi.Arguments = "listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed"
-$psi.RedirectStandardOutput = $true
-$psi.RedirectStandardError = $true
-$psi.UseShellExecute = $false
-$psi.CreateNoWindow = $true
-
-$process = New-Object System.Diagnostics.Process
-$process.StartInfo = $psi
-$process.Start() | Out-Null
-
-$stdout = $process.StandardOutput
-$stderr = $process.StandardError
-$secret = $null
-
-Write-Host "Waiting for webhook secret..."
-
-while (-not $stdout.EndOfStream -or -not $stderr.EndOfStream) {
-    if (-not $stdout.EndOfStream) {
-        $line = $stdout.ReadLine()
-        Write-Host "[stripe] $line"
-        if (-not $secret -and $line -match "Your webhook signing secret is (\w+)") {
-            $secret = $matches[1]
-            break
-        }
+# Define your listeners here
+$listeners = @(
+    @{
+        Name       = "checkout_completed"
+        Variable   = "STRIPE_WEBHOOK_SECRET"
+        ForwardTo  = "localhost:8888/.netlify/functions/createOrder"
+        Events     = "checkout.session.completed"
+    },
+    @{
+        Name       = "ga4_sync"
+        Variable   = "STRIPE_GA4_SYNC_KEY"
+        ForwardTo  = "localhost:8888/.netlify/functions/stripeGA4Sync"
+        Events     = "checkout.session.completed"
     }
+)
 
-    if (-not $stderr.EndOfStream) {
-        $errorLine = $stderr.ReadLine()
-        Write-Host "[stripe-error] $errorLine"
-        if (-not $secret -and $errorLine -match "Your webhook signing secret is (\w+)") {
-            $secret = $matches[1]
-            break
-        }
-    }
+# Build up one wt.exe command string with all the tabs
+$wtCommand = @()
+
+# Iterate through each of the listeners and build a command
+foreach ($listener in $listeners) {
+    $listenerArgs = "stripe listen --forward-to $($listener.ForwardTo) --events $($listener.Events)"
+    $wtCommand += "wt -w 0 new-tab PowerShell -NoExit -Command $listenerArgs"
 }
 
-if ($secret) {
-    Write-Host "`nFound webhook secret: $secret"
+# Join them with semicolons (Windows Terminal expects this)
+$fullCommand = ($wtCommand -join " ; ")
 
-    # Read existing .env lines or create empty array if file doesn't exist
-    if (Test-Path $envFile) {
-        $lines = Get-Content $envFile
-    }
-    else {
-        $lines = @()
-    }
+Write-Host "Launching Stripe Listeners..."
+Write-Host "Please be aware that you must set the Stripe CLI environment variables in .env to test Stripe Webhooks locally."
+Write-Host "Launching Netlify Local Development Server..."
+Start-Process wt.exe -ArgumentList $fullCommand
 
-    $secretKey = "STRIPE_WEBHOOK_SECRET"
-    $secretValue = $secret
-    $found = $false
-
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        if ($lines[$i] -match "^\s*$secretKey\s*=") {
-            $lines[$i] = "$secretKey=$secretValue"
-            $found = $true
-            break
-        }
-    }
-
-    if (-not $found) {
-        $lines += "$secretKey=$secretValue"
-    }
-
-    # Write back updated .env content
-    Set-Content -Path $envFile -Value $lines
-
-    Write-Host "Saved STRIPE_WEBHOOK_SECRET to $envFile`n"
-
-    Write-Host "Starting Netlify dev server..."
-    Start-Process -NoNewWindow -FilePath "cmd.exe" -ArgumentList "/c npx netlify dev"
-}
-else {
-    Write-Host "Webhook secret not found. Exiting."
-    exit 1
-}
+netlify dev

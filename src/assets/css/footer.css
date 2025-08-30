@@ -14,26 +14,39 @@
 
 .footer a {
     color: white;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #ddd;
+    text-decoration: underline;
 }
 
 .footer-policy-links {
-    font-size: smaller;
     color: var(--jamie-grey);
+    text-align: center;
 }
 
 .policy-separator {
     color: var(--jamie-grey);
-}
-
-.policy-separator {
     margin-left: 0.5ch;
     margin-right: 0.5ch;
 }
 
-.footer-company-information {
-    font-size: 0.8em;
-}
-
 .footer .additional-links {
     text-align: center;
+}
+
+.footer-company-information {
+    font-size: 11px;
+    color: #ddd;
+    text-align: center;
+}
+
+.footer-company-information a {
+    color: #ddd
+}
+
+.footer-company-information a:hover {
+    color: #bbb
 }

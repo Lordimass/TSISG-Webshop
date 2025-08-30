@@ -23,7 +23,7 @@ const SELECT_QUERY = `
   tags:product_tags(tags(*))
 `
 
-export default async function handler(request: Request, _context: Context) {
+export default async function handler(request: Request, _context: Context) {try {
   const {supabase, error: supErr} = await getSupabaseClient()
   if (supErr) return supErr
 
@@ -54,6 +54,12 @@ export default async function handler(request: Request, _context: Context) {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
+
+} catch (e) {
+  console.error('Error fetching products:', e);
+  return new Response(JSON.stringify([]), {status: 500, statusText: 'Internal Server Error'})
+}
+
 };
 
 function flattenProducts(products: ProductData[]): ProductData[] {

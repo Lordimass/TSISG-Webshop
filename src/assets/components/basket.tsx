@@ -2,8 +2,9 @@ import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "../css/basket.css"
 import { BasketProduct } from "./product";
 import { basket_icon } from "../consts";
-import { NotificationsContext, SiteSettingsContext } from "../../app";
 import { ProductInBasket } from "../../lib/types";
+import { NotificationsContext } from "./notification";
+import { SiteSettingsContext } from "../../app";
 
 export default function Basket() {
     function redirectToCheckout() {
@@ -136,10 +137,7 @@ export default function Basket() {
     }
     for (let i = 0; i < basket.length; i++) {
         var prod : ProductInBasket = basket[i]
-        basketItems.push(<BasketProduct 
-            key={prod.sku}
-            product={prod}
-        />)
+        basketItems.push(<BasketProduct product={prod} key={prod.sku}/>)
     }
     
     return (<>

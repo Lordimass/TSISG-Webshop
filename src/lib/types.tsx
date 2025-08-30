@@ -19,11 +19,7 @@ export type ProductData = {
   /** DEPRECATED: Please use category.id instead */
   category_id: number
   /** The category the product belongs to */
-  category: {
-    id: number
-    created_at: string
-    name: string
-  }
+  category: CategoryData
   sort_order: number
   images: ImageData[]
   /** Weight of the product in grams */
@@ -36,6 +32,7 @@ export type ProductData = {
   description: string
   /** The tags attached to the product */
   tags: TagData[]
+  
 }
 
 export type ImageData = {
@@ -56,6 +53,13 @@ export type TagData = {
   created_at: string
 }
 
+export type CategoryData = {
+  id: number,
+  created_at: string
+  name: string,
+  description?: string
+}
+
 export type Basket = ProductInBasket[]
 export type ProductInBasket = {
   sku: number,
@@ -64,5 +68,6 @@ export type ProductInBasket = {
   basketQuantity: number,
   images: ImageData[]
   stock: number
+  category: CategoryData
 }
 

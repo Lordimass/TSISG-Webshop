@@ -1,31 +1,12 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
-
-let stripe: Stripe | null = null;
-if (process.env.STRIPE_SECRET_KEY) {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-03-31.basil',
-      });
-} else {
-    console.error("STRIPE_SECRET_KEY does not exist!")
-}
-
-type productInBasket = {
-    sku: number,
-    name: string,
-    price: number,
-    basketQuantity: number,
-    images: image[]
-    stock: number
-}
-  
-type image = {
-    id: number,
-    image_url: string,
-    display_order: number
-}
+import { stripe } from "../lib/stripeObject.mts";
+import { ImageData, ProductInBasket } from "../lib/types/types.mts";
+import { StripeProductMeta } from "../lib/types/stripeTypes.mts";
+import { checkObjectsEqual } from "../lib/lib.mts";
 
 export default async function handler(request: Request, context: Context) {
+    console.log(process.env.STRIPE_SECRET_KEY)
     if (!stripe) throw new Error(
         "Stripe client not initialised, check STRIPE_SECRET_KEY environment variable"
     );
@@ -41,7 +22,12 @@ export default async function handler(request: Request, context: Context) {
     else basket = await priceCheckResp.json()
 
     for (let i = 0; i < basket.length; i++) {
-        const item: productInBasket = basket[i];
+        const item: ProductInBasket = basket[i];
+        const prodMeta: StripeProductMeta = {
+            sku: item.sku,
+            category_id: item.category.id,
+            category: item.category.name
+        }
         let stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
         const itemprice = Math.round(item.price*100) // Stripe requires prices in pennies
         
@@ -68,30 +54,40 @@ export default async function handler(request: Request, context: Context) {
                 } catch (error) {
                     return new Response(JSON.stringify(error), {status: 500})
                 }
-                
+            }
+
+            // Update other metadata if any has changed
+            if (!checkObjectsEqual(stripeItem.metadata as unknown as StripeProductMeta, prodMeta)) {
+                try {
+                    await stripe.products.update(stripeItem.id, {metadata: prodMeta})
+                } catch (error) {
+                    console.warn("Failed to update product metadata:", error)
+                }
             }
 
         } else { // If it doesn't already exist, we'll need to create it.
             try {
-                stripeItem = await stripe.products.create({
+                const productData = {
                     name: item.name,
                     images: getListOfImageURLS(item.images),
                     default_price_data: {
                         currency: 'gbp',
                         unit_amount: itemprice // Stripe requires prices in pennies
-                    }
-                })
-                if (stripeItem) {
-                    const priceID = stripeItem.default_price
+                    },
+                    metadata: prodMeta
+                }
+                stripeItem = await stripe.products.create(productData)
+                if (stripeItem) { // Add item now that it's been created
+                    const priceID = stripeItem.default_price as string
                     pricePointIDs.push({
-                        price: priceID as string, 
+                        price: priceID, 
                         quantity: item.basketQuantity
                     });
                 } else {
-                    return new Response("An item failed to create on Stripe", {status: 502})
+                    return new Response(undefined, {status: 502, statusText: "An item failed to create on Stripe"})
                 }
             } catch (error) {
-                return new Response(JSON.stringify(error), {status: 500})
+                return new Response(undefined, {status: 500, statusText: JSON.stringify(error)})
             }
         }
     }
@@ -105,7 +101,7 @@ export default async function handler(request: Request, context: Context) {
  * This has to be done as part of the stripe prices fetch flow to ensure there's no possibility for bad
  * actors to tamper with the basket before its sent to this function
 */ 
-async function updateBasketData(basket: productInBasket[], context: Context) {
+async function updateBasketData(basket: ProductInBasket[], context: Context) {
     // Fetch products
     const resp = await fetch(context.url.origin + "/.netlify/functions/getProducts", {
         method: "POST",
@@ -131,21 +127,20 @@ async function updateBasketData(basket: productInBasket[], context: Context) {
     return new Response(JSON.stringify(basket), {status: 200})
 }
 
-
 function getProductOnStripe(
-    stripeProducts: Array<Stripe.Product>, 
-    product: productInBasket
+        stripeProducts: Array<Stripe.Product>, 
+        product: ProductInBasket
     ): Stripe.Product | null {
-    for (let k = 0; k < stripeProducts.length; k++) {
-        const stripeProduct: Stripe.Product = stripeProducts[k]
-        if (stripeProduct.name == product.name) {
-            return stripeProduct
+    let foundProduct: Stripe.Product | null = null;
+    stripeProducts.forEach((stripeProduct) => {
+        if (stripeProduct.metadata.sku === product.sku.toString()) {
+            foundProduct = stripeProduct
         }
-    }
-    return null;
+    })
+    return foundProduct
 }
 
-function getListOfImageURLS(images: image[]) {
+function getListOfImageURLS(images: ImageData[]) {
     const imageList: string[] = []
     for (let i = 0; i < images.length; i++) {
         imageList.push(images[i].image_url)

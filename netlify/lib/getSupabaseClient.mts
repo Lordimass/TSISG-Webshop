@@ -13,7 +13,7 @@ export default async function getSupabaseClient(authHeader?: string, serviceRole
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
-    return {error: new Response("Supabase credentials not set", { status: 500 })};
+    return {error: new Response(undefined, { status: 403, statusText: "Supabase credentials not set"})};
   }
 
   let supabase: SupabaseClient | undefined

@@ -3,9 +3,12 @@ import { dateToDateString, dateToTimeString, getJWTToken, useGetOrderList } from
 import "./css/orders.css"
 import { CheckoutProduct } from "../../assets/components/product";
 import Throbber from "../../assets/components/throbber";
-import { LoginContext, NotificationsContext } from "../../app";
+
+import "./css/orders.css"
+import { LoginContext } from "../../app";
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
+import { NotificationsContext } from "../../assets/components/notification";
 
 const overdue_threshold: number = 7;
 

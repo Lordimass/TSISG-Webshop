@@ -25,6 +25,7 @@ export const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "
 // Max character lengths for address fields, limited by Royal Mail API
 export const CITY_FIELD_MAX_LENGTH = 64
 export const ADDRESS_FIELD_MAX_LENGTH = 50
+export const POSTAL_CODE_FIELD_MAX_LENGTH = 12
 
 // Date time constants
 export const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]

@@ -1,114 +1,12 @@
 // Creates an order record on the Supabase Database, 
 // including order_products records and an orders record.
 
-// TODO: Secure this somehow with a unique authorisation key so that the format
-// cannot be reverse-engineered to create orders at will. Possibly able to do
-// that with whatever Stripe passes as authorisation since this is only ever
-// caleld from their webhook
-
 import { Context } from '@netlify/functions';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
-
-// Metadata can contain up to 50 key-value pairs with the following constraints
-// const keyMaxCharacters: number = 40
-// const valueMaxCharacters: number = 500
-// This metadata only contains basket but has keys up to 50 incase of crazy big
-// orders, its created when the checkout session is made, then will be decrypted
-// here to store the order on the database
-
-type metaBasket = {
-    1: string
-    2?: string
-    3?: string
-    4?: string
-    5?: string
-    6?: string
-    7?: string
-    8?: string
-    9?: string
-    10?: string
-    11?: string
-    12?: string
-    13?: string
-    14?: string
-    15?: string
-    16?: string
-    17?: string
-    18?: string
-    19?: string
-    20?: string
-    21?: string
-    22?: string
-    23?: string
-    24?: string
-    25?: string
-    26?: string
-    27?: string
-    28?: string
-    29?: string
-    30?: string
-    31?: string
-    32?: string
-    33?: string
-    34?: string
-    35?: string
-    36?: string
-    37?: string
-    38?: string
-    39?: string
-    40?: string
-    41?: string
-    42?: string
-    43?: string
-    44?: string
-    45?: string
-    46?: string
-    47?: string
-    48?: string
-    49?: string
-    50?: string
-}
-
-type metaOrderProduct = { // From compressed metadata
-    sku: number
-    quantity: number
-    totalValue: number
-}
-
-type orderProdRecord = { // For order_products table
-    order_id?: string
-    product_sku: number,
-    quantity: number,
-    value: number
-}
-
-type orderProdCompressed = { // From orders_compressed
-    sku: number,
-    product_name: string,
-    weight: number,
-    customs_description: string,
-    origin_country_code: string,
-    package_type_override: string,
-    category: {id: number, name: string},
-    quantity: number,
-    line_value: number,
-    image_url: string
-}
-
-type orderRecord = {
-    id?: string
-    placed_at?: string,
-    email: string,
-    street_address: string,
-    name: string,
-    country: string,
-    fulfilled: boolean,
-    total_value: number,
-    postal_code: string,
-    products: orderProdCompressed[],
-    city: string
-}
+import getSupabaseClient from '../lib/getSupabaseClient.mts';
+import { getCheckoutSessionItems, StripeCompoundLineItem } from '../lib/getCheckoutSessionItems.mts';
+import { Order, OrderProdCompressed, OrderProduct } from '../lib/types/supabaseTypes.mts';
 
 var stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -123,23 +21,15 @@ export default async function handler(request: Request, _context: Context) {
     if (!stripe) {
         return new Response("Stripe object didn't initialise", {status: 500})
     }
-    const body = await request.text()
-    const bodyJSON: Stripe.CheckoutSessionCompletedEvent = JSON.parse(body)
-    const dataObj = bodyJSON.data.object
+    const bodyString = await request.text()
+    const body: Stripe.CheckoutSessionCompletedEvent = JSON.parse(bodyString)
+    const checkoutSession = body.data.object
 
-    // Grab URL and Key from Netlify Env Variables.
-    const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    // SERVICE_ROLE required because orders table is protected.
+    // Get Supabase Object, Service Role required since the objects table is protected
+    const {error: supError, supabase} = await getSupabaseClient(undefined, true);
+    if (supError) return supError;
 
-    // Validate that they were both successfully fetched.
-    if (!supabaseUrl || !supabaseKey) {
-        return new Response("Supabase credentials not set", { status: 401 });
-    }
-
-    const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey)
-
-    // Authenticate request.
+    // Authenticate request from Stripe.
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
     if (!endpointSecret) {
         return new Response("No Stripe endpoint secret set", {status: 401})
@@ -149,10 +39,9 @@ export default async function handler(request: Request, _context: Context) {
         return new Response("No Stripe signature received", {status: 401})
     }
 
-    let stripeEvent: Stripe.Event
     try {
-        stripeEvent = stripe.webhooks.constructEvent(
-            body,
+        stripe.webhooks.constructEvent(
+            bodyString,
             sig,
             endpointSecret
         )
@@ -164,63 +53,28 @@ export default async function handler(request: Request, _context: Context) {
     console.log("Verified Stripe Event.")
 
     // Save the order record
-    const orderID = await saveOrder(dataObj, supabase)
-    if (!orderID) {
-        console.error("No order ID found, cannot finish saving order")
-        return
-    }
+    const orderID = await saveOrder(checkoutSession, supabase!)
 
-    // Decode metadata into an array of order products
-    const orderProducts: Array<metaOrderProduct> = decodeMeta(dataObj.metadata as metaBasket)
-    console.log(orderProducts)
+    // Get products associated with the order
+    const orderProducts: StripeCompoundLineItem[] = await getCheckoutSessionItems(checkoutSession.id)
 
     // Save the order_product record for each product
-    await saveOrderProducts(orderProducts, orderID, supabase)
+    await saveOrderProducts(orderProducts, orderID, supabase!)
 
-    // Update stock
-    await updateStock(orderProducts, supabase)
-    
-    // Create Royal Mail Order
-    const response = await createRMOrder(supabase, orderID)
-    if (response?.status != 200) {
-        return response;
+    // Perform actions only in Production
+    if (process.env.VITE_ENVIRONMENT == "PRODUCTION") {
+        // Update stock of products in database
+        await updateStock(orderProducts, supabase!)
+
+        // Create Royal Mail Order
+        const response = await createRMOrder(supabase!, orderID)
+        if (response?.status != 200) {
+            return response;
+        }
     }
     
     console.log("ORDER PLACED")
-    return new Response(null, {status: 200})
-}
-
-function decodeMeta(meta: metaBasket): Array<metaOrderProduct> {
-    // Decodes the metadata compressed string of products in the order,
-    // explanation for why this is necessary is at the top of this file,
-    // above the definition of orderProduct
-
-    const basket: Array<metaOrderProduct> = []
-
-    // Piece back together the compressed string
-    var basketString: string = ""
-    for (let i=1; i<50; i++) {
-        const key = i as keyof metaBasket
-        const segment: string | undefined = meta[key]
-        if (!segment) {
-            // There's nothing left to decode, break out
-            break;
-        }
-        basketString += segment;
-    }
-
-    // Go through the array and parse it back into an array of objects
-    var compressedBasketArray: Array<Array<string>> = JSON.parse(basketString);
-    for (let i=0; i<compressedBasketArray.length; i++) {
-        const prod: metaOrderProduct = {
-            sku: parseInt(compressedBasketArray[i][0]),
-            quantity: parseInt(compressedBasketArray[i][1]),
-            totalValue: parseFloat(compressedBasketArray[i][2])
-        }
-        basket.push(prod)
-    }
-
-    return basket;
+    return new Response(undefined, {status: 200})
 }
 
 async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseClient) {
@@ -228,8 +82,7 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
     const amount_total = dataObj.amount_total;
     const customer_details = dataObj.customer_details;
     if (!shipping_details || !amount_total || !customer_details) {
-        console.error("Stripe object was missing crucial details, couldn't save order")
-        return
+        throw new Error("Stripe object was missing crucial details, couldn't save order")
     }
 
     var orderID: string | undefined;
@@ -247,29 +100,28 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
             })
         .select() 
     if (error) {
-        console.error(error.code + ": " + error.message)
-        return
+        throw new Error(error.code + ": " + error.message)
     }
 
-    const returnedRecord = data as orderRecord[]
+    const returnedRecord = data as Order[]
     orderID = returnedRecord[0].id
     if (!orderID) {
-        console.error("Order ID not found in returned data " + data)
-        return
+        throw new Error("Order ID not found in returned data " + data)
     }
     return orderID
 }
 
-async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID: string, supabase: SupabaseClient) {
+async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string, supabase: SupabaseClient) {
     // Construct objects for Supabase records
-    var orderProdRecords: Array<orderProdRecord> = []
+    var orderProdRecords: Array<OrderProduct> = []
     for (let i=0; i<orderProducts.length; i++) {
-        const product = orderProducts[i];
+        const prod = orderProducts[i];
+        const meta = prod.product.metadata;
         orderProdRecords.push({
             order_id: orderID,
-            product_sku: product.sku,
-            quantity: product.quantity,
-            value: product.totalValue 
+            product_sku: meta.sku,
+            quantity: prod.lineItem.quantity ?? 0,
+            value: prod.lineItem.amount_total ? prod.lineItem.amount_total/100 : 0
         })
     }
 
@@ -283,36 +135,29 @@ async function saveOrderProducts(orderProducts: Array<metaOrderProduct>, orderID
     }
 }
 
-async function updateStock(products: Array<metaOrderProduct>, supabase: SupabaseClient) {
-    // Don't update stock if this order was placed in dev mode
-    if (process.env.VITE_ENVIRONMENT != "PRODUCTION") {
-        console.log("Stock was not updated for this order since it was not from production.")
-        return
-    }
+async function updateStock(products: StripeCompoundLineItem[], supabase: SupabaseClient) {
     // Fetch current stock first
     let currStock: {sku: number, stock: number, edited?:boolean}[] = [];
     const {data, error} = await supabase
         .from("products")
         .select("sku,stock")
-        .in("sku", products.map((product)=>product.sku))
+        .in("sku", products.map((prod)=>prod.product.metadata.sku))
     if (error) {
-        console.error(error)
-    }
-    if (data) {
-        currStock = data
+        console.error(`Failed to fetch stock! Stock not updated for order. ${error}`)
     } else {
-        console.error("No stock returned from check")
-        return
+        currStock = data
     }
 
     // Adjust stock
     for (let i=0; i<products.length; i++) {
         const prod = products[i]
+        const meta = prod.product.metadata
         for (let k=0; k<currStock.length; k++) {
             const stock_item = currStock[k]
-            if (stock_item.sku == prod.sku) {
-                stock_item.stock -= prod.quantity
-                stock_item.edited = true
+            const change = prod.lineItem.quantity ?? 0
+            if (stock_item.sku == meta.sku) {
+                stock_item.stock -= change
+                stock_item.edited = change > 0 // Should always be true.
             }
         }
     }
@@ -365,7 +210,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
     } else if (data.length == 0) {
         return new Response("No orders mapped to this ID", {status: 400})
     }
-    const order: orderRecord = data[0];
+    const order: Order = data[0];
 
     // Create RM Order
     const subtotal = calculateOrderSubtotal(order.products)
@@ -446,7 +291,7 @@ function calculateOrderWeight(items): number {
  * @param weight The total weight of the order
  * @returns Either "mediumParcel" or "smallParcel"
  */
-function calculatePackageFormat(items: orderProdCompressed[], weight?: number) {
+function calculatePackageFormat(items: OrderProdCompressed[], weight?: number) {
     if (!weight) {
         weight = calculateOrderWeight(items)
     }

@@ -1,5 +1,7 @@
 import { Stripe } from "@stripe/stripe-js"
-import { shipping_options } from "../../assets/consts"
+import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, POSTAL_CODE_FIELD_MAX_LENGTH, shipping_options } from "../../assets/consts"
+import { getGAClientId, getGASessionId } from "../../lib/analytics"
+import ReactGA from "react-ga4"
 
 /**
  * Debug method to test Apple Pay
@@ -25,14 +27,22 @@ export async function checkCanMakePayment(stripePromise: Promise<Stripe | null>)
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
 
-    if (!basketString || basketString == "{\"basket\":[]}") {
+    if (!basketString 
+        || basketString == "{\"basket\":[]}" 
+        || basketString == "{}"
+    ) {
         window.location.href = "/"
     }
 }
 
 export async function fetchClientSecret(): Promise<string> {
-    let prices: Array<Object> = await fetchStripePrices()
-    let basketString = localStorage.getItem("basket")
+    const prices: Array<Object> = await fetchStripePrices()
+    const basketString = localStorage.getItem("basket")
+    const gaClientID = getGAClientId();
+    const gaSessionID = await getGASessionId();
+    console.log("GA Client ID:", gaClientID)
+    console.log("GA Session ID:", gaSessionID)
+
     const result = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",
         headers: {
@@ -42,7 +52,9 @@ export async function fetchClientSecret(): Promise<string> {
             shipping_options: shipping_options,
             stripe_line_items: prices,
             basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
-            origin: window.location.origin
+            origin: window.location.origin,
+            gaClientID,
+            gaSessionID
         })
     })
     .then (
@@ -65,13 +77,31 @@ export async function fetchStripePrices(): Promise<Array<Object>> {
         async function(value) {return await value.json()},
         function(error) {console.error(error); return error}
     )
-    localStorage.setItem("basket", JSON.stringify({basket}))
+    localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
     
     return pricePointIDs;
 }
 
-export async function validateEmail(email: any, checkout: any) {
+export async function validateEmail(email: string, checkout: any) {
     const updateResult = await checkout.updateEmail(email);
     const isValid = updateResult.type !== "error";
     return { isValid, message: !isValid ? updateResult.error.message : null};
+}
+
+export function validateCity(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= CITY_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `City name must be at most ${CITY_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
+}
+
+export function validateAddress(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= ADDRESS_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `Address must be at most ${ADDRESS_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
+}
+
+export function validatePostalCode(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
+    const isValid = value.length <= POSTAL_CODE_FIELD_MAX_LENGTH
+    const message = isValid ? undefined : `Postal code must be at most ${POSTAL_CODE_FIELD_MAX_LENGTH} characters long.`
+    return Promise.resolve({ isValid, message })
 }

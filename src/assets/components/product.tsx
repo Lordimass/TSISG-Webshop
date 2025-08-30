@@ -3,18 +3,10 @@ import { useState, useEffect } from 'react';
 import "../css/product.css"
 import { setBasketStringQuantity } from '../utils';
 import { basket_icon, max_product_order } from '../consts';
-import { ImageData, ProductData, ProductInBasket } from '../../lib/types';
+import { ProductData, ProductInBasket } from '../../lib/types';
 import { supabase } from '../../app';
 import SquareImageBox from './squareImageBox';
 import { getImageURL } from '../../lib/lib';
-
-type prodProps = {
-  sku: number,
-  name: string,
-  price: number,
-  images: ImageData[],
-  stock: number
-}
 
 type checkoutProductParams = {
   image?: string
@@ -134,8 +126,10 @@ export default function Product({ product }: {product: ProductData}) {
 
     // Fetch the current basket contents
     let basketString: string | null = localStorage.getItem("basket")
-    if (!basketString) { // Create basket if it doesn't exist
-      basketString = "{\"basket\": []}"
+    let freshBasket = false
+    if (!basketString || basketString == "{\"basket\":[]}" || basketString == "{}") { // Create basket if it doesn't exist
+      basketString = `{"basket": []}`
+      freshBasket = true
     }
     let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
@@ -162,13 +156,16 @@ export default function Product({ product }: {product: ProductData}) {
         "price": price,
         "basketQuantity": quant,
         "images": images,
-        "stock": stock
+        "stock": stock,
+        "category": product.category
       })
     }
 
     // Save to localStorage
     localStorage.setItem("basket",
-      JSON.stringify({"basket": basket})
+      JSON.stringify(freshBasket 
+        ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
+        : {"basket": basket})
     )
     window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)
