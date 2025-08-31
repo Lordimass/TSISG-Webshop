@@ -10,7 +10,7 @@ $listeners = @(
         Name       = "ga4_sync"
         Variable   = "STRIPE_GA4_SYNC_KEY"
         ForwardTo  = "localhost:8888/.netlify/functions/stripeGA4Sync"
-        Events     = "checkout.session.completed"
+        Events     = "checkout.session.completed,refund.created"
     }
 )
 
