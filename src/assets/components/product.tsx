@@ -268,7 +268,7 @@ export default function Product({ product }: {product: ProductData}) {
     <div className="product" id={"product-" + sku}>
       {/* Product Image + Link to dedicated product page*/}   
       <a className="product-image-link" href={"/products/"+sku}>
-        <SquareImageBox image_url={imageURL} size='100%'/>
+        <SquareImageBox image={imageURL} size='100%'/>
       </a>
 
       {/* Bottom half of the product display */}
@@ -410,7 +410,7 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
 
   return (
     <div className="basket-product" id={"product-" + sku}>
-      <SquareImageBox image_url={imageURL} size='100%' loading='eager'/>
+      <SquareImageBox image={imageURL} size='100%' loading='eager'/>
 
       <div className="basket-prod-footer">
         <div className="basket-product-text">
@@ -454,7 +454,7 @@ export function CheckoutProduct({image, name, quantity, total, sku}: checkoutPro
   null
   
   return (<div className="checkout-product">
-      <SquareImageBox image_url={image} size='100%' loading='eager'/>
+      <SquareImageBox image={image} size='100%' loading='eager'/>
       <div className="checkout-product-text">
           <p>{name} (x{quantity})</p>
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>

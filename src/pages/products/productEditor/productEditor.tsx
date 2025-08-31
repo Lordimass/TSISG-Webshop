@@ -1,15 +1,18 @@
 import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react"
-import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../assets/utils"
-import { ProductData } from "../../lib/types"
-import { category_prod_prop, EditableProductProp, editableProductProps, tags_prod_prop } from "./editableProductProps"
-import { blank_product } from "../../assets/consts"
-import { ProductContext } from "./prodPage"
-import MultiAutocomplete from "../../assets/components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
-import { openObjectInNewTab } from "../../lib/lib"
-import { prodPropParsers } from "./prodPropParsers"
-import { LoginContext } from "../../app"
+import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../assets/utils"
+import { ProductData } from "../../../lib/types"
+import { blank_product } from "../../../assets/consts"
+import { ProductContext } from "../prodPage"
+import { openObjectInNewTab } from "../../../lib/lib"
+import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
-import { NotificationsContext } from "../../assets/components/notification"
+import { NotificationsContext } from "../../../assets/components/notification"
+import { ProductImageEditor } from "./imageEditor"
+import { category_prod_prop, EditableProductProp, editableProductProps, tags_prod_prop } from "./editableProductProps"
+import MultiAutocomplete from "../../../assets/components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
+
+import "./productEditor.css"
+import { prodPropParsers } from "./prodPropParsers"
 
 const EditableProductPropContext = createContext<{
     originalProd: ProductData
@@ -48,7 +51,7 @@ export default function ProductEditor() {
         categories: {id: number, name: string}[]
     } | undefined = useFetchFromNetlifyFunction("getPropertyLists").data
 
-    // Compile HTMLOptionElement's to use in datalists for autocomplete fields.
+    // Compile HTMLOptionElements to use in datalists for autocomplete fields.
     const [catOpts, setCatOpts] = useState<ReactElement[]>([])
     const [tagOpts, setTagOpts] = useState<string[]>([])
     useEffect(() => {
@@ -77,7 +80,9 @@ export default function ProductEditor() {
 
     const inputBox = useRef<HTMLInputElement>(null);
 
-    return (<div className="product-editor">
+    return (<><div className="product-editor">
+        <h2> Basic Product Data </h2>
+        {/******************** Main property editors ********************/}
         <div className="product-editor-grid">
             {/* All standard text field properties */}
             {editableProductProps.map((productProp) => 
@@ -103,8 +108,9 @@ export default function ProductEditor() {
             }}>
                 <EditableProdPropBox fetchNewData={fetchNewData} inputField={tagsInput}/>
             </EditableProductPropContext.Provider>
-
         </div>
+
+        {/*********** Submission Buttons ***********/}
         <button 
             className="product-editor-function-button" 
             id="refresh-data-button" 
@@ -119,7 +125,11 @@ export default function ProductEditor() {
         >
             Open JSON
         </button>
-    </div>)
+    </div>
+    
+    {/******************** Image Editing ********************/}
+    <ProductImageEditor />
+    </>)
 }
 
 function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Promise<void>, inputField?: ReactElement}) {

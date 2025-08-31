@@ -1,5 +1,5 @@
-import { isNumeric } from "../../assets/utils"
-import { ProductData } from "../../lib/types"
+import { isNumeric } from "../../../assets/utils"
+import { ProductData } from "../../../lib/types"
 
 // Editable Product Properties
 export type EditableProductProp = {

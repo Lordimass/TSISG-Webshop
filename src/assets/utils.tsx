@@ -207,7 +207,8 @@ export function setBasketStringQuantity(prod: ProductData | ProductInBasket, qua
       "price": prod.price,
       "basketQuantity": quant,
       "images": prod.images,
-      "stock": prod.stock
+      "stock": prod.stock,
+      "category": prod.category
     })
   }
 

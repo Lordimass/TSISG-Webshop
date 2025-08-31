@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import "../css/squareImageBox.css";
+import { ImageData } from '../../lib/types';
+import { getImageURL } from '../../lib/lib';
 
 type SquareImageBoxProps = {
-  image_url?: string;
+  image?: ImageData | string;
   alt?: string;
   size?: string;
-  images?: {
+  images?: ImageData[] | {
     image_url?: string;
     alt?: string;
   }[];
@@ -18,16 +20,18 @@ type SquareImageBoxProps = {
  * 
  * When multiple images are supplied, a reactive image carousel
  * is displayed in this same square box
- * @param image_url Source path of the image, ONLY use if displaying only one image, otherwise use images parameter
- * @param alt Alt text of the image, ONLY use if displaying only one image, otherwise use images parameter
+ * @param image Source path of the image, ONLY use if displaying only one image, otherwise use images parameter.
+ * This parameter also supports ImageData objects
+ * @param alt Alt text of the image, ONLY use if displaying only one image, otherwise use images parameter. Not 
+ * required if using ImageData for image parameter.
  * @param size Size of the box as a dynamic CSS string, defaults to 200px.
  * @param images An array of objects with image_url:string and alt:string (optional). Will render an image carousel
- * if this is supplied
+ * if this is supplied. Also supports ImageData objects
  * @param loading Loading eagerness of images, "eager" or "lazy"
  * @returns 
  */
 export default function SquareImageBox({
-  image_url,
+  image,
   alt,
   size = '200px',
   images,
@@ -99,17 +103,41 @@ export default function SquareImageBox({
     return currentIndex - 1; // Real images offset by 1 by left clone image
   }
   
-  // Whether or not the component uses carousel functionality, based on which parameters were passed
-  const isCarousel = images && images.length > 1;
-  // Images array supplied, but there's only 1 image in it. No need for carousel
-  if (!isCarousel && images && images.length > 0) { 
-    image_url = images[0].image_url
-    alt = images[0].alt
+  /** Whether or not the component uses carousel functionality, based on which parameters were passed */
+  let isCarousel = images && images.length > 1;
+  /** Whether images are given as ImageData or simple urls */
+  const areImagesData = 
+  isCarousel && (images![0] as ImageData).id !== undefined || // Carousel check
+  !isCarousel && (typeof image !== "string"); // Non-Carousel check
+
+  // If images are ImageData, map them to the simpler object format
+  if (areImagesData && isCarousel) {
+    images = images!.map((image) => {
+      return {
+        // Uses the highres flag if loading is "eager"
+        image_url: getImageURL(image as ImageData, loading === "eager"),
+        alt: image.alt
+      };
+    });
   }
+  images = images as { image_url?: string, alt?: string }[];
+
+  // If single image is ImageData, map that to the simpler format too
+  if (areImagesData && !isCarousel && image) {
+    alt = (image as ImageData).alt;
+    image = getImageURL(image as ImageData, loading === "eager");
+  }
+  image = image as string;
+
+  // Images array supplied, but there's only 1 image in it. No need for carousel
+  if (!isCarousel && images && images.length > 0) {
+    image = images[0].image_url
+    alt = images[0].alt
+    isCarousel = false
+  }
+
   // The index of the image currently being displayed
   const [index, setIndex] = useState(isCarousel ? 1 : 0); 
-  // The src of the current image being displayed
-  const currentImage = isCarousel ? images[index] : { image_url, alt };
   // The start X coordinate of a touch swipe
   const touchStartX = useRef<number | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
@@ -121,12 +149,19 @@ export default function SquareImageBox({
 
   // Used to create an infinite loop of images
   const extendedImages = isCarousel ? [
-      images[images.length - 1],  // clone last image at start
+      images[images.length - 1], // clone last image at start
       ...images,
-      images[0],                  // clone first image at end
+      images[0], // clone first image at end
     ]
   : [];
 
+  // Update isCarousel when images changes
+  useEffect(() => {
+    isCarousel = images && images.length > 1;
+    if (isCarousel) setIndex(1);
+  }, [images]);
+
+  // Update container width on mount and when window resizes
   useEffect(() => {
     if (containerRef.current) {
       function updateSize() {
@@ -192,14 +227,14 @@ export default function SquareImageBox({
                 alt=""
                 aria-hidden="true"
                 className="square-image-blur"
-                loading='lazy'
+                loading={loading}
               />
               <div className="square-image-center">
                 <img
                   src={img.image_url}
                   alt={img.alt}
                   className="square-image-foreground"
-                  loading='lazy'
+                  loading={loading}
                 />
               </div>
             </div>
@@ -208,18 +243,18 @@ export default function SquareImageBox({
       ) : ( // Non-carousel display
         <div className="square-image-center">
           <img
-            src={image_url}
+            src={image}
             alt=""
             aria-hidden="true"
             className="square-image-blur"
-            loading='lazy'
+            loading={loading}
           />
           <div className="square-image-center">
             <img
-              src={image_url}
+              src={image}
               alt={alt}
               className="square-image-foreground"
-              loading='lazy'
+              loading={loading}
             />
           </div>
         </div>

@@ -32,7 +32,6 @@ export type ProductData = {
   description: string
   /** The tags attached to the product */
   tags: TagData[]
-  
 }
 
 export type ImageData = {

@@ -34,13 +34,14 @@ export async function refreshBasket() {
 /**
  * Gets the public URL of a product image
  * @param image The image data
+ * @param highres Whether to get the non-compressed version of the image
  * @returns The public URL of the image, or undefined if not found
  */
-export function getImageURL(image: ImageData): string | undefined {
+export function getImageURL(image: ImageData, highres = false): string | undefined {
   if (image.name) {
     return (supabase.storage
-    .from("transformed-product-images")
-    .getPublicUrl(image.name.replace(/\.[^.]+$/, '.webp'))
+    .from(highres ? "product-images" : "transformed-product-images")
+    .getPublicUrl(highres ? image.name : image.name.replace(/\.[^.]+$/, '.webp'))
     .data.publicUrl)
   } else if (image.image_url){ // Fallback to old system
     return image.image_url

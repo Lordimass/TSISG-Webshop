@@ -1,9 +1,11 @@
 import { Context } from '@netlify/functions';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { compareImages } from '../lib/sortMethods.mts';
+import { ProductData } from '../lib/types/supabaseTypes.mts';
+import { flattenProducts } from './getProducts.mts';
 
-// Lightweight definition without most of the content
-// because its only necessary for modified properties
-type product = {
+// Lightweight definition only used pre-tag flattening
+type UnflattenedProduct = {
     fetched_at? : string,
     tags: any,
 }
@@ -32,7 +34,20 @@ export default async function handler(request: Request, _context: Context) {
         .from('products')
         .select(`
         *,
-        images:product_images(*),
+        images:product_images(
+            inserted_at,
+            image_url,
+            product_sku,
+            display_order,
+            alt,
+            storage_object:objects(
+            id,
+            bucket_id,
+            name,
+            path_tokens,
+            metadata
+            )
+        ),
         category:product_categories(*),
         tags:product_tags(tags(*))
         `)
@@ -42,13 +57,16 @@ export default async function handler(request: Request, _context: Context) {
         return new Response(JSON.stringify(error.message), { status: 500 });
     } else {
         // Add time the data was fetched at, useful for debugging
-        let product: product = data[0] as unknown as product
+        let product: UnflattenedProduct = data[0] as unknown as UnflattenedProduct
         product.fetched_at = new Date().toISOString()
 
         // Flatten the tags array
-        product = {...product, tags: product.tags.map(pt => pt.tags)}
+        const flat_product: ProductData = {...product, tags: product.tags.map(pt => pt.tags)} as unknown as ProductData
 
-        return new Response(JSON.stringify(product), {
+        // Sort the images
+        flat_product.images.sort(compareImages)
+
+        return new Response(JSON.stringify(flattenProducts([flat_product])[0]), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
         });

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
 import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
 import SquareImageBox from "../../assets/components/squareImageBox"
@@ -7,9 +7,9 @@ import { setBasketStringQuantity, useGetProduct } from "../../assets/utils"
 import "./prodPage.css"
 import Markdown from "react-markdown"
 import { LoginContext } from "../../app"
-import { ProductData, ProductInBasket } from "../../lib/types"
+import { ImageData, ProductData, ProductInBasket } from "../../lib/types"
 import { getImageURL } from "../../lib/lib"
-import ProductEditor from "./productEditor"
+import ProductEditor from "./productEditor/productEditor"
 
 export const ProductContext = createContext<{
     basketQuant?: number, 
@@ -27,12 +27,16 @@ export default function ProdPage() {
     const [product, setProduct] = useState<ProductData>(blank_product);
     // Original prod used for reset buttons in editor
     const [originalProd, setOriginalProd] = useState<ProductData>(blank_product);
+    const originalProdSet = useRef(false);
     const [isEditMode, setIsEditMode] = useState(false)
     const prod = useGetProduct(sku); 
     useEffect(() => {
         if (prod) {
             setProduct(prod)
-            setOriginalProd(prod)
+            if (!originalProdSet.current) {
+                setOriginalProd(structuredClone(prod))
+                originalProdSet.current = true;
+            }
         }
     }, [prod])
     useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
@@ -45,16 +49,9 @@ export default function ProdPage() {
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
 
-    const [images, setImages] = useState<{ image_url?: string, alt?: string }[]>([])
+    const [images, setImages] = useState<ImageData[]>([])
     useEffect(() => {
-        if (product) {
-            setImages(product.images.map((image) => {
-                return {
-                    image_url: getImageURL(image),
-                    alt: image.alt
-                }
-            }))
-        }
+        if (product) setImages(product.images)
     }, [product])
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
         basketQuant, setBasketQuant, product, setProduct, originalProd}}>
@@ -69,7 +66,13 @@ export default function ProdPage() {
             access.
         </p> : <></>}
         <div className="product-box">
-            <div className="image"><SquareImageBox images={images} size="100%"/></div>
+            <div className="image">
+                <SquareImageBox 
+                    images={images} 
+                    size="100%" 
+                    loading="eager"
+                />
+            </div>
             <h1 className="title">
                 {product.name}
                 {isEditMode ? <><br/><div className="sku">SKU{sku}</div></> : <></>}

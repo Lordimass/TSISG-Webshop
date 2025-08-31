@@ -62,7 +62,7 @@ export default async function handler(request: Request, _context: Context) {try 
 
 };
 
-function flattenProducts(products: ProductData[]): ProductData[] {
+export function flattenProducts(products: ProductData[]): ProductData[] {
   return products.map(product => {
     const images = (product.images || []).map((img: any) => {
       const obj = img.storage_object ?? {};

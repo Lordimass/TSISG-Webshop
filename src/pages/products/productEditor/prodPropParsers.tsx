@@ -1,9 +1,10 @@
-import { getCategoryID } from "../../assets/utils";
-import { ProductData } from "../../lib/types";
+import { getCategoryID } from "../../../assets/utils";
+import { ProductData } from "../../../lib/types";
 
 // Mapping of keys for the product type to parsers to convert from strings to the respective type for that key
 //
 // These are asynchronous in case extra actions have to take place, e.g. creating a new category in the database
+
 // if a new category name has been input. In the vast majority of cases these resolve instantly.
 export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) => Promise<any>>> = {
     name: async (val) => val,
