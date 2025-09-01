@@ -13,6 +13,7 @@ export async function getCheckoutSessionItems(sessionId: string): Promise<Stripe
     const resp = await stripe.checkout.sessions.listLineItems(sessionId, {
         limit: 100
     });
+    console.log(`Checkout Session Line Items: ${resp}`)
 
     // Find all the products associated with the line items
     const productIDs = resp.data.map(item => {
@@ -22,6 +23,7 @@ export async function getCheckoutSessionItems(sessionId: string): Promise<Stripe
     const products = await stripe.products.list({
         ids: productIDs
     });
+    console.log(`products from lineItems: ${products}`)
 
     // Map all products to their line items to form compound items
     return resp.data.map(lineItem => {

@@ -13,42 +13,53 @@ import { getCheckoutSessionItems, StripeCompoundLineItem } from "../lib/getCheck
 import { StripeProductMeta } from "../lib/types/stripeTypes.mts";
 
 export default async function handler(request: Request, _context: Context) {
-    if (!stripe) {return new Response("Stripe object didn't initialise", {status: 500})}
-
-    // Extract signature and pick secret to authenticate with
-    const endpointSecret = process.env.STRIPE_GA4_SYNC_KEY ?? process.env.STRIPE_WEBHOOK_SECRET 
-    if (!endpointSecret) return new Response(undefined, {status: 401, statusText: "No Stripe endpoint secret set"});
-    const sig = request.headers.get("stripe-signature");
-    if (!sig) return new Response(undefined, {status: 401, statusText: "No Stripe signature received"});
-
-    // Extract body
-    const bodyString = await request.text();
-
-    // Authenticate Request
-    let stripeEvent: Stripe.Event
     try {
-        stripeEvent = stripe.webhooks.constructEvent(bodyString, sig, endpointSecret)
-    } catch (err) {
-        console.error("Failed to verify webhook signature: ", err.message)
-        return new Response(undefined, {status: 400, statusText: "Failed to verify webhook signature"})
-    }
+        console.log("Running stripeGA4Sync")
+        if (!stripe) {return new Response("Stripe object didn't initialise", {status: 500})}
 
-    // Check event type and handle accordingly
-    const body: Stripe.Event = JSON.parse(bodyString);
-    if (body.type === "checkout.session.completed") handleCheckoutSessionCompleted(body);
-    else if (body.type === "refund.created") handleRefundCreated(body);
+        // Extract signature and pick secret to authenticate with
+        const endpointSecret = process.env.STRIPE_GA4_SYNC_KEY ?? process.env.STRIPE_WEBHOOK_SECRET
+        if (!endpointSecret) return new Response(undefined, {status: 401, statusText: "No Stripe endpoint secret set"});
+        const sig = request.headers.get("stripe-signature");
+        if (!sig) return new Response(undefined, {status: 401, statusText: "No Stripe signature received"});
+
+        // Extract body
+        const bodyString = await request.text();
+        console.log(`Request body: ${JSON.stringify(JSON.parse(bodyString), undefined, 2)}`)
+
+        // Authenticate Request
+        let stripeEvent: Stripe.Event
+        try {
+            stripeEvent = stripe.webhooks.constructEvent(bodyString, sig, endpointSecret)
+        } catch (err) {
+            console.error("Failed to verify webhook signature: ", err.message)
+            return new Response(undefined, {status: 400, statusText: "Failed to verify webhook signature"})
+        }
+
+        // Check event type and handle accordingly
+        const body: Stripe.Event = JSON.parse(bodyString);
+        if (body.type === "checkout.session.completed") await handleCheckoutSessionCompleted(body);
+        else if (body.type === "refund.created") await handleRefundCreated(body);
+        return new Response(undefined, {status: 200})
+    } catch (e) {
+        console.error(e)
+        return new Response(undefined, {status: 500})
+    }
 }
 
 /**
- * Triggers a GA4 purchase event for the completed checkout session.
+ * Triggers a GA4 purchase event for the completed checkout
  * @param event - The Stripe event object.
  */
 async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompletedEvent) {
+    console.log("Recieved as Checkout Session Completed event")
     // Extract checkout session from event.
     const session: Stripe.Checkout.Session = event.data.object
+    console.log(session)
 
     // Get the associated LineItems and Products compounded together.
     const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
+    console.log(`lineItems: ${lineItems}`)
 
     // Extract client ID and session ID
     const client_id = session.metadata?.gaClientID;
@@ -57,7 +68,7 @@ async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompl
     console.log("GA Session ID:", session_id);
 
     // Compile payload for GA4.
-    sendGA4Event({
+    const payload = {
         client_id,
         events: [{ name: "purchase", params: {
             debug_mode: process.env.VITE_ENVIRONMENT === "DEVELOPMENT",
@@ -69,7 +80,9 @@ async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompl
             currency: session.currency,
             items: stripeCompoundItemsToGA4Items(lineItems, session.currency) // Map to GA4 item format
         }}]
-    });
+    }
+    console.log(`GA4 Payload ${payload}`)
+    await sendGA4Event(payload);
 }
 
 /**
@@ -77,19 +90,23 @@ async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompl
  * @param event - The Stripe event object.
  */
 async function handleRefundCreated(event: Stripe.RefundCreatedEvent) {
+    console.log("Recieved as Refund event")
     // Extract refund from event.
     const refund: Stripe.Refund = event.data.object
+    console.log(refund)
 
     // Find the associated checkout session
     const checkoutSessionResponse = await stripe.checkout.sessions.list({
         payment_intent: (refund.payment_intent as string) ?? undefined,
         limit: 1
     })
+    console.log(`checkoutSessionResponse: ${checkoutSessionResponse}`)
     const session: Stripe.Checkout.Session | undefined = checkoutSessionResponse.data[0]
     if (!session) {throw new Error("No checkout session found for refund: " + refund.id)}
 
     // Get the associated LineItems and Products compounded together.
     const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
+    console.log(`lineItems: ${lineItems}`)
 
     // Extract client ID and session ID
     const client_id = session.metadata?.gaClientID;
@@ -97,7 +114,7 @@ async function handleRefundCreated(event: Stripe.RefundCreatedEvent) {
     console.log("GA Client ID:", client_id);
     console.log("GA Session ID:", session_id);
 
-    sendGA4Event({
+    const payload = {
         client_id: client_id,
         events: [{ name: "refund", params: {
             debug_mode: process.env.VITE_ENVIRONMENT === "DEVELOPMENT",
@@ -109,7 +126,9 @@ async function handleRefundCreated(event: Stripe.RefundCreatedEvent) {
             currency: refund.currency,
             items: stripeCompoundItemsToGA4Items(lineItems, refund.currency)
         }}]
-    });
+    }
+    console.log(`GA4 Payload ${payload}`)
+    await sendGA4Event(payload);
 }
 
 /**
@@ -119,7 +138,7 @@ async function handleRefundCreated(event: Stripe.RefundCreatedEvent) {
  * @param debug - Whether to enable debug mode. Enabling this prevents events from
  * being ingested, meaning they won't show up in DebugView.
  */
-async function sendGA4Event(payload: any, debug=false) {
+export async function sendGA4Event(payload: any, debug=false) {
     const response = await fetch(`https://region1.google-analytics.com/${debug ? "debug/" : ""}mp/collect?api_secret=${process.env.GA4_MEASUREMENT_PROTOCOL_SECRET}&measurement_id=${process.env.VITE_GA4_MEASUREMENT_ID}`, {
         method: "POST",
         headers: {
