@@ -77,6 +77,12 @@ export default async function handler(request: Request, _context: Context) {
     return new Response(undefined, {status: 200})
 }
 
+/**
+ * Save an order to Supabase.
+ * @param dataObj - The Stripe Checkout Session object.
+ * @param supabase - The Supabase client instance.
+ * @returns The ID of the created order.
+ */
 async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseClient) {
     const shipping_details = dataObj.collected_information?.shipping_details;
     const amount_total = dataObj.amount_total;
