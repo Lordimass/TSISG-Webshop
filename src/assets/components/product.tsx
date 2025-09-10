@@ -378,34 +378,7 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
 
   let string_price: string = "£" + price.toFixed(2);
   let max_order: number = Math.min(max_product_order, stock);
-  console.log()
   window.addEventListener("basketUpdate", syncWithBasket)
-
-  // Check if transformed image exists, and fallback to untransformed if not
-  useEffect(() => {
-    async function exists(path: string) {
-      const { data, error } = await supabase
-        .storage
-        .from("transformed-product-images")
-        .list('', { search: path });
-
-      if (error) {
-        console.error(error);
-        return false;
-      }
-      
-      const exist = data.some((item: { name: string; }) => item.name === path);
-      if (!exist) {
-        setImageURL(supabase.storage
-          .from("product-images")
-          .getPublicUrl(images[0].name)
-          .data.publicUrl)
-      }
-    }
-    if (!images[0].name) return
-    exists(images[0].name.replace(/\.[^.]+$/, '.webp'))
-  }, [])
-
   useEffect(() => {syncWithBasket()}, [])
 
   return (

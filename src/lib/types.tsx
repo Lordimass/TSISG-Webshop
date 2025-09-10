@@ -72,3 +72,15 @@ export type ProductInBasket = {
   category: CategoryData
 }
 
+/** Site-wide settings fetched from the backend, allowing for simple customisation and changes to be made without recompiling the whole thing */
+export type SiteSettings = {
+  /** Whether the webshop is disabled, useful in case of a critical fault. Message is shown to users in a notification */
+  kill_switch?: {enabled: boolean, message: string}
+  /** Notification to display to users at the start of their session */
+  session_notif?: {enabled: boolean, message: string, start_time: string, end_time: string}
+  /** Messages to display when products are disabled, varies based on the reason */
+  product_disabled_messages?: { disabled: string, out_of_stock: string, [key: string]: string }
+  /** Allows for arbitrary other settings that haven't been defined in this type */
+  [key: string]: any 
+}
+

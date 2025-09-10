@@ -38,6 +38,7 @@ export async function refreshBasket() {
  * @returns The public URL of the image, or undefined if not found
  */
 export function getImageURL(image: ImageData, highres = false): string | undefined {
+  if (!image) return undefined
   if (image.name) {
     return (supabase.storage
     .from(highres ? "product-images" : "transformed-product-images")

@@ -8,7 +8,7 @@ import getSupabaseClient from '../lib/getSupabaseClient.mts';
 import { getCheckoutSessionItems, StripeCompoundLineItem } from '../lib/getCheckoutSessionItems.mts';
 import { Order, OrderProdCompressed, OrderProduct } from '../lib/types/supabaseTypes.mts';
 
-var stripe: Stripe | null = null;
+let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',
@@ -91,7 +91,7 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
         throw new Error("Stripe object was missing crucial details, couldn't save order")
     }
 
-    var orderID: string | undefined;
+    let orderID: string | undefined;
     const {data, error} = await supabase
         .from("orders")
         .insert({
@@ -119,7 +119,7 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
 
 async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string, supabase: SupabaseClient) {
     // Construct objects for Supabase records
-    var orderProdRecords: Array<OrderProduct> = []
+    let orderProdRecords: Array<OrderProduct> = []
     for (let i=0; i<orderProducts.length; i++) {
         const prod = orderProducts[i];
         const meta = prod.product.metadata;

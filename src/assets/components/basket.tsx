@@ -17,14 +17,14 @@ export default function Basket() {
     }
 
     function updateBasketQuantity() {
-        var basketQuantTemp: number = 0
-        var basketPriceTemp: number = 0
+        let basketQuantTemp: number = 0
+        let basketPriceTemp: number = 0
 
         const basketString: string | null = localStorage.getItem("basket");
         if (basketString) {
-            var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
+            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
             for (let i=0; i<basket.length; i++) {
-                var item: ProductInBasket = basket[i];
+                let item: ProductInBasket = basket[i];
                 basketQuantTemp += item.basketQuantity;
                 basketPriceTemp += item.price * item.basketQuantity;
             }
@@ -83,18 +83,21 @@ export default function Basket() {
 
     // Disable checkout button in case of kill switch enabled
     const [killSwitch, setKillSwitch] = useState<boolean>(false)
-    let killSwitchMessage = null
+    let killSwitchMessage
     if (killSwitch) {
-        killSwitchMessage = siteSettings.kill_switch.message
+        killSwitchMessage = siteSettings.kill_switch?.message
     }
     useEffect(() => {
-        setKillSwitch(siteSettings.kill_switch && siteSettings.kill_switch.enabled )
+        setKillSwitch(siteSettings.kill_switch?.enabled ?? false)
     }, [siteSettings])
 
     // Update basket quantity on first render only
-    useEffect(updateBasketQuantity,[]) 
+    useEffect(updateBasketQuantity, []) 
     // Listen for basket updates
-    useEffect(() => {window.addEventListener("basketUpdate", updateBasketQuantity);}, [])
+    useEffect(() => {
+        window.addEventListener("basketUpdate", updateBasketQuantity);
+        return () => {window.removeEventListener("basketUpdate", updateBasketQuantity)}
+    }, [])
 
     // Check for clicks outside of the basket container to close the basket.
     useEffect(() => {
@@ -124,8 +127,8 @@ export default function Basket() {
     }, [isOpen])
 
     // Fetch the current contents of the basket and display it
-    var basketItems: Array<ReactElement> = []
-    var basket: Array<ProductInBasket> = []
+    let basketItems: Array<ReactElement> = []
+    let basket: Array<ProductInBasket> = []
     const basketString: string | null = localStorage.getItem("basket")
     if (basketString) {
         basket = JSON.parse(basketString).basket
@@ -136,7 +139,7 @@ export default function Basket() {
         }
     }
     for (let i = 0; i < basket.length; i++) {
-        var prod : ProductInBasket = basket[i]
+        let prod : ProductInBasket = basket[i]
         basketItems.push(<BasketProduct product={prod} key={prod.sku}/>)
     }
     

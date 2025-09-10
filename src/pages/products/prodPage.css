@@ -79,6 +79,18 @@
 
 .prod-page-basket-button {
     grid-area: ticker;
+    border: none;
+}
+
+.prod-page-basket-button:hover {
+    transform: scale(102%);
+}
+
+.prod-page-basket-button:disabled {
+    cursor: not-allowed;
+    background-color: var(--jamie-grey);
+    transform: none;
+    
 }
 
 .prod-page-modifier {
@@ -87,10 +99,6 @@
     height: 4em;
     margin-left: 0;
     box-sizing: border-box;
-}
-
-.prod-page-basket-button:hover {
-    transform: scale(102%);
 }
 
 .tags {

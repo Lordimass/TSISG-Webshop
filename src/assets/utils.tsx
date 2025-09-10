@@ -2,6 +2,7 @@ import { User, UserResponse } from "@supabase/supabase-js";
 import { daysOfWeek, monthsOfYear } from "./consts";
 import { supabase } from "../app";
 import { ProductData, ProductInBasket } from "../lib/types";
+import { UnsubmittedProductData } from "../pages/products/productEditor/types";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();
@@ -22,20 +23,18 @@ export async function getUser() {
  * update the local storage basket to contain that new quantity
  */
 export function setBasketStringQuantity(prod: ProductData | ProductInBasket, quant: number) {
-  // Function needs to update the localStorage basket for persistence,
-  // it will also then update the actual quantity state for this product.
-
+  console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
   // Fetch the current basket contents
-  var basketString: string | null = localStorage.getItem("basket")
+  let basketString: string | null = localStorage.getItem("basket")
   if (!basketString) { // Create basket if it doesn't exist
     basketString = "{\"basket\": []}"
   }
-  var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
+  let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
   // Find product and set quantity
-  var found: boolean = false
+  let found: boolean = false
   for (let i = 0; i<basket.length; i++) {
-    var item: ProductInBasket = basket[i]
+    let item: ProductInBasket = basket[i]
     if (item.sku == prod.sku) {
       found = true
       // Just remove it from the basket if 0
@@ -47,8 +46,9 @@ export function setBasketStringQuantity(prod: ProductData | ProductInBasket, qua
       break
     }
   }
+
   // If it wasn't found, create it
-  if (!found) {
+  if (!found && quant > 0) {
     basket.push({
       "sku": prod.sku,
       "name": prod.name,

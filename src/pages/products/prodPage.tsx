@@ -6,7 +6,7 @@ import { back_icon, basket_icon, blank_product, max_product_order } from "../../
 import { setBasketStringQuantity } from "../../assets/utils"
 import "./prodPage.css"
 import Markdown from "react-markdown"
-import { LoginContext } from "../../app"
+import { LoginContext, SiteSettingsContext } from "../../app"
 import { ImageData, ProductData, ProductInBasket } from "../../lib/types"
 import ProductEditor from "./productEditor/productEditor"
 import { useGetProduct } from "../../lib/netlifyFunctions"
@@ -35,6 +35,8 @@ export default function ProdPage() {
     const originalProdSet = useRef(false);
     // Whether the user is logged in with edit permissions
     const [isEditMode, setIsEditMode] = useState(false)
+    // Whether or not the product is out of stock. If so, basket modifier is disabled.
+    const outOfStock = product.stock <= 0
     // Fetch product data from backend, then assign it to product state and originalProd if not already set
     const prod = useGetProduct(sku); 
     useEffect(() => {
@@ -57,10 +59,6 @@ export default function ProdPage() {
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
 
-    const [images, setImages] = useState<ImageData[]>([])
-    useEffect(() => {
-        if (product) setImages(product.images as ImageData[])
-    }, [product])
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
         basketQuant, setBasketQuant, product, setProduct, originalProd}}>
         <a className="go-home-button" href="/">
@@ -143,7 +141,6 @@ function QuantityTicker() {
         // Update Input Text Field if it exists
         // It may not exist if, e.g. basketQuant is 0
         setInputValue(newQuantity.toString())
-
         setBasketStringQuantity(cleanseUnsubmittedProduct(product), newQuantity)
         setBasketQuant(newQuantity)
     }
@@ -157,11 +154,11 @@ function QuantityTicker() {
             return
         }
 
-        var basketString: string | null = localStorage.getItem("basket");
+        let basketString: string | null = localStorage.getItem("basket");
         if (basketString) {
-            var basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
+            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
             for (let i=0; i<basket.length; i++) {
-                var item: ProductInBasket = basket[i];
+                let item: ProductInBasket = basket[i];
                 if (item.sku == product.sku) {
                     setBasketQuant(item.basketQuantity);
 
@@ -195,23 +192,60 @@ function QuantityTicker() {
     }
 
     const {basketQuant, setBasketQuant, product} = useContext(ProductContext)
+    const [disabled, setDisabled] = useState(true)
+    useEffect(() => {
+        const disabled = product.stock <= 0 
+            || product.active === false 
+            || (siteSettings.kill_switch?.enabled ?? false)
+        console.log(disabled)
+        setDisabled(disabled)
+        // If the product is disabled, ensure the basket quantity is 0
+        if (disabled && product.sku != 0) {
+            console.log("Product disabled, setting basket quantity to 0")
+            setBasketStringQuantity(cleanseUnsubmittedProduct(product), 0)
+            setBasketQuant?.(0)
+        }
+    }, [product])
+    const siteSettings = useContext(SiteSettingsContext)
 
-    // By default these are undefined, so need to escape that
-    if (basketQuant == undefined || !setBasketQuant || !product) { 
-        return
+    // Figure out whether the product is disabled, and set a message to show if so.
+    let disabledMessage
+    if (disabled && product.name != "...") {
+        
+        // Delay slightly to avoid react state update errors
+
+        const msgs = siteSettings.disabled_product_messages
+        if (msgs && msgs.out_of_stock && msgs.disabled) {
+            // Set message to display to user.
+            disabledMessage = !product.active 
+            ? msgs.disabled
+            : product.stock <= 0
+                ? msgs.out_of_stock
+                : (siteSettings.kill_switch) && siteSettings.kill_switch.enabled
+                    ? siteSettings.kill_switch.message
+                    : "This product is unavailable" // Fallback, should never be seen
+        }
     }
 
-    const max_order = Math.min(max_product_order, product?.stock)
-    window.addEventListener("basketUpdate", syncWithBasket)
-    useEffect(() => {syncWithBasket()}, [])
+    const max_order = Math.min(max_product_order, product.stock)
+    
+    useEffect(() => {
+        window.addEventListener("basketUpdate", syncWithBasket)
+        return () => window.removeEventListener("basketUpdate", syncWithBasket)
+    }, [])
     
     if (basketQuant == 0) { // Quant0Modifier
-        return (
-        <div className="basket-button prod-page-basket-button" onClick={()=>updateQuantity(1)}>
+        return (<div>
+        <p>{disabledMessage}</p>
+        <button 
+            className="basket-button prod-page-basket-button" 
+            onClick={()=>updateQuantity(1)}
+            disabled={disabled}
+        >
             <img className="basket-icon" src={basket_icon}></img>
             <h1>+</h1>
-        </div>
-        )
+        </button>
+        </div>)
     } else { // Standard Basket Modifier
         return (<div className='basket-modifier prod-page-modifier'>
         <div className='decrement-basket-quantity-button' onClick={decrement}>

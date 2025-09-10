@@ -16,6 +16,7 @@ import { keywords_meta } from './assets/consts';
 import { refreshBasket } from './lib/lib';
 import { Notif, NotificationsContext } from './assets/components/notification';
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
+import { SiteSettings } from "./lib/types";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -41,7 +42,7 @@ export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
 export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 
-export const SiteSettingsContext = createContext<any>({})
+export const SiteSettingsContext = createContext<SiteSettings>({})
 
 export function App() {
   async function updateLoginContext() {

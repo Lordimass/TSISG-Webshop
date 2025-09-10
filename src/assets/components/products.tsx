@@ -24,7 +24,7 @@ export default function Products() {
     if (!productData) { // List not loaded yet
       return <></>
     }
-    var products: Array<React.JSX.Element> = [];
+    let products: Array<React.JSX.Element> = [];
     let pageCount = 0;
 
     // Deactivate products with no images,
@@ -41,8 +41,8 @@ export default function Products() {
 
     // Create product elements if there are any products to display
     if (activeProductData.length>0) {
-        var start: number = (page-1)*productLoadChunks
-        var end: number = Math.min(page*productLoadChunks, activeProductData.length)
+        let start: number = (page-1)*productLoadChunks
+        let end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
           let product: ProductData|null = activeProductData[i]

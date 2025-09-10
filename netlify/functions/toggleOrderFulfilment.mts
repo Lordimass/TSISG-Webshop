@@ -11,7 +11,7 @@ export default async function handler(request: Request, _context: Context) {
     
     const {id, delivery_cost} = await request.json();
 
-    var fulfilled: boolean = false;
+    let fulfilled: boolean = false;
     // Grab current value
     {
         const {data, error} = await supabase!
