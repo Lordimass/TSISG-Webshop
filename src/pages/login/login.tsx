@@ -1,4 +1,4 @@
-import { AuthSession, AuthTokenResponsePassword, createClient, SupabaseClient, UserResponse } from "@supabase/supabase-js";
+import { AuthSession, AuthTokenResponsePassword } from "@supabase/supabase-js";
 import Footer from "../../assets/components/footer";
 import Header from "../../assets/components/header";
 

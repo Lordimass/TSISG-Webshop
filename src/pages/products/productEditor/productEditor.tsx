@@ -1,8 +1,7 @@
 import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react"
-import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../assets/utils"
 import { ProductData } from "../../../lib/types"
 import { blank_product } from "../../../assets/consts"
-import { ProductContext } from "../prodPage"
+import { cleanseUnsubmittedProduct, ProductContext } from "../prodPage"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
@@ -13,11 +12,13 @@ import MultiAutocomplete from "../../../assets/components/commaSeparatedAutocomp
 
 import "./productEditor.css"
 import { prodPropParsers } from "./prodPropParsers"
+import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
+import { UnsubmittedProductData } from "./types"
 
 const EditableProductPropContext = createContext<{
     originalProd: ProductData
-    product: ProductData,
-    setProduct?: React.Dispatch<React.SetStateAction<ProductData>>
+    product: ProductData | UnsubmittedProductData,
+    setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
     productProp?: EditableProductProp
     updateProductOverride?: (
         key: keyof ProductData, 
@@ -41,9 +42,7 @@ export default function ProductEditor() {
     }
 
     const {product, setProduct, originalProd} = useContext(ProductContext)
-    if (!product) {
-        return
-    }
+    if (!product) return <></>
 
     // Fetch prop lists
     let propLists: {
@@ -128,7 +127,7 @@ export default function ProductEditor() {
     </div>
     
     {/******************** Image Editing ********************/}
-    <ProductImageEditor />
+    <ProductImageEditor fetchNewData={fetchNewData} />
     </>)
 }
 
@@ -178,11 +177,12 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         }
         if (!setProduct) {return}
 
-        const newProduct: ProductData = {...product}
+        const newProduct: UnsubmittedProductData = {...product}
         // Assign the changed value
-        await assignTypedValue(key, value, newProduct)
+        await assignTypedValue(key, value, cleanseUnsubmittedProduct(newProduct))
         // Update on Supabase
-        await updateProductData(newProduct)
+        // TODO: implement handling for unsubmitted images on serverside, then change type of this function to UnsubmittedProductData
+        await updateProductData(newProduct) 
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         fetchNewData()
     }

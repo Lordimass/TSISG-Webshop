@@ -3,32 +3,39 @@ import Footer from "../../assets/components/footer"
 import Header from "../../assets/components/header"
 import SquareImageBox from "../../assets/components/squareImageBox"
 import { back_icon, basket_icon, blank_product, max_product_order } from "../../assets/consts"
-import { setBasketStringQuantity, useGetProduct } from "../../assets/utils"
+import { setBasketStringQuantity } from "../../assets/utils"
 import "./prodPage.css"
 import Markdown from "react-markdown"
 import { LoginContext } from "../../app"
 import { ImageData, ProductData, ProductInBasket } from "../../lib/types"
-import { getImageURL } from "../../lib/lib"
 import ProductEditor from "./productEditor/productEditor"
+import { useGetProduct } from "../../lib/netlifyFunctions"
+import { UnsubmittedProductData } from "./productEditor/types"
 
 export const ProductContext = createContext<{
     basketQuant?: number, 
     setBasketQuant?: React.Dispatch<React.SetStateAction<number>>,
-    setProduct?: React.Dispatch<React.SetStateAction<ProductData>>
-    product: ProductData
+    setProduct?: React.Dispatch<React.SetStateAction<UnsubmittedProductData>>
+    product: UnsubmittedProductData
     originalProd: ProductData
 }>({product: blank_product, originalProd: blank_product});
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
 
+    // The sku of the product, extracted from the URL. Should always match product.sku
     const sku = extractSKU()
+    // The number of this product in the basket
     const [basketQuant, setBasketQuant] = useState(0)
-    const [product, setProduct] = useState<ProductData>(blank_product);
+    // The product being viewed
+    const [product, setProduct] = useState<UnsubmittedProductData>(blank_product);
     // Original prod used for reset buttons in editor
     const [originalProd, setOriginalProd] = useState<ProductData>(blank_product);
+    // Ensure originalProd is only set once
     const originalProdSet = useRef(false);
+    // Whether the user is logged in with edit permissions
     const [isEditMode, setIsEditMode] = useState(false)
+    // Fetch product data from backend, then assign it to product state and originalProd if not already set
     const prod = useGetProduct(sku); 
     useEffect(() => {
         if (prod) {
@@ -39,6 +46,7 @@ export default function ProdPage() {
             }
         }
     }, [prod])
+    // Set isEditMode based on loginContext permissions
     useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
 
     const priceSplit = product.price.toString().split(".")
@@ -51,7 +59,7 @@ export default function ProdPage() {
 
     const [images, setImages] = useState<ImageData[]>([])
     useEffect(() => {
-        if (product) setImages(product.images)
+        if (product) setImages(product.images as ImageData[])
     }, [product])
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
         basketQuant, setBasketQuant, product, setProduct, originalProd}}>
@@ -68,7 +76,7 @@ export default function ProdPage() {
         <div className="product-box">
             <div className="image">
                 <SquareImageBox 
-                    images={images} 
+                    images={cleanseUnsubmittedProduct(product).images} 
                     size="100%" 
                     loading="eager"
                 />
@@ -136,7 +144,7 @@ function QuantityTicker() {
         // It may not exist if, e.g. basketQuant is 0
         setInputValue(newQuantity.toString())
 
-        setBasketStringQuantity(product, newQuantity)
+        setBasketStringQuantity(cleanseUnsubmittedProduct(product), newQuantity)
         setBasketQuant(newQuantity)
     }
 
@@ -233,4 +241,15 @@ function extractSKU(): number {
     const skuString = path[path.length-1]
     // Convert to number type and return
     return skuString as unknown as number; 
+}
+
+/**
+ * Removes unsubmitted types from the product data,
+ * leaving a clean ProductData type to use in other
+ * places. This is useful to, for example, remove
+ * unsubmitted images before updating the basket
+ */
+export function cleanseUnsubmittedProduct(product: UnsubmittedProductData): ProductData {
+    const cleansedImages: ImageData[] = product.images.filter((img) => "id" in img)
+    return {...product, images: cleansedImages}
 }

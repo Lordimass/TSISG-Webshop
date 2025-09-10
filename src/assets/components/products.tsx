@@ -4,11 +4,11 @@ import { useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { useGetProductList } from "../utils";
 import { ProductData, ProductInBasket } from "../../lib/types";
 import { compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../consts";
 import { supabase } from "../../app";
+import { useGetProductList } from "../../lib/netlifyFunctions";
 
 export default function Products() {
     function incrementPage() {

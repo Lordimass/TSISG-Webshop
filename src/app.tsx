@@ -7,7 +7,7 @@ import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
-import { getUser, useFetchFromNetlifyFunction } from './assets/utils';
+import { getUser } from './assets/utils';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import ProdPage from "./pages/products/prodPage";
@@ -15,6 +15,7 @@ import { createClient, User } from '@supabase/supabase-js';
 import { keywords_meta } from './assets/consts';
 import { refreshBasket } from './lib/lib';
 import { Notif, NotificationsContext } from './assets/components/notification';
+import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed

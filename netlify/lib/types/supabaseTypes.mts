@@ -32,6 +32,8 @@ export type ProductData = {
   description: string
   /** The tags attached to the product */
   tags: TagData[]
+  /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
+  package_type_override: string
 }
 
 export type ImageData = {

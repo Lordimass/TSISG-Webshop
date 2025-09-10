@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { page_title } from '../../assets/consts';
 
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
 import React from 'react';
+import Products from '../../assets/components/products';
 
 import "./home.css"
-import Products from '../../assets/components/products';
-import { createClient } from '@supabase/supabase-js';
-import { page_title } from '../../assets/consts';
+
+
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
 var spinTimeout = false

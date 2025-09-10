@@ -32,19 +32,21 @@ export type ProductData = {
   description: string
   /** The tags attached to the product */
   tags: TagData[]
+  /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
+  package_type_override: string
 }
 
 export type ImageData = {
-    alt: string | undefined
-    bucket_id: string
-    display_order: number
-    id: UUID
-    image_url: string
-    inserted_at: string
-    metadata: any
-    name: string
-    path_tokens: string[]
-    product_sku: number
+  alt: string | undefined
+  bucket_id: string
+  display_order: number
+  id: UUID
+  image_url: string
+  inserted_at: string
+  metadata: any
+  name: string
+  path_tokens: string[]
+  product_sku: number
 }
 
 export type TagData = {

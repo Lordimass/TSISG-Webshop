@@ -40,7 +40,7 @@ export default async function handler(request: Request, _context: Context): Prom
     const {supabase, error: clientFetchError} = await getSupabaseClient(undefined, true);
     if (clientFetchError) return clientFetchError
     
-    // Get the name of the transformed image
+    // Construct the name of the transformed image
     let transformedName: string
     if (body.record) {
         transformedName = body.record.name.replace(/\.[^.]+$/, '.webp')

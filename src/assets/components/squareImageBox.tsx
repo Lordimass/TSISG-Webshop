@@ -142,10 +142,17 @@ export default function SquareImageBox({
   const touchStartX = useRef<number | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
   // Whether or not the user is currently touching/dragging the carousel
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(true);
   // Points to the outer container of the carousel so that it doesn't have to be fetched every time
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  // Stores what the images are before a change happens, so that they can be compared to check if
+  // the images have actually changed or a rerender just occured with identical images.
+  const oldImages = useRef(images)
+  // Used to check whether preliminary functions have run from loaded data before 
+  // activating main page functionality
+  const fullyLoaded = useRef(false)
+  let tempIndex = 0
 
   // Used to create an infinite loop of images
   const extendedImages = isCarousel ? [
@@ -157,8 +164,22 @@ export default function SquareImageBox({
 
   // Update isCarousel when images changes
   useEffect(() => {
-    isCarousel = images && images.length > 1;
-    if (isCarousel) setIndex(1);
+    if (!images || !oldImages) return
+    // Check if it's actually changed value
+    let equal = true;
+    images.forEach((img, i) => {
+      if (
+        img.image_url !== oldImages.current[i]?.image_url ||
+        img.alt !== oldImages.current[i]?.alt
+      ) {equal = false}
+    })
+    if (!equal) {
+      isCarousel = images && images.length > 1;
+      if (isCarousel) {setIndex(1); tempIndex = 1}
+      else tempIndex = 0
+      oldImages.current = images
+      fullyLoaded.current = true
+    }
   }, [images]);
 
   // Update container width on mount and when window resizes
@@ -171,14 +192,16 @@ export default function SquareImageBox({
       window.addEventListener("resize", updateSize);
       return () => window.removeEventListener("resize", updateSize);
     }
+    // Set to true initially, then false when the page is fully loaded to stop the animation glitch on load
+    setIsDragging(false);
   }, []);
 
   // Detect when on cloned slides and jump to real slides without an animation
   useEffect(() => {
-    // Not relevant if this isn't a carousel
-    if (!isCarousel) return;
+    // Not relevant if this isn't a carousel or page isn't fully loaded
+    if (!isCarousel || !fullyLoaded) return;
 
-    if (index === 0) {
+    if (index === 0 && tempIndex != 1) {
       // Jump to last real image
       setTimeout(() => {
         setIsDragging(true); // disable transition

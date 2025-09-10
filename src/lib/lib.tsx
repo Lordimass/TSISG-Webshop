@@ -62,3 +62,11 @@ export function openObjectInNewTab(obj: any) {
 
   window.open(url, "_blank");
 }
+
+/**
+ * Returns the extension of the filename given.
+ * @param filename The filename to extract an extension from.
+ */
+export function getFilenameExtension(filename: string) {
+  return filename.split(".").slice(-1)[0]
+}

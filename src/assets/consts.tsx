@@ -8,6 +8,10 @@ export const back_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/ob
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
 
+/** The average character per second reading speed of a person. Used to calculate the length of time to show
+ * a notification for based on its text length */
+export const reading_speed_cps = 16;
+
 // The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
 export const max_product_order: number = 10
 /** The number of products per page */
@@ -53,5 +57,6 @@ export const blank_product: ProductData = {
     weight: 0,
     customs_description: "",
     description: "",
-    origin_country_code: ""
+    origin_country_code: "",
+    package_type_override: "",
 }

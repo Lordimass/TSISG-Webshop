@@ -1,3 +1,4 @@
+import { UnsubmittedImageData } from "../pages/products/productEditor/types"
 import { ImageData, ProductData } from "./types"
 
 export function compareProducts(a: ProductData, b: ProductData) {
@@ -11,7 +12,7 @@ export function compareProducts(a: ProductData, b: ProductData) {
     return a.name.localeCompare(b.name)
 }
 
-export function compareImages(a: ImageData, b: ImageData): number {
+export function compareImages(a: ImageData | UnsubmittedImageData, b: ImageData | UnsubmittedImageData): number {
   if (a.display_order < b.display_order) {
     return -1;
   } else if (b.display_order < a.display_order) {

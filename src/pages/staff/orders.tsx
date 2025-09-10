@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { dateToDateString, dateToTimeString, getJWTToken, useGetOrderList } from "../../assets/utils"
+import { dateToDateString, dateToTimeString, getJWTToken } from "../../assets/utils"
 import "./css/orders.css"
 import { CheckoutProduct } from "../../assets/components/product";
 import Throbber from "../../assets/components/throbber";
@@ -9,6 +9,7 @@ import { LoginContext } from "../../app";
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
 import { NotificationsContext } from "../../assets/components/notification";
+import { useGetOrderList } from "../../lib/netlifyFunctions";
 
 const overdue_threshold: number = 7;
 

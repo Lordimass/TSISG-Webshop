@@ -1,4 +1,4 @@
-import { getCategoryID } from "../../../assets/utils";
+import { getCategoryID } from "../../../lib/netlifyFunctions";
 import { ProductData } from "../../../lib/types";
 
 // Mapping of keys for the product type to parsers to convert from strings to the respective type for that key
