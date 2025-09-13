@@ -1,6 +1,6 @@
 import "../css/products.css"
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
@@ -8,68 +8,63 @@ import { ProductData, ProductInBasket } from "../../lib/types";
 import { compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../consts";
 import { supabase } from "../../app";
-import { useGetProductList } from "../../lib/netlifyFunctions";
+import { useGetProducts, UseRPCReturn } from "../../lib/supabaseRPC";
 
 export default function Products() {
-    function incrementPage() {
-        setPage(page + 1)
-    }
-
-    function decrementPage() {
-        setPage(page - 1)
-    }
+    function incrementPage() {setPage(page + 1)}
+    function decrementPage() {setPage(page - 1)}
 
     const [page, setPage] = useState(1)
-    const productData: Array<ProductData> = useGetProductList();
-    if (!productData) { // List not loaded yet
-      return <></>
-    }
-    let products: Array<React.JSX.Element> = [];
-    let pageCount = 0;
-
+    const getProductsResponse: UseRPCReturn = useGetProducts();
+    const productData: Array<ProductData> = getProductsResponse.data || []
+    const [products, setProducts] = useState<React.JSX.Element[]>([])
+    const [pageCount, setPageCount] = useState(0)
+    
     // Deactivate products with no images,
     // Products with active=false or stock=0 are excluded from the query.
-    const activeProductData: Array<ProductData> = []
-    for (let i=0; i<productData.length; i++) {
-        const product = productData[i]
-        const active = product.images.length>=1; 
-        if (active) {
-            activeProductData.push(product)
-        }
-    }
-    activeProductData.sort(compareProducts)
+    useEffect(() => {
+        const activeProductData: Array<ProductData> = productData.filter(
+            p => p.images && p.images.length >= 1
+        );
+        activeProductData.sort(compareProducts)
 
-    // Create product elements if there are any products to display
-    if (activeProductData.length>0) {
+        // Create product elements if there are any products to display
+        if (activeProductData.length<0) {
+            setProducts([])
+            setPageCount(0)
+            return
+        }
+        
         let start: number = (page-1)*productLoadChunks
         let end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
+        const buildingProducts: React.JSX.Element[] = []
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
-          let product: ProductData|null = activeProductData[i]
-          if (!product) {
-            continue;
-          }
+            let product: ProductData|null = activeProductData[i]
+            if (!product) {
+                continue;
+            }
 
-          if (!product.active) {
-            end++
-            continue;
-          }
-          products.push(<Product
-              product={product}
-              key={product.sku}
-          />)
+            if (!product.active) {
+                end++
+                continue;
+            }
+            
+            const newProductComponent = <Product
+                product={product}
+                key={product.sku}
+            />
+            buildingProducts.push(newProductComponent)
         }
+        setProducts(buildingProducts)
         
-        pageCount = Math.floor(activeProductData.length/productLoadChunks);
-        if (productData.length % productLoadChunks != 0) {
-            pageCount++
+        let pageCount = Math.floor(activeProductData.length/productLoadChunks);
+        if (activeProductData.length % productLoadChunks != 0) {
+            pageCount++;
         }
+        setPageCount(pageCount);
 
-    } else {
-        products = []
-        pageCount = 0
-    }
-
+    }, [getProductsResponse.loading, page])
 
     return (<div className="products-box">
     <div className='products'>{products}</div>

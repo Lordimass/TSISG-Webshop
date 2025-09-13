@@ -122,6 +122,11 @@
     height: 80%;
 }
 
+.basket {
+    display: flex;
+    align-items: center;
+}
+
 .checkout h1 {
     margin-top: 0.4em;
     margin-right: 0.5em;
