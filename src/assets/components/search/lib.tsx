@@ -1,4 +1,5 @@
-import { supabase } from "../../../app";
+import { callRPC } from "../../../lib/supabaseRPC";
+import { ProductData } from "../../../lib/types";
 
 /**
  * Search the products using a full text search function in Supabase.
@@ -6,14 +7,17 @@ import { supabase } from "../../../app";
  * @param notify Function to notify if something goes wrong.
  * @returns A promise that resolves to an array of products.
  */
-export async function searchProducts(query: string, notify: (msg: string) => void = console.log): Promise<any[]> {
+export async function searchProducts(query: string, notify: (msg: string) => void = console.log): Promise<ProductData[]> {
     // Could be improved using GIN/GIN+trgm indexes, but this is fine for now
-    const { data, error } = await supabase.rpc("search_products", { q: query, limit_results: 20 });
-    if (error) {
-        notify("Something went wrong with your search, sorry!: " + error.message);
-        console.error("Search error:", error);
+    try {
+        const data = await callRPC(
+            "search_products", 
+            { q: query, limit_results: 20 }, 
+            () => {});
+        return data;
+    } catch (error: any) {
+        notify("Something went wrong with your search, sorry!");
+        console.error("Error searching products:", error);
         return [];
     }
-
-    return data; // array of products
 }

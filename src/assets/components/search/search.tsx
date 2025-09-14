@@ -3,7 +3,8 @@ import { searchProducts } from "./lib";
 import { NotificationsContext } from "../notification";
 
 import "./search.css"
-import { search_icon } from "../../consts";
+import { CheckoutProduct } from "../product";
+import { ProductData } from "../../../lib/types";
 
 export function ProductSearch() {
   async function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
@@ -17,7 +18,7 @@ export function ProductSearch() {
     setResults(res);
   }
 
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ProductData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const {notify} = useContext(NotificationsContext)
   const menuRef = useRef<HTMLUListElement>(null);
@@ -54,7 +55,7 @@ export function ProductSearch() {
   return (
     <div className="search">
       <div className="search-bar" ref={searchBarRef}>
-        <img className="search-icon" src={search_icon} alt=""/>
+        <i className="search-icon fi fi-br-search"/>
           <input
               name="search"
               className="search-input"
@@ -68,15 +69,17 @@ export function ProductSearch() {
           className="search-results" 
           style={{display: isOpen ? "flex" : "none"}}
           ref={menuRef}
-        >
+        ><div className="inner-results">
+          
         {results.map((p) => (
-            <li key={p.sku} className="search-result-item" id={`search-result-${p.sku}`}>
-            <a className="search-result-name" href={`/products/${p.sku}`}>{p.name}</a>
-            <div className="search-result-description">{p.description}</div>
-            <div className="search-result-price">£{p.price.toFixed(2)}</div>
-            </li>
+            <CheckoutProduct 
+            product={p} 
+            key={p.sku}
+            linked={true}
+            />
         ))}
-        </ul>
+        
+        </div></ul>
     </div>
   );
 }

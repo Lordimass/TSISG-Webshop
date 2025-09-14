@@ -3,6 +3,7 @@
   border-radius: 12px;
   overflow: hidden;
   touch-action: pan-y;
+  align-self: center;
 }
 
 .square-image-spacer {

@@ -1,8 +1,16 @@
 .basket {
-    padding-right: 1em;
-    height: 3em;
+    display: flex;
+    margin-right: 5px;
+    min-height: 64px;
+    min-width: 64px;
     user-select: none;
     cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+.basket img {
+    width: 100%;
 }
 
 .basket-grow {
@@ -17,13 +25,13 @@
 
 .basket-item-count {
     display: flex;
-    position:relative;
+    position: absolute;
     background-color: var(--dark-purple);
     border-radius: 100%;
-    width: 2em;
-    height: 2em;
-    left: 1.7em;
-    top: -1.7em;
+    min-width: 28px;
+    min-width: 28px;
+    right: 42px;
+    top: 40px;
 
     color: white;
     text-align: center;
@@ -39,15 +47,15 @@
     display: none;
     flex-direction: column;
 
-    position: absolute;
+    position: fixed;
     width: 40em;
     max-width: 85%;
     height: 70vh;
     background-color: var(--dark-purple);
-    right: 2.5%;
-    top: 7%;
+    right: 10px;
+    top: 60px;
     z-index: 100;
-    border-radius: 1em;
+    border-radius: 10px;
     padding: 1em;
     box-shadow: 
         1em 3em 1em rgba(0, 0, 0, 0.425);

@@ -3,18 +3,10 @@ import { useState, useEffect } from 'react';
 import "../css/product.css"
 import { setBasketStringQuantity } from '../utils';
 import { basket_icon, max_product_order } from '../consts';
-import { ProductData, ProductInBasket } from '../../lib/types';
+import { OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
 import { supabase } from '../../app';
 import SquareImageBox from './squareImageBox';
 import { getImageURL } from '../../lib/lib';
-
-type checkoutProductParams = {
-  image?: string
-  name: string
-  quantity: number
-  total: number
-  sku?: number
-}
 
 /**
  * I apologise sincerely for the following code.
@@ -418,21 +410,58 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function CheckoutProduct({image, name, quantity, total, sku}: checkoutProductParams) {
-  // This component is used by the staff-portal order manager too,
-  // Extra information is shown in this view
-  const sku_string = sku ? "SKU: " + sku : null
-  const checkbox = sku ? 
-  <><div className='product-filler'/><input type='checkbox' className='product-checkbox'/></> :
-  null
+/**
+ * @param product The product to display
+ * @param admin Whether the product should be rendered in admin mode or not
+ * @param checkbox Whether to display a checkbox alongside the product, for ticking off lists etc.
+ * @param linked Whether the product should be clickable to go to its product page
+ */
+export function CheckoutProduct({
+  product,
+  admin,
+  checkbox,
+  linked
+} : {
+  product: ProductData | ProductInBasket | OrderProduct
+  admin?: boolean
+  checkbox?: boolean
+  linked?: boolean
+}) {
+  // In some cases an undefined value may accidentally be passed
+  // to the component, in which case we should escape it and 
+  // render nothing, it will likely become defined once the page
+  // fully loads.
+  if (!product) return <></>
+  const sku = product.sku
+  const name = "name" in product ? product.name : product.product_name
+  const quantity = "basketQuantity" in product 
+    ? product.basketQuantity 
+    : "quantity" in product
+      ? product.quantity
+      : undefined 
+  const total = "line_value" in product 
+    ? product.line_value 
+    : quantity
+      ? product.price * quantity
+      : product.price
+
+  let image = "image_url" in product 
+    ? product.image_url 
+    : getImageURL(product.images?.[0]);
   
-  return (<div className="checkout-product">
+  let href = linked 
+    ? `/products/${sku}`
+    : undefined;
+
+  if (image == "") image = undefined
+  
+  return (<a className="checkout-product" href={href}>
       <SquareImageBox image={image} size='100%' loading='eager'/>
       <div className="checkout-product-text">
-          <p>{name} (x{quantity})</p>
+          {quantity ? <p>({name} x{quantity})</p> : <p>{name}</p>}
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
-          <p>{sku_string}</p>
+          {admin ? <p>SKU: {sku}</p> : <></>}
       </div>
-      {checkbox}
-  </div>)
+      {checkbox ? <><div className='product-filler'/><input type='checkbox' className='product-checkbox'/></> : <></>}
+  </a>)
 }

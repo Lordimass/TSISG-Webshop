@@ -102,13 +102,7 @@ export function CheckoutProducts() {
         imageURL = undefined
     }
 
-    els.push(<CheckoutProduct
-        image = {imageURL}
-        name = {prod.name}
-        quantity={prod.basketQuantity}
-        total = {prod.price*prod.basketQuantity}
-        key={prod.sku}
-    />)
+    els.push(<CheckoutProduct product={prod}/>)
   }
   return (<div className="checkout-products">{els}</div>)
 }
