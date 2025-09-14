@@ -200,7 +200,7 @@ export default function SquareImageBox({
     <div
       className="square-image-box"
       ref={containerRef}
-      style={{ width: size }}
+      style={{ width: size, height: size }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

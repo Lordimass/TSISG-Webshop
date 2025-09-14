@@ -18,6 +18,8 @@ import { Notif, NotificationsContext } from './assets/components/notification';
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
 import { SiteSettings } from "./lib/types";
 
+import '@flaticon/flaticon-uicons/css/all/all.css';
+
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 //  - Automatically updates STRIPE_WEBHOOK_SECRET in .env to the fresh local development test key. 

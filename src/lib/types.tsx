@@ -72,6 +72,44 @@ export type ProductInBasket = {
   category: CategoryData
 }
 
+export type Order = {
+  id: number
+  placed_at: string
+  email: string
+  street_address: string
+  postal_code: string
+  country: string
+  name: string
+  fulfilled: boolean
+  total_value: number
+  dispatched: boolean
+  delivery_cost?: number
+  products: OrderProduct[]
+  royalMailData: {
+    orderIdentifier: number
+    orderReference?: string
+    /** ISO Date String */
+    createdOn: string
+    /** ISO Date String */
+    orderDate?: string
+    /** ISO Date String */
+    printedOn?: string
+    /** ISO Date String */
+    manifestedOn?: string
+    /** ISO Date String */
+    shippedOn?: string
+    trackingNumber?: string
+  }
+}
+
+export type OrderProduct = {
+  sku: number,
+  product_name: string,
+  quantity: number,
+  line_value: number,
+  image_url: string
+}
+
 /** Site-wide settings fetched from the backend, allowing for simple customisation and changes to be made without recompiling the whole thing */
 export type SiteSettings = {
   /** Whether the webshop is disabled, useful in case of a critical fault. Message is shown to users in a notification */

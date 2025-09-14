@@ -1,6 +1,7 @@
 .header-main{
     display: flex;
     background-color: var(--purple);
+    align-items: center;
 }
 
 .header-lower{
@@ -15,5 +16,6 @@
 
 .header-spacer{
     width: 100%;
+    flex-grow: 1;
 }
 

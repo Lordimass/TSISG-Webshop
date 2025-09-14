@@ -3,61 +3,28 @@ import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import { ProductData } from '../lib/types/supabaseTypes.mts';
 import { compareImages } from '../lib/sortMethods.mts';
 
-const SELECT_QUERY = `
-  *,
-  images:product_images(
-    inserted_at,
-    image_url,
-    product_sku,
-    display_order,
-    alt,
-    storage_object:objects(
-      id,
-      bucket_id,
-      name,
-      path_tokens,
-      metadata
-    )
-  ),
-  category:product_categories(*),
-  tags:product_tags(tags(*))
-`
-
 export default async function handler(request: Request, _context: Context) {try {
   const {supabase, error: supErr} = await getSupabaseClient()
   if (supErr) return supErr
 
   // Function can accept a list of skus to fetch, instead of fetching all
-  let skus: number[] | undefined = undefined
+  let skus: number[] | null = null
   if (request.body) {
     skus = await request.json()
   }
 
   // Fetch data
-  let { data, error }: {data: any, error: any} = {data: null, error: null}
-  if (!skus) {
-    ({ data, error } = await supabase!
-      .from('products')
-      .select(SELECT_QUERY)
-      .eq("active", true)
-      .gt("stock", 0));
-  } else {
-    ({ data, error } = await supabase!
-      .from('products')
-      .select(SELECT_QUERY)
-      .in("sku", skus)
-    );
-  }
+  const {data, error} = await supabase!.rpc("get_products", { skus });
   if (error) throw error
 
-  return new Response(JSON.stringify(flattenProducts(data)), {
+  return new Response(JSON.stringify(data), {
     status: 200,
     headers: { 'Content-Type': 'application/json' },
   });
 
 } catch (e) {
   console.error('Error fetching products:', e);
-  return new Response(JSON.stringify([]), {status: 500, statusText: 'Internal Server Error'})
+  return new Response(e.message ?? JSON.stringify(e), {status: 500} )
 }
 
 };

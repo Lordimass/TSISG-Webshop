@@ -108,18 +108,8 @@ export async function fetchFromNetlifyFunction(
   }
 }
 
-export function useGetProductList(): ProductData[] {
-  const {data} = useFetchFromNetlifyFunction("getProducts")
-  return data
-}
-
 export function useGetOrderList(): any {
   const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, getJWTToken())
-  return data
-}
-
-export function useGetNoImageProds(): any {
-  const {data} = useFetchFromNetlifyFunction("getNoImageProds")
   return data
 }
 

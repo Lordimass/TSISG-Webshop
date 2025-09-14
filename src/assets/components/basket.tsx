@@ -65,11 +65,7 @@ export default function Basket() {
 
         // Toggle display mode
         setIsOpen(!isOpen)
-        if (isOpen) {
-            basket.style.display = "none"
-        } else {
-            basket.style.display = "flex"
-        }
+        basket.style.display = isOpen ? "none" : "flex"
     }
 
     const siteSettings = useContext(SiteSettingsContext)
