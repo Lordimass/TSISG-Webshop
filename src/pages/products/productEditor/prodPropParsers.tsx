@@ -59,7 +59,9 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
     // Convert tags string to array of tag names
     tags: async (val) => {
         if (!val) throw new Error("Tags string is empty");
+        // Split string by commas andr remove trailing white space
         const tags = val.split(",").map(tag => tag.trim());
-        return tags;
+        // Filter out blank tags
+        return tags.filter(tag => tag != "");
     }
 }
