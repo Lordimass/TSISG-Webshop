@@ -60,7 +60,14 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
     tags: async (val) => {
         if (!val) throw new Error("Tags string is empty");
         // Split string by commas andr remove trailing white space
-        const tags = val.split(",").map(tag => tag.trim());
+        const tags = val.split(",").map(tag => {
+            return tag
+                .trim() // Remove trailing spaces
+                .replace(" ", "-") // Spaces to dashes
+                .replace(/-+/g, "-") // Collapse repeated dashes into 1
+                .toLowerCase() // Lower case the whole string
+                .replace(/[^a-z0-9-]+/g, "") // Cleanse characters
+        });
         // Filter out blank tags
         return tags.filter(tag => tag != "");
     }
