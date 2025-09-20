@@ -12,7 +12,6 @@ import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import ProdPage from "./pages/products/prodPage";
 import { createClient, User } from '@supabase/supabase-js';
-import { keywords_meta } from './assets/consts';
 import { refreshBasket } from './lib/lib';
 import { Notif, NotificationsContext } from './assets/components/notification';
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
@@ -153,7 +152,6 @@ export function App() {
     <meta name='creator' content='Sam Knight'/>
     <meta name='creator' content='Lordimass'/>
     <meta name='generator' content='react'/>
-    <meta name='keywords' content={keywords_meta}/>
 
     <LoginContext.Provider value={{loggedIn, user, permissions}}>
     <SiteSettingsContext.Provider value={siteSettings}>

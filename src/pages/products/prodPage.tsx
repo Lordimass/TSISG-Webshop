@@ -87,7 +87,7 @@ export default function ProdPage() {
             hoveredVariant,
             setHoveredVariant
         }}>
-
+        
         {/* Above actual product */}
         <a className="go-home-button" href="/">
             <img src={back_icon}/>
