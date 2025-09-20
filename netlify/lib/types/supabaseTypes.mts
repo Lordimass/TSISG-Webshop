@@ -36,6 +36,14 @@ export type ProductData = {
   package_type_override: string
   /** Products with the same group name are displayed as one product with variants, instead of each as unique products. */
   group_name?: string
+  /** Additional information on the product */
+  metadata: {
+    /** The name of this specific variant, if `group_name != undefined` */
+    variant_name? : string
+    /** The priority of this product to search engines, used in sitemaps */
+    seo_priority? : number
+    [key: string]: unknown
+  }
 }
 
 export type ImageData = {
@@ -76,6 +84,12 @@ export type AssociationMetadata = {
      *  in a group, rather than as a standard product image 
     */
     group_product_icon?: boolean
+
+    /** 
+     * Whether this image is used to represent the group as a whole, rather
+     * than an individual variant.
+     */
+    group_representative?: boolean
 
     [key: string]: unknown
 }

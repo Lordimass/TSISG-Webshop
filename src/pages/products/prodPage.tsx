@@ -77,6 +77,8 @@ export default function ProdPage() {
         priceMinorString = "0"
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
+
+    const page_title = `TSISG - ${product.group_name ?? product.name}`
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
             basketQuant, 
             setBasketQuant, 
@@ -87,6 +89,10 @@ export default function ProdPage() {
             hoveredVariant,
             setHoveredVariant
         }}>
+
+        <title>{page_title}</title>
+        <meta name="description" content={product.description}/>
+        <link rel='canonical' href={`https://thisshopissogay.com/products/${sku}`}/>
         
         {/* Above actual product */}
         <a className="go-home-button" href="/">
