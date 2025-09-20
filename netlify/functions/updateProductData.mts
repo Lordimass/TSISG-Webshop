@@ -21,7 +21,7 @@ export default async function handler(request: Request, _context: Context) { try
     
     // Extract product from body
     const prod: ProductData = await request.json()
-
+    console.log(prod)
     // Update Supabase product table
     const { error: prodErr } = await supabase!
         .from("products")
@@ -37,33 +37,35 @@ export default async function handler(request: Request, _context: Context) { try
             origin_country_code: prod.origin_country_code,
             package_type_override: prod.package_type_override,
             description: prod.description, 
+            group_name: prod.group_name
         })
         .eq("sku", prod.sku)
     if (prodErr) throw prodErr
 
-    // Remove existing product_images mappings
-    const {error: deleteError} = await supabase!
-        .from("product_images")
-        .delete()
-        .eq("product_sku", prod.sku);
-    if (deleteError) throw deleteError;
-    
+    const now = new Date().toISOString()
     // Create new product_images mappings
     const imgPayload = prod.images.map((img) => {return {
             product_sku: prod.sku,
             image_id: img.id,
             image_url: img.image_url,
-            inserted_at: img.inserted_at, // Should be roughly `now()`, calculated by sender method
+            inserted_at: now, // Should be roughly `now()`, calculated by sender method
             display_order: img.display_order,
-            alt: img.alt
+            alt: img.alt,
+            association_metadata: img.association_metadata ?? {}
         }})
-    console.log(imgPayload)
-    const { data, error: imgError } = await supabase!
+    const { error: imgError } = await supabase!
         .from("product_images")
         .upsert(imgPayload)
         .select(`*`)
-    console.log(data)
     if (imgError) throw imgError
+
+    // Remove old product_images mappings
+    const {error: deleteError} = await supabase!
+        .from("product_images")
+        .delete()
+        .eq("product_sku", prod.sku)
+        .lt("inserted_at", now)
+    if (deleteError) throw deleteError;
 
     return new Response(undefined, {status: 204})
 } catch(e: any) {

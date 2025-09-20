@@ -60,4 +60,5 @@ export const blank_product: ProductData = {
     description: "",
     origin_country_code: "",
     package_type_override: "",
+    metadata: {}
 }

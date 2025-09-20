@@ -2,14 +2,24 @@ import { UnsubmittedImageData } from "../pages/products/productEditor/types"
 import { ImageData, ProductData } from "./types"
 
 export function compareProducts(a: ProductData, b: ProductData) {
-    // Primary: Sort by sort_order
-    if (a.sort_order < b.sort_order) return -1
-    if (a.sort_order > b.sort_order) return 1
-    // Secondary: Sort by category
-    if (a.category_id < b.category_id) return -1
-    if (a.category_id > b.category_id) return 1
-    // Tertiary: Sort alphabetically
-    return a.name.localeCompare(b.name)
+  // Primary: Sort by sort_order
+  if (a.sort_order < b.sort_order) return -1
+  if (a.sort_order > b.sort_order) return 1
+  // Secondary: Sort by category
+  if (a.category_id < b.category_id) return -1
+  if (a.category_id > b.category_id) return 1
+  // Tertiary: Sort alphabetically
+  return a.name.localeCompare(b.name)
+}
+
+export function compareProductGroups(a: ProductData[], b: ProductData[]) {
+  // Handle groups with no products
+  if (a.length === 0 && b.length === 0) return 0
+  if (a.length === 0 && b.length > 0) return -1
+  if (a.length > 0 && b.length === 0) return 1
+
+  // Sort based on the first product in the group, presumed as the primary product
+  return compareProducts(a[0], b[0])
 }
 
 export function compareImages(a: ImageData | UnsubmittedImageData, b: ImageData | UnsubmittedImageData): number {

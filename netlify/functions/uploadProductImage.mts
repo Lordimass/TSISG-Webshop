@@ -66,8 +66,8 @@ export default async function handler(request: Request, _context: Context) {
     });
 
   if (error && error.message === "The resource already exists") {
-    console.error(`Duplicate image name upload attempted: ${fileName}`);
-    return new Response(`An image with the name "${fileName}" already exists. Please rename the file and try again.`, { status: 409 });
+    console.warn(`Duplicate image name upload attempted: ${fileName}`);
+    //return new Response(`An image with the name "${fileName}" already exists. Please rename the file and try again.`, { status: 409 });
   }
   else if (error) {
     console.error(`Error while uploading new image: ${error}`);

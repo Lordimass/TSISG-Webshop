@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../app";
+import { ProductData } from "./types";
 
-export type UseRPCReturn = {
+export type UseRPCReturn<T> = {
     loading: boolean
-    data?: any
+    data?: T
     error?: Error
 }
 
@@ -26,7 +27,7 @@ export function useCallRPC(
     functionName: string, 
     params: { [key: string]: any },
     notify?: (msg: string) => void
-) : UseRPCReturn {
+) : UseRPCReturn<any> {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<any>(undefined);
     const [error, setError] = useState<Error | undefined>(undefined);
@@ -48,6 +49,20 @@ export function useCallRPC(
     return {loading, data, error};
 }
 
-export function useGetProducts(skus?: string[]) : UseRPCReturn {
-    return useCallRPC("get_products", {skus: skus || null});
+export function useGetProducts(skus?: number[], in_stock_only = false, active_only = true
+) : UseRPCReturn<ProductData[]> {
+    return useCallRPC("get_products", {skus: skus || null, in_stock_only, active_only});
+}
+export async function getProducts(skus?: number[], in_stock_only = false, active_only = true
+) : Promise<ProductData[]> {
+    return await callRPC("get_products", {skus: skus || null, in_stock_only, active_only});
+}
+
+export function useGetGroupedProducts(skus?: number[], in_stock_only = false, active_only = true
+) : UseRPCReturn<ProductData[][]> {
+    return useCallRPC("get_grouped_products", {skus: skus || null, in_stock_only, active_only});
+}
+export async function getGroupedProducts(skus?: number[], in_stock_only = false, active_only = true
+) : Promise<ProductData[][]> {
+    return await callRPC("get_grouped_products", {skus: skus || null, in_stock_only, active_only});
 }

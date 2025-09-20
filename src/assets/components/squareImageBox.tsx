@@ -141,14 +141,20 @@ export default function SquareImageBox({
 
   // Track container width
   useEffect(() => {
-    function updateSize() {
+    if (!containerRef.current) return;
+    const updateSize = () => {
       if (containerRef.current) {
         setContainerWidth(containerRef.current.offsetWidth);
       }
-    }
+    };
+    // Run immediately
     updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    // Observe the element
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(containerRef.current);
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   // Re-enable transitions **only** after layout is established.
@@ -200,7 +206,7 @@ export default function SquareImageBox({
     <div
       className="square-image-box"
       ref={containerRef}
-      style={{ width: size, height: size }}
+      style={{ width: size, height: containerWidth }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

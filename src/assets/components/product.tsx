@@ -1,23 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import "../css/product.css"
 import { setBasketStringQuantity } from '../utils';
-import { basket_icon, max_product_order } from '../consts';
-import { OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
+import { basket_icon, blank_product, max_product_order } from '../consts';
+import { CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
 import { supabase } from '../../app';
 import SquareImageBox from './squareImageBox';
-import { getImageURL } from '../../lib/lib';
+import { getImageURL, getRepresentativeImageURL } from '../../lib/lib';
+import { ProductContext } from '../../pages/products/lib';
 
 /**
  * I apologise sincerely for the following code.
  */
-export default function Product({ product }: {product: ProductData}) {
+export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
   // Redefining variables after changing parameter to accept
   // full product instead of just select information. Done to
   // avoid refactoring the whole component to use product.???
-  let {sku, name, price, images, stock} = product;
+  let sku: number, name: string, price: number, images: ImageData[], stock: number|undefined, category: CategoryData;
+  let group = false
+  let product: ProductData[] | ProductData = blank_product
+  if ("length" in prod && prod.length === 1) product = prod[0]
+  else product = prod
+  
+  if (!("length" in product)) { // Product is not in a group
+    sku = product.sku
+    name = product.name
+    price = product.price
+    images = product.images
+    stock = product.stock
+    group = true
+  } else { // Product is in a group
+    product = product as unknown as ProductData[]
+    sku = product[0].sku
+    name = product[0].group_name!
+    price = product[0].price
+    images = product[0].images
+    category = product[0].category
+  }
 
-  if (stock < 0) {stock = 0}
+  if (stock && stock < 0) {stock = 0}
 
   function BasketModifier0Quant() { // Simple Add To Basket Button
     return (
@@ -48,7 +69,7 @@ export default function Product({ product }: {product: ProductData}) {
   }
 
   function increment() { // Increase quantity of this product
-    if (quantity >= max_order) {
+    if (!max_order || quantity >= max_order) {
       return
     }
     setBasketStringQuantity(quantity+1)
@@ -76,6 +97,7 @@ export default function Product({ product }: {product: ProductData}) {
   }
 
   function updateQuantity() {
+    if (group) {return}
     // Fetch HTMLElement
     const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
     if (basketElement == null) {
@@ -95,9 +117,9 @@ export default function Product({ product }: {product: ProductData}) {
       return
     }
     // Check number in range
-    if (+value > max_order) {
+    if (+value > max_order!) {
       basketInput.value = max_order as unknown as string
-      setBasketStringQuantity(max_order)
+      setBasketStringQuantity(max_order!)
       return
     } else if (+value <= 0) {
       basketInput.value = 0 as unknown as string
@@ -113,6 +135,7 @@ export default function Product({ product }: {product: ProductData}) {
   }
 
   function setBasketStringQuantity(quant: number) {
+    if (group) {return}
     // Function needs to update the localStorage basket for persistence,
     // it will also then update the actual quantity state for this product.
 
@@ -148,8 +171,8 @@ export default function Product({ product }: {product: ProductData}) {
         "price": price,
         "basketQuantity": quant,
         "images": images,
-        "stock": stock,
-        "category": product.category
+        "stock": stock!,
+        "category": category
       })
     }
 
@@ -207,48 +230,13 @@ export default function Product({ product }: {product: ProductData}) {
       setQuantityButActually(0)
     }
   }
-
-  /**
-   * Redirect user to the dedicated page for this product, also adds
-   */
-  function redirectToDedicatedPage() {
-    window.location.href = "/products/"+sku;
-  }
   
   const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
   const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-  const max_order = Math.min(max_product_order, stock); // Maximum possible product order
-  const [imageURL, setImageURL] = useState(supabase.storage
-    .from("transformed-product-images")
-    .getPublicUrl(product.images[0].name.replace(/\.[^.]+$/, '.webp'))
-    .data.publicUrl
-  )
+  const max_order = stock ? Math.min(max_product_order, stock): undefined; // Maximum possible product order
+  const imageURL = getRepresentativeImageURL(prod)
 
   window.addEventListener("basketUpdate", resetInputToBasket)
-
-  // Check if transformed image exists, and fallback to untransformed if not
-  useEffect(() => {
-    async function exists(path: string) {
-      const { data, error } = await supabase
-        .storage
-        .from("transformed-product-images")
-        .list('', { search: path });
-
-      if (error) {
-        console.error(error);
-        return false;
-      }
-      
-      const exist = data.some((item: { name: string; }) => item.name === path);
-      if (!exist) {
-        setImageURL(supabase.storage
-          .from("product-images")
-          .getPublicUrl(product.images[0].name)
-          .data.publicUrl)
-      }
-    }
-    exists(product.images[0].name.replace(/\.[^.]+$/, '.webp'))
-  }, [])
 
   // Format Price
   const string_price: string = "£" + price.toFixed(2)
@@ -256,7 +244,14 @@ export default function Product({ product }: {product: ProductData}) {
   // Check if item already in basket
   useEffect(() => {resetInputToBasket()}, [])
 
-  return (
+  return (<ProductContext.Provider value={{
+    basketQuant: quantity, setBasketQuant: setQuantityButActually,
+    product: "length" in product ? product[0] : product, setProduct: undefined,
+    group: "length" in product ? product : [],
+    originalProd: "length" in product ? product[0] : product,
+    hoveredVariant: undefined,
+    setHoveredVariant: undefined
+  }}>
     <div className="product" id={"product-" + sku}>
       {/* Product Image + Link to dedicated product page*/}   
       <a className="product-image-link" href={"/products/"+sku}>
@@ -274,10 +269,25 @@ export default function Product({ product }: {product: ProductData}) {
         </div>
         <div className='spacer'/>
         <div className='basket-modifier'>
-          {showModifier ? <BasketModifier/> : <BasketModifier0Quant/>}
+          {group
+            ? showModifier 
+              ? <BasketModifier/> 
+              : <BasketModifier0Quant/>
+            : <GroupBasketModifier/>
+          }
         </div>
       </div>
     </div>
+    
+  </ProductContext.Provider>)
+}
+
+function GroupBasketModifier() {
+  const {product} = useContext(ProductContext)
+  return (
+    <a className="basket-button" href={`/products/${product.sku}`}>
+      <p>View Options <i className="fi fi-rr-angle-right"></i></p>
+    </a>
   )
 }
 

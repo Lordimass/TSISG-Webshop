@@ -1,5 +1,8 @@
+import { createContext } from "react"
 import { isNumeric } from "../../../assets/utils"
 import { ProductData } from "../../../lib/types"
+import { UnsubmittedProductData } from "./types"
+import { blank_product } from "../../../assets/consts"
 
 // Editable Product Properties
 export type EditableProductProp = {
@@ -41,7 +44,7 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "name",
         displayName: "Name",
         tooltip: "User facing name of the product. Max 50 characters.",
-        constraint: (value: string) => typeof value == "string" && value.length <= 50
+        constraint: (value: string) => typeof value === "string" && value.length <= 50
     },
     {
         propName: "price",
@@ -61,7 +64,7 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "active",
         displayName: "Active",
         tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
-        constraint: (value: string) => value.toLowerCase() == "true" || value.toLowerCase() == "false"
+        constraint: (value: string) => value.toLowerCase() === "true" || value.toLowerCase() === "false"
     },
     {
         propName: "weight",
@@ -74,13 +77,13 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "customs_description",
         displayName: "Customs Description",
         tooltip: "A short description of the product for customs forms. max length: 50 characters",
-        constraint: (value: string) => typeof value == "string" && value.length < 50
+        constraint: (value: string) => typeof value === "string" && value.length < 50
     },
     {
         propName: "origin_country_code",
         displayName: "Origin Country Code",
         tooltip: "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
-        constraint: (value: string) => typeof value == "string" && value.length == 3
+        constraint: (value: string) => typeof value === "string" && value.length === 3
     },
     {
         propName: "sort_order",
@@ -92,7 +95,13 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "description",
         displayName: "Description",
         tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
-        constraint: (value: string) => typeof value == "string"
+        constraint: (value: string) => typeof value === "string"
+    },
+    {
+        propName: "group_name",
+        displayName: "Group Name",
+        tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
+        constraint: (value: string) => typeof value === "string"
     },
     {
         propName: "last_edited",
@@ -107,7 +116,7 @@ export const editableProductProps: EditableProductProp[] = [
         tooltip: "The ID of the last person to edit this product",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false // Never editable
-    },
+    }
 ]
 
 export const category_prod_prop: EditableProductProp = {
@@ -123,3 +132,17 @@ export const tags_prod_prop: EditableProductProp = {
     tooltip: "A comma separated list of tags associated with this product",
     constraint: (_value: string) => true
 }
+
+export const EditableProductPropContext = createContext<{
+    originalProd: ProductData
+    product: ProductData | UnsubmittedProductData,
+    setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
+    productProp?: EditableProductProp
+    updateProductOverride?: (
+        key: keyof ProductData, 
+        value: any, 
+        originalProd: ProductData,
+        fetchNewData: () => Promise<void>,
+        constraint: (value: string) => boolean) => Promise<void>
+    resetOverride?: () => void
+}>({product: blank_product, originalProd: blank_product})

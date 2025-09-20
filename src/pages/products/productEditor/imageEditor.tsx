@@ -1,14 +1,15 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
-import { ProductContext } from "../prodPage";
-import { ImageData, ProductData } from "../../../lib/types";
+import { AssociationMetadata, ImageData } from "../../../lib/types";
 import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
 import SquareImageBox from "../../../assets/components/squareImageBox";
 
 import "./imageEditor.css"
-import { UnsubmittedImageData, UnsubmittedProductData } from "./types";
+import { UnsubmittedImageData } from "./types";
 import { NotificationsContext } from "../../../assets/components/notification";
 import { compareImages } from "../../../lib/sortMethods";
 import { updateProductData } from "../../../lib/netlifyFunctions";
+import { ProductContext } from "../lib";
+import { removeImage, shiftImage } from "./lib";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {
@@ -49,7 +50,7 @@ export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<
                 {product.images && product.images.length > 0
                 ? product.images.map((image) =>  
                     <ProdImage 
-                        key={"id" in image ? image.id : crypto.randomUUID()} 
+                        key={"id" in image ? image.id : image.local_url} 
                         image={image}
                     />
                   ) 
@@ -129,26 +130,68 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
         setProduct!({...product, images: newImages})
     }
 
+    function updateAssMetadata(attribute: keyof AssociationMetadata, value: any) {
+        const newImage = {...image}
+        newImage.association_metadata[attribute] = value
+        console.log(newImage, value)
+        setImage(newImage)
+    }
+
     return (
         <div className="product-image">
             <p className="display-order">{image.display_order}</p>
             <SquareImageBox image={url} alt={image.alt ?? undefined} loading="eager" />
 
+            {/* Filename Input */}
             <input 
                 className="image-file-name" 
+                id={`image-name-${image.name}${image.display_order}`}
                 placeholder="File name" 
                 defaultValue={image.name} 
                 onBlur={setName}
                 ref={nameInput}
                 disabled={"id" in image}
             />
+
+            {/* Alt Text Input */}
             <input 
                 className="image-alt-text" 
+                id={`image-alt-${image.name}${image.display_order}`}
                 placeholder="Alt text" 
                 defaultValue={image.alt ?? undefined} 
                 onBlur={setAlt}
                 ref={altInput}
             />
+
+            {/* Global Image Input */}
+            <label>Global 
+                <input 
+                    type="Checkbox" 
+                    defaultChecked={image.association_metadata?.global}
+                    id={`image-global-${image.name}${image.display_order}`}
+                    onChange={(e) => {updateAssMetadata("global", e.target.value)}}
+                />
+            </label>
+
+            {/* Variant Icon Input */}
+            <label>Variant Icon 
+                <input 
+                    type="Checkbox" 
+                    defaultChecked={image.association_metadata?.group_product_icon}
+                    id={`image-variant-icon-${image.name}${image.display_order}`}
+                    onChange={(e) => {updateAssMetadata("group_product_icon", e.target.value)}}
+                />
+            </label>
+
+            {/* Group Representative Input */}
+            <label>Group Representative 
+                <input 
+                    type="Checkbox" 
+                    defaultChecked={image.association_metadata?.group_representative}
+                    id={`image-group-representative-${image.name}${image.display_order}`}
+                    onChange={(e) => {updateAssMetadata("group_representative", e.target.checked)}}
+                />
+            </label>
 
             {/** Remove Image button */}
             <button 
@@ -214,6 +257,7 @@ function UploadNewImage({imageFiles}: {imageFiles: React.RefObject<Map<string, F
             display_order: greatestDisplayOrder+1+i,
             name: file.name,
             local_url,
+            association_metadata: {}
         }
         // Also create a mapping from local_url to the File object
         imageFiles.current.set(local_url, file);
@@ -282,77 +326,3 @@ function PlaceholderProdImage() {
     );
 }
 
-/**
- * Shifts an image left or right in the product image array
- * @param image The image to shift
- * @param product The product containing the image
- * @param setProduct The function to update the product
- * @param left Whether to shift the image left or right
- * @returns 
- */
-function shiftImage(
-    image: ImageData | UnsubmittedImageData, 
-    product: ProductData | UnsubmittedProductData, 
-    setProduct: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>> | undefined, 
-    left = true
-) {
-    if (!setProduct) return;
-
-    let currentIndex: number
-    if ("id" in image) {
-        currentIndex = product.images.findIndex(img => (
-            "id" in img &&
-            img.id === image.id
-        ));
-    } else {
-        currentIndex = product.images.findIndex(img => (
-            "local_url" in img &&
-            img.local_url === image.local_url
-        ))
-    }
-    
-    const newImages = [...product.images];
-
-    // Shift left
-    if (currentIndex > 0 && left ) { 
-        [newImages[currentIndex - 1], newImages[currentIndex]] = [newImages[currentIndex], newImages[currentIndex - 1]];
-
-    // Shift right
-    } else if (currentIndex < product.images.length - 1 && !left) { 
-        [newImages[currentIndex + 1], newImages[currentIndex]] = [newImages[currentIndex], newImages[currentIndex + 1]];
-    }
-
-    // Reset display orders
-    newImages.forEach((img, index) => {
-        img.display_order = index+1;
-    });
-
-    setProduct({ ...product, images: newImages });
-}
-
-/**
- * Removes an image from the product
- * @param image The image to remove
- * @param product The product containing the image
- * @param setProduct The function to update the product
- */
-function removeImage(
-    image: ImageData | UnsubmittedImageData, 
-    product: ProductData | UnsubmittedProductData, 
-    setProduct: React.Dispatch<React.SetStateAction<UnsubmittedProductData>> | undefined
-) {
-    if (!setProduct) return;
-    let newImages: (ImageData | UnsubmittedImageData)[]
-    if ("id" in image) { // Image being removed was submitted
-        newImages = product.images.filter(img => (
-            "local_url" in img || // Include all unsubmitted
-            img.id !== image.id // And only submitted images that aren't this one
-        ));
-    } else { // Image being removed was unsubmitted
-        newImages = product.images.filter(img => (
-            "id" in img || // Include all submitted
-            img.local_url !== image.local_url // And only unsubmitted images that aren't this one
-        ))
-    }
-    setProduct({ ...product, images: newImages });
-}

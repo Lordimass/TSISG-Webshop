@@ -169,7 +169,8 @@ export async function updateProductData(
     metadata: {},
     name: img.unsubmittedImage.name,
     path_tokens: [img.unsubmittedImage.name],
-    product_sku: product.sku
+    product_sku: product.sku,
+    association_metadata: img.unsubmittedImage.association_metadata
   }})
   const combinedImages = [...submittedImages, ...newImages].sort(compareImages)
   const reconstructedProduct: ProductData = {...product, images: combinedImages}

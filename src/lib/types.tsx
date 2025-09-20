@@ -34,19 +34,62 @@ export type ProductData = {
   tags: TagData[]
   /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
   package_type_override: string
+  /** Products with the same group name are displayed as one product with variants, instead of each as unique products. */
+  group_name?: string
+  /** Additional information on the product */
+  metadata: {
+    /** The name of this specific variant, if `group_name != undefined` */
+    variant_name? : string
+    [key: string]: unknown
+  }
 }
 
 export type ImageData = {
+  /** Alt text for the image */
   alt: string | undefined
+  /** The identifier of the bucket that the image object belongs to */
   bucket_id: string
+  /** The order to display this image in when in a list, higher numbers come later */
   display_order: number
+  /** The identifier of the image object */
   id: UUID
+  /** DEPRECATED: Use `id` instead. The direct access url of the image */
   image_url: string
+  /** ISO timestamp of when the association was made between the image and the product */
   inserted_at: string
-  metadata: any
+  /** The filename of the image */
   name: string
+  /** String tokens representing the path through the bucket to obtain the image */
   path_tokens: string[]
+  /** The SKU of the product this image is related to */
   product_sku: number
+  /** Additional information on the image object itself */
+  metadata: {[key: string]: unknown}
+  /** Additional information on the association between the image and its product. */
+  association_metadata: AssociationMetadata
+}
+
+/** Additional information on the association between an image and its product. */
+export type AssociationMetadata = {
+    /**
+     * Whether this image is relevant to all products in the product group 
+     * (if it exists), rather than just the SKU it's assigned to
+     */
+    global?: boolean
+
+    /** 
+     * Whether this image is to be used as an icon for the product when
+     *  in a group, rather than as a standard product image 
+    */
+    group_product_icon?: boolean
+
+    /** 
+     * Whether this image is used to represent the group as a whole, rather
+     * than an individual variant.
+     */
+    group_representative?: boolean
+
+    [key: string]: unknown
 }
 
 export type TagData = {

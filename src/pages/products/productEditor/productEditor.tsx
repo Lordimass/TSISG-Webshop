@@ -1,42 +1,29 @@
-import { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react"
+import { ReactElement, useContext, useEffect, useRef, useState } from "react"
 import { ProductData } from "../../../lib/types"
-import { blank_product } from "../../../assets/consts"
-import { cleanseUnsubmittedProduct, ProductContext } from "../prodPage"
+import { cleanseUnsubmittedProduct } from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
 import { NotificationsContext } from "../../../assets/components/notification"
 import { ProductImageEditor } from "./imageEditor"
-import { category_prod_prop, EditableProductProp, editableProductProps, tags_prod_prop } from "./editableProductProps"
+import { category_prod_prop, EditableProductPropContext, editableProductProps, tags_prod_prop } from "./editableProductProps"
 import MultiAutocomplete from "../../../assets/components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
 
 import "./productEditor.css"
 import { prodPropParsers } from "./prodPropParsers"
 import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
 import { UnsubmittedProductData } from "./types"
-
-const EditableProductPropContext = createContext<{
-    originalProd: ProductData
-    product: ProductData | UnsubmittedProductData,
-    setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
-    productProp?: EditableProductProp
-    updateProductOverride?: (
-        key: keyof ProductData, 
-        value: any, 
-        originalProd: ProductData,
-        fetchNewData: () => Promise<void>,
-        constraint: (value: string) => boolean) => Promise<void>
-    resetOverride?: () => void
-}>({product: blank_product, originalProd: blank_product})
+import { ProductContext } from "../lib"
+import { getProducts } from "../../../lib/supabaseRPC"
 
 export default function ProductEditor() {
     async function fetchNewData() {
-        const response = await fetchFromNetlifyFunction("getProduct", JSON.stringify({sku: product.sku}))
-        if (!response.error && response.data && setProduct) {
-            setProduct(response.data)
+        const response = await getProducts([product.sku])
+        if (setProduct) {
+            setProduct(response[0])
         }
         const tagsResp = await fetchFromNetlifyFunction("getPropertyLists")
-        if (!response.error && response.data && setProduct) {
+        if (!tagsResp.error && tagsResp.data && setProduct) {
             propLists = tagsResp.data
         }
     }
@@ -156,6 +143,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
             } else { // Fallback to raw string if no parser provided
                 target[key] = val as ProductData[K]
             }
+            return target
         }
 
         // When the inputField is specified, the value of `value` will be undefined since the ref cannot point to it.
@@ -177,11 +165,11 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         }
         if (!setProduct) {return}
 
-        const newProduct: UnsubmittedProductData = {...product}
+        const newProduct: ProductData = cleanseUnsubmittedProduct({...product})
         // Assign the changed value
-        await assignTypedValue(key, value, cleanseUnsubmittedProduct(newProduct))
+        await assignTypedValue(key, value, newProduct)
+        console.log(newProduct)
         // Update on Supabase
-        // TODO: implement handling for unsubmitted images on serverside, then change type of this function to UnsubmittedProductData
         await updateProductData(newProduct) 
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         fetchNewData()

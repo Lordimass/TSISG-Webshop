@@ -5,28 +5,29 @@ import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
 import { ProductData, ProductInBasket } from "../../lib/types";
-import { compareProducts } from "../../lib/sortMethods";
+import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../consts";
 import { supabase } from "../../app";
-import { useGetProducts, UseRPCReturn } from "../../lib/supabaseRPC";
+import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
     function decrementPage() {setPage(page - 1)}
 
     const [page, setPage] = useState(1)
-    const getProductsResponse: UseRPCReturn = useGetProducts();
-    const productData: Array<ProductData> = getProductsResponse.data || []
+    const getProductsResponse = useGetGroupedProducts(undefined, true, true);
+    const productGroups: ProductData[][] = getProductsResponse.data || []
     const [products, setProducts] = useState<React.JSX.Element[]>([])
     const [pageCount, setPageCount] = useState(0)
     
-    // Deactivate products with no images,
-    // Products with active=false or stock=0 are excluded from the query.
     useEffect(() => {
-        const activeProductData: Array<ProductData> = productData.filter(
-            p => p.images && p.images.length >= 1
-        );
-        activeProductData.sort(compareProducts)
+        // Don't show products with no images
+        const activeProductData: ProductData[][] = productGroups.filter(group => {
+            const images = group.map(p => p.images).flat(1)
+            return images.length > 0;
+        });
+        activeProductData.sort(compareProductGroups)
+        activeProductData.forEach((group) => {group.sort(compareProducts)})
 
         // Create product elements if there are any products to display
         if (activeProductData.length<0) {
@@ -40,19 +41,15 @@ export default function Products() {
 
         const buildingProducts: React.JSX.Element[] = []
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
-            let product: ProductData|null = activeProductData[i]
-            if (!product) {
+            let group: ProductData[]|null = activeProductData[i]
+            if (!group || group.length === 0) {
                 continue;
-            }
-
-            if (!product.active) {
-                end++
-                continue;
+                i--
             }
             
             const newProductComponent = <Product
-                product={product}
-                key={product.sku}
+                prod={group}
+                key={group[0].sku}
             />
             buildingProducts.push(newProductComponent)
         }
