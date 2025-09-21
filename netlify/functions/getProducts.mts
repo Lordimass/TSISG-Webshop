@@ -24,7 +24,7 @@ export default async function handler(request: Request, _context: Context) {try 
 
 } catch (e) {
   console.error('Error fetching products:', e);
-  return new Response(e.message ?? JSON.stringify(e), {status: 500} )
+  return new Response('An unexpected server error occurred.', {status: 500});
 }
 
 };
