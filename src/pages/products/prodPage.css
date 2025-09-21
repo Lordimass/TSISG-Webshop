@@ -1,0 +1,251 @@
+.product-box {
+    display: grid; 
+    grid-template-columns: 1fr 2fr; 
+    grid-template-rows: auto auto auto 1fr auto; 
+    gap: 0 20px; 
+    grid-template-areas: 
+        "image title"
+        "image price"
+        "image tags"
+        "image desc"
+        "image ticker";
+
+    margin: 1em;
+    padding: 1em;
+    width: calc(100% - 2em);
+    background-color: white;
+    /* Mostly so that it doesn't disappear while testing/developing */
+    min-height: 25vh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+
+    border-radius: 1.5em;
+}
+
+.product-box .image { 
+    grid-area: image;
+}
+
+.product-box .price {
+    grid-area: price;
+    color: black;
+    font-weight: 200;
+    font-size: 2em;
+    min-width: 0;
+}
+
+.product-box .title {
+    grid-area: title;
+    color: black;
+    font-size: 3.5em;
+    line-height: 1.2em;
+    min-width: 0
+}
+
+.product-box .desc { 
+    grid-area: desc;
+    min-width: 0;
+    margin-top: 1em;
+    margin-bottom: 1.5em;
+    margin-right: 10%;
+    font-size: larger;
+}
+
+.product-box .desc p {
+    margin-bottom: 0.5em;
+}
+
+.go-home-button {
+    display: flex;
+    height: 2em;
+    user-select: none;
+    margin-left: 1em;
+    margin-top: 0.5em;
+    text-decoration: none;
+}
+
+.go-home-button img {
+    height: 2em;
+    filter: invert(1);
+    vertical-align: "middle";
+}
+
+.go-home-button h1 {
+    font-size: 2em;
+}
+
+.logged-in-disclaimer {
+    margin-left: 1em;
+}
+
+.prod-page-basket-button {
+    border: none;
+    height: 60px;
+}
+
+.ticker {
+    grid-area: ticker;
+    width: 100%;
+    max-width: 100%;
+}
+
+.prod-page-basket-button h1 {
+    display: flex;
+    gap: 3px;
+}
+
+.prod-page-basket-button:hover {
+    transform: scale(102%);
+}
+
+.prod-page-basket-button:disabled {
+    cursor: not-allowed;
+    background-color: var(--jamie-grey);
+    transform: none;
+}
+
+.prod-page-basket-button .basket-icon {
+    font-size: larger;
+    line-height: 1em;
+    height: 1em
+}
+
+.prod-page-modifier {
+    grid-area: ticker;
+    width: 100%;
+    height: 60px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.tags {
+    display: flex;
+    gap: 0 3px;
+    height: min-content;
+}
+
+.tag {
+    background-color: var(--jamie-grey);
+    height: min-content;
+    padding: 5px;
+    border-radius: 10px;
+    color: white;
+    font-family: "Perfect Penmanship";
+    font-size: 0.8em;
+    user-select: none;
+}
+
+.title .sku {
+    font-size: 0.4em;
+    font-weight: 600;
+    line-height: 1em;
+    margin-bottom: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    text-wrap-mode: wrap;
+}
+
+.product-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 5px;
+    max-width: 100%;
+    border-radius: 10px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
+}
+
+.product-variant {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    
+    width: 100px;
+    box-sizing: content-box;
+    height: max-content;
+    padding: 5px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+
+    background-color: #ccc;
+    transition: margin-bottom 0.1s;
+}
+
+.product-variant:hover {
+    background-color: white;
+    border: 2px solid black;
+}
+
+.selected-product-variant {
+    background-color: white;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+
+.hover-product-image {
+    position: absolute;
+    z-index: 2;
+}
+
+
+@media screen and (max-width: 1100px)  {
+    .product-group {
+        justify-content: center;
+    }
+
+    .product-variant {
+        transition: none;
+        padding: 1px;
+    }
+
+    .product-variant:hover {
+        background-color: default;
+        border: 2px solid black;
+    }
+
+    .selected-product-variant {
+        margin-bottom: unset;
+        border: 2px solid black;
+        padding: 0;
+    }
+
+    .product-variant .p-small {
+        display: none;
+    }
+
+    .product-box {
+        display: flex;
+        flex-direction: column; 
+        gap: 0px 0; 
+
+        margin: 10px;
+        padding: 15px;
+        width: calc(100% - 20px);
+        border-radius: 10px;
+    }
+
+    .product-editor-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-box .title {
+        font-size: 3em;
+        margin-top: 10px;
+    }
+
+    .product-box .desc {
+        min-height: 150px;
+    }
+
+    .product-box .price {
+        font-size: 2.5em;
+    }
+
+    .prod-page-modifier {
+        height: 4em;
+        width: 100%;
+        margin: 0;
+    }
+}

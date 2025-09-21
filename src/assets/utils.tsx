@@ -1,7 +1,8 @@
 import { User, UserResponse } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
 import { daysOfWeek, monthsOfYear } from "./consts";
 import { supabase } from "../app";
+import { ProductData, ProductInBasket } from "../lib/types";
+import { UnsubmittedProductData } from "../pages/products/productEditor/types";
 
 export async function getLoggedIn() {
     const user: User | null = await getUser();
@@ -18,86 +19,75 @@ export async function getUser() {
 }
 
 /**
- * Calls the given Netlify function with the given body and JWT Auth token if supplied
- * @param func The name of the function to run
- * @param body The body for the function (Optional)
- * @param jwt Promise of JWT Auth Token
- * @returns Data or error
+ * Given a new quantity and relevant information on a product to associate it with,
+ * update the local storage basket to contain that new quantity
  */
-export function fetchFromNetlifyFunction(func: string, body?:string, jwt?: Promise<string | undefined>):any {
-  const [data, setData] = useState<any>(null)
-  const [error, setError] = useState<any>(null)
-  let errored = false
+export function setBasketStringQuantity(prod: ProductData | ProductInBasket, quant: number) {
+  console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
+  // Fetch the current basket contents
+  let basketString: string | null = localStorage.getItem("basket")
+  if (!basketString) { // Create basket if it doesn't exist
+    basketString = "{\"basket\": []}"
+  }
+  let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
 
-  const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
-  
-  useEffect(() => {
-    async function fetchData() {
-      const jwtString = await jwt
-      try {
-        // Standard case where no body supplied
-        if (!body) {
-          // Supply JWT as auth if supplied
-          await fetch(endpoint, {headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}}) 
-          .then((response) => {
-            errored = response.status != 200; 
-            return response.json();
-          })
-          .then((data) => {
-            if (errored) {
-              console.error(data)
-              setError(data)
-            } else {setData(data)}
-          })
-          
-        // Alternative POST case
-        } else {
-          await fetch(endpoint, {
-            method: "POST",
-            body: body,
-            // Supply JWT as auth if supplied
-            headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}
-          })
-          .then((response) => {
-            errored = response.status != 200; 
-            return response.json();
-          })
-          .then((data) => {
-            if (errored) {
-              console.error(data)
-              setError(data)
-            } else {setData(data)}
-          })
-        }
-
-      } catch (error: any) {
-        setError(error);
+  // Find product and set quantity
+  let found: boolean = false
+  for (let i = 0; i<basket.length; i++) {
+    let item: ProductInBasket = basket[i]
+    if (item.sku == prod.sku) {
+      found = true
+      // Just remove it from the basket if 0
+      if (quant == 0) {
+        basket.splice(i, 1)
+        break
       }
+      item.basketQuantity = quant
+      break
     }
-
-    fetchData();
-  }, []);
-
-  if (error) {
-    console.error(error)
   }
-  else if (data) {
-    return data
+
+  // If it wasn't found, create it
+  if (!found && quant > 0) {
+    basket.push({
+      "sku": prod.sku,
+      "name": prod.name,
+      "price": prod.price,
+      "basketQuantity": quant,
+      "images": prod.images,
+      "stock": prod.stock,
+      "category": prod.category
+    })
   }
-  return []
+
+  // Save to localStorage
+  localStorage.setItem("basket",
+    JSON.stringify({"basket": basket})
+  )
+
+  window.dispatchEvent(new CustomEvent("basketUpdate"))
 }
 
-
-export function getProductList(): any {
-    return fetchFromNetlifyFunction("getProducts")
+/**
+ * Checks whether a given value is able to be converted to a number
+ * @param value 
+ */
+export function isNumeric(value: string): boolean {
+  return !Number.isNaN(value);
 }
 
-export function getOrderList(jwt: Promise<string | undefined>): any {
-  return fetchFromNetlifyFunction("getAllOrders", undefined, jwt)
-}
-
-export function getNoImageProds(): any {
-  return fetchFromNetlifyFunction("getNoImageProds")
+/**
+ * Attempt to parse a string as JSON and return it, if it's not valid then just return the string again.
+ * Helpful for logging when you don't know what the string is but want to log it nicely.
+ * @param value String to attempt to parse
+ * @returns Either the start string or a JSON object
+ */
+export function softParseJSON(value: string): any {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
 }
 
 export async function fetchPolicy(name: string): Promise<string>{

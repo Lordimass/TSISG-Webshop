@@ -4,7 +4,7 @@
 import { Context } from "@netlify/functions";
 import Stripe from "stripe";
 
-var stripe: Stripe | null = null;
+let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
     stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
         apiVersion: '2025-03-31.basil',

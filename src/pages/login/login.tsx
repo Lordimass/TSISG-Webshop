@@ -1,4 +1,4 @@
-import { AuthSession, AuthTokenResponsePassword, createClient, SupabaseClient, UserResponse } from "@supabase/supabase-js";
+import { AuthSession, AuthTokenResponsePassword } from "@supabase/supabase-js";
 import Footer from "../../assets/components/footer";
 import Header from "../../assets/components/header";
 
@@ -118,7 +118,7 @@ export default function LoginPage() {
         setLoggedIn(false)
     }
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((event: string) => {
         if (event === "SIGNED_IN") {
             setLoggedIn(true);
         } else if (event === "SIGNED_OUT") {
@@ -132,7 +132,7 @@ export default function LoginPage() {
         const checkLoginStatus = async () => {
             console.log("Checking if user is logged in")
             const isLoggedIn = await getLoggedIn();
-            console.log(isLoggedIn)
+            console.log(isLoggedIn ? "User was already logged in" : "User is not logged in")
             setLoggedIn(isLoggedIn)
         }
         checkLoginStatus()

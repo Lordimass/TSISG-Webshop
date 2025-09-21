@@ -81,10 +81,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         
         const zones: Array<Array<string>> = [uk, eu]
         // Default shipping rate is most expensive (Should be world shipping)
-        var shipping_option: {shipping_rate: string} = shipping_options[shipping_options.length-1]; 
+        let shipping_option: {shipping_rate: string} = shipping_options[shipping_options.length-1]; 
     
         // Find the zone that the given country is in
-        var found = false;
+        let found = false;
         zones.forEach((zone, i) => {
             if (zone.includes(code)) {
                 shipping_option = shipping_options[i];
@@ -120,7 +120,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     /**
      * Checks whether all of the items in the basket are still in stock
-     * @returns <code>true</code> if stock is OK, <code>false</code> if it is not.
+     * @returns true if stock is OK, false if it is not.
      */
     async function checkStock() {
         // Can assume basket string exists given context
@@ -307,12 +307,12 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
     const [killSwitch, setKillSwitch] = useState<boolean>(false)
-    let killSwitchMessage = null
+    let killSwitchMessage
     if (killSwitch) {
-        killSwitchMessage = siteSettings.kill_switch.message
+        killSwitchMessage = siteSettings.kill_switch?.message
     }
     useEffect(() => {
-        setKillSwitch(siteSettings.kill_switch && siteSettings.kill_switch.enabled )
+        setKillSwitch(siteSettings.kill_switch?.enabled ?? false)
     }, [siteSettings])
     
     // Set shipping rate to first option as default until country is set.

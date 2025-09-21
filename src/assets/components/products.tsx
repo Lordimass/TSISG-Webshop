@@ -1,72 +1,67 @@
 import "../css/products.css"
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { getProductList } from "../utils";
 import { ProductData, ProductInBasket } from "../../lib/types";
-import { compareProducts } from "../../lib/sortMethods";
+import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../consts";
 import { supabase } from "../../app";
+import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 
 export default function Products() {
-    function incrementPage() {
-        setPage(page + 1)
-    }
-
-    function decrementPage() {
-        setPage(page - 1)
-    }
+    function incrementPage() {setPage(page + 1)}
+    function decrementPage() {setPage(page - 1)}
 
     const [page, setPage] = useState(1)
-    const productData: Array<ProductData> = getProductList();
-    var products: Array<React.JSX.Element> = [];
-    let pageCount = 0;
+    const getProductsResponse = useGetGroupedProducts(undefined, true, true);
+    const productGroups: ProductData[][] = getProductsResponse.data || []
+    const [products, setProducts] = useState<React.JSX.Element[]>([])
+    const [pageCount, setPageCount] = useState(0)
+    
+    useEffect(() => {
+        // Don't show products with no images
+        const activeProductData: ProductData[][] = productGroups.filter(group => {
+            const images = group.map(p => p.images).flat(1)
+            return images.length > 0;
+        });
+        activeProductData.sort(compareProductGroups)
+        activeProductData.forEach((group) => {group.sort(compareProducts)})
 
-    // Deactivate products with no images,
-    // Products with active=false or stock=0 are excluded from the query.
-    const activeProductData: Array<ProductData> = []
-    for (let i=0; i<productData.length; i++) {
-        const product = productData[i]
-        const active = product.images.length>=1; 
-        if (active) {
-            activeProductData.push(product)
-        }
-    }
-    activeProductData.sort(compareProducts)
-
-    // Create product elements if there are any products to display
-    if (activeProductData.length>0) {
-        var start: number = (page-1)*productLoadChunks
-        var end: number = Math.min(page*productLoadChunks, activeProductData.length)
-
-        for (let i=start; i < Math.min(end, activeProductData.length); i++) {
-          let product: ProductData|null = activeProductData[i]
-          if (!product) {
-            continue;
-          }
-
-          if (!product.active) {
-            end++
-            continue;
-          }
-          products.push(<Product
-              prod={product}
-              key={product.sku}
-          />)
+        // Create product elements if there are any products to display
+        if (activeProductData.length<0) {
+            setProducts([])
+            setPageCount(0)
+            return
         }
         
-        pageCount = Math.floor(activeProductData.length/productLoadChunks);
-        if (productData.length % productLoadChunks != 0) {
-            pageCount++
+        let start: number = (page-1)*productLoadChunks
+        let end: number = Math.min(page*productLoadChunks, activeProductData.length)
+
+        const buildingProducts: React.JSX.Element[] = []
+        for (let i=start; i < Math.min(end, activeProductData.length); i++) {
+            let group: ProductData[]|null = activeProductData[i]
+            if (!group || group.length === 0) {
+                continue;
+                i--
+            }
+            
+            const newProductComponent = <Product
+                prod={group}
+                key={group[0].sku}
+            />
+            buildingProducts.push(newProductComponent)
         }
+        setProducts(buildingProducts)
+        
+        let pageCount = Math.floor(activeProductData.length/productLoadChunks);
+        if (activeProductData.length % productLoadChunks != 0) {
+            pageCount++;
+        }
+        setPageCount(pageCount);
 
-    } else {
-        products = []
-        pageCount = 0
-    }
-
+    }, [getProductsResponse.loading, page])
 
     return (<div className="products-box">
     <div className='products'>{products}</div>
@@ -104,13 +99,7 @@ export function CheckoutProducts() {
         imageURL = undefined
     }
 
-    els.push(<CheckoutProduct
-        image = {imageURL}
-        name = {prod.name}
-        quantity={prod.basketQuantity}
-        total = {prod.price*prod.basketQuantity}
-        key={prod.sku}
-    />)
+    els.push(<CheckoutProduct product={prod}/>)
   }
   return (<div className="checkout-products">{els}</div>)
 }

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { dateToDateString, dateToTimeString, getJWTToken, getOrderList } from "../../assets/utils";
+import { dateToDateString, dateToTimeString, getJWTToken } from "../../assets/utils"
+import "./css/orders.css"
 import { CheckoutProduct } from "../../assets/components/product";
 import Throbber from "../../assets/components/throbber";
 
@@ -8,56 +9,21 @@ import { LoginContext } from "../../app";
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
 import { NotificationsContext } from "../../assets/components/notification";
+import { useGetOrderList } from "../../lib/netlifyFunctions";
+import { Order } from "../../lib/types";
 
 const overdue_threshold: number = 7;
 
-type Order = {
-    id: number
-    placed_at: string
-    email: string
-    street_address: string
-    postal_code: string
-    country: string
-    name: string
-    fulfilled: boolean
-    total_value: number
-    dispatched: boolean
-    delivery_cost?: number
-    products: {
-        sku: number,
-        product_name: string,
-        quantity: number,
-        line_value: number,
-        image_url: string
-    }[]
-    royalMailData: {
-    orderIdentifier: number
-    orderReference?: string
-    /** ISO Date String */
-    createdOn: string
-    /** ISO Date String */
-    orderDate?: string
-    /** ISO Date String */
-    printedOn?: string
-    /** ISO Date String */
-    manifestedOn?: string
-    /** ISO Date String */
-    shippedOn?: string
-    trackingNumber?: string
-    }
 
-}
-
-export function OrderManager() {
+export function OrderManager() { 
+    const orders: Order[] = useGetOrderList() || []
+    orders.sort(compareOrders)
     const loginContext = useContext(LoginContext)
     const [accessible, setAccessible] = useState(false)
-
     useEffect(() => {
         setAccessible(loginContext.permissions.includes("manage_orders"))
     }, [loginContext]) 
 
-    let orders: Order[] = getOrderList(getJWTToken())
-    orders.sort(compareOrders)
     return (<><Header/><div className="content" id="order-manager-content">
         <title>TSISG STAFF - Order Manager</title>
         <meta name="robots" content="noindex"/>
@@ -65,13 +31,13 @@ export function OrderManager() {
 
         {
             accessible ? 
-            orders ? (orders.map((order: any) => <Order key={order.id} order={order}/>)) : <></> 
+            orders ? (orders.map((order: any) => <OrderDisplay key={order.id} order={order}/>)) : <></> 
             : <NotLoggedIn/>
         }
         </div><Footer/></>)
 }
 
-function Order({order}:{order:Order}) {
+function OrderDisplay({order}:{order:Order}) {
     function expand() {
         setExpanded(!expanded)
     }
@@ -171,14 +137,13 @@ function Order({order}:{order:Order}) {
         </div>
 
         <div className="order-products">
-            {order.products ? order.products.map(prod => <CheckoutProduct 
-                image={prod.image_url}
-                name={prod.product_name}
-                quantity={prod.quantity}
-                total={prod.line_value}
-                sku={prod.sku}
-                key={prod.sku}
-            />) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
+            {order.products ? order.products.map(prod => {return <CheckoutProduct 
+                product={prod} 
+                key={prod.sku} 
+                admin={true} 
+                checkbox={true}
+            />}
+            ) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>
         {!order.fulfilled
         ? <div className="delivery-cost">

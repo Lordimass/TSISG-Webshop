@@ -3,6 +3,7 @@
   border-radius: 12px;
   overflow: hidden;
   touch-action: pan-y;
+  align-self: center;
 }
 
 .square-image-spacer {
@@ -32,8 +33,8 @@
 }
 
 .square-image-foreground {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 

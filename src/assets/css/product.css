@@ -4,17 +4,40 @@
 
     width: min-content;
     height: min-content;
-    min-width: 20em;
+    min-width: 320px;
     max-width: 20em;
-    min-height: 33em;
+    min-height: 35em;
 
     background-color: white;
     overflow:hidden;
     border-radius: 1em;
     color: white;
     margin: 1em;
+}
 
-    justify-content: space-between;
+.product-image-link {
+    display: block;
+    width: 100%;
+}
+
+.product-name {
+    text-decoration: none;
+    font-size: large;
+}
+
+.product-name:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.product .div:hover {
+    cursor: pointer;
+}
+
+.bg-blurrer {
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(4px);
 }
 
 .product-text {
@@ -23,6 +46,7 @@
     margin: 1em;
     color: black;
     flex-grow: 1;
+    margin-top: 2em;
 }
 
 .product-price {
@@ -45,9 +69,12 @@
 .basket-button {
     display: flex;
     justify-content: center;
+    align-items: center;
+    color: white;
+    text-decoration: none;
 
     width: 100%;
-    height: 100%;
+    height: 4em;
     background-color: var(--purple);
     border-radius: 1em;
     transition: all 0.1s;
@@ -74,6 +101,7 @@
 .prod-footer {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .decrement-basket-quantity-button, .increment-basket-quantity-button {
@@ -134,9 +162,22 @@ either would make sense so I went with that.
 
     .product-text {
         font-size: smaller;
+        margin: 0.8em;
+    }
+
+    .product-name {
+        font-size: 1em;
+    }
+
+    .product-price {
+        margin-top: 0.5em;
     }
 
     .basket-modifier {
+        height: 2em;
+    }
+
+    .basket-modifier .basket-button {
         height: 2em;
     }
 

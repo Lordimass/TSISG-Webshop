@@ -1,5 +1,5 @@
 import { Context } from "@netlify/functions";
-import getSupabaseObject from "../lib/getSupabaseObject.mts";
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 
 /**
  * Artificially trigger the imageTransformer for every product-image.
@@ -11,7 +11,7 @@ export default async function handler(request: Request, context: Context): Promi
     if (!authHeader) {
         return new Response(undefined, {status: 403, statusText: "No Authorization supplied"})
     }
-    const {supabase, error: supabaseError} = await getSupabaseObject(authHeader);
+    const {supabase, error: supabaseError} = await getSupabaseClient(authHeader);
     if (supabaseError) return supabaseError
 
     // Fetch list of images

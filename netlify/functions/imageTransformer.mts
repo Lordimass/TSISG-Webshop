@@ -5,7 +5,7 @@
 // For local development, use cloudflared tunnel or similar with `cloudflared tunnel run`
 
 import { Context } from "@netlify/functions";
-import getSupabaseObject from "../lib/getSupabaseObject.mts";
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import { WebhookPayload } from "../lib/types/supabaseTypes.mts";
 import sharp from "sharp";
 import { formatBytes } from '../lib/lib.mts';
@@ -37,10 +37,10 @@ export default async function handler(request: Request, _context: Context): Prom
     }
 
     // Get service role Supabase Client for uploading new images and checking request contents
-    const {supabase, error: clientFetchError} = await getSupabaseObject(undefined, true);
+    const {supabase, error: clientFetchError} = await getSupabaseClient(undefined, true);
     if (clientFetchError) return clientFetchError
     
-    // Get the name of the transformed image
+    // Construct the name of the transformed image
     let transformedName: string
     if (body.record) {
         transformedName = body.record.name.replace(/\.[^.]+$/, '.webp')

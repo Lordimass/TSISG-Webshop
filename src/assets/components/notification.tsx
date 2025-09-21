@@ -1,6 +1,6 @@
 import { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
 import "../css/notification.css";
-import { info_icon } from "../consts";
+import { info_icon, reading_speed_cps } from "../consts";
 
 export type Notif = { id: number; message: string; duration?: number };
 
@@ -19,7 +19,7 @@ export default function Notifications() {
   const [isVisible, setIsVisible] = useState(false);
   const timeoutRef = useRef<number>(null);
 
-  // 1) enqueue incoming notifs
+  // enqueue incoming notifs
   useEffect(() => {
     const handler = (e: any) => {
       const id = newNotif.current.id
@@ -31,7 +31,7 @@ export default function Notifications() {
     return () => window.removeEventListener("notification", handler);
   }, []);
 
-  // 2) when nothing is showing, dequeue the next
+  // when nothing is showing, dequeue the next
   useEffect(() => {
     if (!visibleNotif && internalQueue.length > 0) {
       const [next, ...rest] = internalQueue;
@@ -40,7 +40,7 @@ export default function Notifications() {
     }
   }, [internalQueue, visibleNotif]);
 
-  // 3) whenever a new visibleNotif appears, trigger slide‑in then auto‑dismiss
+  // whenever a new visibleNotif appears, trigger slide‑in then auto‑dismiss
   useEffect(() => {
     if (!visibleNotif) return;
     // ensure it starts hidden
@@ -49,11 +49,13 @@ export default function Notifications() {
     // next tick: add the "visible" class so CSS transition runs
     const id1 = window.setTimeout(() => setIsVisible(true), 20);
 
-    // schedule slide‑out after 5s or duration
+    // schedule slide‑out after set duration, calculated time to read, or 5s minimum
     if (visibleNotif.duration) {
       timeoutRef.current = window.setTimeout(() => setIsVisible(false), (visibleNotif.duration*1000+20));
     } else {
-      timeoutRef.current = window.setTimeout(() => setIsVisible(false), 5020);
+      timeoutRef.current = window.setTimeout(() => setIsVisible(false), Math.min(
+        visibleNotif.message.length / reading_speed_cps * 1000 + 20, 5000
+      ));
     }
 
     return () => {

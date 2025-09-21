@@ -7,14 +7,17 @@ import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
-import DragNDrop from './pages/dragndrop/dragndrop';
-import { fetchFromNetlifyFunction, getUser } from './assets/utils';
-import { createClient, User } from '@supabase/supabase-js';
+import { getUser } from './assets/utils';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
-import { keywords_meta } from './assets/consts';
+import ProdPage from "./pages/products/prodPage";
+import { createClient, User } from '@supabase/supabase-js';
 import { refreshBasket } from './lib/lib';
 import { Notif, NotificationsContext } from './assets/components/notification';
+import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
+import { SiteSettings } from "./lib/types";
+
+import '@flaticon/flaticon-uicons/css/all/all.css';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -40,7 +43,7 @@ export const SUPABASE_DATABASE_URL = `https://${SUPABASE_ID}.supabase.co`
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1bWxwZml5YnFsa3dvc2Nyanp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNTEyOTEsImV4cCI6MjA1NzcyNzI5MX0.jXIG6uxnvxAhbPDsKuTnFwa9-3fh8odQwYcV0ffQLeE"
 export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 
-export const SiteSettingsContext = createContext<any>({})
+export const SiteSettingsContext = createContext<SiteSettings>({})
 
 export function App() {
   async function updateLoginContext() {
@@ -61,11 +64,10 @@ export function App() {
   }
 
   // Fetching Site Settings
-  let siteSettings = fetchFromNetlifyFunction("getSiteSettings");
-  if ( // Set to empty object if it errored or hasn't finished running yet
-    typeof siteSettings == "string" ||
-    Object.prototype.toString.call(siteSettings) === '[object Array]'
-  ) {
+  let response = useFetchFromNetlifyFunction("getSiteSettings");
+  let siteSettings = response.data
+  // Set to empty object if it errored or hasn't finished running yet
+  if (typeof siteSettings == "string" || !siteSettings) {
     siteSettings = {}
   }
 
@@ -150,7 +152,6 @@ export function App() {
     <meta name='creator' content='Sam Knight'/>
     <meta name='creator' content='Lordimass'/>
     <meta name='generator' content='react'/>
-    <meta name='keywords' content={keywords_meta}/>
 
     <LoginContext.Provider value={{loggedIn, user, permissions}}>
     <SiteSettingsContext.Provider value={siteSettings}>
@@ -163,6 +164,8 @@ export function App() {
       <Routes>
         <Route index element={<Home />} />
   
+        <Route path="products/*" element={<ProdPage/>} />
+
         <Route path="checkout" element={<Checkout/>} />
   
         <Route path="thankyou" element={<ThankYou/>} />
@@ -176,8 +179,6 @@ export function App() {
         <Route path="refunds" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
         <Route path="cancellations" element={<Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
         <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
-
-        <Route path="dragndrop" element={<DragNDrop/>}/>
 
         <Route path="*" element={<Page404/>} />
       </Routes>

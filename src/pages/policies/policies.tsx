@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { fetchPolicy } from "../../assets/utils";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-import { page_title } from "../../assets/consts";
 
 export default function Policy({file_name, title, canonical}: {file_name: string, title: string, canonical: string}) {
     const [md, setMd] = useState<string | null>(null)

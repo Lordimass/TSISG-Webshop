@@ -1,6 +1,6 @@
 import { Context } from '@netlify/functions';
 import { SupabaseClient } from '@supabase/supabase-js';
-import getSupabaseObject from '../lib/getSupabaseObject.mts';
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import { OrdersCompressed as SbOrder } from '../lib/types/supabaseTypes.mts';
 import { OrderFromPageable as RmOrder} from '../lib/types/royalMailTypes.mts';
 
@@ -14,7 +14,7 @@ export default async function handler(request: Request, _context: Context) {
   if (!authHeader) {
     return new Response("No Authorization supplied", {status: 403})
   }
-  const {error, supabase} = await getSupabaseObject(authHeader)
+  const {error, supabase} = await getSupabaseClient(authHeader)
   if (error) {return error}
 
   const supabaseOrdersResp = await fetchSupabaseOrders(supabase!)

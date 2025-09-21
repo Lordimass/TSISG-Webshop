@@ -1,153 +1,140 @@
-import { HandlerEvent } from '@netlify/functions';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+/**
+ * Handles uploading an image to the product_images Supabase bucket. These images
+ * are compressed marginally to prevent huge file sizes but are otherwise left
+ * untouched.
+ */
+
+import { Context } from '@netlify/functions';
 import formidable from 'formidable';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 import { Readable } from 'stream';
 import { formatBytes } from '../lib/lib.mts';
+import getSupabaseClient from "../lib/getSupabaseClient.mts";
 
-const TARGET_IMAGE_SIZE = 150 * 1024
-const ALLOWED_UIDS = ["9f76379b-8c04-47c6-b950-b7e159e7859b"]
+/** The target maximum size for the image in bytes */
+const TARGET_IMAGE_SIZE = 1000 * 1000;
 
-// Uses Lambda Compatibility Mode, don't care right now since this is temporary
-export async function handler(event: HandlerEvent) {
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
-    }
+export default async function handler(request: Request, _context: Context) {
+  if (request.method !== 'POST') {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
 
-    // Grab Supabase URL and Key from Netlify Env Variables.
-    const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const authHeader = request.headers.get("Authorization") ?? undefined;
+  const { supabase, error: supErr } = await getSupabaseClient(authHeader);
+  if (supErr) return supErr;
 
-    // Validate that they were both successfully fetched.
-    if (!supabaseUrl || !supabaseKey) {
-        return new Response("Supabase credentials not set", { status: 500 });
-    }
-    const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+  // Convert body -> Buffer
+  const arrayBuffer = await request.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
-    // Authorise Request
-    const AuthorisationResult = await authorise(event, supabase)
-    if (AuthorisationResult.statusCode != 200) {
-        return AuthorisationResult
-    }
+  // Wrap it in a Readable so formidable can parse it
+  const req = bufferToReadable(buffer) as any;
+  req.headers = Object.fromEntries(request.headers.entries());
 
-    // Handle File Payload
-    const buffer = Buffer.from(event.body!, event.isBase64Encoded ? 'base64' : 'utf8');
-    const req = bufferToReadable(buffer) as any;
-    req.headers = event.headers;
+  const form = formidable({ multiples: false });
 
-    const form = formidable({ multiples: false });
-
-    const { fields, files } = await new Promise<{ fields: any; files: any }>((resolve, reject) => {
+  // Use Promise to await the callback from form.parse, 
+  // resulting in the fields and files from the form.
+  const { fields, files } = await new Promise<{ fields: any; files: any }>(
+    (resolve, reject) => {
         form.parse(req, (err, fields, files) => {
             if (err) reject(err);
             else resolve({ fields, files });
-        });
+        }
+    )}
+  );
+
+  const uploaded = files.file?.[0];
+  if (!uploaded) {
+    return new Response('No file uploaded.', { status: 400 });
+  }
+
+  // Read the temp file path to buffer
+  const uncompressedBuffer: Buffer = await fs.readFile(uploaded.filepath);
+  const fileName: string = uploaded.originalFilename;
+
+  // Compress
+  const compressedBuffer: Buffer = await convertAndCompressToWebp(uncompressedBuffer, TARGET_IMAGE_SIZE);
+
+  // Upload File to Supabase
+  // TODO: Handle duplicate names
+  const { error } = await supabase!.storage
+    .from("product-images")
+    .upload(fileName, compressedBuffer, {
+      contentType: "image/webp",
     });
 
-    const uploaded = files.file[0];
-    if (!uploaded) {
-    return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'No file uploaded' }),
-    };
-    }
+  if (error && error.message === "The resource already exists") {
+    console.warn(`Duplicate image name upload attempted: ${fileName}`);
+    //return new Response(`An image with the name "${fileName}" already exists. Please rename the file and try again.`, { status: 409 });
+  }
+  else if (error) {
+    console.error(`Error while uploading new image: ${error}`);
+    return new Response(JSON.stringify(error), { status: 500 });
+  }
 
-    // Read the temp file path to buffer
-    const uncompressedBuffer: Buffer = await fs.readFile(uploaded.filepath);
-    const fileName: string = uploaded.originalFilename
-    // Compress
-    const compressedBuffer: Buffer = await convertAndCompressToWebp(uncompressedBuffer)
+  // Then fetch its ID and URL
+  const {data: idData, error: idError} = await supabase!
+    .from("objects")
+    .select(`id`)
+    .eq("name", fileName)
+  if (idError) {
+    console.error(`Error while fetching image ID after saving a new image: ${idError.message}`)
+    return new Response("Failed to fetch image ID after saving", { status: 500 });
+  }
+  const fileID = idData[0].id
+  const fileURL = supabase!.storage.from("product-images").getPublicUrl(fileName).data.publicUrl
 
+  return new Response(
+    JSON.stringify({
+      filename: uploaded.originalFilename,
+      size: uploaded.size,
+      fileID,
+      fileURL
+    }),
+    { status: 200, headers: { "Content-Type": "application/json" } }
+  );
+}
 
-    // Upload File to Supabase
-    const { data, error } = await supabase.storage
-        .from("product_images")
-        .upload(fileName, compressedBuffer, {
-            contentType: "image/webp",
-        })
-    
-    if (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({error: error.message})
-        }
-    }
-
-    // Then fetch its URL
-    const publicURL = supabase.storage.from("product_images").getPublicUrl(fileName).data.publicUrl
-
-    // Assign image to product
-    const response = await supabase
-        .from("product_images")
-        .insert({
-            image_url: publicURL,
-            product_sku: fields.sku[0] as unknown as number
-        })
-    if (response.error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({error: response.error.message})
-        }
-    }
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: `Uploaded file ${uploaded.originalFilename}[${formatBytes(compressedBuffer.length)}] to ${publicURL}, SKU: ${fields.sku}`,
-            filename: uploaded.originalFilename,
-            size: uploaded.size,
-            publicURL: publicURL
-        }),
-    };
-};
-
-
-function bufferToReadable(buffer: Buffer) {
+/**
+ * Convert a buffer to a Readable object
+ * @param buffer The Buffer to convert to Readable
+ * @returns A Readable object containing the contents of the buffer
+ */
+function bufferToReadable(buffer: Buffer): Readable {
   return new Readable({
     read() {
       this.push(buffer);
       this.push(null);
-    }
+    },
   });
 }
 
-async function convertAndCompressToWebp(buffer: Buffer) {
+/**
+ * Compress an image buffer below the target maximum size
+ * @param buffer The image buffer to compress
+ * @param targetMax Target max image size in bytes
+ * @returns 
+ */
+async function convertAndCompressToWebp(buffer: Buffer, tagetMax: number): Promise<Buffer> {
   let quality = 100; // Start quality
   let outputBuffer = await sharp(buffer).webp({ quality }).toBuffer();
 
   // Reduce quality until size fits or minimum quality reached
-  while (outputBuffer.length > TARGET_IMAGE_SIZE && quality > 1) {
+  while (outputBuffer.length > tagetMax && quality > 1) {
     quality -= 10;
     if (quality <= 0) {
-        quality = 1
+      quality = 1;
     }
-    console.log(`Attempting Quality: ${quality}`)
-    outputBuffer = await sharp(buffer).webp({ quality }).toBuffer();
+    outputBuffer = await sharp(buffer).webp({
+      quality,
+      smartSubsample: true,
+      smartDeblock: true,
+      effort: 6,
+    }).toBuffer();
   }
 
-  console.log(`Image compressed with quality ${quality}, file size ${formatBytes(outputBuffer.length)}`)
+  console.log(`Image compressed with quality ${quality}, file size ${formatBytes(outputBuffer.length)}`);
   return outputBuffer;
 }
-
-async function authorise(event: HandlerEvent, supabase: SupabaseClient) {
-    // Extract token from Authorization header
-    const authHeader = event.headers.authorization || event.headers.Authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return { statusCode: 401, error: 'Unauthorized: Missing token' };
-    }
-    const token = authHeader.split(' ')[1];
-
-    // Verify JWT and get user data
-    const { data: user, error } = await supabase.auth.getUser(token);
-    if (error || !user) {
-        return { statusCode: 401, error: 'Unauthorized: Invalid token' };
-    }
-
-    // Check if user's ID is allowed
-    if (!ALLOWED_UIDS.includes(user.user.id)) {
-        return { statusCode: 403, error: 'Forbidden: User not allowed' };
-    }
-
-    return { statusCode: 200, body: 'Success' };
-};

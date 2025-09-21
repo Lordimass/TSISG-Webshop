@@ -1,16 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { page_title } from '../../assets/consts';
 
 import Header from "../../assets/components/header";
 import Footer from "../../assets/components/footer";
 import React from 'react';
+import Products from '../../assets/components/products';
 
 import "./home.css"
-import Products from '../../assets/components/products';
-import { createClient } from '@supabase/supabase-js';
-import { page_title } from '../../assets/consts';
+
+
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
-var spinTimeout = false
+let spinTimeout = false
 
 export default function Home() {
   function changeWord() {
@@ -22,7 +23,7 @@ export default function Home() {
     rotate(document.getElementById("title-word"))
 
     words.splice(words.indexOf(word), 1)
-    var value: number = Math.floor(Math.random()*words.length)
+    let value: number = Math.floor(Math.random()*words.length)
 
     setTimeout(() => {
       setWord(words[value])

@@ -41,7 +41,12 @@ body {
 
 p {
     margin: 0;
+    font-size: 16px;
     font-family: "Perfect Penmanship"; 
+}
+
+.p-small {
+    font-size: 12px;
 }
 
 h1 {
@@ -50,8 +55,23 @@ h1 {
     font-family: "Backso"
 }
 
+h2 {
+    margin: 0;
+    color: white;
+    font-family: "Backso" 
+}
+
 a {
+    font-family: "Perfect Penmanship";
     color: black;
+}
+
+hr {
+    margin: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--jamie-grey);
+    border: none;
 }
 
 .content {
@@ -68,3 +88,40 @@ button {
     cursor: pointer;
 }
 
+/* Tooltip functionality when hovering over tooltipables */
+.tooltipable {
+  text-decoration: underline dotted;
+}
+
+.tooltipable .tooltip {
+  visibility: hidden;
+  width: 20vw;
+  background-color: white;
+  color: black;
+  border: 1px black solid;
+  padding: 5px;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  font-size: 1rem;
+ 
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 10;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltipable:hover .tooltip {
+  visibility: visible;
+}
+
+/* Superscript and subscript text */
+.superscript, .subscript {
+    font-size: xx-small;
+}
+.superscript {
+    vertical-align: top;
+}
+.subscript {
+    vertical-align: bottom;
+}
