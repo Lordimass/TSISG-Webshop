@@ -51,6 +51,7 @@ async function propFetch(supabase: SupabaseClient, table_name: string, columns: 
             return new Response(JSON.stringify(data), {status: 200})
         }
     } catch(e: any) {
-        return new Response(e, {status: 500})
+        console.error("Exception in propFetch:", e);
+        return new Response("Internal server error", {status: 500});
     }
 }
