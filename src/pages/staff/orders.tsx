@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { dateToDateString, dateToTimeString, getJWTToken } from "../../assets/utils"
+import { dateToDateString, dateToTimeString, getJWTToken, isNumeric } from "../../assets/utils"
 import "./css/orders.css"
 import { CheckoutProduct } from "../../assets/components/product";
 import Throbber from "../../assets/components/throbber";
@@ -11,12 +11,18 @@ import Footer from "../../assets/components/footer";
 import { NotificationsContext } from "../../assets/components/notification";
 import { useGetOrderList } from "../../lib/netlifyFunctions";
 import { Order } from "../../lib/types";
-
-const overdue_threshold: number = 7;
-
+import { compareOrders } from "../../lib/sortMethods";
+import { overdue_threshold } from "../../assets/consts";
+import { callRPC } from "../../lib/supabaseRPC";
+import { OrdersContext } from "./lib";
 
 export function OrderManager() { 
-    const orders: Order[] = useGetOrderList() || []
+    const unsetOrders: Order[] = useGetOrderList() || []
+    const [orders, setOrders] = useState<Order[]>([])
+    useEffect(() => {
+        if (unsetOrders.length > 0) setOrders(unsetOrders)
+    }, [unsetOrders])
+
     orders.sort(compareOrders)
     const loginContext = useContext(LoginContext)
     const [accessible, setAccessible] = useState(false)
@@ -25,6 +31,7 @@ export function OrderManager() {
     }, [loginContext]) 
 
     return (<><Header/><div className="content" id="order-manager-content">
+        <OrdersContext.Provider value={{orders, setOrders}}>
         <title>TSISG STAFF - Order Manager</title>
         <meta name="robots" content="noindex"/>
         <link rel='canonical' href='https://thisshopissogay.com/staff/orders'/>
@@ -34,7 +41,7 @@ export function OrderManager() {
             orders ? (orders.map((order: any) => <OrderDisplay key={order.id} order={order}/>)) : <></> 
             : <NotLoggedIn/>
         }
-        </div><Footer/></>)
+        </OrdersContext.Provider></div><Footer/></>)
 }
 
 function OrderDisplay({order}:{order:Order}) {
@@ -43,25 +50,8 @@ function OrderDisplay({order}:{order:Order}) {
     }
 
     async function toggleFulfilment() {
-        if (toggleInProgress) {
-            return
-        }
-        
+        if (toggleInProgress) return
         setToggleInProgress(true);
-
-        // Extract delivery cost
-        const deliveryCostString = deliveryCostInput.current ? deliveryCostInput.current.value : null
-        let deliveryCost = null
-        if (deliveryCostString) {
-            const potentialDeliveryCost = parseFloat(deliveryCostString)
-            if (!Number.isNaN(potentialDeliveryCost)) {
-                deliveryCost = potentialDeliveryCost
-            } else {
-                notify("Invalid delivery cost supplied! \"" + deliveryCostString + `"`)
-                setToggleInProgress(false);
-                return;
-            }
-        }
     
         const response = await fetch("../.netlify/functions/toggleOrderFulfilment", {
             method: "POST",
@@ -69,7 +59,7 @@ function OrderDisplay({order}:{order:Order}) {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${await getJWTToken()}`
             },
-            body: JSON.stringify({id: order.id, delivery_cost: deliveryCost})
+            body: JSON.stringify({id: order.id})
         })
 
         if (response.ok) {
@@ -91,7 +81,26 @@ function OrderDisplay({order}:{order:Order}) {
         return newColourClass
     }
 
+    async function setDeliveryCost(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+
+        // Update Supabase
+        const val = deliveryCostInput.current?.value ?? "s"
+        if (+val <= 0) {notify("Cost must be a valid number greater than 0!"); return}
+        try {
+            await callRPC("update_delivery_cost", {order_id: order.id, new_cost: val}, notify)
+        } catch {return}
+
+        // Update the order state
+        const newOrders = orders.map(o => {
+            if (o.id !== order.id) return o
+            else return {...o, delivery_cost: +val}
+        })
+        setOrders!(newOrders)
+    }
+
     const {notify} = useContext(NotificationsContext)
+    const {orders, setOrders} = useContext(OrdersContext)
 
     const date = new Date(order.placed_at)
     const today = new Date()
@@ -145,13 +154,13 @@ function OrderDisplay({order}:{order:Order}) {
             />}
             ) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>
-        {!order.fulfilled
-        ? <div className="delivery-cost">
-            <p>Royal Mail Delivery Cost: £</p>
-            <input placeholder="0.00" ref={deliveryCostInput}/>
-            <p>(Mark order as fulfilled to save)</p>
-            </div>
-        : <></>}
+        
+        <form className="delivery-cost" onSubmit={setDeliveryCost}>
+            <label>Royal Mail Delivery Cost: £
+                <input id="delivery-cost-input" placeholder="0.00" ref={deliveryCostInput}/>
+            </label>
+            <input type="submit"/>
+        </form>
         
         <p id="order-fulfil-warning">{
             order.fulfilled
@@ -196,29 +205,4 @@ function NotLoggedIn() {
             </p>
         </div>
     )
-}
-
-function compareOrders(a:Order, b:Order) {
-    const dateA = new Date(a.placed_at)
-    const dateB = new Date(b.placed_at)
-    // Place fulfilled orders after unfulfilled orders
-    if (a.fulfilled && !b.fulfilled) {
-        return 1
-    } else if (b.fulfilled && !a.fulfilled) {
-        return -1
-    // Place oldest unfullfilled orders first
-    } else if (!a.fulfilled && !b.fulfilled) {
-        return dateA < dateB 
-        ? -1 
-        : dateA == dateB
-            ? 0 
-            : 1
-    // Place most recent fulfilled orders first
-    } else {
-        return dateA < dateB 
-        ? 1 
-        : dateA == dateB 
-            ? 0
-            : -1
-    }
 }

@@ -9,7 +9,7 @@ export default async function handler(request: Request, _context: Context) {
     const {error, supabase} = await getSupabaseClient(authHeader)
     if (error) {return error}
     
-    const {id, delivery_cost} = await request.json();
+    const {id} = await request.json();
 
     let fulfilled: boolean = false;
     // Grab current value
@@ -31,7 +31,7 @@ export default async function handler(request: Request, _context: Context) {
     {
         const {data, error} = await supabase!
             .from("orders")
-            .update({fulfilled: !fulfilled, delivery_cost: delivery_cost})
+            .update({fulfilled: !fulfilled})
             .eq("id", id)
             .select()
         if (error) {

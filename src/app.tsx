@@ -27,10 +27,12 @@ import '@flaticon/flaticon-uicons/css/all/all.css';
 
 // Stripe CLI login expires every 90 days, run stripe login to refresh this if you receive an authentication error.
 export const LoginContext = createContext<{
+  loading: boolean
   loggedIn: boolean
   user: User | null
   permissions: string[]
 }>({
+  loading: true,
   loggedIn: false,
   user: null,
   permissions: []
@@ -46,6 +48,12 @@ export const supabase = createClient(SUPABASE_DATABASE_URL, SUPABASE_ANON_KEY)
 export const SiteSettingsContext = createContext<SiteSettings>({})
 
 export function App() {
+  // Login Checking
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [permissions, setPermissions] = useState([])
+  const [loading, setLoading] = useState(true)
+
   async function updateLoginContext() {
     const userResponse = await getUser()
     setUser(userResponse)
@@ -54,6 +62,7 @@ export function App() {
       const permissions = userResponse.app_metadata.permissions
       setPermissions(permissions ? permissions : [])
     }
+    setLoading(false)
   }
 
   // Set up notification queue
@@ -113,11 +122,6 @@ export function App() {
     if (timeSinceUpdate > 600000) refreshBasket()
   }, [])
 
-  // Login Checking
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-  const [permissions, setPermissions] = useState([])
-
   // If auth state changes, reauthorise user.
   useEffect(() => {
     const {data: {subscription}} = supabase.auth.onAuthStateChange((event, session) => {
@@ -153,7 +157,7 @@ export function App() {
     <meta name='creator' content='Lordimass'/>
     <meta name='generator' content='react'/>
 
-    <LoginContext.Provider value={{loggedIn, user, permissions}}>
+    <LoginContext.Provider value={{loggedIn, user, permissions, loading}}>
     <SiteSettingsContext.Provider value={siteSettings}>
     <NotificationsContext.Provider value={{newNotif, notify}}>
     {/**

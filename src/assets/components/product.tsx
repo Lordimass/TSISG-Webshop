@@ -4,7 +4,6 @@ import "../css/product.css"
 import { setBasketStringQuantity } from '../utils';
 import { basket_icon, blank_product, max_product_order } from '../consts';
 import { CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
-import { supabase } from '../../app';
 import SquareImageBox from './squareImageBox';
 import { getImageURL, getRepresentativeImageURL } from '../../lib/lib';
 import { ProductContext } from '../../pages/products/lib';
@@ -468,7 +467,7 @@ export function CheckoutProduct({
   return (<a className="checkout-product" href={href}>
       <SquareImageBox image={image} size='100%' loading='eager'/>
       <div className="checkout-product-text">
-          {quantity ? <p>({name} x{quantity})</p> : <p>{name}</p>}
+          {quantity ? <p>{name} (x{quantity})</p> : <p>{name}</p>}
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
           {admin ? <p>SKU: {sku}</p> : <></>}
       </div>

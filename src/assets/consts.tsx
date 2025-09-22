@@ -9,6 +9,11 @@ export const search_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
 
+/**
+ * The number of days before an unfulfilled order is considered overdue
+ */
+export const overdue_threshold: number = 2;
+
 /** The average character per second reading speed of a person. Used to calculate the length of time to show
  * a notification for based on its text length */
 export const reading_speed_cps = 16;

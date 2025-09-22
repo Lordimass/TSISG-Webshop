@@ -70,6 +70,7 @@
 }
 
 .checkout-product-text {
+    align-self: center;
     font-size: 1.4rem;
     margin-top: 1em;
     width: 350%;

@@ -63,6 +63,10 @@
     margin-top: 1em;
 }
 
+.order-products .checkout-product .checkout-product-text {
+    margin: 10px;
+}
+
 .order-values {
     column-count: 2;
     width: 100%;
@@ -101,16 +105,17 @@
 
 .delivery-cost {
     display: flex;
+    font-family: "Perfect Penmanship";
     margin-top: 1em;
 }
 
-.delivery-cost input {
-    width: 4ch;
-    font-family: "Perfect Penmanship";
-    height: 1em;
-    margin-right: 1ch;
+#delivery-cost-input {
+    max-width: 10ch;
 }
 
+.delivery-cost input {
+    font-family: "Perfect Penmanship";
+}
 
 @media screen and (max-width: 1100px) {
     .order {

@@ -1,5 +1,5 @@
 import { UnsubmittedImageData } from "../pages/products/productEditor/types"
-import { ImageData, ProductData } from "./types"
+import { ImageData, Order, ProductData } from "./types"
 
 export function compareProducts(a: ProductData, b: ProductData) {
   // Primary: Sort by sort_order
@@ -29,4 +29,29 @@ export function compareImages(a: ImageData | UnsubmittedImageData, b: ImageData 
     return 1;
   }
   return 0;
+}
+
+export function compareOrders(a:Order, b:Order) {
+    const dateA = new Date(a.placed_at)
+    const dateB = new Date(b.placed_at)
+    // Place fulfilled orders after unfulfilled orders
+    if (a.fulfilled && !b.fulfilled) {
+        return 1
+    } else if (b.fulfilled && !a.fulfilled) {
+        return -1
+    // Place oldest unfullfilled orders first
+    } else if (!a.fulfilled && !b.fulfilled) {
+        return dateA < dateB 
+        ? -1 
+        : dateA == dateB
+            ? 0 
+            : 1
+    // Place most recent fulfilled orders first
+    } else {
+        return dateA < dateB 
+        ? 1 
+        : dateA == dateB 
+            ? 0
+            : -1
+    }
 }

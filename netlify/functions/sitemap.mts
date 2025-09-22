@@ -23,7 +23,7 @@ export default async function handler(_request: Request, _context: Context) {
       <loc>${baseUrl}/sitemapStatic.xml</loc>
     </sitemap>
     <sitemap>
-      <loc>${baseUrl}/sitemapProducts.mts</loc>
+      <loc>${baseUrl}/sitemapProducts.xml</loc>
     </sitemap>
   </sitemapindex>
   `
