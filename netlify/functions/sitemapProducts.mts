@@ -21,7 +21,7 @@ export default async function handler(_request: Request, _context: Context) {
         return `
             <url>
                 <loc>${baseUrl}/products/${prod.sku}</loc>
-                <lastmod>${d.getFullYear()}-${d.getMonth()}-${d.getDate()}</lastmod>
+                <lastmod>${d.getFullYear()}-${d.getMonth().toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}</lastmod>
                 <changefreq>daily</changefreq>
                 <priority>${prod.metadata.seo_priority ?? 0.5}</priority>
             </url>
