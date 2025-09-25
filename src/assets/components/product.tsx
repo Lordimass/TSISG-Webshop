@@ -26,8 +26,8 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     name = product.name
     price = product.price
     images = product.images
+    category = product.category
     stock = product.stock
-    group = true
   } else { // Product is in a group
     product = product as unknown as ProductData[]
     sku = product[0].sku
@@ -35,6 +35,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     price = product[0].price
     images = product[0].images
     category = product[0].category
+    group = true
   }
 
   if (stock && stock < 0) {stock = 0}
@@ -57,7 +58,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
         className='basket-input' 
         type='text'
         inputMode='numeric'
-        onBlur={updateQuantity}
+        onBlur={updateQuantityFromInputBox}
         defaultValue={quantity}
         aria-label='Quantity'
       />
@@ -71,14 +72,14 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     if (!max_order || quantity >= max_order) {
       return
     }
-    setBasketStringQuantity(quantity+1)
+    updateQuantity(quantity+1)
     setShowModifer(true)
-    updateQuantityDisplay()
+    updateQuantityToInputBox()
   }
 
   function decrement() {
     if (quantity > 0) {
-      setBasketStringQuantity(quantity-1)
+      updateQuantity(quantity-1)
     }
 
     if (quantity <= 1) {
@@ -86,7 +87,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     }
   }
 
-  function updateQuantityDisplay() {
+  function updateQuantityToInputBox() {
     // Updating the value displayed in the quantity box
     let basketInput = document.getElementById("basket-input-" + sku);
     if (basketInput == null) {
@@ -95,7 +96,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     (basketInput as HTMLInputElement).value = quantity.toString()
   }
 
-  function updateQuantity() {
+  function updateQuantityFromInputBox() {
     if (group) {return}
     // Fetch HTMLElement
     const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
@@ -118,22 +119,21 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     // Check number in range
     if (+value > max_order!) {
       basketInput.value = max_order as unknown as string
-      setBasketStringQuantity(max_order!)
+      updateQuantity(max_order!)
       return
     } else if (+value <= 0) {
       basketInput.value = 0 as unknown as string
-      setBasketStringQuantity(0)
+      updateQuantity(0)
       setShowModifer(false)
       return
     }
     basketInput.value = +value as unknown as string
     
-    
     // Actually change the variable value
-    setBasketStringQuantity(+value)
+    updateQuantity(+value)
   }
 
-  function setBasketStringQuantity(quant: number) {
+  function updateQuantity(quant: number) {
     if (group) {return}
     // Function needs to update the localStorage basket for persistence,
     // it will also then update the actual quantity state for this product.
@@ -176,10 +176,11 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     }
 
     // Save to localStorage
-    localStorage.setItem("basket",
-      JSON.stringify(freshBasket 
+    const newBasketObj = freshBasket 
         ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
-        : {"basket": basket})
+        : {"basket": basket}
+    localStorage.setItem("basket",
+      JSON.stringify(newBasketObj)
     )
     window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)
@@ -268,7 +269,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
         </div>
         <div className='spacer'/>
         <div className='basket-modifier'>
-          {group
+          {!group
             ? showModifier 
               ? <BasketModifier/> 
               : <BasketModifier0Quant/>

@@ -1,73 +1,43 @@
-// Creates an order record on the Supabase Database, 
-// including order_products records and an orders record.
+import Stripe from "stripe"
+import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.mts"
+import { StripeProductMeta } from "../types/stripeTypes.mts"
+import { Order, OrderProdCompressed, OrderProduct } from "../types/supabaseTypes.mts"
+import { SupabaseClient } from "@supabase/supabase-js"
+import { supabaseService } from "../getSupabaseClient.mts"
+import { sendGA4Event } from "../lib.mts"
 
-import { Context } from '@netlify/functions';
-import { SupabaseClient } from '@supabase/supabase-js';
-import Stripe from 'stripe';
-import getSupabaseClient from '../lib/getSupabaseClient.mts';
-import { getCheckoutSessionItems, StripeCompoundLineItem } from '../lib/getCheckoutSessionItems.mts';
-import { Order, OrderProdCompressed, OrderProduct } from '../lib/types/supabaseTypes.mts';
-
-let stripe: Stripe | null = null;
-if (process.env.STRIPE_SECRET_KEY) {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-03-31.basil',
-      });
-} else {
-    console.error("STRIPE_SECRET_KEY does not exist!")
+export default async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompletedEvent): Promise<Response | undefined> {
+    const createOrderResp = await createOrder(event.data.object)
+    const triggerPurchaseEventResp = await triggerGA4PurchaseEvent(event)
+    if (createOrderResp && !createOrderResp.ok) {return createOrderResp}
+    else if (triggerPurchaseEventResp && !triggerPurchaseEventResp.ok) {return triggerPurchaseEventResp}
+    else {
+        return new Response(
+            JSON.stringify({
+                createOrderResp,
+                triggerPurchaseEventResp
+            })
+        )
+    }
 }
 
-export default async function handler(request: Request, _context: Context) {
-    if (!stripe) {
-        return new Response("Stripe object didn't initialise", {status: 500})
-    }
-    const bodyString = await request.text()
-    const body: Stripe.CheckoutSessionCompletedEvent = JSON.parse(bodyString)
-    const checkoutSession = body.data.object
-
-    // Get Supabase Object, Service Role required since the objects table is protected
-    const {error: supError, supabase} = await getSupabaseClient(undefined, true);
-    if (supError) return supError;
-
-    // Authenticate request from Stripe.
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
-    if (!endpointSecret) {
-        return new Response("No Stripe endpoint secret set", {status: 401})
-    }
-    const sig = request.headers.get("stripe-signature");
-    if (!sig) {
-        return new Response("No Stripe signature received", {status: 401})
-    }
-
-    try {
-        stripe.webhooks.constructEvent(
-            bodyString,
-            sig,
-            endpointSecret
-        )
-    } catch (err) {
-        console.error("Failed to verify webhook signature: ", err.message)
-        return new Response("Failed to verify webhook signature", {status: 400})
-    }
-
-    console.log("Verified Stripe Event.")
-
+async function createOrder(session: Stripe.Checkout.Session): Promise<Response | undefined> {
     // Save the order record
-    const orderID = await saveOrder(checkoutSession, supabase!)
+    const orderID = await saveOrder(session, supabaseService)
 
     // Get products associated with the order
-    const orderProducts: StripeCompoundLineItem[] = await getCheckoutSessionItems(checkoutSession.id)
+    const orderProducts: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id)
 
     // Save the order_product record for each product
-    await saveOrderProducts(orderProducts, orderID, supabase!)
+    await saveOrderProducts(orderProducts, orderID, supabaseService)
 
     // Perform actions only in Production
     if (process.env.VITE_ENVIRONMENT == "PRODUCTION") {
         // Update stock of products in database
-        await updateStock(orderProducts, supabase!)
+        await updateStock(orderProducts, supabaseService)
 
         // Create Royal Mail Order
-        const response = await createRMOrder(supabase!, orderID)
+        const response = await createRMOrder(supabaseService, orderID)
         if (response?.status != 200) {
             return response;
         }
@@ -119,7 +89,7 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
 
 async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string, supabase: SupabaseClient) {
     // Construct objects for Supabase records
-    let orderProdRecords: Array<OrderProduct> = []
+    let orderProdRecords: OrderProduct[] = []
     for (let i=0; i<orderProducts.length; i++) {
         const prod = orderProducts[i];
         const meta = prod.product.metadata;
@@ -272,7 +242,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
     }
 }
 
-function calculateOrderSubtotal(items): number {
+function calculateOrderSubtotal(items: OrderProdCompressed[]): number {
     let val = 0;
     for (let i=0; i<items.length; i++) {
         const item = items[i]
@@ -281,7 +251,7 @@ function calculateOrderSubtotal(items): number {
     return val
 }
 
-function calculateOrderWeight(items): number {
+function calculateOrderWeight(items: OrderProdCompressed[]): number {
     let weight = 0;
     for (let i=0; i<items.length; i++) {
         const item = items[i]
@@ -313,4 +283,71 @@ function calculatePackageFormat(items: OrderProdCompressed[], weight?: number) {
         }
     }
     return "smallParcel"
+}
+
+/**
+ * Triggers a GA4 purchase event for the completed checkout
+ * @param event - The Stripe event object.
+ */
+async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEvent): Promise<Response | undefined> {
+    // Do nothing if we're not in production
+    const env = process.env.VITE_ENVIRONMENT
+    if (env !== "PRODUCTION") {
+        console.log(`No GA4 Event Triggered since this is not a production environment: ${env}`)
+        return
+    }
+
+    // Extract checkout session from event.
+    const session: Stripe.Checkout.Session = event.data.object
+    console.log(session)
+
+    // Get the associated LineItems and Products compounded together.
+    const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
+    console.log(`lineItems: ${lineItems}`)
+
+    // Extract client ID and session ID
+    const client_id = session.metadata?.gaClientID;
+    const session_id = Number(session.metadata!.gaSessionID);
+    console.log("GA Client ID:", client_id);
+    console.log("GA Session ID:", session_id);
+
+    // Compile payload for GA4.
+    const payload = {
+        client_id,
+        events: [{ name: "purchase", params: {
+            debug_mode: process.env.VITE_ENVIRONMENT === "DEVELOPMENT",
+            session_id,
+            transaction_id: session.id, // Stripe Checkout Session ID is the ID of an order/transaction.
+            shipping: (session.total_details?.amount_shipping ?? 0)/100,
+            tax: (session.total_details?.amount_tax ?? 0)/100,
+            value: ((session.amount_total ?? 0) - (session.shipping_cost?.amount_total ?? 0)) / 100,
+            currency: session.currency,
+            items: stripeCompoundItemsToGA4Items(lineItems, session.currency) // Map to GA4 item format
+        }}]
+    }
+    console.log(`GA4 Payload ${payload}`)
+    await sendGA4Event(payload);
+}
+
+/**
+ * Maps Stripe compound line items to GA4 item format.
+ * @param lineItems - The compound line items from the Stripe checkout session.
+ * @param currency - The currency of the transaction.
+ * @returns An array of items formatted for GA4.
+ */
+export function stripeCompoundItemsToGA4Items(lineItems: StripeCompoundLineItem[], currency: string | null) {
+    return lineItems.map(({lineItem, product}) => {
+        // Verify that the metadata matches the expected format.
+        if (!product.metadata) throw new Error("Product is missing metadata");
+        const metadata: StripeProductMeta = product.metadata as unknown as StripeProductMeta
+        if (!metadata.sku) throw new Error("Product is missing required metadata, cannot send serverside GA4 event.");
+        return {
+            item_id: metadata.sku,
+            item_name: product.name,
+            item_category: metadata.category,
+            price: lineItem.amount_total / 100,
+            quantity: lineItem.quantity,
+            currency: currency,
+        }
+    })
 }

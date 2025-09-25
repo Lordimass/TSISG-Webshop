@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import PageSelector from "./pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { ProductData, ProductInBasket } from "../../lib/types";
+import { Basket, ProductData, ProductInBasket } from "../../lib/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../consts";
 import { supabase } from "../../app";
@@ -79,27 +79,7 @@ export default function Products() {
 
 export function CheckoutProducts() {
   const basketString: string | null = localStorage.getItem("basket")
-  if (!basketString) {
-      return (<></>)
-  }
-  const basket: Array<ProductInBasket> = JSON.parse(basketString).basket
-  const els: Array<React.JSX.Element> = []
-
-  for (let i=0; i<basket.length; i++) {
-    let imageURL: undefined | string = undefined
-    const prod: ProductInBasket = basket[i]
-    if (prod.images[0].name) {
-        imageURL = supabase.storage
-            .from("transformed-product-images")
-            .getPublicUrl(prod.images[0].name.replace(/\.[^.]+$/, '.webp'))
-            .data.publicUrl
-    } else if (prod.images[0].image_url){ // Fallback to old system
-        imageURL = prod.images[0].image_url
-    } else { // Couldn't find an image at all... strange.
-        imageURL = undefined
-    }
-
-    els.push(<CheckoutProduct product={prod}/>)
-  }
-  return (<div className="checkout-products">{els}</div>)
+  if (!basketString) {return (<></>)}
+  const basket: Basket = JSON.parse(basketString).basket
+  return (<div className="checkout-products">{basket.map((prod) => <CheckoutProduct product={prod} key={prod.sku}/>)}</div>)
 }
