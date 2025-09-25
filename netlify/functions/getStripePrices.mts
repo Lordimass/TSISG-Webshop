@@ -52,7 +52,8 @@ export default async function handler(request: Request, context: Context) {
                 try {
                     await stripe.products.update(stripeItem.id, {default_price: price.id})
                 } catch (error) {
-                    return new Response(JSON.stringify(error), {status: 500})
+                    console.error("Error updating product default price:", error);
+                    return new Response(JSON.stringify({error: "Internal server error"}), {status: 500});
                 }
             }
 
@@ -87,7 +88,8 @@ export default async function handler(request: Request, context: Context) {
                     return new Response(undefined, {status: 502, statusText: "An item failed to create on Stripe"})
                 }
             } catch (error) {
-                return new Response(undefined, {status: 500, statusText: JSON.stringify(error)})
+                console.error("Error creating product on Stripe:", error);
+                return new Response(undefined, {status: 500, statusText: "Internal server error"});
             }
         }
     }
