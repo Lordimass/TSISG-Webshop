@@ -12,19 +12,34 @@
 
 #payment-form label {
     font-family: "Perfect Penmanship";
+    color: #30313d;
+    font-size: 14px;
 }
 
 #payment-form input, #payment-form select {
     font-family: "Perfect Penmanship";
-    width: 90%;
-    height: 3.5em;
+    width: 100%;
     border-radius: 1em;
     box-sizing: border-box;
+    border-color: var(--jamie-grey);
+    border-style: solid;
+    font-size: 16px;
+    padding: 10px;
+    line-height: 22px;
 }
 
-#payment-element {
-    width: 50em;
-    max-width: 100%;
+.required-input input:focus {
+    box-shadow: 0 0 0 3px hsla(211, 100%, 50%, 25%), 0 0 0 1px #007aff;
+    outline: 0px;
+}
+
+.invalid-required-input input {
+    color: var(--red);
+    box-shadow: 0 0 0 2px var(--red) 
+}
+
+.required-input {
+    margin-bottom: 12px;
 }
 
 .checkout-content {
@@ -48,7 +63,7 @@
 }
 
 .checkout-right .msg, #payment-form .msg {
-    margin-top: 0.5em;
+    margin-top: 5px;
     font-size: smaller;
     color: var(--jamie-grey);
 }
@@ -58,7 +73,8 @@
 }
 
 #payment-form .error {
-    color: darkred;
+    color: var(--red);
+    font-size: 0.93rem;
 }
 
 .checkout-product {

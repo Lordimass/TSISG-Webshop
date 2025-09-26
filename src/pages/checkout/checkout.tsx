@@ -13,43 +13,16 @@ import Throbber from "../../assets/components/throbber";
 import { CheckoutProducts } from "../../assets/components/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import { checkCanMakePayment, fetchClientSecret, redirectIfEmptyBasket, validateAddress, validateCity, validateEmail, validatePostalCode } from "./checkoutFunctions";
-import { uk, eu, page_title, shipping_options } from "../../assets/consts";
+import { checkCanMakePayment, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
+import { page_title } from "../../assets/consts";
 import { Basket } from "../../lib/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
-import {loadStripe, Stripe, StripeCheckoutContact, StripeCheckoutTotalSummary, StripePaymentElementOptions} from '@stripe/stripe-js';
-import {CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
+import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
+import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import CountryOptgroups from "./countryOptgroups";
 import { NotificationsContext } from "../../assets/components/notification";
-
-const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
-let stripePromise: Promise<Stripe | null> = new Promise(()=>{});
-if (STRIPE_KEY) {
-    stripePromise = loadStripe(STRIPE_KEY)
-}
-
-const appearance: {
-  theme: "stripe" | "flat" | "night" | undefined
-} = {
-  theme: 'stripe',
-};
-
-const options = { fetchClientSecret, elementsOptions: { appearance } };
-const paymentElementOpts: StripePaymentElementOptions = {
-    fields: {
-        billingDetails: {
-            name: "never",
-            address: {
-                country: "never",
-                line1: "never",
-                postalCode: "never",
-                city: "never"
-            }
-        }
-    }
-}
+import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)
@@ -57,15 +30,15 @@ export default function Checkout() {
     // If the user has nothing in their basket, they should not
     // be on this page and will be redirected home
     useEffect(redirectIfEmptyBasket, []) 
-
+    const title = page_title + " - Checkout"
     return (<><Header/><div className="content checkout-content">
-        <title>{page_title} - Checkout</title>
+        <title>{title}</title>
         <meta name="robots" content="noindex"/>
         <link rel='canonical' href='https://thisshopissogay.com/checkout'/>
         
         {preparing ? <Loading/> : <></>}
         
-        <CheckoutProvider stripe={stripePromise} options={options}>
+        <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
             <CheckoutAux onReady={()=>{setPreparing(false)}}/>
         </CheckoutProvider>
 
@@ -74,49 +47,6 @@ export default function Checkout() {
 
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
-    
-    async function updateCountry() {
-        if (!countryInput.current) return
-        const code = countryInput.current.value
-        
-        const zones: Array<Array<string>> = [uk, eu]
-        // Default shipping rate is most expensive (Should be world shipping)
-        let shipping_option: {shipping_rate: string} = shipping_options[shipping_options.length-1]; 
-    
-        // Find the zone that the given country is in
-        let found = false;
-        zones.forEach((zone, i) => {
-            if (zone.includes(code)) {
-                shipping_option = shipping_options[i];
-                found = true;
-                return
-            }
-        })
-    
-        // Apply the shipping rate
-        checkout.updateShippingOption(shipping_option.shipping_rate);
-        setCountryCode(code)
-    }
-
-    function CountrySelect() {
-        return(<>
-        <label>Country</label><br/>
-        <select 
-            ref={countryInput}
-            name="country" 
-            className="form-control" 
-            id="country-select" 
-            onChange={updateCountry} 
-            defaultValue={countryCode}
-        >
-            <CountryOptgroups/>
-        </select>
-        <p className="msg">
-            Shipping is currently limited to the United Kingdom. 
-            International shipping will be coming soon!
-        </p>
-        </>)
-    }
 
     /**
      * Checks whether all of the items in the basket are still in stock
@@ -228,30 +158,47 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
 
-    const countryInput = useRef<HTMLSelectElement>(null)
-    const [countryCode, setCountryCode] = useState("0")
-
     const [readyToCheckout, setReadyToCheckout] = useState(false)
-    
-    const [name, setName] = useState('');
-    const [isNameValid, setIsNameValid] = useState(false);
 
     const [email, setEmail] = useState('');
     const [isEmailValid, setIsEmailValid] = useState(false);
 
-    const [address, setAddress] = useState<string | undefined>(undefined);
-    const [isAddressValid, setIsAddressValid] = useState(false);
-
-    const [city, setCity] = useState<string | undefined>(undefined);
-    const [isCityValid, setIsCityValid] = useState(false);
-
-    const [postalCode, setPostalCode] = useState<string | undefined>(undefined);
-    const [isPostalCodeValid, setIsPostalCodeValid] = useState(false);
-
     const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
 
-    // To prevent overloading the database / exploitation, only check stock once
+    const addressComplete = useRef(false)
+    const country = useRef<string>("")
+
+    // Handle changes in address and update shipping options
+    const addressElement = checkout.getShippingAddressElement()
+    addressElement?.once("change", async (e) => {
+        // Don't check again unless the country has changed
+        if (e.value.address.country === country.current) return
+        // Don't bother checking until the full address is complete
+        if (!e.complete) return
+        country.current = e.value.address.country
+
+        const resp = await fetch(window.location.origin + "/.netlify/functions/getShippingOptions", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({country: e.value.address.country, checkoutID: checkout.id})
+        })
+        if (!resp.ok) {
+            console.error(await resp.text())
+            setError(<p className="msg">Something went wrong fetching the shipping rates for your address, sorry!</p>)
+            return
+        }
+        const rates: string[] = await resp.json()
+        if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
+        
+        // TODO: Give customers multiple shipping options
+        checkout.updateShippingOption(rates[0])
+
+        addressComplete.current = true
+    })
+
+    // To prevent overloading the database / exploitation, only check stock once.
+    //
     // Theoretically, someone could type their address (and therefore check stock),
     // then someone else could place an order for the same thing, then this person
     // could place their order, and successfully order out of stock products, but
@@ -262,27 +209,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     // Run checks to see if checkout is ready or not once fields have all been validated
     useEffect(() => {async function checkReadyToCheckout() {
-        let ready = isNameValid 
-        && isEmailValid 
-        && isAddressValid 
-        && isCityValid 
-        && isPostalCodeValid
-        && countryCode != "0";
+        let ready = isEmailValid && addressComplete.current
+
         console.log("Ready to checkout: ", ready);
         if (ready) {
-            // Update billing addresses
-            const compiledAddress: StripeCheckoutContact = {
-                name: name,
-                address: {
-                    country: countryCode,
-                    line1: address,
-                    city: city,
-                    postal_code: postalCode,
-                }
-            }
-            await checkout.updateShippingAddress(compiledAddress);
-            await checkout.updateBillingAddress(compiledAddress);
-
             // Check that the session is still active
             if (!await checkSessionStatus()) {
                 ready = false
@@ -302,7 +232,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
         setReadyToCheckout(ready);
 
-    }; checkReadyToCheckout()}, [isNameValid, isEmailValid, isAddressValid, isCityValid, isPostalCodeValid, countryCode])
+    }; checkReadyToCheckout()}, [isEmailValid, addressComplete.current])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
@@ -315,21 +245,18 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         setKillSwitch(siteSettings.kill_switch?.enabled ?? false)
     }, [siteSettings])
     
-    // Set shipping rate to first option as default until country is set.
-    useEffect(() => {checkout.updateShippingOption(shipping_options[0].shipping_rate)}, [])
     const DEV = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-
-
 
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" ref={formRef}>
-                <RequiredInput 
-                    label="Name" 
-                    id="name-input" 
-                    setIsValid={setIsNameValid} 
-                    value={name} setValue={setName}
-                />
+                <p className="msg">
+                    Shipping is currently limited to the United Kingdom. 
+                    International shipping will be coming soon!
+                </p><br/>
+
+                <AddressElement options={addressElementOpts}/>
+
                 <RequiredInput 
                     label="Email" 
                     id="email-input" 
@@ -338,31 +265,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     setValue={setEmail}
                     constraint={async (value) => validateEmail(value, checkout)}
                 />
-                <RequiredInput 
-                    label="Address" 
-                    id="address-input" 
-                    setIsValid={setIsAddressValid} 
-                    value={address} setValue={setAddress}
-                    constraint={validateAddress}
-                />
-                <RequiredInput 
-                    label="City" 
-                    id="city-input" 
-                    setIsValid={setIsCityValid} 
-                    value={city} 
-                    setValue={setCity}
-                    constraint={validateCity}
-                />
-                <RequiredInput 
-                    label="Postcode / ZIP Code" 
-                    id="postal-code-input" 
-                    setIsValid={setIsPostalCodeValid} 
-                    value={postalCode} 
-                    setValue={setPostalCode}
-                    constraint={validatePostalCode}
-                />
 
-                <CountrySelect/><br/><br/>
                 <label>Payment</label>
                 <PaymentElement 
                     id="payment-element" 
@@ -452,7 +355,7 @@ function RequiredInput({
 
     const [error, setError] = useState<string | null>(null);
 
-    return (<>
+    return (<div className={"required-input"+(error ? " invalid-required-input" : "")}>
         <label>
             {label ?? ""}<br/>
             <input
@@ -465,11 +368,14 @@ function RequiredInput({
             />
         </label>
         { error ? <p className="error msg">{error}</p> : null }
-        <br/>
-    </>)
+    </div>)
 }
 
 function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSummary}) {
+    const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
+    const sub = checkoutTotal.subtotal.amount
+    const shp = checkoutTotal.shippingRate.amount
+    const tot = checkoutTotal.total.amount
     return (
     <div className="checkout-totals">
         <div className="left">
@@ -479,9 +385,9 @@ function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSumm
         </div>
         <div className="spacer"></div>
         <div className="right">
-            <p>{checkoutTotal.subtotal.amount}</p>
-            <p>{checkoutTotal.shippingRate.amount}</p>
-            <div className="total"><p className="currency">GBP</p>{checkoutTotal.total.amount}</div>
+            <p>{sub}</p>
+            <p style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>{shp}</p>
+            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}><p className="currency">GBP</p>{tot}</div>
         </div>
     </div>
     )

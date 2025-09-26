@@ -30,3 +30,11 @@ export default async function getSupabaseClient(authHeader?: string, serviceRole
 
   return {supabase}
 }
+
+const respAnon = await getSupabaseClient()
+if (respAnon.error) throw respAnon.error
+export const supabaseAnon = respAnon.supabase!
+
+const respService = await getSupabaseClient(undefined, true)
+if (respService.error) throw respService.error
+export const supabaseService = respService.supabase!

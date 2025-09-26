@@ -176,10 +176,11 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     }
 
     // Save to localStorage
-    localStorage.setItem("basket",
-      JSON.stringify(freshBasket 
+    const newBasketObj = freshBasket 
         ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
-        : {"basket": basket})
+        : {"basket": basket}
+    localStorage.setItem("basket",
+      JSON.stringify(newBasketObj)
     )
     window.dispatchEvent(new CustomEvent("basketUpdate"))
     setQuantityButActually(quant)

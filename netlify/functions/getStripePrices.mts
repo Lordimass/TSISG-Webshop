@@ -4,6 +4,8 @@ import { stripe } from "../lib/stripeObject.mts";
 import { ImageData, ProductInBasket } from "../lib/types/types.mts";
 import { StripeProductMeta } from "../lib/types/stripeTypes.mts";
 import { checkObjectsEqual } from "../lib/lib.mts";
+import { callRPC } from "../lib/supabaseRPC.mts";
+import { supabaseAnon } from "../lib/getSupabaseClient.mts";
 
 export default async function handler(request: Request, context: Context) {
     console.log(process.env.STRIPE_SECRET_KEY)
@@ -53,7 +55,7 @@ export default async function handler(request: Request, context: Context) {
                     await stripe.products.update(stripeItem.id, {default_price: price.id})
                 } catch (error) {
                     console.error("Error updating product default price:", error);
-                    return new Response(JSON.stringify({error: "Internal server error"}), {status: 500});
+                    return new Response(undefined, {status: 500});
                 }
             }
 
@@ -105,14 +107,7 @@ export default async function handler(request: Request, context: Context) {
 */ 
 async function updateBasketData(basket: ProductInBasket[], context: Context) {
     // Fetch products
-    const resp = await fetch(context.url.origin + "/.netlify/functions/getProducts", {
-        method: "POST",
-        body: JSON.stringify(basket.map((i)=>i.sku))
-    })
-    if (!resp.ok) {
-        return new Response("Failed to verify product data", {status: 502})
-    }
-    const freshProducts = await resp.json()
+    const freshProducts = await callRPC("get_products", {skus: basket.map(p=>p.sku), in_stock_only: false, active_only: false}, supabaseAnon)
 
     // Check and ammend prices 
     for (let i=0; i<basket.length; i++) {

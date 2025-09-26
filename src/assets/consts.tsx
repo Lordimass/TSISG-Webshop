@@ -7,7 +7,7 @@ export const hide_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/ob
 export const back_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//back.webp";
 export const search_icon = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/search.webp";
 
-export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_RATES)
+export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_OPTION_GROUPS)
 
 /**
  * The number of days before an unfulfilled order is considered overdue
@@ -29,11 +29,6 @@ export const page_title: string = "This Shop Is So GAY"
 // Region definitions for the purpose of shipping
 export const uk = ["GB", "GG", "JE", "IM"]
 export const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "ES", "LU", "BE", "PT", "BG", "MT", "NL", "HR", "PL", "CY", "PT", "CZ", "RO", "EE", "SK", "FI", "SI", "GR", "HU", "SE", "IT", "AL", "MD", "AD", "ME", "AM", "MK", "AZ", "NO", "BY", "RU", "BA", "SM", "FO", "RS", "GE", "CH", "GI", "TJ", "GL", "TR", "IS", "TM", "KZ", "UA", "XK", "UZ", "KG", "VA", "LI"]
-
-// Max character lengths for address fields, limited by Royal Mail API
-export const CITY_FIELD_MAX_LENGTH = 64
-export const ADDRESS_FIELD_MAX_LENGTH = 50
-export const POSTAL_CODE_FIELD_MAX_LENGTH = 12
 
 // Date time constants
 export const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]

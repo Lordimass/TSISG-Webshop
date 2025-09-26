@@ -51,7 +51,7 @@ export default function Notifications() {
 
     // schedule slide‑out after set duration, calculated time to read, or 5s minimum
     if (visibleNotif.duration) {
-      timeoutRef.current = window.setTimeout(() => setIsVisible(false), (visibleNotif.duration*1000+20));
+      timeoutRef.current = window.setTimeout(() => setIsVisible(false), (Math.min(visibleNotif.duration*1000+20, 5000)));
     } else {
       timeoutRef.current = window.setTimeout(() => setIsVisible(false), Math.min(
         visibleNotif.message.length / reading_speed_cps * 1000 + 20, 5000

@@ -1,7 +1,7 @@
 import { Stripe } from "@stripe/stripe-js"
-import { ADDRESS_FIELD_MAX_LENGTH, CITY_FIELD_MAX_LENGTH, POSTAL_CODE_FIELD_MAX_LENGTH, shipping_options } from "../../assets/consts"
+import {shipping_options } from "../../assets/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics"
-import ReactGA from "react-ga4"
+import { Basket } from "../../lib/types"
 
 /**
  * Debug method to test Apple Pay
@@ -65,7 +65,7 @@ export async function fetchClientSecret(): Promise<string> {
 }
 
 export async function fetchStripePrices(): Promise<Array<Object>> {
-    const oldBasket = JSON.parse(localStorage.getItem("basket")!).basket
+    const oldBasket: Basket = JSON.parse(localStorage.getItem("basket")!).basket
     const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
@@ -86,22 +86,4 @@ export async function validateEmail(email: string, checkout: any) {
     const updateResult = await checkout.updateEmail(email);
     const isValid = updateResult.type !== "error";
     return { isValid, message: !isValid ? updateResult.error.message : null};
-}
-
-export function validateCity(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
-    const isValid = value.length <= CITY_FIELD_MAX_LENGTH
-    const message = isValid ? undefined : `City name must be at most ${CITY_FIELD_MAX_LENGTH} characters long.`
-    return Promise.resolve({ isValid, message })
-}
-
-export function validateAddress(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
-    const isValid = value.length <= ADDRESS_FIELD_MAX_LENGTH
-    const message = isValid ? undefined : `Address must be at most ${ADDRESS_FIELD_MAX_LENGTH} characters long.`
-    return Promise.resolve({ isValid, message })
-}
-
-export function validatePostalCode(value: string): Promise<{ isValid: boolean; message?: string | undefined; }> {
-    const isValid = value.length <= POSTAL_CODE_FIELD_MAX_LENGTH
-    const message = isValid ? undefined : `Postal code must be at most ${POSTAL_CODE_FIELD_MAX_LENGTH} characters long.`
-    return Promise.resolve({ isValid, message })
 }
