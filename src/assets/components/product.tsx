@@ -26,6 +26,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     name = product.name
     price = product.price
     images = product.images
+    category = product.category
     stock = product.stock
   } else { // Product is in a group
     product = product as unknown as ProductData[]
