@@ -2,6 +2,7 @@ import { loadStripe, Stripe, StripeAddressElementOptions, StripePaymentElementOp
 import { fetchClientSecret } from "./checkoutFunctions";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
+if (!STRIPE_KEY) {console.error("No VITE_STRIPE_KEY!")}
 export const stripePromise: Promise<Stripe | null> = STRIPE_KEY ? loadStripe(
     STRIPE_KEY
 ) : new Promise(() => {});

@@ -40,8 +40,6 @@ export async function fetchClientSecret(): Promise<string> {
     const basketString = localStorage.getItem("basket")
     const gaClientID = getGAClientId();
     const gaSessionID = await getGASessionId();
-    console.log("GA Client ID:", gaClientID)
-    console.log("GA Session ID:", gaSessionID)
 
     const result = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",

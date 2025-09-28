@@ -47,7 +47,6 @@ export default function Checkout() {
 
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
-
     /**
      * Checks whether all of the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.

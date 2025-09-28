@@ -291,11 +291,11 @@ function calculatePackageFormat(items: OrderProdCompressed[], weight?: number) {
  */
 async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEvent): Promise<Response | undefined> {
     // Do nothing if we're not in production
-    const env = process.env.VITE_ENVIRONMENT
-    if (env !== "PRODUCTION") {
-        console.log(`No GA4 Event Triggered since this is not a production environment: ${env}`)
-        return
-    }
+    // const env = process.env.VITE_ENVIRONMENT
+    // if (env !== "PRODUCTION") {
+    //     console.log(`No GA4 Event Triggered since this is not a production environment: ${env}`)
+    //     return
+    // }
 
     // Extract checkout session from event.
     const session: Stripe.Checkout.Session = event.data.object
@@ -327,6 +327,7 @@ async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEve
     }
     console.log(`GA4 Payload ${payload}`)
     await sendGA4Event(payload);
+    return new Response(undefined, {status: 200})
 }
 
 /**

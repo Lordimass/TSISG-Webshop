@@ -1,5 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ReactGA from "react-ga4"
 
 import Home from './pages/home/home';
 import React, { createContext, useEffect, useRef, useState } from 'react'
@@ -16,6 +15,7 @@ import { refreshBasket } from './lib/lib';
 import { Notif, NotificationsContext } from './assets/components/notification';
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
 import { SiteSettings } from "./lib/types";
+import ReactGA from "react-ga4";
 
 import '@flaticon/flaticon-uicons/css/all/all.css';
 
@@ -128,25 +128,46 @@ export function App() {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
           updateLoginContext()
       }})
-
     // Cleanup function to remove listener when component unmounts to prevent recursive checks
     return () => {subscription.unsubscribe();};
   }, [])
   
   useEffect(() => {updateLoginContext()}, [])
 
-  // GA4 Page View Analytics
+  // Set up GA4 Consent Mode
   useEffect(() => {
-    const pathname: string = window.location.pathname
     const dev = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-    if (dev) console.log("In a development environment")
-    ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID, {gaOptions: {debug_mode: dev}})
-    ReactGA.send({
-      hitType: "pageview", 
-      page: pathname, 
-      title: pathname,
-      environment: import.meta.env.VITE_ENVIRONMENT
-    })
+    if (dev) console.log("In a development environment");
+
+    // Bootstrap gtag + default consent
+    (window as any).dataLayer = (window as any).dataLayer || [];
+    (window as any).gtag = function () {
+      (window as any).dataLayer.push(arguments);
+    };
+
+    // Consent Mode V2 defaults (deny until user chooses)
+    (window as any).gtag("consent", "default", {
+      // deny optional cookies for now.
+      ad_storage: "denied",
+      analytics_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      // allow essential cookies.
+      functionality_storage: 'granted',
+      security_storage: 'granted'        
+    });
+
+    ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+
+    (window as any).gtag("config", import.meta.env.VITE_GA4_MEASUREMENT_ID, {"debug_mode": dev})
+
+    // Load GA4 library
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${
+      import.meta.env.VITE_GA4_MEASUREMENT_ID
+    }`;
+    document.head.appendChild(script);
   }, [])
 
 

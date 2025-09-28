@@ -1,0 +1,71 @@
+.cookie-banner {
+    position: absolute;
+    left: 20px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 60%;
+    box-sizing: border-box;
+    padding: 15px;
+    gap: 15px;
+
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    background-color: white;
+    z-index: 100;
+    box-shadow: 8px 16px 8px rgba(0, 0, 0, 0.425);
+
+    color: #333333;
+
+    animation: 0.5s ease-out forwards;
+}
+
+.cookie-banner.exit {
+    animation-name: slideOutToTop;
+}
+
+.cookie-banner.enter {
+    animation-name: slideInFromTop;
+}
+
+@keyframes slideInFromTop {
+    0% {transform: translateY(-30vw)} 
+    100% {transform: translateY(0)}
+}
+
+@keyframes slideOutToTop {
+    0% {transform: translateY(0)} 
+    100% {transform: translateY(-30vw)}
+}
+
+.cookie-banner-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+}
+
+.cookie-icon {
+    font-size: xx-large;
+}
+
+.cookie-right {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    gap: 5px;
+}
+
+.cookie-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.cookie-buttons button {
+    padding: 5px;
+    border-radius: 10px;
+    border: 2px solid var(--jamie-grey);
+    color: #333333;
+    font-family: "Perfect Penmanship";
+}

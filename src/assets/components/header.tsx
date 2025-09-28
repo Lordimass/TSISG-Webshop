@@ -1,6 +1,7 @@
 import "../css/common.css"
 import "../css/header.css"
 import Basket from "./basket"
+import { CookieBanner } from "./cookieBanner/cookieBanner"
 import Notifications from "./notification"
 import { ProductSearch } from "./search/search"
 
@@ -27,5 +28,6 @@ export default function Header() {
             </div>
             <div className="header-lower"></div>
         </div>
+        <CookieBanner/>
     </>)
 }
