@@ -1,3 +1,23 @@
+#root .checkout-content {
+    display: flex;
+    flex-direction: row;
+}
+
+.checkout-left, .checkout-right {
+    width: 50%;
+    min-height: 10em;
+    padding: 1em;
+    box-sizing: border-box;
+}
+
+.checkout-right {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dark-purple);
+    box-shadow:
+        -0.5em 0em 2em rgba(0,0,0,0.3);
+}
+
 .loading-screen {
     display: flex;
     flex-direction: column;
@@ -40,26 +60,6 @@
 
 .required-input {
     margin-bottom: 12px;
-}
-
-.checkout-content {
-    display: flex;
-    flex-direction: row;
-}
-
-.checkout-left, .checkout-right {
-    width: 50%;
-    min-height: 10em;
-    padding: 1em;
-    box-sizing: border-box;
-}
-
-.checkout-right {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--dark-purple);
-    box-shadow:
-        -0.5em 0em 2em rgba(0,0,0,0.3);
 }
 
 .checkout-right .msg, #payment-form .msg {

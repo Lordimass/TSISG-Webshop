@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { UnsubmittedProductData } from "./productEditor/types";
 import { ImageData, ProductData } from "../../lib/types";
-import { blank_product } from "../../assets/consts";
+import { blank_product } from "../../lib/consts";
 
 export const ProductContext = createContext<{
     basketQuant?: number, 

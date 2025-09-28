@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
-import Footer from "../../assets/components/footer";
-import Header from "../../assets/components/header";
+import Footer from "../../components/header-footer/footer";
+import Header from "../../components/header-footer/header";
 
 import "./thankyou.css"
 

@@ -1,5 +1,4 @@
-import "../css/common.css"
-import "../css/footer.css"
+import "./footer.css"
 
 export default function Footer() {
     return (

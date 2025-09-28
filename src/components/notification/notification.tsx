@@ -1,6 +1,6 @@
 import { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
-import "../css/notification.css";
-import { info_icon, reading_speed_cps } from "../consts";
+import "./notification.css";
+import { info_icon, reading_speed_cps } from "../../lib/consts";
 
 export type Notif = { id: number; message: string; duration?: number };
 

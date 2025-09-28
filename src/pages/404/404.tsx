@@ -1,6 +1,6 @@
-import Footer from "../../assets/components/footer";
-import Header from "../../assets/components/header";
-import { page_title } from "../../assets/consts";
+import Footer from "../../components/header-footer/footer";
+import Header from "../../components/header-footer/header";
+import { page_title } from "../../lib/consts";
 
 import "./404.css"
 

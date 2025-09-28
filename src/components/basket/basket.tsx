@@ -1,9 +1,9 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
-import "../css/basket.css"
-import { BasketProduct } from "./product";
-import { basket_icon } from "../consts";
+import "./basket.css"
+import { BasketProduct } from "../product/product";
+import { basket_icon } from "../../lib/consts";
 import { ProductInBasket } from "../../lib/types";
-import { NotificationsContext } from "./notification";
+import { NotificationsContext } from "../notification/notification";
 import { SiteSettingsContext } from "../../app";
 
 export default function Basket() {

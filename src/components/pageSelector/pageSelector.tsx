@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import "../css/pageSelector.css"
+import "./pageSelector.css"
 
 type props = {
     decrementCallback: CallableFunction | undefined,

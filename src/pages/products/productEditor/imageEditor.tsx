@@ -1,15 +1,15 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
 import { AssociationMetadata, ImageData } from "../../../lib/types";
 import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
-import SquareImageBox from "../../../assets/components/squareImageBox";
 
 import "./imageEditor.css"
 import { UnsubmittedImageData } from "./types";
-import { NotificationsContext } from "../../../assets/components/notification";
+import { NotificationsContext } from "../../../components/notification/notification";
 import { compareImages } from "../../../lib/sortMethods";
 import { updateProductData } from "../../../lib/netlifyFunctions";
 import { ProductContext } from "../lib";
 import { removeImage, shiftImage } from "./lib";
+import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {

@@ -1,20 +1,21 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { dateToDateString, dateToTimeString, getJWTToken, isNumeric } from "../../assets/utils"
 import "./css/orders.css"
-import { CheckoutProduct } from "../../assets/components/product";
-import Throbber from "../../assets/components/throbber";
+import { CheckoutProduct } from "../../components/product/product";
+import Throbber from "../../components/throbber/throbber";
 
 import "./css/orders.css"
 import { LoginContext } from "../../app";
-import Header from "../../assets/components/header";
-import Footer from "../../assets/components/footer";
-import { NotificationsContext } from "../../assets/components/notification";
+import Header from "../../components/header-footer/header";
+import Footer from "../../components/header-footer/footer";
+import { NotificationsContext } from "../../components/notification/notification";
 import { useGetOrderList } from "../../lib/netlifyFunctions";
 import { Order } from "../../lib/types";
 import { compareOrders } from "../../lib/sortMethods";
-import { overdue_threshold } from "../../assets/consts";
+import { overdue_threshold } from "../../lib/consts";
 import { callRPC } from "../../lib/supabaseRPC";
 import { OrdersContext } from "./lib";
+import { getJWTToken } from "../../lib/auth";
+import { dateToDateString, dateToTimeString } from "../../lib/lib";
 
 export function OrderManager() { 
     const unsetOrders: Order[] = useGetOrderList() || []

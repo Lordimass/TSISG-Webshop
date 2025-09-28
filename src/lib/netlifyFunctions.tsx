@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { getJWTToken, softParseJSON } from "../assets/utils"
 import { ImageData, ProductData } from "./types"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { UUID } from "crypto"
 import { compareImages } from "./sortMethods"
+import { getJWTToken } from "./auth"
+import { softParseJSON } from "./lib"
 
 /**
  * Calls the given Netlify function with the given body and JWT Auth token if supplied

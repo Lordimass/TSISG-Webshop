@@ -1,8 +1,8 @@
 import { createContext } from "react"
-import { isNumeric } from "../../../assets/utils"
 import { ProductData } from "../../../lib/types"
 import { UnsubmittedProductData } from "./types"
-import { blank_product } from "../../../assets/consts"
+import { blank_product } from "../../../lib/consts"
+import { isNumeric } from "../../../lib/lib"
 
 // Editable Product Properties
 export type EditableProductProp = {

@@ -2,7 +2,7 @@
 // These methods are called when the user makes changes 
 // to a property type which requires special handling
 
-import { getJWTToken } from "../../../assets/utils";
+import { getJWTToken } from "../../../lib/auth";
 import { ProductData } from "../../../lib/types";
 import { prodPropParsers } from "./prodPropParsers";
 

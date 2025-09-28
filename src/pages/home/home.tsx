@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { page_title } from '../../assets/consts';
+import { page_title } from '../../lib/consts';
 
-import Header from "../../assets/components/header";
-import Footer from "../../assets/components/footer";
+import Header from "../../components/header-footer/header";
+import Footer from "../../components/header-footer/footer";
 import React from 'react';
-import Products from '../../assets/components/products';
+import Products from '../../components/product/products';
 
 import "./home.css"
 

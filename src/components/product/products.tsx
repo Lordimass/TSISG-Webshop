@@ -1,13 +1,12 @@
-import "../css/products.css"
+import "./products.css"
 
-import { use, useEffect, useState } from "react";
-import PageSelector from "./pageSelector";
+import {useEffect, useState } from "react";
+import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { Basket, ProductData, ProductInBasket } from "../../lib/types";
+import { Basket, ProductData } from "../../lib/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
-import { productLoadChunks } from "../consts";
-import { supabase } from "../../app";
+import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 
 export default function Products() {

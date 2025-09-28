@@ -1,12 +1,12 @@
 import Markdown from "react-markdown";
-import Footer from "../../assets/components/footer";
-import Header from "../../assets/components/header";
+import Footer from "../../components/header-footer/footer";
+import Header from "../../components/header-footer/header";
 
 import "./policies.css"
 import { useEffect, useState } from "react";
-import { fetchPolicy } from "../../assets/utils";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import { fetchPolicy } from "../../lib/lib";
 
 export default function Policy({file_name, title, canonical}: {file_name: string, title: string, canonical: string}) {
     const [md, setMd] = useState<string | null>(null)

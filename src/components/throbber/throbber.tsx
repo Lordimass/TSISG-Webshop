@@ -1,4 +1,4 @@
-import "../css/throbber.css"
+import "./throbber.css"
 
 export default function Throbber({extraClass}: {extraClass?: string}) {
     if (!extraClass) {

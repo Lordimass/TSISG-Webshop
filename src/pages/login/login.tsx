@@ -1,153 +1,107 @@
-import { AuthSession, AuthTokenResponsePassword } from "@supabase/supabase-js";
-import Footer from "../../assets/components/footer";
-import Header from "../../assets/components/header";
+import Footer from "../../components/header-footer/footer";
+import Header from "../../components/header-footer/header";
 
 import "./login.css"
-import { FormEvent, useContext, useEffect, useState } from "react";
-import { getLoggedIn } from "../../assets/utils";
-import { hide_icon, page_title, show_icon } from "../../assets/consts";
-import { supabase, SUPABASE_ID } from "../../app";
-import { NotificationsContext } from "../../assets/components/notification";
+import { FormEvent, useContext, useState } from "react";
+import { hide_icon, page_title, password_incorrect_msg, show_icon } from "../../lib/consts";
+import { LoginContext } from "../../app";
+import { NotificationsContext } from "../../components/notification/notification";
+import { forgotPassword, login, logout } from "../../lib/auth";
+import Throbber from "../../components/throbber/throbber";
 
 export default function LoginPage() {
-    function Login() {
-        async function login(e: FormEvent) {
-            e.preventDefault()
-            console.log("Attempting sign in...")
-    
-            if (!supabase) {
-                return;
-            }
-            const email = (document.getElementById("email") as HTMLInputElement).value
-            const password = (document.getElementById("password") as HTMLInputElement).value
-    
-            let signInResponse: AuthTokenResponsePassword | undefined = await supabase.auth.signInWithPassword({
-                email,
-                password
-            })
-            /**
-             * Credentials invalid for some reason or another,
-             * could be because either:
-             *  - The account doesn't exist.
-             *  - The password is incorrect.
-             * Either way we try to create an account with the given
-             * email to determine which of these cases we have.
-             */
-            if (signInResponse?.error) { 
-                // Attempt sign up
-                let signUpResponse = await supabase?.auth.signUp({
-                    email,
-                    password
-                })
-                
-                // CASE 2: If signup fails, the account must already exist and
-                // the password is incorrect.
-                if (signUpResponse.error || !signUpResponse.data.session) {
-                    console.log("Password incorrect!")
-                    setError("Password incorrect!")
+    const {loggedIn, loading} = useContext(LoginContext)
 
-                // CASE 1: If this works then they didn't have
-                // an account in the first place and so can now sign up
-                } else {
-                    console.log("Created account successfully!")
-                    history.back()
-                }
-            /**
-             * Credentials are valid, navigate back to return to the
-             * action they were trying to complete.
-             */
-            } else {
-                console.log(signInResponse?.data)
-                console.log("Signed in successfully!")
-                history.back()
-            }
-        }
-    
-        const [showPass, setShowPass] = useState(false)
-        const [error, setError] = useState<string | null>(null)
-        const {notify} = useContext(NotificationsContext)
-    
-        return (
-            <div className="login-box">
-                <form className="login-form">
-                    <h1>Welcome!</h1> <br/>
-                    <label>Email</label> <br/>
-                    <input id="email" type="text" placeholder="you@are.gay"/> <br/><br/>
-                    <label>Password</label>
-                    <input 
-                        id="password" 
-                        autoComplete="current-password" 
-                        type={showPass ? "text" : "password"} 
-                        placeholder="********"/>
-                    <div className="under-password">
-                        <img onClick={()=>{setShowPass(!showPass)}} src={showPass ? show_icon : hide_icon}/>
-                        <p onClick={() => {forgotNotImplemented(notify)}} id="forgot-password">I forgot my password</p>
-                    </div>
-                    
-                    <button onClick={login} id="submit">Sign Up / Sign In</button>
-                    <p className="login-error">{error}</p>
-                </form>
-            </div>
-        )
-    }
-
-    function LoggedIn() {
-        const authStorageString = localStorage.getItem(`sb-${SUPABASE_ID}-auth-token`)
-        if (!authStorageString) {
-            console.error("You cannot display logged in component while logged out")
-            return
-        }
-        const authStorage: AuthSession = JSON.parse(authStorageString)
-        const email = authStorage.user.user_metadata.email;
-
-        return (
-            <div className="login-box">
-                <h1>Hi again!</h1>
-                <p id="already-logged-in">
-                    You're already logged in as {email}! Did you want to log out?
-                </p>
-                <button id="logout" onClick={logOut}>Log out</button>
-            </div>
-        )
-    }
-
-
-    async function logOut() {
-        const res = await supabase.auth.signOut()
-        console.log("Logged out: " + res)
-        setLoggedIn(false)
-    }
-
-    supabase.auth.onAuthStateChange((event: string) => {
-        if (event === "SIGNED_IN") {
-            setLoggedIn(true);
-        } else if (event === "SIGNED_OUT") {
-            setLoggedIn(false)
-        }
-    })
-
-    const [loggedIn, setLoggedIn] = useState(false) 
-
-    useEffect(()=>{
-        const checkLoginStatus = async () => {
-            console.log("Checking if user is logged in")
-            const isLoggedIn = await getLoggedIn();
-            console.log(isLoggedIn ? "User was already logged in" : "User is not logged in")
-            setLoggedIn(isLoggedIn)
-        }
-        checkLoginStatus()
-    },[])
-
-    return (<><Header/><div className="content">
+    return (<><Header/><div className="content login-content">
         <title>{page_title} - Login</title>
         <meta name="robots" content="noindex"/>
         <link rel='canonical' href='https://thisshopissogay.com/login'/>
 
-        {loggedIn ? <LoggedIn/> : <Login/>}
+        {loading ? <Throbber/> : loggedIn ? <LoggedIn/> : <Login/>}
     </div><Footer/></>)
 }
 
-function forgotNotImplemented(notify: (msg: string) => void) {
-    notify("This function isn't implemented yet, contact support for help!")
+function Login() {
+    async function handleFormSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault()
+        try {login(email, password)}
+
+        // Something went wrong logging in
+        catch (e: unknown) {
+            // Password was incorrect
+            if (e === password_incorrect_msg) {setError(e); return}
+            // Something else went wrong
+            else {
+                console.error(e);
+                setError("Something went wrong! Try again later");
+                return;
+            }
+        };
+
+        // At this stage, login was successful and we go back to
+        // whatever the user was doing that needed logging in.
+        history.back()
+    }
+
+    const [email, setEmail] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
+
+    const [showPassword, setShowPassword] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const {notify} = useContext(NotificationsContext)
+
+    return (
+        <div className="login-box">
+            <form className="login-form" onSubmit={handleFormSubmit}>
+                <h1>Welcome!</h1> <br/>
+                <label>
+                    Email
+                    <input 
+                        id="email" 
+                        type="text" 
+                        placeholder="you@are.gay" 
+                        autoComplete="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                    />    
+                </label><br/><br/>
+
+                <label>
+                    Password
+                    <input 
+                        id="password" 
+                        autoComplete="current-password new-password" 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="********"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                    />
+                </label>
+
+                <div className="under-password">
+                    <img onClick={()=>{setShowPassword(!showPassword)}} src={showPassword ? show_icon : hide_icon}/>
+                    <p onClick={() => {forgotPassword(notify)}} id="forgot-password">I forgot my password</p>
+                </div>
+                
+                <input type="submit" id="submit" value={"Sign Up / Sign In"}/>
+                <p className="login-error">{error}</p>
+            </form>
+        </div>
+    )
 }
 
+function LoggedIn() {
+    const {user} = useContext(LoginContext)
+    if (!user) throw new Error("No user found, are you logged in?")
+    const email = user.email;
+
+    return (
+        <div className="login-box">
+            <h1>Hi again!</h1>
+            <p id="already-logged-in">
+                You're already logged in as {email}! Did you want to log out?
+            </p>
+            <button id="logout" onClick={logout}>Log out</button>
+        </div>
+    )
+}

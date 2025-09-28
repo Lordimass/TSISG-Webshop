@@ -6,17 +6,17 @@ import Checkout from './pages/checkout/checkout';
 import ThankYou from './pages/thankyou/thankyou';
 import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
-import { getUser } from './assets/utils';
 import Policy from './pages/policies/policies';
 import { OrderManager } from './pages/staff/orders';
 import ProdPage from "./pages/products/prodPage";
 import { createClient, User } from '@supabase/supabase-js';
 import { refreshBasket } from './lib/lib';
-import { Notif, NotificationsContext } from './assets/components/notification';
+import { Notif, NotificationsContext } from './components/notification/notification';
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
 import { SiteSettings } from "./lib/types";
 import ReactGA from "react-ga4";
 
+import "./common.css"
 import '@flaticon/flaticon-uicons/css/all/all.css';
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
@@ -55,12 +55,15 @@ export function App() {
   const [loading, setLoading] = useState(true)
 
   async function updateLoginContext() {
-    const userResponse = await getUser()
-    setUser(userResponse)
-    setLoggedIn(!!userResponse)
-    if (userResponse) {
-      const permissions = userResponse.app_metadata.permissions
-      setPermissions(permissions ? permissions : [])
+    const resp = await supabase.auth.getUser();
+    if (resp.error) throw resp.error;
+    const user = resp.data.user
+
+    setUser(user)
+    setLoggedIn(!!user)
+    if (user) {
+      const permissions = user.app_metadata.permissions
+      setPermissions(permissions ?? [])
     }
     setLoading(false)
   }

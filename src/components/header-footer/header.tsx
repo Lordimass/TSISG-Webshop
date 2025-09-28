@@ -1,9 +1,8 @@
-import "../css/common.css"
-import "../css/header.css"
-import Basket from "./basket"
-import { CookieBanner } from "./cookieBanner/cookieBanner"
-import Notifications from "./notification"
-import { ProductSearch } from "./search/search"
+import "./header.css"
+import Basket from "../basket/basket"
+import { CookieBanner } from "../cookieBanner/cookieBanner"
+import Notifications from "../notification/notification"
+import { ProductSearch } from "../search/search"
 
 export default function Header() {
     const logo_path: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//logo-round.webp"

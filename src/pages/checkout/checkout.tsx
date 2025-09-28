@@ -7,21 +7,21 @@
 
 import "./checkout.css"
 
-import Header from "../../assets/components/header"
-import Footer from "../../assets/components/footer"
-import Throbber from "../../assets/components/throbber";
-import { CheckoutProducts } from "../../assets/components/products";
+import Header from "../../components/header-footer/header"
+import Footer from "../../components/header-footer/footer"
+import Throbber from "../../components/throbber/throbber";
+import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
 import { checkCanMakePayment, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
-import { page_title } from "../../assets/consts";
+import { page_title } from "../../lib/consts";
 import { Basket } from "../../lib/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import { NotificationsContext } from "../../assets/components/notification";
+import { NotificationsContext } from "../../components/notification/notification";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 
 export default function Checkout() {
