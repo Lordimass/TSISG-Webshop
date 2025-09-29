@@ -1,4 +1,4 @@
-import { UUID } from "crypto"
+import { CategoryData, ImageData } from "./supabaseTypes.mts"
 
 export type Basket = ProductInBasket[]
 export type ProductInBasket = {
@@ -9,25 +9,5 @@ export type ProductInBasket = {
   images: ImageData[]
   stock: number
   category: CategoryData
-}
-
-export type ImageData = {
-    alt: string | null
-    bucket_id: string
-    display_order: number
-    id: UUID
-    image_url: string
-    inserted_at: string
-    metadata: any
-    name: string
-    path_tokens: string[]
-    product_sku: number
-}
-
-export type CategoryData = {
-  id: number,
-  created_at: string
-  name: string,
-  description?: string
 }
 

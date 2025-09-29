@@ -1,3 +1,6 @@
+import { supabaseAnon } from "./getSupabaseClient.mts";
+import { ImageData } from "./types/supabaseTypes.mts";
+
 /**
  * Formats a number of bytes as a readable byte string
  * @param bytes Number of bytes
@@ -52,4 +55,24 @@ export async function sendGA4Event(payload: any, debug=false) {
         console.log("Successfully sent GA4 event", response.status, response.statusText)
         if (debug) console.log("GA4 Debug Response:", await response.json())
     }
+}
+
+/**
+ * Gets the public URL of a product image
+ * @param image The image data
+ * @param highres Whether to get the non-compressed version of the image
+ * @returns The public URL of the image, or undefined if not found
+ */
+export function getImageURL(image: ImageData, highres = false): string | undefined {
+  if (!image) return undefined
+  if (image.name) {
+    return (supabaseAnon.storage
+    .from(highres ? "product-images" : "transformed-product-images")
+    .getPublicUrl(highres ? image.name : image.name.replace(/\.[^.]+$/, '.webp'))
+    .data.publicUrl)
+  } else if (image.image_url){ // Fallback to old system
+    return image.image_url
+  } else { // Couldn't find an image at all... strange.
+    return undefined
+  }
 }

@@ -1,11 +1,12 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 import { stripe } from "../lib/stripeObject.mts";
-import { ImageData, ProductInBasket } from "../lib/types/types.mts";
+import { ProductInBasket } from "../lib/types/types.mts";
 import { StripeProductMeta } from "../lib/types/stripeTypes.mts";
-import { checkObjectsEqual } from "../lib/lib.mts";
+import { checkObjectsEqual, getImageURL } from "../lib/lib.mts";
 import { callRPC } from "../lib/supabaseRPC.mts";
 import { supabaseAnon } from "../lib/getSupabaseClient.mts";
+import { ImageData } from "../lib/types/supabaseTypes.mts";
 
 export default async function handler(request: Request, context: Context) {
     console.log(process.env.STRIPE_SECRET_KEY)
@@ -105,7 +106,7 @@ export default async function handler(request: Request, context: Context) {
  * This has to be done as part of the stripe prices fetch flow to ensure there's no possibility for bad
  * actors to tamper with the basket before its sent to this function
 */ 
-async function updateBasketData(basket: ProductInBasket[], context: Context) {
+async function updateBasketData(basket: ProductInBasket[], _context: Context) {
     // Fetch products
     const freshProducts = await callRPC("get_products", {skus: basket.map(p=>p.sku), in_stock_only: false, active_only: false}, supabaseAnon)
 
@@ -138,9 +139,5 @@ function getProductOnStripe(
 }
 
 function getListOfImageURLS(images: ImageData[]) {
-    const imageList: string[] = []
-    for (let i = 0; i < images.length; i++) {
-        imageList.push(images[i].image_url)
-    }
-    return imageList
+    return images.map(img => getImageURL(img)).filter(img => img !== undefined)
 }
