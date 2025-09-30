@@ -5,19 +5,18 @@
 
     top: 5%;
     background-color: var(--bright-yellow);
-    padding: 1em;
+    padding: 20px;
+    box-sizing: border-box;
     border-top-right-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
     max-width: 90vw;
-    width: 22em;
-    z-index: 100;
+    min-width: 300px;
+    z-index: 300;
 
     transition: transform 0.4s ease, opacity 0.4s ease;
     transform: translateX(-120%);
     opacity: 0;
-}
 
-.notification.visible {
     transform: translateX(0);
     opacity: 1;
 }
@@ -30,6 +29,10 @@
 .notif-head {
     display: flex;
     align-items: center;
+    text-align: center;
+    margin: 0 0 20px 0;
+    gap: 10px;
+    text-wrap-mode: nowrap;
 }
 
 .notification h2 {
@@ -37,15 +40,20 @@
     height: 1em;
     user-select: none;
     color: black;
-    margin: 1em 0 1em 0;
 }
 
-.notif-head img {
-    height: 2em;
-    margin-right: 0.5em;
+.notif-head .info-icon {
+    font-size: 30px;
+    height: 30px;
+    align-self: center;
+    justify-items: center;
+    
 }
 
 .close-notif {
+    position: relative;
+    top: -15px;
+    right: -10px;
     font-family: "Perfect Penmanship";
     user-select: none;
     align-self: flex-start;
