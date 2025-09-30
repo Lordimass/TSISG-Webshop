@@ -7,7 +7,6 @@ import "./css/orders.css"
 import { LoginContext } from "../../app";
 import Header from "../../components/header-footer/header";
 import Footer from "../../components/header-footer/footer";
-import { NotificationsContext } from "../../components/notification/notification";
 import { useGetOrderList } from "../../lib/netlifyFunctions";
 import { Order } from "../../lib/types";
 import { compareOrders } from "../../lib/sortMethods";
@@ -16,6 +15,7 @@ import { callRPC } from "../../lib/supabaseRPC";
 import { OrdersContext } from "./lib";
 import { getJWTToken } from "../../lib/auth";
 import { dateToDateString, dateToTimeString } from "../../lib/lib";
+import { NotificationsContext } from "../../components/notification/lib";
 
 export function OrderManager() { 
     const unsetOrders: Order[] = useGetOrderList() || []

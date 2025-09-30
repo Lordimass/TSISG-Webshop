@@ -1,6 +1,5 @@
 import { Basket, ImageData, ProductData, ProductInBasket } from "./types"
-import { supabase } from "../app"
-import { getProducts } from "./supabaseRPC"
+import { getProducts, supabase } from "./supabaseRPC"
 import { compareProducts } from "./sortMethods"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { daysOfWeek, monthsOfYear } from "./consts"

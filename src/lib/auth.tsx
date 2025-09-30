@@ -1,5 +1,19 @@
-import { supabase } from "../app"
+import { createContext } from "react"
 import { password_incorrect_msg } from "./consts"
+import { User } from "@supabase/supabase-js"
+import { supabase } from "./supabaseRPC"
+
+export const LoginContext = createContext<{
+  loading: boolean
+  loggedIn: boolean
+  user: User | null
+  permissions: string[]
+}>({
+  loading: true,
+  loggedIn: false,
+  user: null,
+  permissions: []
+})
 
 export function forgotPassword(notify: (msg: string) => void) {
     notify("This function isn't implemented yet, contact support for help!")

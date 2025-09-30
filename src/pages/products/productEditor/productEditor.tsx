@@ -4,7 +4,6 @@ import { cleanseUnsubmittedProduct } from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
-import { NotificationsContext } from "../../../components/notification/notification"
 import { ProductImageEditor } from "./imageEditor"
 import { category_prod_prop, EditableProductPropContext, editableProductProps, tags_prod_prop } from "./editableProductProps"
 import MultiAutocomplete from "../../../components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
@@ -14,6 +13,7 @@ import { prodPropParsers } from "./prodPropParsers"
 import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
 import { ProductContext } from "../lib"
 import { getProducts } from "../../../lib/supabaseRPC"
+import { NotificationsContext } from "../../../components/notification/lib"
 
 export default function ProductEditor() {
     async function fetchNewData() {

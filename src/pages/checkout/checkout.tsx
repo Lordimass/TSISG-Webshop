@@ -21,8 +21,8 @@ import React, { useState, useEffect, FormEvent, useRef, useContext } from "react
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import { NotificationsContext } from "../../components/notification/notification";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
+import { NotificationsContext } from "../../components/notification/lib";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)

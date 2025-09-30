@@ -1,10 +1,9 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "./basket.css"
 import { BasketProduct } from "../product/product";
-import { basket_icon } from "../../lib/consts";
 import { ProductInBasket } from "../../lib/types";
-import { NotificationsContext } from "../notification/notification";
 import { SiteSettingsContext } from "../../app";
+import { NotificationsContext } from "../notification/lib";
 
 export default function Basket() {
     function redirectToCheckout() {
@@ -141,7 +140,7 @@ export default function Basket() {
     
     return (<>
         <div className="basket" id="basket" onClick={() => {toggleBasket()}} ref={buttonRef}>
-            <img src={basket_icon}></img>
+            <i className="fi fi-sr-shopping-basket"/>
             <div className="basket-item-count" id="basket-item-count">
                 <p>{basketQuantity}</p>
             </div>
@@ -160,7 +159,7 @@ export default function Basket() {
             style={killSwitch ? {backgroundColor: "var(--jamie-grey)", cursor: "not-allowed"} : {}}>
                 <div>
                     <h1>Checkout</h1>
-                    <img src={basket_icon}/>
+                    <i className="fi fi-sr-shopping-basket"/>
                 </div>
             </div>
         </div>

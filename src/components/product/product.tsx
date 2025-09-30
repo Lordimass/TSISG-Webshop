@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 
 import "./product.css"
-import { basket_icon, blank_product, max_product_order } from '../../lib/consts';
+import { blank_product, max_product_order } from '../../lib/consts';
 import { CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
 import SquareImageBox from '../squareImageBox/squareImageBox';
 import { getImageURL, getRepresentativeImageURL, setBasketStringQuantity } from '../../lib/lib';
@@ -42,7 +42,7 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
   function BasketModifier0Quant() { // Simple Add To Basket Button
     return (
       <div className="basket-button" onClick={increment}>
-        <img className="basket-icon" src={basket_icon}></img>
+        <i className="fi fi-sr-shopping-basket basket-icon"/>
         <h1>+</h1>
       </div>
     )

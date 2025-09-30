@@ -1,12 +1,17 @@
 .basket {
     display: flex;
     margin-right: 5px;
-    min-height: 64px;
-    min-width: 64px;
+    min-height: 50px;
+    min-width: 50px;
+    padding: 8px;
     user-select: none;
     cursor: pointer;
     align-items: center;
     justify-content: center;
+
+    font-size: 50px;
+    line-height: 0.5em;
+    color: white;
 }
 
 .basket img {
@@ -64,6 +69,7 @@
 
 .basket-product {
     display: flex;
+    gap: 10px;
     background-color: white;
     color: black;
     border-radius: 1em;
@@ -80,7 +86,6 @@
 .basket-product-text {
     display: flex;
     flex-direction: column;
-    margin: 0.5em;
 }
 
 .basket-prod-footer {
@@ -88,7 +93,9 @@
     flex-direction: column;
     width: 250%;
     height: 100%;
+    box-sizing: border-box;
     justify-content: space-between;
+    padding-top: 10px;
 }
 
 .basket-left-blurrer {
@@ -113,9 +120,14 @@
     height: 4em;
     border-radius: 1em;
     line-height: 1em;
+    
     justify-items: center;
     user-select: none;
     cursor: pointer;
+}
+
+.checkout i {
+    font-size: 35px;
 }
 
 .checkout div {
@@ -140,9 +152,14 @@
     margin-right: 0.5em;
 }
 
+.basket-product .basket-modifier {
+    margin: 0;
+    margin-bottom: 0.5em;
+}
+
 @media screen and (max-width: 1100px) {
     .basket-product {
-        min-height: 7em;
+        min-height: 100px;
     }
 
     .basket-product-text {
@@ -151,10 +168,5 @@
 
     .basket-product-text p {
         margin-top: 0.2em
-    }
-
-    .basket-product .basket-modifier {
-        margin: 0;
-        margin-bottom: 0.5em;
     }
 }

@@ -5,9 +5,9 @@ import "./login.css"
 import { FormEvent, useContext, useState } from "react";
 import { hide_icon, page_title, password_incorrect_msg, show_icon } from "../../lib/consts";
 import { LoginContext } from "../../app";
-import { NotificationsContext } from "../../components/notification/notification";
 import { forgotPassword, login, logout } from "../../lib/auth";
 import Throbber from "../../components/throbber/throbber";
+import { NotificationsContext } from "../../components/notification/lib";
 
 export default function LoginPage() {
     const {loggedIn, loading} = useContext(LoginContext)

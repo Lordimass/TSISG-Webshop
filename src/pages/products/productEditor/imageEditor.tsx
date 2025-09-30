@@ -4,12 +4,12 @@ import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../
 
 import "./imageEditor.css"
 import { UnsubmittedImageData } from "./types";
-import { NotificationsContext } from "../../../components/notification/notification";
 import { compareImages } from "../../../lib/sortMethods";
 import { updateProductData } from "../../../lib/netlifyFunctions";
 import { ProductContext } from "../lib";
 import { removeImage, shiftImage } from "./lib";
 import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
+import { NotificationsContext } from "../../../components/notification/lib";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {

@@ -1,10 +1,10 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { searchProducts } from "./lib";
-import { NotificationsContext } from "../notification/notification";
 
 import "./search.css"
 import { CheckoutProduct } from "../product/product";
 import { ProductData } from "../../lib/types";
+import { NotificationsContext } from "../notification/lib";
 
 export function ProductSearch() {
   async function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {

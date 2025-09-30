@@ -1,16 +1,7 @@
-import { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import "./notification.css";
 import { info_icon, reading_speed_cps } from "../../lib/consts";
-
-export type Notif = { id: number; message: string; duration?: number };
-
-export const NotificationsContext = createContext<{
-  newNotif: RefObject<Notif>,
-  notify: (message: string) => void
-}>({
-  newNotif: {current: {id: Date.now(), message: "NullMessage"}},
-  notify: (message: string) => {console.error(`Notify method does not exist, failed to notify with message: ${message}`)}
-})
+import { Notif, NotificationsContext } from "./lib";
 
 export default function Notifications() {
   const {newNotif} = useContext(NotificationsContext)

@@ -1,4 +1,5 @@
 import { UUID } from "crypto"
+import { createContext } from "react"
 
 export type ProductData = {
   sku: number,
@@ -154,6 +155,7 @@ export type OrderProduct = {
 }
 
 /** Site-wide settings fetched from the backend, allowing for simple customisation and changes to be made without recompiling the whole thing */
+export const SiteSettingsContext = createContext<SiteSettings>({})
 export type SiteSettings = {
   /** Whether the webshop is disabled, useful in case of a critical fault. Message is shown to users in a notification */
   kill_switch?: {enabled: boolean, message: string}

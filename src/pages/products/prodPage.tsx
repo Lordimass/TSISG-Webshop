@@ -11,9 +11,9 @@ import { UnsubmittedImageData, UnsubmittedProductData } from "./productEditor/ty
 import { getGroup, getImageURL, setBasketStringQuantity } from "../../lib/lib"
 import { cleanseUnsubmittedProduct, extractSKU, ProductContext } from "./lib"
 import { useGetProducts } from "../../lib/supabaseRPC"
-import { NotificationsContext } from "../../components/notification/notification"
 import { compareImages } from "../../lib/sortMethods"
 import SquareImageBox from "../../components/squareImageBox/squareImageBox"
+import { NotificationsContext } from "../../components/notification/lib"
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
