@@ -2,16 +2,7 @@
 // in the body of the call.
 
 import { Context } from "@netlify/functions";
-import Stripe from "stripe";
-
-let stripe: Stripe | null = null;
-if (process.env.STRIPE_SECRET_KEY) {
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: '2025-03-31.basil',
-      });
-} else {
-    console.error("STRIPE_SECRET_KEY does not exist!")
-}
+import { stripe } from "../lib/stripeObject.mts";
 
 export default async function handler(request: Request, _context: Context) {
     if (!stripe) {

@@ -114,11 +114,6 @@ export function useGetOrderList(): any {
   return data
 }
 
-export function useGetProduct(sku: number): ProductData {
-  const {data} = useFetchFromNetlifyFunction("getProduct", JSON.stringify({sku:sku}))
-  return data
-}
-
 /**
  * Creates a new product category if it doesn't already exist and returns the ID
  */

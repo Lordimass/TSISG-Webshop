@@ -15,22 +15,19 @@ export async function refreshBasket() {
 
   // Fetch new data on products
   const skusToFetch: number[] = basket.map((prod) => prod.sku)
-  const response = await fetch(window.origin + "/.netlify/functions/getProducts", {
-    body: JSON.stringify(skusToFetch), 
-    method: "POST"
-  })
-  if (!response.ok) return
-  const newProducts: ProductData[] = await response.json()
-  
+  const newProducts = await getProducts(skusToFetch, false, false)
   // Save new data
+  const newBasket: Basket = []
   basket.forEach((basketProd) => {
     newProducts.forEach((newProduct) => {
       if (newProduct.sku === basketProd.sku) {
-        basketProd = { ...newProduct, basketQuantity: basketProd.basketQuantity }
+        newBasket.push({ ...newProduct, basketQuantity: basketProd.basketQuantity })
       }
     })
   })
-  localStorage.setItem("basket", JSON.stringify({basket, lastUpdated: (new Date()).toISOString()}))
+  if (newBasket) {
+    localStorage.setItem("basket", JSON.stringify({basket: newBasket, lastUpdated: (new Date()).toISOString()}))
+  }
 }
 
 /**
@@ -146,15 +143,7 @@ export function setBasketStringQuantity(prod: ProductData | ProductInBasket, qua
 
   // If it wasn't found, create it
   if (!found && quant > 0) {
-    basket.push({
-      "sku": prod.sku,
-      "name": prod.name,
-      "price": prod.price,
-      "basketQuantity": quant,
-      "images": prod.images,
-      "stock": prod.stock,
-      "category": prod.category
-    })
+    basket.push({...prod, basketQuantity: quant})
   }
 
   // Save to localStorage

@@ -163,15 +163,9 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
     }
     // If it wasn't found, create it
     if (!found) {
-      basket.push({
-        "sku": sku,
-        "name": name,
-        "price": price,
-        "basketQuantity": quant,
-        "images": images,
-        "stock": stock!,
-        "category": category
-      })
+      // Type cast is safe because basket mod only enabled
+      // for non grouped products
+      basket.push({...(product as ProductData), basketQuantity: quant})
     }
 
     // Save to localStorage

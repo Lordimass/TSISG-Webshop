@@ -6,14 +6,14 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
  * @param serviceRole 
  * @returns 
  */
-export default async function getSupabaseClient(authHeader?: string, serviceRole?: boolean): Promise<{error?: Response, supabase?: SupabaseClient}> {
+export default async function getSupabaseClient(authHeader?: string, serviceRole?: boolean): Promise<SupabaseClient> {
   // Grab URL and Key from Netlify Env Variables.
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL;
   const supabaseKey = process.env.SUPABASE_ANON_KEY;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey || !supabaseServiceKey) {
-    return {error: new Response(undefined, { status: 403, statusText: "Supabase credentials not set"})};
+    throw { status: 403, message: "Supabase credentials not set"}
   }
 
   let supabase: SupabaseClient | undefined
@@ -28,13 +28,8 @@ export default async function getSupabaseClient(authHeader?: string, serviceRole
     supabase = createClient(supabaseUrl, supabaseKey)
   }
 
-  return {supabase}
+  return supabase
 }
 
-const respAnon = await getSupabaseClient()
-if (respAnon.error) throw respAnon.error
-export const supabaseAnon = respAnon.supabase!
-
-const respService = await getSupabaseClient(undefined, true)
-if (respService.error) throw respService.error
-export const supabaseService = respService.supabase!
+export const supabaseAnon = await getSupabaseClient()
+export const supabaseService = await getSupabaseClient(undefined, true)

@@ -14,8 +14,10 @@ export default async function handler(request: Request, _context: Context) {
   if (!authHeader) {
     return new Response("No Authorization supplied", {status: 403})
   }
-  const {error, supabase} = await getSupabaseClient(authHeader)
-  if (error) {return error}
+  
+  let supabase: SupabaseClient
+  try {supabase = await getSupabaseClient(authHeader);}
+  catch (e: any) {return new Response(e.message, { status: e.status })}
 
   const supabaseOrdersResp = await fetchSupabaseOrders(supabase!)
   if (!supabaseOrdersResp.ok) {return supabaseOrdersResp}

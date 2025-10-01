@@ -9,6 +9,7 @@ import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import { WebhookPayload } from "../lib/types/supabaseTypes.mts";
 import sharp from "sharp";
 import { formatBytes } from '../lib/lib.mts';
+import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Sync contents of product-images bucket with transformed-product-images
@@ -37,8 +38,9 @@ export default async function handler(request: Request, _context: Context): Prom
     }
 
     // Get service role Supabase Client for uploading new images and checking request contents
-    const {supabase, error: clientFetchError} = await getSupabaseClient(undefined, true);
-    if (clientFetchError) return clientFetchError
+    let supabase: SupabaseClient
+    try {supabase = await getSupabaseClient();}
+    catch (e: any) {return new Response(e.message, { status: e.status })}
     
     // Construct the name of the transformed image
     let transformedName: string

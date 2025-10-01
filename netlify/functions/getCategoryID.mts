@@ -1,5 +1,6 @@
 import { Context } from '@netlify/functions';
 import getSupabaseClient from '../lib/getSupabaseClient.mts';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Gets the ID of a category, given its name as the body. 
@@ -10,8 +11,11 @@ export default async function handler(request: Request, _context: Context) {
     if (!authHeader) {
         return new Response("No Authorization supplied", {status: 403})
     }
-    const {error, supabase} = await getSupabaseClient(authHeader)
-    if (error) {return error}
+    
+    let supabase: SupabaseClient
+    try {supabase = await getSupabaseClient(authHeader);}
+    catch (e: any) {return new Response(e.message, { status: e.status })}
+
     const name = await request.text()
     console.log(`Extracted Tag Name from request: ${name}`)
 
@@ -20,7 +24,7 @@ export default async function handler(request: Request, _context: Context) {
         .from('product_categories')
         .select("id")
         .eq("name", name)
-    if (searchError) throw error
+    if (searchError) throw searchError
     if (searchData!.length > 0) {
         // Record was found, return the id
         console.log(`Tag ID was found to be ${searchData![0].id}`)
@@ -32,7 +36,7 @@ export default async function handler(request: Request, _context: Context) {
         .from('product_categories')
         .insert([{name: name}])
         .select()
-    if (createError) throw error
+    if (createError) throw createError
 
     console.log(`Tag ID created as ${createData![0].id}`)
     return new Response(JSON.stringify({id: createData![0].id}), {status: 200});

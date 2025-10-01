@@ -11,18 +11,19 @@ import fs from 'fs/promises';
 import { Readable } from 'stream';
 import { formatBytes } from '../lib/lib.mts';
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /** The target maximum size for the image in bytes */
 const TARGET_IMAGE_SIZE = 1000 * 1000;
 
 export default async function handler(request: Request, _context: Context) {
-  if (request.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
-  }
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
   const authHeader = request.headers.get("Authorization") ?? undefined;
-  const { supabase, error: supErr } = await getSupabaseClient(authHeader);
-  if (supErr) return supErr;
+  if (!authHeader) return new Response("No Authorization supplied", {status: 403})
+  let supabase: SupabaseClient
+  try {supabase = await getSupabaseClient(authHeader);}
+  catch (e: any) {return new Response(e.message, { status: e.status })}
 
   // Convert body -> Buffer
   const arrayBuffer = await request.arrayBuffer();

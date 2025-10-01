@@ -1,5 +1,6 @@
 import { Context } from "@netlify/functions";
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export default async function handler(request: Request, context: Context): Promise<Response> {
     try {
@@ -12,8 +13,9 @@ export default async function handler(request: Request, context: Context): Promi
         if (!authHeader) {
             return new Response("Unauthorized", { status: 401 });
         }
-        const { supabase, error: supErr} = await getSupabaseClient(authHeader);
-        if (supErr) return supErr;
+        let supabase: SupabaseClient
+        try {supabase = await getSupabaseClient(authHeader);}
+        catch (e: any) {return new Response(e.message, { status: e.status })}
 
         const body = await request.json();
         if (!body || !body.sku || !body.tags) {

@@ -1,5 +1,6 @@
 import { Context } from "@netlify/functions";
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Artificially trigger the imageTransformer for every product-image.
@@ -8,11 +9,10 @@ import getSupabaseClient from "../lib/getSupabaseClient.mts";
  */
 export default async function handler(request: Request, context: Context): Promise<Response> {
     const authHeader = request.headers.get("Authorization")
-    if (!authHeader) {
-        return new Response(undefined, {status: 403, statusText: "No Authorization supplied"})
-    }
-    const {supabase, error: supabaseError} = await getSupabaseClient(authHeader);
-    if (supabaseError) return supabaseError
+    if (!authHeader) return new Response(undefined, {status: 403, statusText: "No Authorization supplied"})
+    let supabase: SupabaseClient
+    try {supabase = await getSupabaseClient(authHeader);}
+    catch (e: any) {return new Response(e.message, { status: e.status })}
 
     // Fetch list of images
     const {data: imagesList, error: imagesListError} = await supabase!

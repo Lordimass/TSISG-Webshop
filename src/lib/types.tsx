@@ -106,15 +106,7 @@ export type CategoryData = {
 }
 
 export type Basket = ProductInBasket[]
-export type ProductInBasket = {
-  sku: number,
-  name: string,
-  price: number,
-  basketQuantity: number,
-  images: ImageData[]
-  stock: number
-  category: CategoryData
-}
+export type ProductInBasket = ProductData & {basketQuantity: number}
 
 export type Order = {
   id: number

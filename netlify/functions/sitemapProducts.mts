@@ -6,10 +6,13 @@ import { Context } from "@netlify/functions";
 import { baseUrl } from "./sitemap.mts";
 import { ProductData } from "../lib/types/supabaseTypes.mts";
 import getSupabaseClient from "../lib/getSupabaseClient.mts"
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export default async function handler(_request: Request, _context: Context) {
-    const {supabase, error: supErr} = await getSupabaseClient()
-    if (supErr) throw supErr;
+    let supabase: SupabaseClient
+    try {supabase = await getSupabaseClient();}
+    catch (e: any) {return new Response(e.message, { status: e.status })}
+
     const {data, error: fetchErr} = await supabase!.rpc("get_products");
     if (fetchErr) throw fetchErr;
     const products = data as ProductData[]

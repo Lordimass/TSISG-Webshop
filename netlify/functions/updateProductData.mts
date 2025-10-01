@@ -10,8 +10,9 @@ export default async function handler(request: Request, _context: Context) { try
     
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) return new Response(undefined, {status: 403})
-    const {supabase, error: supErr} = await getSupabaseClient(authHeader)
-    if (supErr) {return supErr}
+    let supabase: SupabaseClient
+    try {supabase = await getSupabaseClient(authHeader);}
+    catch (e: any) {return new Response(e.message, { status: e.status })}
 
     // Get the list of permissions that the user has.
     const token = authHeader.split(" ")[1]
