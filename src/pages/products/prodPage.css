@@ -57,6 +57,7 @@
 
 .go-home-button {
     display: flex;
+    align-items: center;
     height: 2em;
     user-select: none;
     margin-left: 1em;
@@ -64,14 +65,19 @@
     text-decoration: none;
 }
 
-.go-home-button img {
-    height: 2em;
-    filter: invert(1);
-    vertical-align: "middle";
+.go-home-button h1 {
+    margin-bottom: -6px;
+    margin-left: 5px;
 }
 
-.go-home-button h1 {
+.go-home-button h1, .go-home-button i {
     font-size: 2em;
+    line-height: 1em;
+    color: white;
+}
+
+.go-home-button i {
+    height: 1em;
 }
 
 .logged-in-disclaimer {

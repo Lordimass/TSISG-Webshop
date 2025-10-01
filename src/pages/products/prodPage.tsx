@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react"
 import Footer from "../../components/header-footer/footer"
 import Header from "../../components/header-footer/header"
-import { back_icon, blank_product, max_product_order } from "../../lib/consts"
+import { blank_product, max_product_order } from "../../lib/consts"
 import "./prodPage.css"
 import Markdown from "react-markdown"
 import { LoginContext, SiteSettingsContext } from "../../app"
@@ -95,7 +95,7 @@ export default function ProdPage() {
         
         {/* Above actual product */}
         <a className="go-home-button" href="/">
-            <img src={back_icon}/>
+            <i className="fi fi-sr-left"/>
             <h1>Go Home</h1>
         </a>
         {isEditMode ? 

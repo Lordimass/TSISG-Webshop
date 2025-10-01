@@ -55,9 +55,20 @@
     height: 1.2em;
 }
 
-.under-password img {
-    height: 100%;
-    cursor: pointer;
+.show-password {
+    display: flex;
+    align-items: center;
+    
+    border: unset;
+    background-color: unset;
+    padding: 3px;
+
+    font-size: 18px;
+    color: var(--blue-black);
+}
+
+.show-password i {
+    height: 1em;
 }
 
 .login-error {

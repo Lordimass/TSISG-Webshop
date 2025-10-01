@@ -1,5 +1,4 @@
 import { createContext } from "react"
-import { password_incorrect_msg } from "./consts"
 import { User } from "@supabase/supabase-js"
 import { supabase } from "./supabaseRPC"
 
@@ -39,8 +38,8 @@ export async function login(email: string, password: string) {
         let signUpResponse = await supabase.auth.signUp({email, password})
         
         // CASE 1: Sign up fail: Account already exists, password incorrect.
-        if (signUpResponse.error || !signUpResponse.data.session) {
-            throw new Error(password_incorrect_msg)
+        if (signUpResponse.error) {
+            throw new Error(signUpResponse.error.message)
         }
         // CASE 2: Sign up success: New account created, logged in. No action required
     }

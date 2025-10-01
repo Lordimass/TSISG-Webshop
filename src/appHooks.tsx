@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, UserResponse } from "@supabase/supabase-js";
 import { supabase } from "./lib/supabaseRPC";
 import { Notif } from "./components/notification/lib";
 import { useFetchFromNetlifyFunction } from "./lib/netlifyFunctions";
@@ -22,10 +22,11 @@ export function useLogin() {
    * information from Supabase Auth servers.
    */
   async function updateLoginContext() {
-    const resp = await supabase.auth.getUser();
-    if (resp.error) throw resp.error;
+    const resp: UserResponse = await supabase.auth.getUser();
+    // AuthSessionMissingError just means the user is not logged in. This is not a problem here.
+    if (resp.error && resp.error.name !== "AuthSessionMissingError") throw new Error(resp.error.name);
+    
     const user = resp.data.user
-
     setUser(user)
     setLoggedIn(!!user)
     if (user) {
@@ -37,7 +38,7 @@ export function useLogin() {
 
   // If auth state changes, reauthorise user.
   useEffect(() => {
-    const {data: {subscription}} = supabase.auth.onAuthStateChange((event, session) => {
+    const {data: {subscription}} = supabase.auth.onAuthStateChange(event => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
           updateLoginContext()
       }})

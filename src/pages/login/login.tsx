@@ -1,12 +1,12 @@
+import "./login.css"
+
 import Footer from "../../components/header-footer/footer";
 import Header from "../../components/header-footer/header";
-
-import "./login.css"
+import Throbber from "../../components/throbber/throbber";
 import { FormEvent, useContext, useState } from "react";
-import { hide_icon, page_title, password_incorrect_msg, show_icon } from "../../lib/consts";
+import { page_title } from "../../lib/consts";
 import { LoginContext } from "../../app";
 import { forgotPassword, login, logout } from "../../lib/auth";
-import Throbber from "../../components/throbber/throbber";
 import { NotificationsContext } from "../../components/notification/lib";
 
 export default function LoginPage() {
@@ -24,23 +24,12 @@ export default function LoginPage() {
 function Login() {
     async function handleFormSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        try {login(email, password)}
-
-        // Something went wrong logging in
-        catch (e: unknown) {
-            // Password was incorrect
-            if (e === password_incorrect_msg) {setError(e); return}
-            // Something else went wrong
-            else {
-                console.error(e);
-                setError("Something went wrong! Try again later");
-                return;
-            }
-        };
+        try {await login(email, password)}
+        catch (e: any) {setError(e.message); return};
 
         // At this stage, login was successful and we go back to
         // whatever the user was doing that needed logging in.
-        history.back()
+        // history.back()
     }
 
     const [email, setEmail] = useState<string>("")
@@ -79,7 +68,9 @@ function Login() {
                 </label>
 
                 <div className="under-password">
-                    <img onClick={()=>{setShowPassword(!showPassword)}} src={showPassword ? show_icon : hide_icon}/>
+                    <button className="show-password" onClick={(e)=>{e.preventDefault(); setShowPassword(!showPassword)}}>
+                        {showPassword ? <i className="fi fi-ss-eye"/> : <i className="fi fi-ss-eye-crossed"/>}
+                    </button>
                     <p onClick={() => {forgotPassword(notify)}} id="forgot-password">I forgot my password</p>
                 </div>
                 
