@@ -14,6 +14,7 @@ import { useGetProducts } from "../../lib/supabaseRPC"
 import { compareImages } from "../../lib/sortMethods"
 import SquareImageBox from "../../components/squareImageBox/squareImageBox"
 import { NotificationsContext } from "../../components/notification/lib"
+import Page404 from "../404/404"
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -34,23 +35,26 @@ export default function ProdPage() {
     const [group, setGroup] = useState<ProductData[]>([])
     // Used to set hovered image width to be the same as the carousel
     const carouselContainerRef = useRef<HTMLDivElement>(null)
+    const return404 = useRef(false)
 
     // Whether the user is logged in with edit permissions
     const [isEditMode, setIsEditMode] = useState(false)
     // Fetch product data from backend, then assign it to product state and originalProd if not already set
-    const resp = useGetProducts([sku], false, false); 
+    const resp = useGetProducts([sku], false); 
     if (resp.error) {notify(resp.error.message)}
     const prod = resp.data?.[0]
     useEffect(() => {
-        if (prod) {
+        if (!resp.loading && prod) {
             // Set the product state
             setProduct(prod)
             if (!originalProdSet.current) {
                 setOriginalProd(structuredClone(prod))
                 originalProdSet.current = true;
             }
+        } else if (!resp.loading && !prod) {
+            return404.current = true;
         }
-    }, [prod])
+    }, [resp.loading])
 
     useEffect(() => {
         if (product.sku === 0) return
@@ -78,6 +82,8 @@ export default function ProdPage() {
     const priceMinor = priceMinorString.padEnd(2, "0")
 
     const page_title = `TSISG - ${product.group_name ?? product.name}`
+
+    if (return404.current) return <Page404/>
     return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
             basketQuant, 
             setBasketQuant, 
