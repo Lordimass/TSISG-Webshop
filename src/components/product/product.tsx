@@ -377,7 +377,7 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
   useEffect(() => {syncWithBasket()}, [])
 
   return (
-    <div className="basket-product" id={"product-" + sku}>
+    <a className="basket-product" id={"product-" + sku} href={`/products/${sku}`}>
       <SquareImageBox image={imageURL} size='100%' loading='eager'/>
 
       <div className="basket-prod-footer">
@@ -405,7 +405,7 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
         </div>
 
       </div>
-    </div>
+    </a>
   )
 }
 

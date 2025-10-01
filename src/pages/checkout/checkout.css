@@ -1,4 +1,4 @@
-#root .checkout-content {
+.checkout-content {
     display: flex;
     flex-direction: row;
 }
@@ -87,10 +87,14 @@
 
 .checkout-product-text {
     align-self: center;
-    font-size: 1.4rem;
+    font-size: 1.4em;
     margin-top: 1em;
     width: 350%;
     margin: 20px;
+}
+
+.checkout-product-text p {
+    font-size: 1em;
 }
 
 .checkout-product-price {
@@ -159,8 +163,11 @@
 
 @media screen and (max-width: 700px) {
     .checkout-product-text {
-        font-size: large;
-        width: 150%;
+        width: 200%;
+    }
+
+    .checkout-product-text p {
+        font-size: 1rem;
     }
 
     .checkout-content {
@@ -169,10 +176,5 @@
 
     .checkout-left, .checkout-right {
         width: 100%;
-    }
-
-    .checkout-products {
-        max-height: 80vh;
-        overflow-x: scroll;
     }
 }
