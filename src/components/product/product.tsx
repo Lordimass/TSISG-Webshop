@@ -134,48 +134,9 @@ export default function Product({ prod }: {prod: ProductData | ProductData[]}) {
 
   function updateQuantity(quant: number) {
     if (group) {return}
-    // Function needs to update the localStorage basket for persistence,
-    // it will also then update the actual quantity state for this product.
-
-    // Fetch the current basket contents
-    let basketString: string | null = localStorage.getItem("basket")
-    let freshBasket = false
-    if (!basketString || basketString == "{\"basket\":[]}" || basketString == "{}") { // Create basket if it doesn't exist
-      basketString = `{"basket": []}`
-      freshBasket = true
-    }
-    let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
-
-    // Find product and set quantity
-    let found: boolean = false
-    for (let i = 0; i<basket.length; i++) {
-      let item: ProductInBasket = basket[i]
-      if (item.sku == sku) {
-        found = true
-        // Just remove it from the basket if 0
-        if (quant == 0) {
-          basket.splice(i, 1)
-          break
-        }
-        item.basketQuantity = quant
-        break
-      }
-    }
-    // If it wasn't found, create it
-    if (!found) {
-      // Type cast is safe because basket mod only enabled
-      // for non grouped products
-      basket.push({...(product as ProductData), basketQuantity: quant})
-    }
-
-    // Save to localStorage
-    const newBasketObj = freshBasket 
-        ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
-        : {"basket": basket}
-    localStorage.setItem("basket",
-      JSON.stringify(newBasketObj)
-    )
-    window.dispatchEvent(new CustomEvent("basketUpdate"))
+    
+    // Typecast safe since modifier only active for non-grouped products
+    setBasketStringQuantity(product as ProductData, quant)
     setQuantityButActually(quant)
   }
 

@@ -3,6 +3,7 @@ import { getProducts, supabase } from "./supabaseRPC"
 import { compareProducts } from "./sortMethods"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { daysOfWeek, monthsOfYear } from "./consts"
+import { triggerAddToCart } from "./analytics/analytics"
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale
@@ -118,18 +119,25 @@ export async function getGroup(name?: string): Promise<ProductData[]> {
  */
 export function setBasketStringQuantity(prod: ProductData | ProductInBasket, quant: number) {
   console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
+  /** Whether this is a new basket string or not */
+  let freshBasket = false
+  /** The change in quantity from this update */
+  let diff = 0
   // Fetch the current basket contents
   let basketString: string | null = localStorage.getItem("basket")
   if (!basketString) { // Create basket if it doesn't exist
     basketString = "{\"basket\": []}"
+    freshBasket = true
   }
-  let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
+  const basketObj = JSON.parse(basketString)
+  let basket: Basket = basketObj.basket;
 
   // Find product and set quantity
   let found: boolean = false
   for (let i = 0; i<basket.length; i++) {
     let item: ProductInBasket = basket[i]
     if (item.sku == prod.sku) {
+      diff = quant - item.basketQuantity
       found = true
       // Just remove it from the basket if 0
       if (quant == 0) {
@@ -143,15 +151,21 @@ export function setBasketStringQuantity(prod: ProductData | ProductInBasket, qua
 
   // If it wasn't found, create it
   if (!found && quant > 0) {
+    diff = quant
     basket.push({...prod, basketQuantity: quant})
   }
 
   // Save to localStorage
+  const newBasketObj = freshBasket 
+      ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
+      : {"basket": basket, "lastUpdated": basketObj.lastUpdated}
   localStorage.setItem("basket",
-    JSON.stringify({"basket": basket})
+    JSON.stringify(newBasketObj)
   )
-
   window.dispatchEvent(new CustomEvent("basketUpdate"))
+
+  // Trigger GA4 Event
+  triggerAddToCart(prod, diff)
 }
 
 /**

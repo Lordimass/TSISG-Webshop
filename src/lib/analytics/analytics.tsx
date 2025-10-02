@@ -68,6 +68,7 @@ export function triggerAddShippingInfo(currency = "GBP", coupon?: string, shippi
     const items = getBasketAsGA4Products()
     let value = 0; 
     items.forEach(p => value += p.price ?? 0)
+
     gtag("event", "add_shipping_info", {
         currency, value, coupon, shipping_tier, items
     })
@@ -77,7 +78,21 @@ export function triggerAddPaymentInfo(currency = "GBP", coupon?: string, payment
     const items = getBasketAsGA4Products()
     let value = 0; 
     items.forEach(p => value += p.price ?? 0)
+
     gtag("event", "add_payment_info", {
         currency, value, coupon, payment_type, items
+    })
+}
+
+export function triggerAddToCart(product: ProductData, change: number, currency = "GBP") {
+    const func = change>0 ? "add_to_cart" : "remove_from_cart"
+    const value = product.price*change
+    const item = convertToGA4Product(product)
+    item.quantity = change
+    
+    gtag("event", func, {
+        currency, 
+        value, 
+        items: [item]
     })
 }
