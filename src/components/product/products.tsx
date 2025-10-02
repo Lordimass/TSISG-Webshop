@@ -43,7 +43,6 @@ export default function Products() {
             let group: ProductData[]|null = activeProductData[i]
             if (!group || group.length === 0) {
                 continue;
-                i--
             }
             
             const newProductComponent = <Product

@@ -15,15 +15,6 @@ export function CookieBanner() {
       analytics_storage: "granted",
     });
 
-    // Initialise GA4
-    const pathname: string = window.location.pathname
-    ReactGA.send({
-      hitType: "pageview", 
-      page: pathname, 
-      title: pathname,
-      environment: import.meta.env.VITE_ENVIRONMENT
-    })
-
     localStorage.setItem("consentModeAnswer", "accept")
     setExiting(true)
   };
@@ -36,8 +27,7 @@ export function CookieBanner() {
   // Only show popup if it's not already been answered
   useEffect(() => {
     const consentModeAnswer = localStorage.getItem("consentModeAnswer")
-    if (!consentModeAnswer) {setVisible(true); return}
-    if (consentModeAnswer === "accept") {acceptCookies()}
+    if (!consentModeAnswer) setVisible(true)
   }, [])
 
   const [visible, setVisible] = useState(false);

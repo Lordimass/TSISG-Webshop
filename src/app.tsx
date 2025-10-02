@@ -14,7 +14,7 @@ import { OrderManager } from './pages/staff/orders';
 import { NotificationsContext } from "./components/notification/lib";
 import { LoginContext } from "./lib/auth";
 import { SiteSettingsContext } from "./lib/types";
-import { useConditionalBasketUpdate, useGA4, useLogin, useNotifs, useSiteSettings } from "./appHooks";
+import { useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings } from "./appHooks";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -29,7 +29,6 @@ export function App() {
   const {newNotif, notify} = useNotifs()
   const siteSettings = useSiteSettings(notify)
   useConditionalBasketUpdate()
-  useGA4()
 
   return (<>
     <meta name='author' content='Sam Knight'/>

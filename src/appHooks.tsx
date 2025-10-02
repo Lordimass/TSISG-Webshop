@@ -128,6 +128,8 @@ export function useConditionalBasketUpdate() {
 }
 
 /**
+ * TO BE RUN IN main.tsx
+ * 
  * Initialises GA4 with default denied settings until cookies
  * are accepted.
  * 
@@ -135,39 +137,39 @@ export function useConditionalBasketUpdate() {
  * which sends cookie-less pings to track analytics without
  * association with the user.
  */
-export function useGA4() {
-    useEffect(() => {
-      const dev = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
-      if (dev) console.log("In a development environment");
+export function initGA4() {
+  const dev = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
+  if (dev) console.log("In a development environment");
 
-      // Bootstrap gtag + default consent
-      (window as any).dataLayer = (window as any).dataLayer || [];
-      (window as any).gtag = function () {
-        (window as any).dataLayer.push(arguments);
-      };
+  // Bootstrap gtag + default consent
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).gtag = function () {
+    (window as any).dataLayer.push(arguments);
+  };
 
-      // Consent Mode V2 defaults (deny until user chooses)
-      (window as any).gtag("consent", "default", {
-        // deny optional cookies for now.
-        ad_storage: "denied",
-        analytics_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied",
-        // allow essential cookies.
-        functionality_storage: 'granted',
-        security_storage: 'granted'        
-      });
+  const consent = (localStorage.getItem("consentModeAnswer") === "accept") ? "granted" : "denied";
 
-      ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+  // Consent Mode V2 defaults (deny until user chooses)
+  (window as any).gtag("consent", "default", {
+    // deny optional cookies for now.
+    ad_storage: "denied",
+    analytics_storage: consent,
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    // allow essential cookies.
+    functionality_storage: 'granted',
+    security_storage: 'granted'        
+  });
 
-      (window as any).gtag("config", import.meta.env.VITE_GA4_MEASUREMENT_ID, {"debug_mode": dev})
+  ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID);
 
-      // Load GA4 library
-      const script = document.createElement("script");
-      script.async = true;
-      script.src = `https://www.googletagmanager.com/gtag/js?id=${
-        import.meta.env.VITE_GA4_MEASUREMENT_ID
-      }`;
-      document.head.appendChild(script);
-  }, [])
+  (window as any).gtag("config", import.meta.env.VITE_GA4_MEASUREMENT_ID, {"debug_mode": dev})
+
+  // Load GA4 library
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${
+    import.meta.env.VITE_GA4_MEASUREMENT_ID
+  }`;
+  document.head.appendChild(script);
 }
