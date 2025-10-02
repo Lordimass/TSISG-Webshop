@@ -141,16 +141,10 @@ export function initGA4() {
   const dev = import.meta.env.VITE_ENVIRONMENT === "DEVELOPMENT"
   if (dev) console.log("In a development environment");
 
-  // Bootstrap gtag + default consent
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  (window as any).gtag = function () {
-    (window as any).dataLayer.push(arguments);
-  };
-
   const consent = (localStorage.getItem("consentModeAnswer") === "accept") ? "granted" : "denied";
 
   // Consent Mode V2 defaults (deny until user chooses)
-  (window as any).gtag("consent", "default", {
+  gtag("consent", "default", {
     // deny optional cookies for now.
     ad_storage: "denied",
     analytics_storage: consent,
@@ -162,8 +156,7 @@ export function initGA4() {
   });
 
   ReactGA.initialize(import.meta.env.VITE_GA4_MEASUREMENT_ID);
-
-  (window as any).gtag("config", import.meta.env.VITE_GA4_MEASUREMENT_ID, {"debug_mode": dev})
+  gtag("config", import.meta.env.VITE_GA4_MEASUREMENT_ID, {"debug_mode": dev})
 
   // Load GA4 library
   const script = document.createElement("script");
@@ -173,3 +166,6 @@ export function initGA4() {
   }`;
   document.head.appendChild(script);
 }
+
+(window as any).dataLayer = (window as any).dataLayer || [];
+export const gtag: Gtag.Gtag = function () {(window as any).dataLayer.push(arguments);};

@@ -23,6 +23,7 @@ import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@st
 import {Stripe as StripeNS} from "stripe";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 import { NotificationsContext } from "../../components/notification/lib";
+import { triggerAddPaymentInfo, triggerAddShippingInfo } from "../../lib/analytics/analytics";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)
@@ -166,6 +167,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [isLoading, setIsLoading] = useState(false);
 
     const addressComplete = useRef(false)
+    const paymentInfoComplete = useRef(false)
     const country = useRef<string>("")
 
     // Handle changes in address and update shipping options
@@ -194,6 +196,16 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         checkout.updateShippingOption(rates[0])
 
         addressComplete.current = true
+        triggerAddShippingInfo()
+    })
+
+    const paymentElement = checkout.getPaymentElement()
+    paymentElement?.once("change", (e) => {
+        if (e.complete && !paymentInfoComplete.current) {
+            paymentInfoComplete.current = true
+            triggerAddPaymentInfo()
+        }
+        
     })
 
     // To prevent overloading the database / exploitation, only check stock once.
@@ -254,7 +266,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     International shipping will be coming soon!
                 </p><br/>
 
-                <AddressElement options={addressElementOpts}/>
+                <AddressElement 
+                    options={addressElementOpts}
+                />
 
                 <RequiredInput 
                     label="Email" 

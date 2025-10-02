@@ -1,6 +1,6 @@
 import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
-import { getGAClientId, getGASessionId } from "../../lib/analytics"
+import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
 import { Basket } from "../../lib/types"
 
 /**
