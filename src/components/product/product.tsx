@@ -371,18 +371,21 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
     setImageURL(getImageURL(images[0]))
   }, [])
 
+  const link = `/products/${sku}`
   let string_price: string = "£" + price.toFixed(2);
   let max_order: number = Math.min(max_product_order, stock);
   window.addEventListener("basketUpdate", syncWithBasket)
   useEffect(() => {syncWithBasket()}, [])
 
   return (
-    <a className="basket-product" id={"product-" + sku} href={`/products/${sku}`}>
-      <SquareImageBox image={imageURL} size='100%' loading='eager'/>
+    <div className="basket-product" id={"product-" + sku}>
+      <a className="basket-prod-header" href={link}>
+        <SquareImageBox image={imageURL} size='100%' loading='eager'/>
+      </a>
 
       <div className="basket-prod-footer">
         <div className="basket-product-text">
-          <p className="product-name">{name}</p>
+          <a className="product-name" href={link}>{name}</a>
           <p className="product-price">{string_price}</p>
         </div>
 
@@ -405,7 +408,7 @@ export function BasketProduct({ product }: {product: ProductInBasket}) {
         </div>
 
       </div>
-    </a>
+    </div>
   )
 }
 

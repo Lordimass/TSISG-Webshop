@@ -69,17 +69,18 @@
 
 .basket-product {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
     gap: 10px;
     background-color: white;
     color: black;
     text-decoration: none;
     border-radius: 1em;
     margin: 0.3em;
-    justify-content: space-between;
     
     overflow: hidden;
-
-    flex-direction: row;
     width: 98%;
     min-height: 10em;
 }
@@ -87,6 +88,10 @@
 .basket-product-text {
     display: flex;
     flex-direction: column;
+}
+
+.basket-prod-header {
+    min-width: 29%;
 }
 
 .basket-prod-footer {
