@@ -44,7 +44,7 @@ export async function getGASessionId(): Promise<string | null> {
     });
 }
 
-export function convertToGA4Product(p: ProductData | ProductInBasket): GA4Product {
+function convertToGA4Product(p: ProductData | ProductInBasket): GA4Product {
     return {
         item_id: p.sku.toString(),
         item_name: p.name,
@@ -55,29 +55,27 @@ export function convertToGA4Product(p: ProductData | ProductInBasket): GA4Produc
     }
 }
 
-export function getBasketAsGA4Products(): GA4Product[] {
+function getBasketAsGA4Products(): {items: GA4Product[], value: number} {
     const basketString = localStorage.getItem("basket")
-    if (!basketString) return []
+    if (!basketString) return {items: [], value: 0}
     const basketObj = JSON.parse(basketString)
-    if (!("basket" in basketObj)) {console.error("localStorage Basket Malformed"); return [];}
+    if (!("basket" in basketObj)) {console.error("localStorage Basket Malformed"); return {items: [], value: 0};}
     const basket: Basket = basketObj.basket
-    return basket.map(convertToGA4Product)
+    const items = basket.map(convertToGA4Product)
+    let value = 0; 
+    items.forEach(p => value += p.price ?? 0)
+    return {items, value}
 }
 
 export function triggerAddShippingInfo(currency = "GBP", coupon?: string, shipping_tier?: string) {
-    const items = getBasketAsGA4Products()
-    let value = 0; 
-    items.forEach(p => value += p.price ?? 0)
-
+    const {items, value} = getBasketAsGA4Products()
     gtag("event", "add_shipping_info", {
         currency, value, coupon, shipping_tier, items
     })
 }
 
 export function triggerAddPaymentInfo(currency = "GBP", coupon?: string, payment_type?: string) {
-    const items = getBasketAsGA4Products()
-    let value = 0; 
-    items.forEach(p => value += p.price ?? 0)
+    const {items, value} = getBasketAsGA4Products()
 
     gtag("event", "add_payment_info", {
         currency, value, coupon, payment_type, items
@@ -94,5 +92,12 @@ export function triggerAddToCart(product: ProductData, change: number, currency 
         currency, 
         value, 
         items: [item]
+    })
+}
+
+export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
+    const {items, value} = getBasketAsGA4Products()
+    gtag("event", "begin_checkout", {
+        currency, value, coupon, items
     })
 }

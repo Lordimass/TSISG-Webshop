@@ -23,7 +23,7 @@ import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@st
 import {Stripe as StripeNS} from "stripe";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 import { NotificationsContext } from "../../components/notification/lib";
-import { triggerAddPaymentInfo, triggerAddShippingInfo } from "../../lib/analytics/analytics";
+import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)
@@ -40,7 +40,7 @@ export default function Checkout() {
         {preparing ? <Loading/> : <></>}
         
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
-            <CheckoutAux onReady={()=>{setPreparing(false)}}/>
+            <CheckoutAux onReady={()=>{setPreparing(false); triggerBeginCheckout()}}/>
         </CheckoutProvider>
 
         </div><Footer/></>);
