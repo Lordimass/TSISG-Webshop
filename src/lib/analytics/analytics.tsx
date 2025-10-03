@@ -101,3 +101,8 @@ export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
         currency, value, coupon, items
     })
 }
+
+export function triggerSearch(search_term: string, ignore_single_characters = true) {
+    if (ignore_single_characters && search_term.length <= 1) return
+    gtag("event", "search", {search_term})
+}

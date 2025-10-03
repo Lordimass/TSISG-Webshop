@@ -5,17 +5,45 @@ import "./search.css"
 import { CheckoutProduct } from "../product/product";
 import { ProductData } from "../../lib/types";
 import { NotificationsContext } from "../notification/lib";
+import { triggerSearch } from "../../lib/analytics/analytics";
 
-export function ProductSearch() {
-  async function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
+/**
+ * 
+ * @param search_delay The delay in milliseconds between a user typing and the search
+ * being performed. Stops the API from being overloaded and limits the number of GA4
+ * `search` triggers.
+ * @returns 
+ */
+export function ProductSearch({search_delay = 200}: {search_delay: number}) {
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
+    // Close any existing timeout
+    if (searchTimeout.current) clearTimeout(searchTimeout.current)
+
+    // Extract Query
     const query = e.target.value;
     if (!query.trim()) {
         setResults([]);
         return;
     }
-    const res = await searchProducts(query, notify);
-    setResults(res);
+
+    // Perform search after delay
+    searchTimeout.current = setTimeout(
+      () => {performSearch(query)}, 
+      search_delay
+    )
+  }
+
+  async function performSearch(query: string) {
+    try {
+      const res = await searchProducts(query);
+      setResults(res);
+      triggerSearch(query);
+    } catch (error: any) {
+      notify("Something went wrong with your search, sorry!");
+      console.error("Error searching products:", JSON.stringify(error, undefined, 2));
+      setResults([])
+    }
   }
 
   const [results, setResults] = useState<ProductData[]>([]);
@@ -23,6 +51,7 @@ export function ProductSearch() {
   const {notify} = useContext(NotificationsContext)
   const menuRef = useRef<HTMLUListElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
   // Check for clicks outside of the container to close the menu.
   useEffect(() => {
@@ -35,10 +64,10 @@ export function ProductSearch() {
               );
           }
           
-          if (searchBarRef.current && searchBarRef.current.contains(event.target) && results.length > 0) {
-              console.log(`Opening ${results.length} results`)
-              setIsOpen(true);
-          }
+          if (
+            searchBarRef.current && 
+            searchBarRef.current.contains(event.target) && results.length > 0
+          ) setIsOpen(true);
       }
 
       // Bind listener when menu is open
@@ -60,7 +89,7 @@ export function ProductSearch() {
               name="search"
               className="search-input"
               type="text"
-              onChange={(e) => {handleSearch(e);}}
+              onChange={(e) => {handleChange(e);}}
               placeholder="Search products..."
           />
         </div>

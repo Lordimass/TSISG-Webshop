@@ -7,17 +7,11 @@ import { ProductData } from "../../lib/types";
  * @param notify Function to notify if something goes wrong.
  * @returns A promise that resolves to an array of products.
  */
-export async function searchProducts(query: string, notify: (msg: string) => void = console.log): Promise<ProductData[]> {
+export async function searchProducts(query: string): Promise<ProductData[]> {
     // Could be improved using GIN/GIN+trgm indexes, but this is fine for now
-    try {
-        const data = await callRPC(
-            "search_products", 
-            { q: query, limit_results: 20 }, 
-            () => {});
-        return data;
-    } catch (error: any) {
-        notify("Something went wrong with your search, sorry!");
-        console.error("Error searching products:", error);
-        return [];
-    }
+    const data = await callRPC(
+        "search_products", 
+        { q: query, limit_results: 20 }, 
+        () => {});
+    return data;
 }
