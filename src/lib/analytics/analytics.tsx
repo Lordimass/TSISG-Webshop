@@ -95,6 +95,14 @@ export function triggerAddToCart(product: ProductData, change: number, currency 
     })
 }
 
+export function triggerViewCart(currency="GBP") {
+    const {items, value} = getBasketAsGA4Products()
+    
+    gtag("event", "view_cart", {
+        currency, value, items
+    })
+}
+
 export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
     const {items, value} = getBasketAsGA4Products()
     gtag("event", "begin_checkout", {

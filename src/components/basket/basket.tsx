@@ -4,6 +4,7 @@ import { BasketProduct } from "../product/product";
 import { ProductInBasket } from "../../lib/types";
 import { SiteSettingsContext } from "../../app";
 import { NotificationsContext } from "../notification/lib";
+import { triggerViewCart } from "../../lib/analytics/analytics";
 
 export default function Basket() {
     function redirectToCheckout() {
@@ -63,8 +64,12 @@ export default function Basket() {
         }
 
         // Toggle display mode
-        setIsOpen(!isOpen)
+        const newIsOpen = !isOpen
+        setIsOpen(newIsOpen)
         basket.style.display = isOpen ? "none" : "flex"
+
+        // Trigger GA4 Event if Basket Opened
+        if (newIsOpen) triggerViewCart()
     }
 
     const siteSettings = useContext(SiteSettingsContext)
