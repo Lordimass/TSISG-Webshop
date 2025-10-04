@@ -106,3 +106,11 @@ export function triggerSearch(search_term: string, ignore_single_characters = tr
     if (ignore_single_characters && search_term.length <= 1) return
     gtag("event", "search", {search_term})
 }
+
+export function triggerSignUp(method: string) {
+    gtag("event", "sign_up", {method})
+}
+
+export function triggerLogin(method: string) {
+    gtag("event", "login", {method})
+}

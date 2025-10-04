@@ -1,6 +1,7 @@
 import { createContext } from "react"
 import { User } from "@supabase/supabase-js"
 import { supabase } from "./supabaseRPC"
+import { triggerLogin, triggerSignUp } from "./analytics/analytics"
 
 export const LoginContext = createContext<{
   loading: boolean
@@ -40,11 +41,14 @@ export async function login(email: string, password: string) {
         // CASE 1: Sign up fail: Account already exists, password incorrect.
         if (signUpResponse.error) {
             throw new Error(signUpResponse.error.message)
+        } else {
+          // CASE 2: Sign up success: New account created, logged in. Trigger GA4 Event.
+          triggerSignUp("Email")
+          return
         }
-        // CASE 2: Sign up success: New account created, logged in. No action required
     }
-
     // Credentials valid. User is logged in
+    triggerLogin("Email")
 }
 
 export async function getJWTToken() {
