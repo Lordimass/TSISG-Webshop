@@ -5,7 +5,7 @@ import "./search.css"
 import { CheckoutProduct } from "../product/product";
 import { ProductData } from "../../lib/types";
 import { NotificationsContext } from "../notification/lib";
-import { triggerSearch } from "../../lib/analytics/analytics";
+import { triggerSearch, triggerViewItemList } from "../../lib/analytics/analytics";
 
 /**
  * 
@@ -36,9 +36,10 @@ export function ProductSearch({search_delay = 200}: {search_delay: number}) {
 
   async function performSearch(query: string) {
     try {
-      const res = await searchProducts(query);
-      setResults(res);
+      const searchResults = await searchProducts(query);
+      setResults(searchResults);
       triggerSearch(query);
+      triggerViewItemList(searchResults, "search-results", "Search Results")
     } catch (error: any) {
       notify("Something went wrong with your search, sorry!");
       console.error("Error searching products:", JSON.stringify(error, undefined, 2));

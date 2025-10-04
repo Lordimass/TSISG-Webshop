@@ -8,6 +8,7 @@ import { Basket, ProductData } from "../../lib/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
+import { triggerViewItemList } from "../../lib/analytics/analytics";
 
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
@@ -38,20 +39,21 @@ export default function Products() {
         let start: number = (page-1)*productLoadChunks
         let end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
-        const buildingProducts: React.JSX.Element[] = []
+        const productComponents: React.JSX.Element[] = []
+        const displayedProducts: ProductData[] = []
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
             let group: ProductData[]|null = activeProductData[i]
-            if (!group || group.length === 0) {
-                continue;
-            }
+            if (!group || group.length === 0) continue;
             
             const newProductComponent = <Product
                 prod={group}
                 key={group[0].sku}
             />
-            buildingProducts.push(newProductComponent)
+            productComponents.push(newProductComponent)
+            displayedProducts.push(...group)
         }
-        setProducts(buildingProducts)
+        setProducts(productComponents)
+        triggerViewItemList(displayedProducts, `home_page_${page}`, `Home Page ${page}`)
         
         let pageCount = Math.floor(activeProductData.length/productLoadChunks);
         if (activeProductData.length % productLoadChunks != 0) {

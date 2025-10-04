@@ -15,7 +15,7 @@ import { compareImages } from "../../lib/sortMethods"
 import SquareImageBox from "../../components/squareImageBox/squareImageBox"
 import { NotificationsContext } from "../../components/notification/lib"
 import Page404 from "../404/404"
-import { triggerViewItem } from "../../lib/analytics/analytics"
+import { triggerViewItem, triggerViewItemList } from "../../lib/analytics/analytics"
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -62,7 +62,14 @@ export default function ProdPage() {
         if (product.sku === 0) return
         // Fetch any products in group
         getGroup(product.group_name).then(
-            setGroup, 
+            (g) => {
+                setGroup(g); 
+                if (g.length > 0) triggerViewItemList(
+                    g, 
+                    `product-group-page`, 
+                    `Product Group Page`
+                )
+            }, 
             (error) => {setGroup([]); console.error(error)}
         )
     }, [product])

@@ -122,6 +122,14 @@ export function triggerViewItem(product: ProductData | ProductData[], currency =
     })
 }
 
+export function triggerViewItemList(products: ProductData[], item_list_id?: string, item_list_name?: string, currency = "GBP") {
+    const items = products.map(convertToGA4Product)
+
+    gtag("event", "view_item_list", {
+        currency, item_list_id, item_list_name, items
+    })
+}
+
 export function triggerSearch(search_term: string, ignore_single_characters = true) {
     if (ignore_single_characters && search_term.length <= 1) return
     gtag("event", "search", {search_term})
