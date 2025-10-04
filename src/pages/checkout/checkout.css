@@ -87,18 +87,18 @@
 
 .checkout-product-text {
     align-self: center;
-    font-size: 1.4em;
     margin-top: 1em;
     width: 350%;
     margin: 20px;
 }
 
-.checkout-product-text p {
-    font-size: 1em;
+.checkout-product-name {
+    font-size: 20px;
 }
 
 .checkout-product-price {
-    font-size: smaller;
+    font-size: 18px;
+    color: var(--jamie-grey)
 }
 
 .checkout-totals {

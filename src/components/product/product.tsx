@@ -425,7 +425,7 @@ export function CheckoutProduct({
   return (<a className="checkout-product" href={href}>
       <SquareImageBox image={image} size='100%' loading='eager'/>
       <div className="checkout-product-text">
-          {quantity ? <p>{name} (x{quantity})</p> : <p>{name}</p>}
+          {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> : <p className='checkout-product-name'>{name}</p>}
           <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
           {admin ? <p>SKU: {sku}</p> : <></>}
       </div>
