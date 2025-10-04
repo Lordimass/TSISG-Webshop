@@ -15,6 +15,7 @@ import { compareImages } from "../../lib/sortMethods"
 import SquareImageBox from "../../components/squareImageBox/squareImageBox"
 import { NotificationsContext } from "../../components/notification/lib"
 import Page404 from "../404/404"
+import { triggerViewItem } from "../../lib/analytics/analytics"
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -51,6 +52,7 @@ export default function ProdPage() {
                 setOriginalProd(structuredClone(prod))
                 originalProdSet.current = true;
             }
+            triggerViewItem(prod)
         } else if (!resp.loading && !prod) {
             return404.current = true;
         }
@@ -210,6 +212,7 @@ function ProductVariant({
         if (!setProduct) return
         setProduct(product)
         window.history.pushState(undefined, product.name, `/products/${product.sku}`)
+        triggerViewItem(cleanseUnsubmittedProduct(product))
     }
     /** 
      * The image to display for the product, either the group_product_icon

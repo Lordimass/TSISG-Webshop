@@ -105,8 +105,20 @@ export function triggerViewCart(currency="GBP") {
 
 export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
     const {items, value} = getBasketAsGA4Products()
+
     gtag("event", "begin_checkout", {
         currency, value, coupon, items
+    })
+}
+
+export function triggerViewItem(product: ProductData | ProductData[], currency = "GBP") {
+    const prods: ProductData[] = !("length" in product) ? [product] : product
+    const items = prods.map(convertToGA4Product)
+    let value = 0;
+    prods.forEach(p => value+=p.price) 
+
+    gtag("event", "view_item", {
+        currency, items, value
     })
 }
 
