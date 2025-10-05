@@ -11,7 +11,7 @@ import ProdPage from "./pages/products/prodPage";
 import Reports from "./pages/staff/reports/reports";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { OrderManager } from './pages/staff/orders';
+import { OrderManager } from './pages/staff/orders/orders';
 import { NotificationsContext } from "./components/notification/lib";
 import { LoginContext } from "./lib/auth";
 import { SiteSettingsContext } from "./lib/types";

@@ -1,21 +1,22 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import "./css/orders.css"
-import { CheckoutProduct } from "../../components/product/product";
-import Throbber from "../../components/throbber/throbber";
+import { CheckoutProduct } from "../../../components/product/product";
 
-import "./css/orders.css"
-import { LoginContext } from "../../app";
-import Header from "../../components/header-footer/header";
-import Footer from "../../components/header-footer/footer";
-import { useGetOrderList } from "../../lib/netlifyFunctions";
-import { Order } from "../../lib/types";
-import { compareOrders } from "../../lib/sortMethods";
-import { overdue_threshold } from "../../lib/consts";
-import { callRPC } from "../../lib/supabaseRPC";
-import { OrdersContext } from "./lib";
-import { getJWTToken } from "../../lib/auth";
-import { dateToDateString, dateToTimeString } from "../../lib/lib";
-import { NotificationsContext } from "../../components/notification/lib";
+import Throbber from "../../../components/throbber/throbber";
+import Header from "../../../components/header-footer/header";
+import Footer from "../../../components/header-footer/footer";
+
+import { LoginContext } from "../../../app";
+import { useGetOrderList } from "../../../lib/netlifyFunctions";
+import { Order } from "../../../lib/types";
+import { compareOrders } from "../../../lib/sortMethods";
+import { overdue_threshold } from "../../../lib/consts";
+import { callRPC } from "../../../lib/supabaseRPC";
+import { OrdersContext } from "../lib";
+import { getJWTToken } from "../../../lib/auth";
+import { dateToDateString, dateToTimeString } from "../../../lib/lib";
+import { NotificationsContext } from "../../../components/notification/lib";
+
+import "./orders.css"
 
 export function OrderManager() { 
     const unsetOrders: Order[] = useGetOrderList() || []
