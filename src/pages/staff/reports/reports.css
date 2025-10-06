@@ -1,0 +1,8 @@
+#report-manager-content {
+    display: flex;
+    justify-content: center;
+}
+
+.loading-screen .throbber {
+    align-self: center;
+}
