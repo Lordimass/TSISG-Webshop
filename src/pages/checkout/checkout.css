@@ -1,4 +1,4 @@
-.checkout-content {
+#checkout-content {
     display: flex;
     flex-direction: row;
 }
@@ -170,7 +170,7 @@
         font-size: 1rem;
     }
 
-    .checkout-content {
+    #checkout-content {
         flex-direction: column;
     }
 

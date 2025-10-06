@@ -2,8 +2,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { CheckoutProduct } from "../../../components/product/product";
 
 import Throbber from "../../../components/throbber/throbber";
-import Header from "../../../components/header-footer/header";
-import Footer from "../../../components/header-footer/footer";
 
 import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
@@ -19,6 +17,7 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import { NotLoggedIn } from "../lib";
+import Page from "../../../components/page/page";
 
 export function OrderManager() { 
     const unsetOrders: Order[] = useGetOrderList() || []
@@ -34,19 +33,22 @@ export function OrderManager() {
         setAccessible(loginContext.permissions.includes("manage_orders"))
     }, [loginContext]) 
 
-    return (<><Header/><div className="content" id="order-manager-content">
+    return (<Page
+        id="order-manager-content"
+        loadCondition={!loginContext.loading}
+        title="TSISG STAFF - Order Manager"
+        noindex={true}
+        canonical="https://thisshopissogay.com/staff/orders"
+    >
         <OrdersContext.Provider value={{orders, setOrders}}>
-        <title>TSISG STAFF - Order Manager</title>
-        <meta name="robots" content="noindex"/>
-        <link rel='canonical' href='https://thisshopissogay.com/staff/orders'/>
-
         {accessible  
             ? orders  
                 ? (orders.map((order: any) => <OrderDisplay key={order.id} order={order}/>))
                 : null
         : <NotLoggedIn/>}
-        
-        </OrdersContext.Provider></div><Footer/></>)
+        </OrdersContext.Provider>
+    </Page>
+)
 }
 
 function OrderDisplay({order}:{order:Order}) {

@@ -1,9 +1,6 @@
 import { useEffect } from "react";
-
-import Footer from "../../components/header-footer/footer";
-import Header from "../../components/header-footer/header";
-
 import "./thankyou.css"
+import Page from "../../components/page/page";
 
 const order_confirmed_gif: string = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//order-confirmed.gif"
 
@@ -14,11 +11,11 @@ export default function ThankYou() {
         window.dispatchEvent(new CustomEvent("basketUpdate"))
     }, [])
 
-    return (<><Header/><div className="content">
-        <title>Thank you for your order!</title>
-        <meta name="robots" content="noindex"/>
-        <link rel='canonical' href='https://thisshopissogay.com/thankyou'/>
-
+    return (<Page
+        title="Thank you for your order!"
+        noindex={true}
+        canonical="https://thisshopissogay.com/thankyou"
+    >
         <div className="thanks-box">
             <div className="thanks-top">
                 <div className="order-confirmed-gif-container">
@@ -33,7 +30,7 @@ export default function ThankYou() {
                 <button id="go-home" onClick={goHome}>Go Home</button>
             </div>
         </div>
-        </div><Footer/></>)
+    </Page>)
 }
 
 function goHome() {

@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { page_title } from '../../lib/consts';
 
-import Header from "../../components/header-footer/header";
-import Footer from "../../components/header-footer/footer";
 import React from 'react';
 import Products from '../../components/product/products';
 
 import "./home.css"
+import Page from '../../components/page/page';
 
 
 
@@ -32,19 +31,18 @@ export default function Home() {
     setTimeout(() => {
       spinTimeout = false
     }, 1100)
-    
   }
-
   const [word, setWord] = useState("GAY");
-  return (<><Header /><div className="content">
-    <title>{page_title}</title>
-    <link rel='canonical' href='https://thisshopissogay.com'/>
-    <meta name="description" content={`
+
+  return (<Page
+    title={page_title}
+    canonical='https://thisshopissogay.com'
+    metaDescription={`
       The official online shop for This Shop Is So Gay in York! 
       We sell queer and LGBT merchandise of all kinds and deliver
       it straight to your door :D`
-    }/>
-
+    }
+  >
     <div className="title-section">
       <div className='title-text'>
         <h1>This Shop Is So</h1>
@@ -54,7 +52,7 @@ export default function Home() {
     
     <Products/>
     
-  </div><Footer /></>)
+  </Page>)
 }
 
 function rotate(el: HTMLElement | null) {

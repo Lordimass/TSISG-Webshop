@@ -1,39 +1,28 @@
 import { useContext } from "react";
-import Footer from "../../../components/header-footer/footer";
-import Header from "../../../components/header-footer/header";
 import { LoginContext } from "../../../app";
-import Throbber from "../../../components/throbber/throbber";
 
 import "./reports.css"
 import { NotLoggedIn } from "../lib";
+import Page from "../../../components/page/page";
 
 export default function Reports() {
     const viewPermission = "view_reports"
     const managePermission = "manage_reports"
+    const title = "TSISG STAFF - Report Manager"
+    const canonical = "https://thisshopissogay.com/staff/reports"
 
     const loginContext = useContext(LoginContext)
-    if (loginContext.loading) return (
-        <><Header/><div className="content" id="report-manager-content">
-            <title>TSISG STAFF - Report Manager</title>
-            <meta name="robots" content="noindex"/>
-            <link rel='canonical' href='https://thisshopissogay.com/staff/reports'/>
-            <div className="loading-screen">
-                <Throbber/>
-            </div>
-        </div><Footer/></>
-    )
-    else if (!(loginContext.permissions.includes(viewPermission))) return (
-        <><Header/><div className="content" id="report-manager-content">
-            <title>TSISG STAFF - Report Manager</title>
-            <meta name="robots" content="noindex"/>
-            <link rel='canonical' href='https://thisshopissogay.com/staff/reports'/>
-            <NotLoggedIn/>
-        </div><Footer/></>
-    )
+    const content = !loginContext.permissions.includes(viewPermission) && !loginContext.loading 
+        ? <NotLoggedIn/> 
+        : <p>Reports accessible!</p>
 
-    return (<><Header/><div className="content" id="report-manager-content">
-        <title>TSISG STAFF - Report Manager</title>
-        <meta name="robots" content="noindex"/>
-        <link rel='canonical' href='https://thisshopissogay.com/staff/reports'/>
-    </div><Footer/></>);
+    return (<Page 
+        title={title} 
+        id="report-manager-content"
+        noindex={true} 
+        canonical={canonical}
+        loadCondition={!loginContext.loading}
+    >
+        {content}
+    </Page>)
 }

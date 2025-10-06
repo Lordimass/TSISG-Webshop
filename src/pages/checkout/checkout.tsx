@@ -7,8 +7,6 @@
 
 import "./checkout.css"
 
-import Header from "../../components/header-footer/header"
-import Footer from "../../components/header-footer/footer"
 import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
@@ -24,6 +22,7 @@ import {Stripe as StripeNS} from "stripe";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
+import Page from "../../components/page/page";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)
@@ -32,18 +31,18 @@ export default function Checkout() {
     // be on this page and will be redirected home
     useEffect(redirectIfEmptyBasket, []) 
     const title = page_title + " - Checkout"
-    return (<><Header/><div className="content checkout-content">
-        <title>{title}</title>
-        <meta name="robots" content="noindex"/>
-        <link rel='canonical' href='https://thisshopissogay.com/checkout'/>
-        
-        {preparing ? <Loading/> : <></>}
-        
+    return (<Page
+        id="checkout-content"
+        noindex={true}
+        canonical="https://thisshopissogay.com/checkout"
+        title={title}
+        loadCondition={!preparing}
+        loadingText="We're loading your basket..."
+    >
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
-            <CheckoutAux onReady={()=>{setPreparing(false); triggerBeginCheckout()}}/>
+            <CheckoutAux onReady={()=>{setPreparing(false); triggerBeginCheckout(); console.log("Test!")}}/>
         </CheckoutProvider>
-
-        </div><Footer/></>);
+    </Page>)
 }
 
 function CheckoutAux({onReady}: {onReady: Function}) {
@@ -311,7 +310,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
 function Loading() {
     return (<div className="loading-screen">
-        
         <p>We're loading your basket...</p>
         <Throbber/>
     </div>)
