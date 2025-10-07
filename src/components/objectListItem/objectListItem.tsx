@@ -8,7 +8,7 @@ import "./objectListItem.css"
 export default function ObjectListItem({
     children, style, dropdown, className
 } : {
-    children?: JSX.Element[]
+    children?: JSX.Element[] | JSX.Element
     /** The style of box to render */
     style?: "red" | "yellow" | "green"
     /** Content to include in a drop down menu */
