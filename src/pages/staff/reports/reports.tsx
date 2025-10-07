@@ -1,9 +1,5 @@
-import { useContext } from "react";
-import { LoginContext } from "../../../app";
-
 import "./reports.css"
-import { NotLoggedIn } from "../lib";
-import Page from "../../../components/page/page";
+import AuthenticatedPage from "../../../components/page/authenticatedPage";
 
 export default function Reports() {
     const viewPermission = "view_reports"
@@ -11,18 +7,14 @@ export default function Reports() {
     const title = "TSISG STAFF - Report Manager"
     const canonical = "https://thisshopissogay.com/staff/reports"
 
-    const loginContext = useContext(LoginContext)
-    const content = !loginContext.permissions.includes(viewPermission) && !loginContext.loading 
-        ? <NotLoggedIn/> 
-        : <p>Reports accessible!</p>
 
-    return (<Page 
+    return (<AuthenticatedPage
+        requiredPermission={viewPermission}
         title={title} 
         id="report-manager-content"
         noindex={true} 
         canonical={canonical}
-        loadCondition={!loginContext.loading}
     >
-        {content}
-    </Page>)
+        <p>Page is accessible</p>
+    </AuthenticatedPage>)
 }

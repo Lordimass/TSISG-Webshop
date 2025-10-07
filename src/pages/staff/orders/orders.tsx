@@ -16,8 +16,7 @@ import { NotificationsContext } from "../../../components/notification/lib";
 
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
-import { NotLoggedIn } from "../lib";
-import Page from "../../../components/page/page";
+import AuthenticatedPage from "../../../components/page/authenticatedPage";
 
 export function OrderManager() { 
     const unsetOrders: Order[] = useGetOrderList() || []
@@ -33,21 +32,22 @@ export function OrderManager() {
         setAccessible(loginContext.permissions.includes("manage_orders"))
     }, [loginContext]) 
 
-    return (<Page
+    return (<AuthenticatedPage
+        requiredPermission="manage_orders"
         id="order-manager-content"
-        loadCondition={!loginContext.loading}
         title="TSISG STAFF - Order Manager"
         noindex={true}
         canonical="https://thisshopissogay.com/staff/orders"
+        loadCondition={orders.length > 0}
+        loadingText="Loading orders"
     >
         <OrdersContext.Provider value={{orders, setOrders}}>
-        {accessible  
-            ? orders  
-                ? (orders.map((order: any) => <OrderDisplay key={order.id} order={order}/>))
-                : null
-        : <NotLoggedIn/>}
+        {orders  
+            ? (orders.map((order: any) => <OrderDisplay key={order.id} order={order}/>))
+            : null
+        }
         </OrdersContext.Provider>
-    </Page>
+    </AuthenticatedPage>
 )
 }
 
