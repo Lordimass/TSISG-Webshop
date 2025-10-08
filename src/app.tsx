@@ -16,6 +16,7 @@ import { NotificationsContext } from "./components/notification/lib";
 import { LoginContext } from "./lib/auth";
 import { SiteSettingsContext } from "./lib/types";
 import { useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings } from "./appHooks";
+import { Report } from "./pages/staff/reports/report/report";
 
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
@@ -60,6 +61,7 @@ export function App() {
 
         <Route path="staff/orders" element={<OrderManager/>} />
         <Route path="staff/reports" element={<Reports/>} />
+        <Route path="staff/reports/*" element={<Report/>} />
   
         <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
         <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
