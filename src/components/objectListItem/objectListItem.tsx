@@ -28,8 +28,8 @@ export default function ObjectListItem({
     
     const [dropdownActive, setDropdownActive] = useState(false)
 
-    return (<div className={`object-list-item ${className ?? ""}`}>
-        <div className={`inner ${style ?? ""}`}>
+    return (<div className={`object-list-item`}>
+        <div className={`inner${style ? " "+style : ""}${className ? " "+className : ""}`}>
             {children}
             {dropdown && !hideDropdownToggles 
                 ? <button className="expand" onClick={togDropdown}>

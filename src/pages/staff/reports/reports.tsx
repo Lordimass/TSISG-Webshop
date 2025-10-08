@@ -26,9 +26,7 @@ export default function Reports() {
     let reportComponents: JSX.Element[] = []
     if (reports.length > 0) {
         reports.forEach((r: any, i: number) => {reportComponents.push(
-            <ObjectListItem key={i}>
-                <p>{JSON.stringify(r)}</p>
-            </ObjectListItem>
+            <ReportVisual r={r} key={i}/>
         )})
         reportComponents = [<CreateReport key={-1}/>, ...reportComponents]
     }
@@ -43,6 +41,29 @@ export default function Reports() {
     ><ReportsContext.Provider value={{reports, setReports}}>
         {reportComponents}
     </ReportsContext.Provider></AuthenticatedPage>)
+}
+
+function ReportVisual({r}: {r: ReportData}) {
+    const {permissions} = useContext(LoginContext)
+    if (!permissions.includes(managePermission) && !r.published) {
+        return null
+    }
+
+    const startDate = (new Date(r.start_date)).toLocaleString().slice(0,10)
+    const endDate = (new Date(r.end_date)).toLocaleString().slice(0,10)
+
+    return <ObjectListItem 
+        className="report-visual" 
+        dropdown={<pre>{JSON.stringify(r, undefined, 2)}</pre>}
+        style={r.published ? undefined : "yellow"}
+    >
+        <div className="report-visual-inner">
+            <i className="fi fi-sr-document"/>
+            <a href={`/staff/reports/${r.start_date}-${r.end_date}`}>
+                View Report: <b>{startDate} - {endDate}</b>
+            </a>
+        </div>
+    </ObjectListItem>
 }
 
 function CreateReport() {
