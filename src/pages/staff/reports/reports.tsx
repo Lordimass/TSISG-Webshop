@@ -28,8 +28,8 @@ export default function Reports() {
         reports.forEach((r: any, i: number) => {reportComponents.push(
             <ReportVisual r={r} key={i}/>
         )})
-        reportComponents = [<CreateReport key={-1}/>, ...reportComponents]
     }
+    reportComponents = [<CreateReport key={-1}/>, ...reportComponents]
 
     return (<AuthenticatedPage
         requiredPermission={viewPermission}
@@ -44,9 +44,31 @@ export default function Reports() {
 }
 
 function ReportVisual({r}: {r: ReportData}) {
+    const {notify} = useContext(NotificationsContext)
+    const {reports, setReports} = useContext(ReportsContext)
+    const [sure, setSure] = useState(false)
+
     const {permissions} = useContext(LoginContext)
-    if (!permissions.includes(managePermission) && !r.published) {
+    const managePerm = permissions.includes(managePermission)
+    if (!managePerm && !r.published) {
         return null
+    }
+
+    async function handleDelete(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+        e.preventDefault()
+        // Confirm
+        if (!sure) {
+            setSure(true);
+            return
+        }
+
+        // Delete Report
+        const deleteResp = await supabase.from("reports").delete().eq("id", r.id)
+        if (deleteResp.error) {
+            notify("An error occured while deleting this report: " + deleteResp.error.message)
+            return
+        }
+        setReports(reports.filter(rep => rep.id !== r.id))
     }
 
     const startDate = (new Date(r.start_date)).toLocaleString().slice(0,10)
@@ -62,6 +84,12 @@ function ReportVisual({r}: {r: ReportData}) {
             <a href={`/staff/reports/${r.start_date}-${r.end_date}`}>
                 View Report: <b>{startDate} - {endDate}</b>
             </a>
+            <div className="spacer"/>
+            {managePerm ? <button 
+                className="delete-report-button"
+                onClick={handleDelete}
+            >{sure ? "Are you sure?" : <><i className="fi fi-sr-trash"/> Delete</>}
+            </button> : null}
         </div>
     </ObjectListItem>
 }
@@ -100,7 +128,7 @@ function CreateReport() {
         }
 
         // Redirect to page for the report
-        window.location.replace(`/${startDate}-${endDate}`)
+        window.location.replace(`/staff/reports/${startDate}-${endDate}`)
     } 
 
     if (!permissions.includes(managePermission)) return null

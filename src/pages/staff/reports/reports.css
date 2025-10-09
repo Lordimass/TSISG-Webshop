@@ -25,3 +25,18 @@
 .report-visual i {
     font-size: 20px;
 }
+
+.delete-report-button {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: min-content;
+    padding: 2px;
+    line-height: 1em;
+}
+
+.delete-report-button i {
+    line-height: 1em;
+    max-height: 1em;
+    font-size: 1em;
+}

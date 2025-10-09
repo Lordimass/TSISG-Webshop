@@ -1,4 +1,5 @@
 export type ReportData = {
+    id: number
     /** YYYY-MM-DD start of date range that the report covers */
     start_date: string
     /** YYYY-MM-DD end of date range that the report covers */
