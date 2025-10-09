@@ -81,7 +81,7 @@ function ReportVisual({r}: {r: ReportData}) {
     >
         <div className="report-visual-inner">
             <i className="fi fi-sr-document"/>
-            <a href={`/staff/reports/${r.start_date}-${r.end_date}`}>
+            <a href={`/staff/reports/${r.id}`}>
                 View Report: <b>{startDate} - {endDate}</b>
             </a>
             <div className="spacer"/>
@@ -128,7 +128,7 @@ function CreateReport() {
         }
 
         // Redirect to page for the report
-        window.location.replace(`/staff/reports/${startDate}-${endDate}`)
+        window.location.replace(`/staff/reports/${insertResp.data[0].id}`)
     } 
 
     if (!permissions.includes(managePermission)) return null
