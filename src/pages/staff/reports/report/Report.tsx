@@ -1,5 +1,6 @@
 import AuthenticatedPage from "../../../../components/page/authenticatedPage";
 import { viewPermission } from "../lib";
+import BudgetUsage from "../pages/budgetUsage/budgetUsage";
 import { Title } from "../pages/title/Title";
 import { ReportContext, useFetchReport } from "./lib";
 
@@ -16,6 +17,7 @@ export function Report() {
     <ReportContext.Provider value={{report, setReport}}>
         <Title/>
         <hr/>
+        <BudgetUsage/>
     </ReportContext.Provider>
     : <></>}</AuthenticatedPage>
 }
