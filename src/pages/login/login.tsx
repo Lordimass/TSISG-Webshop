@@ -1,24 +1,23 @@
 import "./login.css"
 
-import Footer from "../../components/header-footer/footer";
-import Header from "../../components/header-footer/header";
-import Throbber from "../../components/throbber/throbber";
 import { FormEvent, useContext, useState } from "react";
 import { page_title } from "../../lib/consts";
 import { LoginContext } from "../../app";
 import { forgotPassword, login, logout } from "../../lib/auth";
 import { NotificationsContext } from "../../components/notification/lib";
+import Page from "../../components/page/page";
 
 export default function LoginPage() {
     const {loggedIn, loading} = useContext(LoginContext)
 
-    return (<><Header/><div className="content login-content">
-        <title>{page_title} - Login</title>
-        <meta name="robots" content="noindex"/>
-        <link rel='canonical' href='https://thisshopissogay.com/login'/>
-
-        {loading ? <Throbber/> : loggedIn ? <LoggedIn/> : <Login/>}
-    </div><Footer/></>)
+    return (<Page
+        title={page_title + "- Login"}
+        noindex={true}
+        canonical="https://thisshopissogay.com/login"
+        loadCondition={!loading}
+    >
+        {loggedIn ? <LoggedIn/> : <Login/>}
+    </Page>)
 }
 
 function Login() {

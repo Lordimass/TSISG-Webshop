@@ -1,5 +1,6 @@
 import "./common.css"
 import '@flaticon/flaticon-uicons/css/all/all.css';
+import '@mdxeditor/editor/style.css'
 
 import Home from './pages/home/home';
 import Checkout from './pages/checkout/checkout';
@@ -8,13 +9,16 @@ import LoginPage from './pages/login/login';
 import Page404 from './pages/404/404';
 import Policy from './pages/policies/policies';
 import ProdPage from "./pages/products/prodPage";
+import Reports from "./pages/staff/reports/reports";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { OrderManager } from './pages/staff/orders';
+import { OrderManager } from './pages/staff/orders/orders';
 import { NotificationsContext } from "./components/notification/lib";
 import { LoginContext } from "./lib/auth";
 import { SiteSettingsContext } from "./lib/types";
 import { useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings } from "./appHooks";
+import { Report } from "./pages/staff/reports/report/report";
+
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -57,6 +61,8 @@ export function App() {
         <Route path='login' element={<LoginPage/>} />
 
         <Route path="staff/orders" element={<OrderManager/>} />
+        <Route path="staff/reports" element={<Reports/>} />
+        <Route path="staff/reports/*" element={<Report/>} />
   
         <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
         <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>

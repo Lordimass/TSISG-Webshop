@@ -1,6 +1,4 @@
 import { useContext, useEffect, useRef, useState } from "react"
-import Footer from "../../components/header-footer/footer"
-import Header from "../../components/header-footer/header"
 import { blank_product, max_product_order } from "../../lib/consts"
 import "./prodPage.css"
 import Markdown from "react-markdown"
@@ -16,6 +14,7 @@ import SquareImageBox from "../../components/squareImageBox/squareImageBox"
 import { NotificationsContext } from "../../components/notification/lib"
 import Page404 from "../404/404"
 import { triggerViewItem, triggerViewItemList } from "../../lib/analytics/analytics"
+import Page from "../../components/page/page"
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -90,95 +89,96 @@ export default function ProdPage() {
     }
     const priceMinor = priceMinorString.padEnd(2, "0")
 
-    const page_title = `TSISG - ${product.group_name ?? product.name}`
-
     if (return404.current) return <Page404/>
-    return (<><Header/><div className="content prodPage"><ProductContext.Provider value={{
-            basketQuant, 
-            setBasketQuant, 
-            product, 
-            setProduct, 
-            originalProd, 
-            group,
-            hoveredVariant,
-            setHoveredVariant
-        }}>
-
-        <title>{page_title}</title>
-        <meta name="description" content={product.description}/>
-        <link rel='canonical' href={`https://thisshopissogay.com/products/${sku}`}/>
+    return (<Page
+        title={`TSISG - ${product.group_name ?? product.name}`}
+        metaDescription={product.description}
+        canonical={`https://thisshopissogay.com/products/${sku}`}
+    >
         
-        {/* Above actual product */}
-        <a className="go-home-button" href="/">
-            <i className="fi fi-sr-left"/>
-            <h1>Go Home</h1>
-        </a>
-        {isEditMode ? 
-        <p className="logged-in-disclaimer">
-            You see additional information on this page because you
-            are <a href="/login">logged into</a> an account with special
-            access.
-        </p> : <></>}
+    <ProductContext.Provider value={{
+        basketQuant, 
+        setBasketQuant, 
+        product, 
+        setProduct, 
+        originalProd, 
+        group,
+        hoveredVariant,
+        setHoveredVariant
+    }}>
+    
+    {/* Above actual product */}
+    <a className="go-home-button" href="/">
+        <i className="fi fi-sr-left"/>
+        <h1>Go Home</h1>
+    </a>
+    {isEditMode ? 
+    <p className="logged-in-disclaimer">
+        You see additional information on this page because you
+        are <a href="/login">logged into</a> an account with special
+        access.
+    </p> : <></>}
 
-        {/* Actual box containing this product's information */}
-        <div className="product-box">
-            <div className="image" ref={carouselContainerRef}>{hoveredVariant
-                ? <div className="hover-product-image">
-                <SquareImageBox
-                    image={cleanseUnsubmittedProduct(hoveredVariant).images[0]}
-                    size={(carouselContainerRef.current?.offsetWidth ?? 0) + "px"}
-                    loading="eager"
-                 /></div> : <></>}
-                 <SquareImageBox 
-                    images={
-                        // Images from this product
-                        [...cleanseUnsubmittedProduct(product)
-                            .images
-                            // Filter out the group_product_icon if there is one
-                            .filter(img => 
-                                !img.association_metadata?.group_product_icon &&
-                                !img.association_metadata?.group_representative
-                            ),
-                        // Global images from products in group
-                        ...group.map(
-                            variant => {return variant.images?.filter(img => 
-                                img.product_sku !== product.sku && 
-                                img.association_metadata?.global
-                            ) ?? []}
-                        ).flat(1)
-                        ].sort(compareImages)
-                    } 
-                    size="100%" 
-                    loading="eager"
-                />
-            </div>
-            <h1 className="title">
-                {product.group_name ?? product.name}
-                {isEditMode 
-                ? group.length === 0 
-                    ? <><br/><div className="sku">SKU{sku}</div></> 
-                    : <><br/><div className="sku">SKUS{group.map(prod=>prod.sku).sort().map(sku => " "+sku).toString()}</div></>
-                : <></>}
-            </h1>
-            <h2 className="price">
-                <span style={{fontSize: "0.7em"}}>£</span>
-                {priceMajor}
-                <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
-            </h2>
-            <div className="tags">{product.tags.map((tag) => (
-                <div className="tag" key={tag.name}>{tag.name}</div>
-                ))}</div>
-            <div className="desc">
-                <Markdown>{product.description}</Markdown>
-            </div>
-            <div className="ticker">
-                <ProductGroup/>
-                <QuantityTicker/>
-            </div>
+    {/* Actual box containing this product's information */}
+    <div className="product-box">
+        <div className="image" ref={carouselContainerRef}>{hoveredVariant
+            ? <div className="hover-product-image">
+            <SquareImageBox
+                image={cleanseUnsubmittedProduct(hoveredVariant).images[0]}
+                size={(carouselContainerRef.current?.offsetWidth ?? 0) + "px"}
+                loading="eager"
+                /></div> : <></>}
+                <SquareImageBox 
+                images={
+                    // Images from this product
+                    [...cleanseUnsubmittedProduct(product)
+                        .images
+                        // Filter out the group_product_icon if there is one
+                        .filter(img => 
+                            !img.association_metadata?.group_product_icon &&
+                            !img.association_metadata?.group_representative
+                        ),
+                    // Global images from products in group
+                    ...group.map(
+                        variant => {return variant.images?.filter(img => 
+                            img.product_sku !== product.sku && 
+                            img.association_metadata?.global
+                        ) ?? []}
+                    ).flat(1)
+                    ].sort(compareImages)
+                } 
+                size="100%" 
+                loading="eager"
+            />
         </div>
+        <h1 className="title">
+            {product.group_name ?? product.name}
+            {isEditMode 
+            ? group.length === 0 
+                ? <><br/><div className="sku">SKU{sku}</div></> 
+                : <><br/><div className="sku">SKUS{group.map(prod=>prod.sku).sort().map(sku => " "+sku).toString()}</div></>
+            : <></>}
+        </h1>
+        <h2 className="price">
+            <span style={{fontSize: "0.7em"}}>£</span>
+            {priceMajor}
+            <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
+        </h2>
+        <div className="tags">{product.tags.map((tag) => (
+            <div className="tag" key={tag.name}>{tag.name}</div>
+            ))}</div>
+        <div className="desc">
+            <Markdown>{product.description}</Markdown>
+        </div>
+        <div className="ticker">
+            <ProductGroup/>
+            <QuantityTicker/>
+        </div>
+    </div>
 
-        {isEditMode ? <ProductEditor/> : <></>}
-    </ProductContext.Provider></div><Footer/></>)
+    {isEditMode ? <ProductEditor/> : <></>}
+
+    </ProductContext.Provider></Page>)
 }
 
 function ProductGroup() {
