@@ -1,10 +1,11 @@
-import { useContext, useRef, useState } from "react"
+import { useContext, useState } from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
-import "./Title.css"
 import { ReportContext, updateReport } from "../../report/lib"
 import { NotificationsContext } from "../../../../../components/notification/lib"
 import { LoginContext } from "../../../../../app"
 import { managePermission } from "../../lib"
+
+import "./title.css"
 
 export function Title() {
     const {permissions} = useContext(LoginContext)
@@ -30,6 +31,7 @@ export function Title() {
     <img id="title-page-logo" src="https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/logo.svg"/>
     <div id="title-page-text">
         <MDXEditorAuth 
+            requiredPermission={managePermission}
             markdown={"# "+ (r.metadata.title ?? "Insert Title")} 
             onChange={(e) => {updateReport({...r, metadata: {...r.metadata, title: e.substring(2)}}, setR, notify)}}
         />
