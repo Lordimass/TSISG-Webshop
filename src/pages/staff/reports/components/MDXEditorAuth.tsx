@@ -4,8 +4,10 @@ import { LoginContext } from "../../../../app";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import { managePermission } from "../lib";
 export default function MDXEditorAuth(
-    {requiredPermission, ...props} : MDXEditorProps & React.RefAttributes<MDXEditorMethods> & {
+    {requiredPermission=managePermission, ...props} 
+    : MDXEditorProps & React.RefAttributes<MDXEditorMethods> & {
         requiredPermission?: string
     }) 
 {
