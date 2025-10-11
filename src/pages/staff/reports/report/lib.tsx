@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabaseRPC";
-import { ReportData } from "../types";
+import { ReportData, ReportDataMeta } from "../types";
 import { NotificationsContext } from "../../../../components/notification/lib";
 
 /** How long to wait (in seconds) before performing another save to Supabase */
@@ -8,10 +8,12 @@ const SAVE_INTERVAL = 5
 
 export const ReportContext = createContext<{
     report?: ReportData
-    setReport: React.Dispatch<React.SetStateAction<ReportData | undefined>>
+    setReport: (r: ReportData) => Promise<void>
+    setReportMeta: <K extends keyof ReportDataMeta>(key: K, value: ReportDataMeta[K]) => Promise<void>
     canEdit?: boolean
 }>({
-    setReport: () => {},
+    setReport: () => {return new Promise(()=>{})},
+    setReportMeta: () => {return new Promise(()=>{})},
     canEdit: false
 })
 
@@ -47,6 +49,9 @@ export function useFetchReport() {
 }
 
 /**
+ * WARNING: Do not use this function, it is intended only for use in `report.tsx`, 
+ * use `setReport` from `ReportContext` instead!
+ * 
  * Update the remote report with fresh data
  */
 export async function updateReport(
@@ -73,5 +78,4 @@ export async function updateReport(
         const id = window.setTimeout(() => {updateReport(r, setR, notify)}, timeRemaining)
         localStorage.setItem("updateReportTimeoutID", String(id))
     }
-
 }

@@ -12,5 +12,15 @@
 }
 
 .report-page {
+    width: 100%;
+    box-sizing: border-box;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 1100px) {
+    .report-page {
+        padding: 5px;
+    }
 }

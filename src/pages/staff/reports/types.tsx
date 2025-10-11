@@ -7,8 +7,13 @@ export type ReportData = {
     /** Whether this report is readable by those with the view_reports permission */
     published: boolean
     /** Additional information related to the report */
-    metadata: {
-        title?: string
-        [key: string]: any
-    }
+    metadata: ReportDataMeta
+}
+
+export type ReportDataMeta = {
+    title?: string
+    budgetUsageTable?: string
+    totalBudgetTable?: string
+    budgetTable?: string
+    [key: string]: any
 }

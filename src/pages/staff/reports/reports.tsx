@@ -5,8 +5,8 @@ import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import { JSX, useContext, useEffect, useRef, useState } from "react";
 import { NotificationsContext } from "../../../components/notification/lib";
 import { LoginContext } from "../../../app";
-import { managePermission, ReportsContext, viewPermission } from "./lib";
 import { ReportData } from "./types";
+import { managePermission, ReportsContext, viewPermission } from "./consts";
 
 export default function Reports() {
     const title = "TSISG STAFF - Report Manager"

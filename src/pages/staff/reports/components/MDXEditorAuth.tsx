@@ -1,10 +1,11 @@
 import { diffSourcePlugin, headingsPlugin, imagePlugin, listsPlugin, markdownShortcutPlugin, MDXEditor, MDXEditorMethods, MDXEditorProps } from "@mdxeditor/editor";
 import { useContext } from "react";
 import { LoginContext } from "../../../../app";
-import { managePermission } from "../lib";
+import { managePermission } from "../consts";
 export default function MDXEditorAuth(
-    {requiredPermission=managePermission, ...props} 
+    {id, requiredPermission=managePermission, ...props} 
     : MDXEditorProps & React.RefAttributes<MDXEditorMethods> & {
+        id?: string
         requiredPermission?: string
     }) 
 {
@@ -19,9 +20,10 @@ export default function MDXEditorAuth(
     ]
 
     const writeAccess = !requiredPermission || permissions.includes(requiredPermission)
-    return <MDXEditor 
-        readOnly={writeAccess && (props.readOnly === undefined || props.readOnly)}
+    return <div id={id}>
+    <MDXEditor 
+        readOnly={!writeAccess && (props.readOnly === undefined || props.readOnly)}
         {...props}
     />
-    
+    </div>
 }

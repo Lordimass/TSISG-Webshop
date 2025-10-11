@@ -1,0 +1,46 @@
+.report-subtitle {
+    color: black;
+    background-color: var(--bone-white);
+    padding: 20px;
+    padding-bottom: 15px;
+    border-radius: 10px;
+}
+
+.report-subtitle h2 {
+    color: black;
+}
+
+#report .report-table th, #report .report-table td {
+    border-width: 0px;
+}
+
+#report .report-table hr {
+    height: 0;
+}
+
+/* Select only the header cells that aren't part of the editor */
+#report .report-table th[class*="Cell"]:not([data-tool-cell="true"]) {
+    background-color: var(--bright-yellow);
+}
+
+.report-table th[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: smaller;
+}
+
+.report-table td[class*="Cell"]:not([data-tool-cell="true"]) {
+    background-color: var(--bone-white);
+}
+
+.report-table td[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: x-large;
+}
+
+@media screen and (max-width: 1100px) {
+    .report-table th[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: x-small;
+    }
+
+    .report-table td[class*="Cell"]:not([data-tool-cell="true"]) span {
+        font-size: smaller;
+    }
+}

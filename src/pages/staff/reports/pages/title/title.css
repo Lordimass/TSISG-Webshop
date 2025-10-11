@@ -1,10 +1,9 @@
 #report-title-page {
-    display: flex;
     flex-direction: row;
-    align-items: center;
     justify-content: center;
-    gap: 5vw;
+    align-items: center;
     text-align: center;
+    gap: 5vw;
 }
 
 @media screen and (max-width: 1100px) {
