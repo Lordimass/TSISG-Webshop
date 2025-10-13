@@ -51,5 +51,6 @@ function BudgetTable({id, md, metaKey} : {
         markdown={md}
         contentEditableClassName="report-table"
         onChange={md => (setReportMeta(metaKey, md))}
+        readOnly={window.innerWidth < 1100}
     />
 }
