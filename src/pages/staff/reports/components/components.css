@@ -1,3 +1,4 @@
+/*************** Subtitle ***************/
 .report-subtitle {
     color: black;
     background-color: var(--bone-white);
@@ -10,6 +11,7 @@
     color: black;
 }
 
+/*************** Tables ***************/
 #report .report-table th, #report .report-table td {
     border-width: 0px;
 }
@@ -43,4 +45,14 @@
     .report-table td[class*="Cell"]:not([data-tool-cell="true"]) span {
         font-size: smaller;
     }
+}
+
+/*************** Charts ***************/
+.recharts-text, .recharts-legend-item-text {
+    font-family: "Perfect Penmanship";
+    user-select: none;
+}
+
+.recharts-surface:focus {
+    outline: none;
 }
