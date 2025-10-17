@@ -8,7 +8,7 @@ import { managePermission } from "../../consts"
 
 export function Title() {
     const {permissions} = useContext(LoginContext)
-    const {report: r, setReport: setR, setReportMeta} = useContext(ReportContext)
+    const {report: r, setReport: setR, setReportMeta, viewMode} = useContext(ReportContext)
     if (!r) return
 
     const [dateStart, setDateStart] = useState(r.start_date)
@@ -37,19 +37,18 @@ export function Title() {
             <input 
                 type="date" 
                 id="date-range-start"
-                disabled={!permissions.includes(managePermission)}
+                disabled={!permissions.includes(managePermission) || viewMode}
                 value={dateStart}
                 onChange={handleStartChange}
             /><p>-</p>
             <input 
                 type="date"
                 id="date-range-end"
-                disabled={!permissions.includes(managePermission)}
+                disabled={!permissions.includes(managePermission) || viewMode}
                 value={dateEnd}
                 onChange={handleEndChange}
             />
         </div>
-        
     </div>
 
     </div>

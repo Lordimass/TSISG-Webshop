@@ -1,6 +1,6 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import AuthenticatedPage from "../../../../components/page/authenticatedPage";
-import { viewPermission } from "../consts";
+import { managePermission, viewPermission } from "../consts";
 import BudgetUsage from "../pages/budgetUsage/budgetUsage";
 import { Title } from "../pages/title/title";
 import { ReportData, ReportDataMeta } from "../types";
@@ -9,6 +9,8 @@ import { ReportContext, updateReport, useFetchReport } from "./lib";
 import "./report.css"
 import { NotificationsContext } from "../../../../components/notification/lib";
 import EmployeeHours from "../pages/employeeHours/employeeHours";
+import { Activity } from "../pages/activity/activity";
+import { LoginContext } from "../../../../app";
 
 export function Report() {
     /** 
@@ -29,7 +31,10 @@ export function Report() {
     }
 
     const {notify} = useContext(NotificationsContext)
+    const {permissions} = useContext(LoginContext)
     const {loading, report, setReport} = useFetchReport()
+
+    const [viewMode, setViewMode] = useState(false)
 
     return <AuthenticatedPage 
         id="report"
@@ -39,13 +44,25 @@ export function Report() {
     <ReportContext.Provider value={{
         report, 
         setReport: updateReportData, 
-        setReportMeta: updateReportMetadata
+        setReportMeta: updateReportMetadata,
+        viewMode
     }}>
+        {/* Button to allow editors to view document as a viewer */}
+        {permissions.includes(managePermission) ? 
+        <div id="view-mode-button-container">
+            <button id="view-mode-button" onClick={() => setViewMode(!viewMode)}>
+                {viewMode ? "Enable Edit Mode" : "Enable View Mode"}
+            </button>
+        </div> : null}
+
+        {/* Report Body */}
         <Title/>
         <hr/>
         <BudgetUsage/>
         <hr/>
         <EmployeeHours/>
+        <hr/>
+        <Activity/>
     </ReportContext.Provider>
     : <></>}</AuthenticatedPage>
 }

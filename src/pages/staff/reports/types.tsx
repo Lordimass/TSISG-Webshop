@@ -15,5 +15,6 @@ export type ReportDataMeta = {
     budgetUsageTable?: string
     totalBudgetTable?: string
     budgetTable?: string
+    activityPreGitText?: string
     [key: string]: any
 }

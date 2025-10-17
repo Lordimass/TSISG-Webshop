@@ -2,6 +2,7 @@ import { diffSourcePlugin, headingsPlugin, imagePlugin, listsPlugin, markdownSho
 import { useContext } from "react";
 import { LoginContext } from "../../../../app";
 import { managePermission } from "../consts";
+import { ReportContext } from "../report/lib";
 export default function MDXEditorAuth(
     {id, requiredPermission=managePermission, ...props} 
     : MDXEditorProps & React.RefAttributes<MDXEditorMethods> & {
@@ -9,6 +10,7 @@ export default function MDXEditorAuth(
         requiredPermission?: string
     }) 
 {
+    const {viewMode} = useContext(ReportContext)
     const {permissions} = useContext(LoginContext)
     if (!props.plugins) props.plugins = [
         headingsPlugin(), 
@@ -19,11 +21,11 @@ export default function MDXEditorAuth(
         markdownShortcutPlugin(),
     ]
 
-    const writeAccess = !requiredPermission || permissions.includes(requiredPermission)
+    const writeAccess = !requiredPermission || (permissions.includes(requiredPermission) && !viewMode)
     return <div id={id}>
     <MDXEditor 
-        readOnly={!writeAccess && (props.readOnly === undefined || props.readOnly)}
         {...props}
+        readOnly={!writeAccess || props.readOnly}
     />
     </div>
 }

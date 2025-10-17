@@ -10,11 +10,11 @@ export const ReportContext = createContext<{
     report?: ReportData
     setReport: (r: ReportData) => Promise<void>
     setReportMeta: <K extends keyof ReportDataMeta>(key: K, value: ReportDataMeta[K]) => Promise<void>
-    canEdit?: boolean
+    viewMode?: boolean
 }>({
     setReport: () => {return new Promise(()=>{})},
     setReportMeta: () => {return new Promise(()=>{})},
-    canEdit: false
+    viewMode: false
 })
 
 /**

@@ -3,7 +3,7 @@
     grid-template-columns: 3.5fr 1fr;
 }
 
-#budget-usage-table br {
+.report-table br {
     display: none;
 }
 
@@ -19,9 +19,12 @@
     align-items: center;
 }
 
-
 #report #budget-table td {
     border-width: 1px;
+}
+
+#budget-table .report-table {
+    padding-bottom: 0;
 }
 
 /* Select only the cells that aren't part of the editor */

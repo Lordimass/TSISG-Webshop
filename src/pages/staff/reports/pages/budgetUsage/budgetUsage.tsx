@@ -44,7 +44,6 @@ function BudgetTable({id, md, metaKey} : {
     metaKey: keyof ReportDataMeta}) 
 {
     const {setReportMeta} = useContext(ReportContext)
-
     return <MDXEditorAuth 
         id={id}
         plugins={[tablePlugin({tablePipeAlign: false}), thematicBreakPlugin()]}

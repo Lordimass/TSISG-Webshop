@@ -11,6 +11,10 @@
     color: black;
 }
 
+.report-subtitle p {
+    color: var(--jamie-grey);
+}
+
 /*************** Editable Tables ***************/
 #report .report-table th, #report .report-table td {
     border-width: 0px;

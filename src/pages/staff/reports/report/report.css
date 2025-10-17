@@ -4,6 +4,10 @@
     align-items: center;
 }
 
+#view-mode-button-container {
+    width: 100%;
+}
+
 #report hr {
     height: 3px;
     width: 90%;
