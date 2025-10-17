@@ -155,6 +155,8 @@ export type SiteSettings = {
   session_notif?: {enabled: boolean, message: string, start_time: string, end_time: string}
   /** Messages to display when products are disabled, varies based on the reason */
   product_disabled_messages?: { disabled: string, out_of_stock: string, [key: string]: string }
+  /** Mappings of Clockify UserIDs to actual names */
+  clockify_users?: {userID: string, name: string}[]
   /** Allows for arbitrary other settings that haven't been defined in this type */
   [key: string]: any 
 }

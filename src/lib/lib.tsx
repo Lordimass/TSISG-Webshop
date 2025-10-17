@@ -195,15 +195,31 @@ export async function fetchPolicy(name: string): Promise<string>{
   return resp.text()
 }
 
-export function dateToDateString(date: Date) {
-  return daysOfWeek[date.getDay()] +
+export function dateToDateString(date: Date, short = false) {
+  if (!short) return daysOfWeek[date.getDay()] +
       " " + date.getDate() +
       " " + monthsOfYear[date.getMonth()] + 
       " " + date.getFullYear();
+  else return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear().toString(10).slice(2)}`
 }
 
 export function dateToTimeString(date: Date) {
   return date.getHours().toString().padStart(2, "0") + ":" 
   + date.getMinutes().toString().padStart(2, "0") + ":" 
   + date.getSeconds().toString().padStart(2, "0")
+}
+
+/**
+ * Takes a duration in milliseconds and converts it to
+ * a string hh:mm:ss
+ * @param duration A duration in milliseconds
+ * @returns A string hh:mm:ss
+ */
+export function durationToDurationString(duration: number): string {
+  const hours = Math.floor(duration / 3.6e+6)
+  duration -= hours * 3.6e+6
+  const minutes = Math.floor(duration / 6e+4)
+  duration -= minutes * 6e+4
+  const seconds = Math.floor(duration / 1000)
+  return `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:${seconds.toString().padStart(2,"0")}`
 }

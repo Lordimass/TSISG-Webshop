@@ -8,6 +8,7 @@ import { ReportContext, updateReport, useFetchReport } from "./lib";
 
 import "./report.css"
 import { NotificationsContext } from "../../../../components/notification/lib";
+import EmployeeHours from "../pages/employeeHours/employeeHours";
 
 export function Report() {
     /** 
@@ -19,7 +20,7 @@ export function Report() {
         value: ReportDataMeta[K],
     ) {
         const metadata = {...report!.metadata}
-        metadata[key] = value
+        metadata[key] = value !== "" ? value : undefined
         await updateReportData({...report!, metadata})
     }
 
@@ -43,6 +44,8 @@ export function Report() {
         <Title/>
         <hr/>
         <BudgetUsage/>
+        <hr/>
+        <EmployeeHours/>
     </ReportContext.Provider>
     : <></>}</AuthenticatedPage>
 }

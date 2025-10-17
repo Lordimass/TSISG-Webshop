@@ -11,7 +11,7 @@
     color: black;
 }
 
-/*************** Tables ***************/
+/*************** Editable Tables ***************/
 #report .report-table th, #report .report-table td {
     border-width: 0px;
 }
@@ -22,6 +22,10 @@
 
 /* Select only the header cells that aren't part of the editor */
 #report .report-table th[class*="Cell"]:not([data-tool-cell="true"]) {
+    background-color: var(--bright-yellow);
+}
+
+.report th {
     background-color: var(--bright-yellow);
 }
 
@@ -47,12 +51,43 @@
     }
 }
 
+/*************** Vanilla Tables ***************/
+.vanilla-report-table {
+    border-radius: 10px;
+    border: 2px solid var(--blue-black);
+    overflow: hidden;
+}
+
+.vanilla-report-table table {
+    border-collapse: collapse;
+}
+
+.vanilla-report-table th {
+    background-color: var(--bright-yellow);
+}
+
+.vanilla-report-table th, .vanilla-report-table td {
+    box-sizing: border-box;
+    padding: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 200px;
+
+    font-family: "Perfect Penmanship";
+}
+
 /*************** Charts ***************/
 .recharts-text, .recharts-legend-item-text {
     font-family: "Perfect Penmanship";
+    font-size: smaller;
     user-select: none;
 }
 
 .recharts-surface:focus {
     outline: none;
+}
+
+.recharts-tooltip-item-list {
+    font-family: "Perfect Penmanship";
+    font-size: smaller;
 }
