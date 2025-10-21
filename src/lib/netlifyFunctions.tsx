@@ -148,7 +148,7 @@ export async function updateProductData(
     if (!imgFile) throw new Error("Image file not found in image map")
     // Create a new File object with the correct name
     const named_image = new File([imgFile], img.name, { type: imgFile.type });
-    const resp = await uploadProductImage(named_image);
+    const resp = await uploadImage(named_image, "product-images");
     return { resp, unsubmittedImage: img };
   });
 
@@ -181,22 +181,27 @@ export async function updateProductData(
 }
 
 /**
- * Uploads an image to the product_images bucket, 
- * by calling the uploadProductImage Netlify Function
- * @param image The image file to upload
+ * Uploads an image to the given bucket.
+ * @param image The image file to upload.
+ * @param bucket The name of the bucket to upload the image to.
+ * @returns An object with 4 keys:
+ *  * `fileName` - The name of the file in the bucket.
+ *  * `size` - The size of the file in the bucket.
+ *  * `fileID` - The ID of the created file object.
+ *  * `fileURL` - The URL where the image can be accessed.
  */
-export async function uploadProductImage(image: File): Promise<{
+export async function uploadImage(image: File, bucket: string): Promise<{
     fileName: string
     size: number
     fileID: string
     fileURL: string
 }> {
-    // Using FormData here for expandability, it allows me
-    // to attach other values later if I need to.
     const formData = new FormData()
     formData.append("file", image)
+    formData.append("bucket", bucket)
 
     const {data, error} = await fetchFromNetlifyFunction("uploadProductImage", formData, getJWTToken())
+    console.log(data)
     if (error) throw error
     return data
 }

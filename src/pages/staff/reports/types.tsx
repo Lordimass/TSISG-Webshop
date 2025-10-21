@@ -16,5 +16,8 @@ export type ReportDataMeta = {
     totalBudgetTable?: string
     budgetTable?: string
     activityPreGitText?: string
+    activityPostGitText?: string
+    publishedGitCommits?: string[]
+    unpublishedGitCommits?: string[]
     [key: string]: any
 }

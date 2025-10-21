@@ -62,6 +62,7 @@ export async function updateReport(
     // Clear previous waiting cooldown
     const oldID = localStorage.getItem("updateReportTimeoutID")
     if (oldID) window.clearTimeout(oldID)
+    setR(r)
 
     // Check if it's been long enough since the last update
     const lastUpdate = Number(localStorage.getItem("lastReportSave")) ?? -1
@@ -71,8 +72,8 @@ export async function updateReport(
         const updateResp = await supabase.from("reports").update(r).eq("id", r.id)
         if (updateResp.error) notify(updateResp.error.message);
         localStorage.setItem("lastReportSave", String(Date.now()))
-        console.log(`Saved report: ${JSON.stringify(r, undefined, 2)}`)
-        setR(r)
+        console.log("Saved.")
+        
     } else {
         // Still on cooldown, try again once cooldown has expired
         const id = window.setTimeout(() => {updateReport(r, setR, notify)}, timeRemaining)

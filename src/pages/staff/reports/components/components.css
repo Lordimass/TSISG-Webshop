@@ -1,3 +1,18 @@
+/*************** MDX Editor ***************/
+.mdx-editor-container {
+    background-color: var(--bone-white);
+    border-radius: 10px;
+}
+
+.mdxeditor-popup-container h2 {
+    color: black;
+    text-align: center;
+}
+
+.mdxeditor-toolbar[class*="readOnly"] {
+    display: none;
+}
+
 /*************** Subtitle ***************/
 .report-subtitle {
     color: black;
@@ -7,11 +22,11 @@
     border-radius: 10px;
 }
 
-.report-subtitle h2 {
+#report h2 {
     color: black;
 }
 
-.report-subtitle p {
+.report-subtitle p, #report .subtitle, #report .subtitle a {
     color: var(--jamie-grey);
 }
 
@@ -72,9 +87,6 @@
 
 .vanilla-report-table th, .vanilla-report-table td {
     box-sizing: border-box;
-    padding: 10px;
-    padding-left: 10px;
-    padding-right: 10px;
     width: 200px;
 
     font-family: "Perfect Penmanship";

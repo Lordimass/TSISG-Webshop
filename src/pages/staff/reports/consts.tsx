@@ -18,6 +18,18 @@ export const ReportsContext = createContext<{
     setReports: ()=>{}
 })
 
+export const chartBlueDark = "#004561";
+export const chartBlueMed = "#3d85c6";
+export const chartBlueLight = "#9fc5e8";
+
+export const chartGreenDark = "#38761d";
+export const chartGreenMed = "#93c47d";
+export const chartGreenLight = "#b6d7a8";
+
+export const chartRedDark = "#660000";
+export const chartRedMed = "#cc0000";
+export const chartRedLight = "#f4cccc";
+
 /** 
  * The default budget usage table markdown to display if one does
  * not exist for the current report 
@@ -53,15 +65,3 @@ export const DEFAULT_BUDGET_TABLE = `
     | | £  | |
     | | £  | |
 `
-
-export const chartBlueDark = "#004561";
-export const chartBlueMed = "#3d85c6";
-export const chartBlueLight = "#9fc5e8";
-
-export const chartGreenDark = "#38761d";
-export const chartGreenMed = "#93c47d";
-export const chartGreenLight = "#b6d7a8";
-
-export const chartRedDark = "#660000";
-export const chartRedMed = "#cc0000";
-export const chartRedLight = "#f4cccc";

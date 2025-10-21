@@ -39,7 +39,7 @@ export default async function handler(request: Request, _context: Context): Prom
 
     // Get service role Supabase Client for uploading new images and checking request contents
     let supabase: SupabaseClient
-    try {supabase = await getSupabaseClient();}
+    try {supabase = await getSupabaseClient(undefined, true);}
     catch (e: any) {return new Response(e.message, { status: e.status })}
     
     // Construct the name of the transformed image

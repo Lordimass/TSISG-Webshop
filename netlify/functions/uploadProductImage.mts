@@ -1,5 +1,5 @@
 /**
- * Handles uploading an image to the product_images Supabase bucket. These images
+ * Handles uploading an image to a Supabase bucket. These images
  * are compressed marginally to prevent huge file sizes but are otherwise left
  * untouched.
  */
@@ -56,12 +56,13 @@ export default async function handler(request: Request, _context: Context) {
   const fileName: string = uploaded.originalFilename;
 
   // Compress
+  console.log("Compressing image...")
   const compressedBuffer: Buffer = await convertAndCompressToWebp(uncompressedBuffer, TARGET_IMAGE_SIZE);
 
   // Upload File to Supabase
   // TODO: Handle duplicate names
   const { error } = await supabase!.storage
-    .from("product-images")
+    .from(fields.bucket)
     .upload(fileName, compressedBuffer, {
       contentType: "image/webp",
     });
@@ -85,11 +86,10 @@ export default async function handler(request: Request, _context: Context) {
     return new Response("Failed to fetch image ID after saving", { status: 500 });
   }
   const fileID = idData[0].id
-  const fileURL = supabase!.storage.from("product-images").getPublicUrl(fileName).data.publicUrl
-
+  const fileURL = supabase!.storage.from(fields.bucket).getPublicUrl(fileName).data.publicUrl
   return new Response(
     JSON.stringify({
-      filename: uploaded.originalFilename,
+      fileName: uploaded.originalFilename,
       size: uploaded.size,
       fileID,
       fileURL
@@ -118,17 +118,19 @@ function bufferToReadable(buffer: Buffer): Readable {
  * @param targetMax Target max image size in bytes
  * @returns 
  */
-async function convertAndCompressToWebp(buffer: Buffer, tagetMax: number): Promise<Buffer> {
+async function convertAndCompressToWebp(buffer: Buffer, targetMax: number): Promise<Buffer> {
   let quality = 100; // Start quality
-  let outputBuffer = await sharp(buffer).webp({ quality }).toBuffer();
+  let resizeBuffer = await sharp(buffer).resize({ width: 750 }).toBuffer()
+  let outputBuffer = await sharp(resizeBuffer).webp({ quality }).toBuffer();
 
   // Reduce quality until size fits or minimum quality reached
-  while (outputBuffer.length > tagetMax && quality > 1) {
+  while (outputBuffer.length > targetMax && quality > 1) {
     quality -= 10;
+    console.log("Attempting compression quality: " + quality)
     if (quality <= 0) {
       quality = 1;
     }
-    outputBuffer = await sharp(buffer).webp({
+    outputBuffer = await sharp(resizeBuffer).webp({
       quality,
       smartSubsample: true,
       smartDeblock: true,

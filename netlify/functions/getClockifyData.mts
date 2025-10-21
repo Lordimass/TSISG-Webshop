@@ -28,7 +28,6 @@ export default async function handler(request: Request, _context: Context) {try{
         const userID = clockifyUsers[i]
         let endpoint = `
             https://api.clockify.me/api/v1/workspaces/${process.env.CLOCKIFY_WORKSPACE_ID}/user/${userID}/time-entries?start=${start}&end=${end}&page-size=${days*5}`
-        console.log(endpoint)
         // Set API Key Header
         const headers: HeadersInit = new Headers();
         headers.set("x-api-key", process.env.CLOCKIFY_KEY!);

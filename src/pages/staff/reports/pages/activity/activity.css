@@ -1,0 +1,32 @@
+.git-commits {
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.commit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.git-commit {
+    display: flex;
+    gap: 8px;
+}
+
+.git-commit input {
+    min-width: 20px;
+}
+
+.commit-header {
+    font-weight: bold;
+}
+
+.commit-body  {
+    overflow: auto;
+}
+
+.git-commit a {
+    color: #18a0ae;
+}
