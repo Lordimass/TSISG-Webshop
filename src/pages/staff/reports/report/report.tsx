@@ -11,6 +11,11 @@ import { NotificationsContext } from "../../../../components/notification/lib";
 import EmployeeHours from "../pages/employeeHours/employeeHours";
 import { Activity } from "../pages/activity/activity";
 import { LoginContext } from "../../../../app";
+import IssueTracking from "../pages/issueTracking/issueTracking";
+import SiteAnalytics from "../pages/siteAnalytics/siteAnalytics";
+import Vulnerabilities from "../pages/vulnerabilities/vulnerabilities";
+import AttainmentOfPlan from "../pages/attainmentOfPlan/attainmentOfPlan";
+import Plan from "../pages/plan/plan";
 
 export function Report() {
     /** 
@@ -63,6 +68,16 @@ export function Report() {
         <EmployeeHours/>
         <hr/>
         <Activity/>
+        <hr/>
+        <IssueTracking/>
+        <hr/>
+        <SiteAnalytics/>
+        <hr/>
+        <Vulnerabilities/>
+        <hr/>
+        <AttainmentOfPlan/>
+        <hr/>
+        <Plan/>
     </ReportContext.Provider>
     : <></>}</AuthenticatedPage>
 }
