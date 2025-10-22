@@ -24,8 +24,6 @@ export default function EmployeeHours() {
 }
 
 function HoursChart({userDailyHours}: {userDailyHours: UserDailyHours}) {
-    // Calculate hours
-
     // Check Name
     let name = "UNKNOWN"
     const siteSettings = useContext(SiteSettingsContext)

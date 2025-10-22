@@ -13,6 +13,21 @@
     display: none;
 }
 
+/*************** InputAuth ***************/
+
+.input-auth {
+    border: 0;
+    background-color: transparent;
+    font-family: "Perfect Penmanship";
+    font-size: inherit;
+    min-width: 10px;
+    margin-bottom: 10px;
+}
+
+.input-auth:focus-visible {
+    outline: none;
+}
+
 /*************** Subtitle ***************/
 .report-subtitle {
     color: black;
@@ -75,6 +90,10 @@
     border-radius: 10px;
     border: 2px solid var(--blue-black);
     overflow: hidden;
+    width: max-content;
+    max-width: 100%;
+    background-color: var(--bone-white);
+    text-align: center;
 }
 
 .vanilla-report-table table {
@@ -85,11 +104,20 @@
     background-color: var(--bright-yellow);
 }
 
+.vanilla-report-table td {
+    padding: 10px;
+}
+
 .vanilla-report-table th, .vanilla-report-table td {
     box-sizing: border-box;
     width: 200px;
 
     font-family: "Perfect Penmanship";
+}
+
+.vanilla-editor-table th {
+    background-color: var(--light-purple);
+    color: white;
 }
 
 /*************** Charts ***************/

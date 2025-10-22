@@ -1,7 +1,6 @@
 import { useContext } from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
 import ReportSubtitle from "../../components/reportSubtitle"
-import "./plan.css"
 import { ReportContext } from "../../report/lib"
 
 export default function Plan() {
