@@ -1,0 +1,42 @@
+.loading-screen .throbber {
+    align-self: center;
+}
+
+#create-report-form input {
+    margin-right: 1ch;
+    margin-left: 1ch;
+}
+
+#create-report-form {
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.report-visual-inner {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    gap: 5px;
+}
+
+.report-visual i {
+    font-size: 20px;
+}
+
+.delete-report-button {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: min-content;
+    padding: 2px;
+    line-height: 1em;
+}
+
+.delete-report-button i {
+    line-height: 1em;
+    max-height: 1em;
+    font-size: 1em;
+}

@@ -76,3 +76,36 @@ export function getImageURL(image: ImageData, highres = false): string | undefin
     return undefined
   }
 }
+
+/**
+ * Converts an ISO8601 duration to a duration in milliseconds.
+ * @param duration An ISO8601 duration string.
+ * @returns `duration` in milliseconds.
+ */
+export function parseDuration(duration: string): number {
+  if (!duration) {console.error(`No duration supplied`); return NaN}
+  const regex =
+    /^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/;
+
+  const match = duration.match(regex);
+  if (!match) return NaN;
+
+  const [,
+    years,
+    months,
+    days,
+    hours,
+    minutes,
+    seconds,
+  ] = match.map((v) => (v ? parseFloat(v) : 0));
+
+  const ms =
+    years * 31536000000 +
+    months * 2592000000 +
+    days * 86400000 +
+    hours * 3600000 +
+    minutes * 60000 +
+    seconds * 1000;
+
+  return ms;
+}

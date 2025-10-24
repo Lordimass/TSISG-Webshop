@@ -1,0 +1,42 @@
+.issue-tracking-graph {
+    background-color: var(--bone-white);
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+    box-sizing: border-box;
+    width: 50%;
+    padding: 10px;
+    padding-top: 30px;
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.total-issues-tables {
+    display: flex;
+    gap: 10px;
+}
+
+.issue-tracking-graphs {
+    display: flex;
+    gap: 10px;
+}
+
+@media screen and (max-width: 1100px) {
+    .total-issues-table {
+        flex-direction: column;
+    }
+
+    .issue-tracking-graphs {
+        flex-direction: column;
+    }
+}
+
+.issue-tracking-graph {
+    width: 100%;
+}
+

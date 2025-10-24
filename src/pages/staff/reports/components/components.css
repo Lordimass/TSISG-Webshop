@@ -1,0 +1,137 @@
+/*************** MDX Editor ***************/
+.mdx-editor-container {
+    background-color: var(--bone-white);
+    border-radius: 10px;
+}
+
+.mdxeditor-popup-container h2 {
+    color: black;
+    text-align: center;
+}
+
+.mdxeditor-toolbar[class*="readOnly"] {
+    display: none;
+}
+
+/*************** InputAuth ***************/
+
+.input-auth {
+    border: 0;
+    background-color: transparent;
+    font-family: "Perfect Penmanship";
+    font-size: inherit;
+    min-width: 10px;
+    margin-bottom: 10px;
+}
+
+.input-auth:focus-visible {
+    outline: none;
+}
+
+/*************** Subtitle ***************/
+.report-subtitle {
+    color: black;
+    background-color: var(--bone-white);
+    padding: 20px;
+    padding-bottom: 15px;
+    border-radius: 10px;
+}
+
+#report h2 {
+    color: black;
+}
+
+.report-subtitle p, #report .subtitle, #report .subtitle a {
+    color: var(--jamie-grey);
+}
+
+/*************** Editable Tables ***************/
+#report .report-table th, #report .report-table td {
+    border-width: 0px;
+}
+
+#report .report-table hr {
+    height: 0;
+}
+
+/* Select only the header cells that aren't part of the editor */
+#report .report-table th[class*="Cell"]:not([data-tool-cell="true"]) {
+    background-color: var(--bright-yellow);
+}
+
+.report th {
+    background-color: var(--bright-yellow);
+}
+
+.report-table th[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: smaller;
+}
+
+.report-table td[class*="Cell"]:not([data-tool-cell="true"]) {
+    background-color: var(--bone-white);
+}
+
+.report-table td[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: x-large;
+}
+
+@media screen and (max-width: 1100px) {
+    .report-table th[class*="Cell"]:not([data-tool-cell="true"]) span {
+    font-size: x-small;
+    }
+
+    .report-table td[class*="Cell"]:not([data-tool-cell="true"]) span {
+        font-size: smaller;
+    }
+}
+
+/*************** Vanilla Tables ***************/
+.vanilla-report-table {
+    border-radius: 10px;
+    border: 2px solid var(--blue-black);
+    overflow: hidden;
+    width: max-content;
+    max-width: 100%;
+    background-color: var(--bone-white);
+    text-align: center;
+}
+
+.vanilla-report-table table {
+    border-collapse: collapse;
+}
+
+.vanilla-report-table th {
+    background-color: var(--bright-yellow);
+}
+
+.vanilla-report-table td {
+    padding: 10px;
+}
+
+.vanilla-report-table th, .vanilla-report-table td {
+    box-sizing: border-box;
+    width: 200px;
+
+    font-family: "Perfect Penmanship";
+}
+
+.vanilla-editor-table th {
+    background-color: var(--light-purple);
+    color: white;
+}
+
+/*************** Charts ***************/
+.recharts-text, .recharts-legend-item-text {
+    font-family: "Perfect Penmanship";
+    font-size: smaller;
+    user-select: none;
+}
+
+.recharts-surface:focus {
+    outline: none;
+}
+
+.recharts-tooltip-item-list {
+    font-family: "Perfect Penmanship";
+    font-size: smaller;
+}

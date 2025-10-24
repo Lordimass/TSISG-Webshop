@@ -14,7 +14,7 @@ export type UseRPCReturn<T> = {
 
 export async function callRPC(
     functionName: string, 
-    params: { [key: string]: any }, 
+    params?: { [key: string]: any }, 
     notify?: (msg: string) => void
 ): Promise<any> {
     const {data, error} = await supabase.rpc(functionName, params);
@@ -29,7 +29,7 @@ export async function callRPC(
 
 export function useCallRPC(
     functionName: string, 
-    params: { [key: string]: any },
+    params?: { [key: string]: any },
     notify?: (msg: string) => void
 ) : UseRPCReturn<any> {
     const [loading, setLoading] = useState(true);

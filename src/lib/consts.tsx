@@ -2,13 +2,16 @@ import { ProductData } from "./types";
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_OPTION_GROUPS)
 
-/**
- * The number of days before an unfulfilled order is considered overdue
- */
+/** The image to use when no image is provided */
+export const PLACEHOLDER_IMAGE = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/logo.webp"
+
+/** The number of days before an unfulfilled order is considered overdue */
 export const overdue_threshold: number = 2;
 
-/** The average character per second reading speed of a person. Used to calculate the length of time to show
- * a notification for based on its text length */
+/** 
+ * The average character per second reading speed of a person. Used to calculate the length of time to show
+ * a notification for based on its text length 
+*/
 export const reading_speed_cps = 16;
 
 // The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
