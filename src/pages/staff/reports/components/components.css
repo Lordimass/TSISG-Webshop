@@ -37,7 +37,7 @@
     border-radius: 10px;
 }
 
-#report h2 {
+#report h2, #report h1{
     color: black;
 }
 
