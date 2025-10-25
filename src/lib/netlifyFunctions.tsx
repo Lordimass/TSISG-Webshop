@@ -86,7 +86,7 @@ export async function fetchFromNetlifyFunction(
   func: string, 
   body?: string | ArrayBuffer | Blob | File | FormData  | URLSearchParams | ReadableStream, 
   jwt?: Promise<string | undefined>
-): Promise<{data?: any, error?: Error}> {
+): Promise<{data?: any, error?: any}> {
   const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
   const jwtString = await jwt
   const headers = jwtString ? {Authorization: `Bearer ${jwtString}`} : undefined
@@ -102,10 +102,9 @@ export async function fetchFromNetlifyFunction(
     }
     return {data: softParseJSON(responseBody)}
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error(error)
-    if (error instanceof Error) return {error: error}
-    else return {error: new Error(JSON.stringify(error))}
+    return {error}
   }
 }
 
