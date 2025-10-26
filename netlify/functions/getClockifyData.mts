@@ -1,5 +1,5 @@
 import { Context } from "@netlify/functions";
-import { TimeEntry } from "../lib/types/clockifyTypes.mts";
+import type { TimeEntry } from "../../shared/types/clockifyTypes.mts";
 import { parseDuration } from "../lib/lib.mts"
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 

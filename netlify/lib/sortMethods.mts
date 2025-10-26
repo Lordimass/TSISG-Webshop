@@ -1,4 +1,4 @@
-import { ImageData } from "./types/supabaseTypes.mts";
+import type { ImageData } from "@shared/types/supabaseTypes.mts";
 
 export function compareImages(a: ImageData, b: ImageData): number {
   if (a.display_order < b.display_order) {

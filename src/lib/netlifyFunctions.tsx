@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ImageData, ProductData } from "./types"
+import { ImageData, ProductData } from "@shared/types/types"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { UUID } from "crypto"
 import { compareImages } from "./sortMethods"
@@ -133,12 +133,9 @@ export async function updateProductData(
 ) : Promise<boolean> {
 
   // Find images that are yet to be uploaded
-  const unsubmittedImages = product.images.filter(
-    (img) => "local_url" in img
-  ) as UnsubmittedImageData[]
-  const submittedImages = product.images.filter(
-    (img) => "id" in img
-  ) as ImageData[]
+  const imagesUnion = product.images as (ImageData | UnsubmittedImageData)[]
+  const unsubmittedImages = imagesUnion.filter((img): img is UnsubmittedImageData => "local_url" in img)
+  const submittedImages = imagesUnion.filter((img): img is ImageData => "id" in img)
 
   // Upload all of these new images
   const compoundImagePromises = unsubmittedImages.map(async (img) => {

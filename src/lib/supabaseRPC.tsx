@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ProductData } from "./types";
+import { ProductData } from "@shared/types/types";
 import { createClient } from "@supabase/supabase-js";
 
 const SUPABASE_DATABASE_URL = import.meta.env.VITE_SUPABASE_DATABASE_URL

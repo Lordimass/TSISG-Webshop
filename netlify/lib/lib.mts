@@ -1,5 +1,5 @@
 import { supabaseAnon } from "./getSupabaseClient.mts";
-import { ImageData } from "./types/supabaseTypes.mts";
+import type { ImageData } from "@shared/types/supabaseTypes.mts";
 
 /**
  * Formats a number of bytes as a readable byte string

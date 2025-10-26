@@ -1,4 +1,4 @@
-import { ProductData } from "./types";
+import { ProductData } from "@shared/types/types";
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_OPTION_GROUPS)
 
