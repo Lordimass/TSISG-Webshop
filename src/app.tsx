@@ -15,7 +15,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { OrderManager } from './pages/staff/orders/orders';
 import { NotificationsContext } from "./components/notification/lib";
 import { LoginContext } from "./lib/auth";
-import { SiteSettingsContext } from "./lib/types";
+import { SiteSettingsContext } from "@shared/types/types";
 import { useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings } from "./appHooks";
 import { Report } from "./pages/staff/reports/report/report";
 

@@ -1,5 +1,5 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
-import { AssociationMetadata, ImageData } from "../../../lib/types";
+import { AssociationMetadata, ImageData } from "@shared/types/types";
 import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
 
 import "./imageEditor.css"
@@ -108,7 +108,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
         }
 
         // If the extension was removed or modified, add the correct one back on
-        if (getFilenameExtension(newName) !== extension) {
+    if (getFilenameExtension(newName as string) !== extension) {
             newName += "." + extension
         }
 

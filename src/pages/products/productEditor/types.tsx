@@ -1,4 +1,4 @@
-import { AssociationMetadata, ImageData, ProductData } from "../../../lib/types";
+import { AssociationMetadata, ImageData, ProductData } from "@shared/types/types";
 
 export type UnsubmittedImageData = {
     name: string

@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { ProductData } from "../../../lib/types"
+import { ProductData } from "@shared/types/types"
 import { UnsubmittedProductData } from "./types"
 import { blank_product } from "../../../lib/consts"
 import { isNumeric } from "../../../lib/lib"
