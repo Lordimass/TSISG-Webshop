@@ -1,7 +1,7 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "./basket.css"
 import { BasketProduct } from "../product/product";
-import { ProductInBasket } from "../../lib/types";
+import { ProductInBasket } from "@shared/types/types";
 import { SiteSettingsContext } from "../../app";
 import { NotificationsContext } from "../notification/lib";
 import { triggerViewCart } from "../../lib/analytics/analytics";

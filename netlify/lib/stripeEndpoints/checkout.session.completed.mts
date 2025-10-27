@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.mts"
-import { StripeProductMeta } from "../types/stripeTypes.mts"
-import { Order, OrderProdCompressed, OrderProduct } from "../types/supabaseTypes.mts"
+import type { StripeProductMeta } from "@shared/types/stripeTypes.mts"
+import type { Order, OrderProdCompressed, OrderProduct } from "@shared/types/supabaseTypes.mts"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { supabaseService } from "../getSupabaseClient.mts"
 import { sendGA4Event } from "../lib.mts"
@@ -216,7 +216,7 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                     {
                         weightInGrams: orderWeight,
                         packageFormatIdentifier: packageFormat,
-                        contents: order.products.map((prod) => {return {
+                        contents: order.products.map((prod: any) => {return {
                             name: prod.product_name,
                             SKU: prod.sku,
                             quantity: prod.quantity,

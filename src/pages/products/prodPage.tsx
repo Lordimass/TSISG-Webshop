@@ -3,7 +3,7 @@ import { blank_product, max_product_order } from "../../lib/consts"
 import "./prodPage.css"
 import Markdown from "react-markdown"
 import { LoginContext, SiteSettingsContext } from "../../app"
-import { ImageData, ProductData, ProductInBasket } from "../../lib/types"
+import { ImageData, ProductData, ProductInBasket } from "@shared/types/types"
 import ProductEditor from "./productEditor/productEditor"
 import { UnsubmittedImageData, UnsubmittedProductData } from "./productEditor/types"
 import { getGroup, getImageURL, setBasketStringQuantity } from "../../lib/lib"
@@ -164,7 +164,7 @@ export default function ProdPage() {
             {priceMajor}
             <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
         </h2>
-        <div className="tags">{product.tags.map((tag) => (
+    <div className="tags">{product.tags.map((tag: any) => (
             <div className="tag" key={tag.name}>{tag.name}</div>
             ))}</div>
         <div className="desc">

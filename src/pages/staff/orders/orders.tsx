@@ -5,7 +5,7 @@ import Throbber from "../../../components/throbber/throbber";
 
 import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
-import { Order } from "../../../lib/types";
+import { Order } from "@shared/types/types";
 import { compareOrders } from "../../../lib/sortMethods";
 import { overdue_threshold } from "../../../lib/consts";
 import { callRPC } from "../../../lib/supabaseRPC";
@@ -149,7 +149,7 @@ function OrderDropdown() {
         </div>
 
         <div className="order-products">
-            {order.products ? order.products.map(prod => {return <CheckoutProduct 
+            {order.products ? order.products.map((prod: any) => {return <CheckoutProduct 
                 product={prod} 
                 key={prod.sku} 
                 admin={true} 

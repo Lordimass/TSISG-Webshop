@@ -22,7 +22,7 @@ export default async function getBetaAnalyticsDataClient(): Promise<BetaAnalytic
     // Temporarily write to a file and override an environment variable
     const tmpFilePath = path.join(os.tmpdir(), `ga-key-${Date.now()}.json`);
     fs.writeFileSync(tmpFilePath, keyString, {encoding: "utf8", mode: 0o600})
-    process.env.GOOGLE_APPLICAITON_CREDENTIALS = tmpFilePath
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpFilePath
 
     // Create auth
     const auth = new GoogleAuth({
