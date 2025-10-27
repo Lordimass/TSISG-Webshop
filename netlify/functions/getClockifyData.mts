@@ -18,7 +18,8 @@ export default async function handler(request: Request, _context: Context) {try{
     const perms = await getSupabaseUserPermissions(request)
     if (!perms.includes("view_reports")) return new Response(undefined, {status: 403})
     
-    const {clockifyUsers, start, end} = await request.json()
+    let {clockifyUsers, start, end} = await request.json()
+    end = (new Date(Date.parse(end)+8.64e+7)).toISOString()
     const responses: IDsEntries[] = []
     const days = (Date.parse(end) - Date.parse(start))/8.64e+7
 
@@ -58,7 +59,7 @@ function convertToDailyHours(entriesLists: IDsEntries[], start: string, end: str
 
   // Align to UTC midnight for day buckets
   const startMilli = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
-  const endMilli = Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate());
+  const endMilli = Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate()-1);
 
   entriesLists.forEach(entriesList => {
     const userID = entriesList.userID;
