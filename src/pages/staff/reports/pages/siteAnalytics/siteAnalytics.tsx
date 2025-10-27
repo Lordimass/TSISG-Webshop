@@ -5,6 +5,7 @@ import { ReportContext } from "../../report/lib"
 import "./siteAnalytics.css"
 import { fetchFromNetlifyFunction } from "../../../../../lib/netlifyFunctions"
 import { getJWTToken } from "../../../../../lib/auth"
+import { openObjectInNewTab } from "../../../../../lib/lib"
 
 export default function SiteAnalytics() {
     const {report: r, setReportMeta: setR} = useContext(ReportContext)
@@ -12,11 +13,15 @@ export default function SiteAnalytics() {
 
     async function handleButtonPress(e: MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
-        const {data, error} = await fetchFromNetlifyFunction("fetchGA4Analytics", undefined, getJWTToken())
+        const {data, error} = await fetchFromNetlifyFunction("fetchGA4Analytics", JSON.stringify({
+            start: r!.start_date,
+            end: r!.end_date
+        }), getJWTToken())
         if (error) {
             setResults(error.message)
         } else {
             setResults(data)
+            openObjectInNewTab(data)
         }
     }
 
@@ -27,7 +32,7 @@ export default function SiteAnalytics() {
             <p>This is only a snapshot of the analytics captured, I can provide a more in depth report on request.</p>
         </ReportSubtitle>
         <button onClick={handleButtonPress}>Fetch</button>
-        <code>{JSON.stringify(results)}</code>
+        <pre>{JSON.stringify(results, undefined, 2)}</pre>
         <MDXEditorAuth
              id="analytics-text"
              markdown={r.metadata.analyticsText ?? ""}
