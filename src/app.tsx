@@ -24,7 +24,7 @@ import { Report } from "./pages/staff/reports/report/report";
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
 //  - Automatically updates STRIPE_WEBHOOK_SECRET in .env to the fresh local development test key. 
 //  - Runs netlify dev.
-// THIS WILL TAKE A MINUTE OR SO TO FINISH LAUCHING.
+// THIS WILL TAKE A MINUTE OR SO TO FINISH LAUNCHING.
 //
 // Stripe CLI login expires every 90 days, run `stripe login` to refresh this if you receive an authentication error.
 

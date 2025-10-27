@@ -5,14 +5,6 @@ import { ProductData } from "./supabaseTypes.mts"
 export type ProductInBasket = ProductData & { basketQuantity: number }
 export type Basket = ProductInBasket[]
 
-/** Additional information on the association between an image and its product. */
-export type AssociationMetadata = {
-  global?: boolean
-  group_product_icon?: boolean
-  group_representative?: boolean
-  [key: string]: unknown
-}
-
 export type OrderProduct = {
   sku: number
   product_name: string
