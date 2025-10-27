@@ -1,4 +1,5 @@
-import { AssociationMetadata, ImageData, ProductData } from "@shared/types/types";
+import { ImageData, ProductData } from "@shared/types/types";
+import {AssociationMetadata} from "@shared/types/supabaseTypes.mts";
 
 export type UnsubmittedImageData = {
     name: string

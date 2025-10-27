@@ -1,5 +1,5 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
-import { AssociationMetadata, ImageData } from "@shared/types/types";
+import { ImageData } from "@shared/types/types";
 import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
 
 import "./imageEditor.css"
@@ -10,6 +10,7 @@ import { ProductContext } from "../lib";
 import { removeImage, shiftImage } from "./lib";
 import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
 import { NotificationsContext } from "../../../components/notification/lib";
+import {AssociationMetadata} from "@shared/types/supabaseTypes.mts";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {
