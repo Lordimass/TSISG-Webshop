@@ -3,6 +3,7 @@ import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
 import type {protos } from "@google-analytics/data";
 import { FetchAnalyticsResponse } from "@shared/types/analyticsTypes.mjs";
+import assert, {AssertionError} from "node:assert";
 
 type Body = {
     start: string;
@@ -34,22 +35,83 @@ interface ProductMetric {
 }
 
 /**
- * Fetches comprehensive analytics data from Google Analytics 4.
+ * Fetches an analytics report from Google Analytics 4.
  * @see Body
  * @see FetchAnalyticsResponse
  * @returns {Promise<Response>} Analytics data matching FetchAnalyticsResponse interface
  */
-export default async function handler(request: Request, _context: Context): Promise<Response> {
-    try {
-        const perms = await getSupabaseUserPermissions(request)
-        if (!perms.includes("view_reports")) return new Response(undefined, {status: 403})
-        const { start, end } = await request.json() as Body
+export default async function handler(request: Request, _context: Context): Promise<Response> { try {
+    /** Get user metrics, engagement metrics, and e-commerce metrics */
+    async function fetchMainMetrics() {
+        return await client.runReport({
+            property: PROPERTY,
+            dateRanges: [
+                { startDate: formattedStart, endDate: formattedEnd },
+                { startDate: formattedLastStart, endDate: formattedLastEnd }
+            ],
+            metrics: [
+                { name: "activeUsers" },
+                { name: "newUsers" },
+                { name: "screenPageViewsPerUser" },
+                { name: "userEngagementDuration" },
+                { name: "transactions" },
+                { name: "totalRevenue" }
+            ]
+        });
+    }
 
-        // Calculate the last period (e.g. last 30 days)
-        const lastPeriodStart = new Date(start)
-        lastPeriodStart.setDate(lastPeriodStart.getDate() - (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
-        const lastPeriodEnd = new Date(start)
-        lastPeriodEnd.setDate(lastPeriodEnd.getDate() - 1)
+    /** Get daily trends */
+    async function fetchDailyTrends() {
+        return await client.runReport({
+            property: PROPERTY,
+            dateRanges: [
+                { startDate: formattedStart, endDate: formattedEnd },
+                { startDate: formattedLastStart, endDate: formattedLastEnd }
+            ],
+            dimensions: [{ name: "date" }],
+            metrics: [
+                { name: "activeUsers" },
+                // { name: "searchClickRate" }, TODO: Find what this metric is called
+                // { name: "searchImpressions" } TODO: Find what this metric is called
+            ],
+            orderBys: [
+                { dimension: { dimensionName: "date" } }
+            ]
+        });
+    }
+
+    /** Get best-selling products */
+    async function fetchBestSellers() {
+        return await client.runReport({
+            property: PROPERTY,
+            dateRanges: [
+                { startDate: formattedStart, endDate: formattedEnd },
+                { startDate: formattedLastStart, endDate: formattedLastEnd }
+            ],
+            dimensions: [
+                { name: "itemId" },
+                { name: "itemName" }
+            ],
+            metrics: [
+                { name: "itemRevenue" },
+                { name: "itemsPurchased" }
+            ],
+            orderBys: [
+                { metric: { metricName: "itemsPurchased" }, desc: true }
+            ],
+            limit: 10
+        });
+    }
+
+    const perms = await getSupabaseUserPermissions(request)
+    if (!perms.includes("view_reports")) return new Response(undefined, {status: 403})
+    const { start, end } = await request.json() as Body
+
+    // Calculate the last period (e.g. last 30 days)
+    const lastPeriodStart = new Date(start)
+    lastPeriodStart.setDate(lastPeriodStart.getDate() - (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
+    const lastPeriodEnd = new Date(start)
+    lastPeriodEnd.setDate(lastPeriodEnd.getDate() - 1)
 
     const client = await getBetaAnalyticsDataClient();
 
@@ -59,62 +121,15 @@ export default async function handler(request: Request, _context: Context): Prom
     const formattedLastStart = lastPeriodStart.toISOString().split('T')[0];
     const formattedLastEnd = lastPeriodEnd.toISOString().split('T')[0];
 
-    // Get user metrics, engagement metrics, and e-commerce metrics in one call
-    const [mainMetrics] = await client.runReport({
-        property: PROPERTY,
-        dateRanges: [
-            { startDate: formattedStart, endDate: formattedEnd },
-            { startDate: formattedLastStart, endDate: formattedLastEnd }
-        ],
-        metrics: [
-            { name: "activeUsers" },
-            { name: "newUsers" },
-            { name: "screenPageViewsPerUser" },
-            { name: "userEngagementDuration" },
-            { name: "transactions" },
-            { name: "totalRevenue" }
-        ]
-    });
-    console.log("Main metrics fetched")
+    // Fetch data
+    const [mainMetrics] = await fetchMainMetrics();
+    const [trends] = await fetchDailyTrends();
+    const [productMetrics] = await fetchBestSellers();
+    console.log("Data fetched")
 
-    // Get daily trends
-    const [trends] = await client.runReport({
-        property: PROPERTY,
-        dateRanges: [{ startDate: formattedStart, endDate: formattedEnd }],
-        dimensions: [{ name: "date" }],
-        metrics: [
-            { name: "activeUsers" },
-            // { name: "searchClickRate" }, TODO: Find what this metric is called
-            // { name: "searchImpressions" } TODO: Find what this metric is called
-        ],
-        orderBys: [
-            { dimension: { dimensionName: "date" } }
-        ]
-    });
-    console.log("Daily trends fetched")
+    printRunReportResponse(trends)
 
-    // Get best-selling products
-    const [productMetrics] = await client.runReport({
-        property: PROPERTY,
-        dateRanges: [
-            { startDate: formattedStart, endDate: formattedEnd },
-            { startDate: formattedLastStart, endDate: formattedLastEnd }
-        ],
-        dimensions: [
-            { name: "itemId" },
-            { name: "itemName" }
-        ],
-        metrics: [
-            { name: "itemRevenue" },
-            { name: "itemsPurchased" }
-        ],
-        orderBys: [
-            { metric: { metricName: "itemsPurchased" }, desc: true }
-        ],
-        limit: 10
-    });
-    console.log("Best sellers fetched")
-
+    // Extract flat metrics from main metrics
     const currentActiveUsers = getMetricValue(mainMetrics, 0, 0);
     const lastActiveUsers = getMetricValue(mainMetrics, 1, 0);
     const currentNewUsers = getMetricValue(mainMetrics, 0, 1);
@@ -123,6 +138,7 @@ export default async function handler(request: Request, _context: Context): Prom
     const lastRevenue = getMetricValue(mainMetrics, 1, 5);
     const currentPurchases = getMetricValue(mainMetrics, 0, 4);
     const lastPurchases = getMetricValue(mainMetrics, 1, 4);
+    console.log("Flat metrics extracted")
 
     const response: FetchAnalyticsResponse = {
         period: {
@@ -142,7 +158,7 @@ export default async function handler(request: Request, _context: Context): Prom
             getMetricValue(mainMetrics, 1, 2)
         ),
         engagementTime: createMetric(
-            "Average Engagement Time (seconds)",
+            "Engagement Time",
             getMetricValue(mainMetrics, 0, 3),
             getMetricValue(mainMetrics, 1, 3)
         ),
@@ -157,36 +173,36 @@ export default async function handler(request: Request, _context: Context): Prom
             lastRevenue
         ),
         ARPPU: createMetric(
-            "Average Revenue per Paying User",
+            "ARPPU",
             currentPurchases ? currentRevenue / currentPurchases : 0,
             lastPurchases ? lastRevenue / lastPurchases : 0
         ),
         ARPU: createMetric(
-            "Average Revenue per User",
+            "ARPU",
             currentActiveUsers ? currentRevenue / currentActiveUsers : 0,
             lastActiveUsers ? lastRevenue / lastActiveUsers : 0
         ),
         clicks: createMetric(
-            "Total Clicks",
+            "Clicks",
             calculateTotal(trends.rows || [], 1),
             0 // Need separate query for last period if needed
         ),
         impressions: createMetric(
-            "Total Impressions",
+            "Impressions",
             calculateTotal(trends.rows || [], 2),
             0 // Need separate query for last period if needed
         ),
+        activeUsersTrend: {
+            label: "Active Users",
+            points: calculateTrend(trends, 0)
+        },
         clicksTrend: {
-            label: "Daily Clicks",
+            label: "Clicks",
             points: calculateTrend(trends, 1)
         },
         impressionsTrend: {
-            label: "Daily Impressions",
+            label: "Impressions",
             points: calculateTrend(trends, 2)
-        },
-        activeUsersTrend: {
-            label: "Daily Active Users",
-            points: calculateTrend(trends, 0)
         },
         bestSellers: calculateBestSellers(productMetrics)
     };
@@ -198,7 +214,7 @@ export default async function handler(request: Request, _context: Context): Prom
  * Helper functions for parsing GA4 metrics
  */
 function getMetricValue(report: RunReportResponse, rowIndex: number, metricIndex: number): number {
-    return Number(report.rows?.[rowIndex]?.metricValues?.[metricIndex]?.value ?? 0);
+    return Number(report.rows?.[rowIndex]?.metricValues?.[metricIndex]?.value || 0);
 }
 
 function createMetric(label: string, value: number, lastValue: number): Metric {
@@ -206,21 +222,50 @@ function createMetric(label: string, value: number, lastValue: number): Metric {
 }
 
 function calculateTotal(rows: RunReportRow[] | undefined, metricIndex: number): number {
-    return rows?.reduce((sum, row) => sum + Number(row.metricValues?.[metricIndex]?.value || 0), 0) || 0;
+    return rows?.reduce(
+        (sum, row) => sum + Number(row.metricValues?.[metricIndex]?.value || 0), 0
+    ) || 0;
 }
 
 function calculateTrend(report: RunReportResponse, metricIndex: number): TrendPoint[] {
     if (!report.rows) return [];
-    return report.rows.map(row => ({
-        date: new Date(row.dimensionValues?.[0].value || 0),
-        value: Number(row.metricValues?.[metricIndex].value),
-        lastValue: 0 // We don't have last period data in the trends report
-    }));
+    const trend: TrendPoint[] = [];
+    let firstBunchPassed = false
+    let currPoint: TrendPoint = {date: new Date(), value: 0, lastValue: 0}
+    report.rows.forEach((row) => {
+        const date = row.dimensionValues?.[0].value || "19700101"
+        const dateRange = row.dimensionValues?.[1].value || "date_range_0"
+        const value = Number(row.metricValues?.[metricIndex]?.value || 0)
+        if (dateRange === "date_range_1") {
+            if (firstBunchPassed) {trend.push({...currPoint})}
+            currPoint.date = getDate(date)
+            currPoint.lastValue = value
+        } else if (dateRange === "date_range_0") {
+            currPoint.value = value
+            firstBunchPassed = true
+        }
+    });
+    return trend;
+}
+
+/**
+ * @param date A date string in YYYYMMDD format, as returned by GA4
+ * @returns A date object containing the timestamp at the start of <code>day</code>
+ */
+function getDate(date: string): Date {
+    assert(date.length === 8, `Date string has invalid length: ${date}`);
+    const day = Number(date.substring(6));
+    const month = Number(date.substring(4,6));
+    const year = Number(date.substring(0,4));
+    assert(
+        !Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(day),
+        `Date string is invalid: ${date}`
+    );
+    return new Date(year, month, day)
 }
 
 function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
     if (!report.rows || !report.rowCount) return [];
-
     const halfPoint = Math.floor(report.rowCount / 2);
     return report.rows.slice(0, halfPoint).map((row, index) => {
         const lastPeriodRow = report.rows?.[index + halfPoint];
@@ -228,15 +273,34 @@ function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
             sku: Number(row.dimensionValues?.[0].value),
             name: row.dimensionValues?.[1].value || "",
             itemRevenue: createMetric(
-                `Product Revenue - ${row.dimensionValues?.[1].value}`,
+                `Item Revenue`,
                 Number(row.metricValues?.[0].value),
                 Number(lastPeriodRow?.metricValues?.[0].value ?? 0)
             ),
             itemsPurchased: createMetric(
-                `Units Sold - ${row.dimensionValues?.[1].value}`,
+                `Units Sold`,
                 Number(row.metricValues?.[1].value),
                 Number(lastPeriodRow?.metricValues?.[1].value ?? 0)
             )
         };
+    });
+}
+
+function printRunReportResponse(response: RunReportResponse) {
+    console.log(`${response.rowCount} rows received`);
+    response.dimensionHeaders?.forEach(dimensionHeader => {
+        console.log(`Dimension header name: ${dimensionHeader.name}`);
+    });
+    response.metricHeaders?.forEach(metricHeader => {
+        console.log(
+            `Metric header name: ${metricHeader.name} (${metricHeader.type})`
+        );
+    });
+
+    console.log('Report result:');
+    response.rows?.forEach(row => {
+        console.log(
+            `${JSON.stringify(row.dimensionValues)},${JSON.stringify(row.metricValues)}`
+        );
     });
 }

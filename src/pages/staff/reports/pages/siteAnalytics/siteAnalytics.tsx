@@ -21,7 +21,6 @@ export default function SiteAnalytics() {
             setResults(error.message)
         } else {
             setResults(data)
-            openObjectInNewTab(data)
         }
     }
 
