@@ -65,8 +65,7 @@ export default async function handler(request: Request, _context: Context): Prom
         return await client.runReport({
             property: PROPERTY,
             dateRanges: [
-                { startDate: formattedStart, endDate: formattedEnd },
-                { startDate: formattedLastStart, endDate: formattedLastEnd }
+                { startDate: formattedLastStart, endDate: formattedEnd }
             ],
             dimensions: [{ name: "date" }],
             metrics: [
@@ -108,18 +107,22 @@ export default async function handler(request: Request, _context: Context): Prom
     const { start, end } = await request.json() as Body
 
     // Calculate the last period (e.g. last 30 days)
-    const lastPeriodStart = new Date(start)
-    lastPeriodStart.setDate(lastPeriodStart.getDate() - (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60 * 24))
-    const lastPeriodEnd = new Date(start)
-    lastPeriodEnd.setDate(lastPeriodEnd.getDate() - 1)
+    const startStamp = Date.parse(start)
+    const endStamp = Date.parse(end)
+    const periodLength = endStamp - startStamp
+    console.log(periodLength)
+    const lastPeriodStart = new Date(startStamp - periodLength - 1)
+    const lastPeriodEnd = new Date(startStamp - 1)
 
     const client = await getBetaAnalyticsDataClient();
 
     // Format dates in YYYY-MM-DD format as required by GA4
     const formattedStart = start.split('T')[0];
     const formattedEnd = end.split('T')[0];
-    const formattedLastStart = lastPeriodStart.toISOString().split('T')[0];
-    const formattedLastEnd = lastPeriodEnd.toISOString().split('T')[0];
+    const formattedLastStart = (lastPeriodStart.toISOString().split('T'))[0];
+    const formattedLastEnd = (lastPeriodEnd.toISOString().split('T'))[0];
+    console.log(formattedStart, formattedEnd);
+    console.log(formattedLastStart, formattedLastEnd);
 
     // Fetch data
     const [mainMetrics] = await fetchMainMetrics();
@@ -194,15 +197,15 @@ export default async function handler(request: Request, _context: Context): Prom
         ),
         activeUsersTrend: {
             label: "Active Users",
-            points: calculateTrend(trends, 0)
+            points: calculateTrend(trends, 0, new Date(startStamp))
         },
         clicksTrend: {
             label: "Clicks",
-            points: calculateTrend(trends, 1)
+            points: calculateTrend(trends, 1, new Date(startStamp))
         },
         impressionsTrend: {
             label: "Impressions",
-            points: calculateTrend(trends, 2)
+            points: calculateTrend(trends, 2, new Date(startStamp))
         },
         bestSellers: calculateBestSellers(productMetrics)
     };
@@ -227,25 +230,21 @@ function calculateTotal(rows: RunReportRow[] | undefined, metricIndex: number): 
     ) || 0;
 }
 
-function calculateTrend(report: RunReportResponse, metricIndex: number): TrendPoint[] {
+function calculateTrend(report: RunReportResponse, metricIndex: number, startDate: Date): TrendPoint[] {
     if (!report.rows) return [];
     const trend: TrendPoint[] = [];
-    let firstBunchPassed = false
-    let currPoint: TrendPoint = {date: new Date(), value: 0, lastValue: 0}
-    report.rows.forEach((row) => {
-        const date = row.dimensionValues?.[0].value || "19700101"
-        const dateRange = row.dimensionValues?.[1].value || "date_range_0"
-        const value = Number(row.metricValues?.[metricIndex]?.value || 0)
-        if (dateRange === "date_range_1") {
-            if (firstBunchPassed) {trend.push({...currPoint})}
-            currPoint.date = getDate(date)
-            currPoint.lastValue = value
-        } else if (dateRange === "date_range_0") {
-            currPoint.value = value
-            firstBunchPassed = true
-        }
-    });
-    return trend;
+    const halfWay = report.rows.length/2
+    for (let i = 0; i < halfWay; i++) {
+        const last = report.rows[i]
+        const current = report.rows[i+halfWay]
+        console.log(current.dimensionValues?.[0]?.value, getDate(current.dimensionValues?.[0]?.value || "19700101").toISOString())
+        trend.push({
+            date: getDate(current.dimensionValues?.[0]?.value || "19700101"),
+            lastValue: Number(last.metricValues?.[metricIndex]?.value || 0),
+            value: Number(current.metricValues?.[metricIndex]?.value || 0)
+        })
+    }
+    return trend.filter(point => point.date.getTime() >= startDate.getTime());
 }
 
 /**
@@ -254,14 +253,10 @@ function calculateTrend(report: RunReportResponse, metricIndex: number): TrendPo
  */
 function getDate(date: string): Date {
     assert(date.length === 8, `Date string has invalid length: ${date}`);
-    const day = Number(date.substring(6));
-    const month = Number(date.substring(4,6));
-    const year = Number(date.substring(0,4));
-    assert(
-        !Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(day),
-        `Date string is invalid: ${date}`
-    );
-    return new Date(year, month, day)
+    const day = date.substring(6);
+    const month = date.substring(4,6);
+    const year = date.substring(0,4);
+    return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
 }
 
 function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
