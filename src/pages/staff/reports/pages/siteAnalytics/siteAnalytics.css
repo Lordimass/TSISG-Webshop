@@ -1,0 +1,28 @@
+.analytics-summary-metrics {
+    display: flex;
+    gap: 10px;
+}
+
+.analytics-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: var(--bone-white);
+
+    .label {
+        color: var(--jamie-grey);
+        font-size: smaller;
+    }
+
+    .value {
+        font-size: x-large;
+    }
+
+    .change.green {
+        color: var(--green);
+    }
+    .change.red {
+        color: var(--red);
+    }
+}

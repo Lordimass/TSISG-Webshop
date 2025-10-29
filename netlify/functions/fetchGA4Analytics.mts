@@ -129,18 +129,17 @@ export default async function handler(request: Request, _context: Context): Prom
     const [trends] = await fetchDailyTrends();
     const [productMetrics] = await fetchBestSellers();
     console.log("Data fetched")
-
-    printRunReportResponse(trends)
+    mainMetrics.rows?.forEach(row => console.log(JSON.stringify(row, undefined, 2)));
 
     // Extract flat metrics from main metrics
-    const currentActiveUsers = getMetricValue(mainMetrics, 0, 0);
-    const lastActiveUsers = getMetricValue(mainMetrics, 1, 0);
-    const currentNewUsers = getMetricValue(mainMetrics, 0, 1);
-    const lastNewUsers = getMetricValue(mainMetrics, 1, 1);
-    const currentRevenue = getMetricValue(mainMetrics, 0, 5);
-    const lastRevenue = getMetricValue(mainMetrics, 1, 5);
-    const currentPurchases = getMetricValue(mainMetrics, 0, 4);
-    const lastPurchases = getMetricValue(mainMetrics, 1, 4);
+    const currentActiveUsers = getMetricValue(mainMetrics, 1, 0);
+    const lastActiveUsers = getMetricValue(mainMetrics, 0, 0);
+    const currentNewUsers = getMetricValue(mainMetrics, 1, 1);
+    const lastNewUsers = getMetricValue(mainMetrics, 0, 1);
+    const currentRevenue = getMetricValue(mainMetrics, 1, 5);
+    const lastRevenue = getMetricValue(mainMetrics, 0, 5);
+    const currentPurchases = getMetricValue(mainMetrics, 1, 4);
+    const lastPurchases = getMetricValue(mainMetrics, 0, 4);
     console.log("Flat metrics extracted")
 
     const response: FetchAnalyticsResponse = {
@@ -237,7 +236,6 @@ function calculateTrend(report: RunReportResponse, metricIndex: number, startDat
     for (let i = 0; i < halfWay; i++) {
         const last = report.rows[i]
         const current = report.rows[i+halfWay]
-        console.log(current.dimensionValues?.[0]?.value, getDate(current.dimensionValues?.[0]?.value || "19700101").toISOString())
         trend.push({
             date: getDate(current.dimensionValues?.[0]?.value || "19700101"),
             lastValue: Number(last.metricValues?.[metricIndex]?.value || 0),
@@ -278,24 +276,5 @@ function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
                 Number(lastPeriodRow?.metricValues?.[1].value ?? 0)
             )
         };
-    });
-}
-
-function printRunReportResponse(response: RunReportResponse) {
-    console.log(`${response.rowCount} rows received`);
-    response.dimensionHeaders?.forEach(dimensionHeader => {
-        console.log(`Dimension header name: ${dimensionHeader.name}`);
-    });
-    response.metricHeaders?.forEach(metricHeader => {
-        console.log(
-            `Metric header name: ${metricHeader.name} (${metricHeader.type})`
-        );
-    });
-
-    console.log('Report result:');
-    response.rows?.forEach(row => {
-        console.log(
-            `${JSON.stringify(row.dimensionValues)},${JSON.stringify(row.metricValues)}`
-        );
     });
 }

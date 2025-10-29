@@ -14,7 +14,7 @@ export interface FetchAnalyticsResponse {
     /** How many pages each user viewed on average. */
     pageViewsPerUser: ReadableAnalyticsMetric<number>
 
-    /** How long each user spent on the page in seconds, on average. */
+    /** How long each user spent on the page in milliseconds, on average. */
     engagementTime: ReadableAnalyticsMetric<number>
 
     /** How many e-commerce purchases were made in the period */
