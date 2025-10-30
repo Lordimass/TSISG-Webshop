@@ -135,3 +135,7 @@
     font-family: "Perfect Penmanship";
     font-size: smaller;
 }
+
+.recharts-surface, svg {
+    overflow: visible;
+}

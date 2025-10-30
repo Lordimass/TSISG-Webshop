@@ -2,7 +2,7 @@ import { Context } from "@netlify/functions";
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
 import type {protos } from "@google-analytics/data";
-import { FetchAnalyticsResponse } from "@shared/types/analyticsTypes.mjs";
+import {FetchAnalyticsResponse, TrendPoint} from "@shared/types/analyticsTypes.mjs";
 import assert, {AssertionError} from "node:assert";
 
 type Body = {
@@ -17,12 +17,6 @@ const PROPERTY = "properties/487921084";
 
 interface Metric {
     label: string;
-    value: number;
-    lastValue: number;
-}
-
-interface TrendPoint {
-    date: Date;
     value: number;
     lastValue: number;
 }
@@ -229,14 +223,15 @@ function calculateTotal(rows: RunReportRow[] | undefined, metricIndex: number): 
     ) || 0;
 }
 
-function calculateTrend(report: RunReportResponse, metricIndex: number, startDate: Date): TrendPoint[] {
+function calculateTrend(report: RunReportResponse, metricIndex: number, startDate: Date): TrendPoint<number>[] {
     if (!report.rows) return [];
-    const trend: TrendPoint[] = [];
+    const trend: TrendPoint<number>[] = [];
     const halfWay = report.rows.length/2
     for (let i = 0; i < halfWay; i++) {
         const last = report.rows[i]
         const current = report.rows[i+halfWay]
         trend.push({
+            lastDate: getDate(last.dimensionValues?.[0]?.value || "19700101"),
             date: getDate(current.dimensionValues?.[0]?.value || "19700101"),
             lastValue: Number(last.metricValues?.[metricIndex]?.value || 0),
             value: Number(current.metricValues?.[metricIndex]?.value || 0)

@@ -79,9 +79,11 @@ interface MetricTrend<T> {
 }
 
 /** A point in a trend */
-interface TrendPoint<T> extends AnalyticsMetric<T> {
+export interface TrendPoint<T> extends AnalyticsMetric<T> {
     /** The date which this point corresponds to in the trend */
     date: Date
+    /** The date at which the `lastValue` corresponds to in the trend */
+    lastDate: Date
 }
 
 /** A collection of metrics relating to a product's performance */
