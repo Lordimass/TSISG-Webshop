@@ -35,11 +35,8 @@ export interface FetchAnalyticsResponse {
     /** The number of times the website was served as a Google search result */
     impressions: ReadableAnalyticsMetric<number>
 
-    /** How total clicks on Google search results varied over the period */
-    clicksTrend: MetricTrend<number>
-
-    /** How the number of times the website was served as a Google search result varied over the period */
-    impressionsTrend: MetricTrend<number>
+    /** How total clicks and impressions on Google search results varied over the period */
+    clicksAndImpressionsTrend: ClicksAndImpressionsTrend
 
     /** Data-points representing the number of active users day by day, throughout the period */
     activeUsersTrend: MetricTrend<number>
@@ -96,3 +93,20 @@ interface ProductAnalytic {
     /** The total number of times this product was purchased */
     itemsPurchased: ReadableAnalyticsMetric<number>
 }
+
+/** A special collection of data points for Google search clicks and impressions*/
+export interface ClicksAndImpressionsTrend {
+    /** A human-readable name for the metric. */
+    label: string,
+    /** The data points in the collection */
+    points: ClicksAndImpressionsTrendPoint[]
+}
+
+/** A point of data in a `ClicksAndImpressionsTrend`
+ * @see ClicksAndImpressionsTrend
+ */
+export interface ClicksAndImpressionsTrendPoint {
+    date: Date,
+    clicks: number
+    impressions: number
+}[]

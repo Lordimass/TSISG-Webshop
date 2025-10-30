@@ -2,7 +2,12 @@ import { Context } from "@netlify/functions";
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
 import type {protos } from "@google-analytics/data";
-import {FetchAnalyticsResponse, TrendPoint} from "@shared/types/analyticsTypes.mjs";
+import {
+    ClicksAndImpressionsTrend,
+    ClicksAndImpressionsTrendPoint,
+    FetchAnalyticsResponse,
+    TrendPoint
+} from "@shared/types/analyticsTypes.mjs";
 import assert, {AssertionError} from "node:assert";
 
 type Body = {
@@ -63,9 +68,9 @@ export default async function handler(request: Request, _context: Context): Prom
             ],
             dimensions: [{ name: "date" }],
             metrics: [
-                { name: "activeUsers" },
-                // { name: "searchClickRate" }, TODO: Find what this metric is called
-                // { name: "searchImpressions" } TODO: Find what this metric is called
+                { name: "activeUsers" }, // TODO: If I include the click and impressions, it changes the values of active users returned?
+                { name: "organicGoogleSearchClicks" },
+                { name: "organicGoogleSearchImpressions" }
             ],
             orderBys: [
                 { dimension: { dimensionName: "date" } }
@@ -104,7 +109,6 @@ export default async function handler(request: Request, _context: Context): Prom
     const startStamp = Date.parse(start)
     const endStamp = Date.parse(end)
     const periodLength = endStamp - startStamp
-    console.log(periodLength)
     const lastPeriodStart = new Date(startStamp - periodLength - 1)
     const lastPeriodEnd = new Date(startStamp - 1)
 
@@ -115,15 +119,13 @@ export default async function handler(request: Request, _context: Context): Prom
     const formattedEnd = end.split('T')[0];
     const formattedLastStart = (lastPeriodStart.toISOString().split('T'))[0];
     const formattedLastEnd = (lastPeriodEnd.toISOString().split('T'))[0];
-    console.log(formattedStart, formattedEnd);
-    console.log(formattedLastStart, formattedLastEnd);
 
     // Fetch data
     const [mainMetrics] = await fetchMainMetrics();
     const [trends] = await fetchDailyTrends();
     const [productMetrics] = await fetchBestSellers();
     console.log("Data fetched")
-    mainMetrics.rows?.forEach(row => console.log(JSON.stringify(row, undefined, 2)));
+    trends.rows?.forEach(row => console.log(JSON.stringify(row, undefined, 2)));
 
     // Extract flat metrics from main metrics
     const currentActiveUsers = getMetricValue(mainMetrics, 1, 0);
@@ -134,7 +136,6 @@ export default async function handler(request: Request, _context: Context): Prom
     const lastRevenue = getMetricValue(mainMetrics, 0, 5);
     const currentPurchases = getMetricValue(mainMetrics, 1, 4);
     const lastPurchases = getMetricValue(mainMetrics, 0, 4);
-    console.log("Flat metrics extracted")
 
     const response: FetchAnalyticsResponse = {
         period: {
@@ -192,13 +193,9 @@ export default async function handler(request: Request, _context: Context): Prom
             label: "Active Users",
             points: calculateTrend(trends, 0, new Date(startStamp))
         },
-        clicksTrend: {
+        clicksAndImpressionsTrend: {
             label: "Clicks",
-            points: calculateTrend(trends, 1, new Date(startStamp))
-        },
-        impressionsTrend: {
-            label: "Impressions",
-            points: calculateTrend(trends, 2, new Date(startStamp))
+            points: calculateClicksAndImpressionsTrend(trends, new Date(startStamp))
         },
         bestSellers: calculateBestSellers(productMetrics)
     };
@@ -238,6 +235,25 @@ function calculateTrend(report: RunReportResponse, metricIndex: number, startDat
         })
     }
     return trend.filter(point => point.date.getTime() >= startDate.getTime());
+}
+
+function calculateClicksAndImpressionsTrend(
+    report: RunReportResponse,
+    startDate: Date
+): ClicksAndImpressionsTrendPoint[] {
+    if (!report.rows) return [];
+    const trend: ClicksAndImpressionsTrendPoint[] = [];
+    for (let i = 0; i < report.rows.length; i++) {
+        const row = report.rows[i]
+        const date = getDate(row.dimensionValues?.[0]?.value || "19700101")
+        if (date.getTime() < startDate.getTime()) continue;
+        trend.push({
+            date: getDate(row.dimensionValues?.[0]?.value || "19700101"),
+            clicks: Number(row.metricValues?.[1]?.value || 0),
+            impressions: Number(row.metricValues?.[2]?.value || 0)
+        })
+    }
+    return trend
 }
 
 /**

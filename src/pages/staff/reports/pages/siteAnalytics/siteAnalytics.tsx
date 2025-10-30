@@ -6,10 +6,10 @@ import "./siteAnalytics.css"
 import {fetchFromNetlifyFunction} from "../../../../../lib/netlifyFunctions"
 import {getJWTToken} from "../../../../../lib/auth"
 import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
-import {DurationMetric, NumericalMetric} from "./metricComponents.tsx";
+import {DurationMetric, MonetaryMetric, NumericalMetric} from "./metricComponents.tsx";
 import {Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {dateToDateString} from "../../../../../lib/lib.tsx";
-import {chartBlueLight, chartBlueMed} from "../../consts.tsx";
+import {chartBlueLight, chartBlueMed, chartPurpleDark} from "../../consts.tsx";
 
 export default function SiteAnalytics() {
     const {report: r, setReportMeta: setR} = useContext(ReportContext)
@@ -37,9 +37,12 @@ export default function SiteAnalytics() {
         <button onClick={handleButtonPress}>Fetch</button>
 
         <AnalyticsSummaryMetrics results={results} />
-        <ActiveUsersTrend results={results} />
+        <div className="analytics-charts-container">
+            <ActiveUsersTrend results={results} />
+            <ClicksAndImpressionsTrend results={results} />
+        </div>
+        <EComSummaryMetrics results={results} />
 
-        <pre>{JSON.stringify(results, undefined, 2)}</pre>
         <MDXEditorAuth
              id="analytics-text"
              markdown={r.metadata.analyticsText ?? ""}
@@ -50,10 +53,21 @@ export default function SiteAnalytics() {
     </div>)
 }
 
+function AnalyticsSummaryMetrics({results} : {results?: FetchAnalyticsResponse}) {
+    if (!results) return null
+    return (<div className="analytics-summary-metrics">
+        <NumericalMetric metric={results.activeUsers} />
+        <NumericalMetric metric={results.newUsers} />
+        <NumericalMetric metric={results.newUserPercent} positiveDirection={"NEUTRAL"} />
+        <NumericalMetric metric={results.pageViewsPerUser} />
+        <DurationMetric metric={results.engagementTime} />
+    </div>)
+}
+
 function ActiveUsersTrend({results}: {results?: FetchAnalyticsResponse}) {
     if (!results) return null
     return (<div id="active-users-trend" className="analytics-chart-container">
-        <h2>Active Users Trend</h2>
+        <h2>Active Users</h2>
         <ResponsiveContainer width={"100%"} height={250}>
             <LineChart data={results.activeUsersTrend.points} className="lineChart">
                 <Line
@@ -98,13 +112,51 @@ function ActiveUsersTrend({results}: {results?: FetchAnalyticsResponse}) {
     </div>)
 }
 
-function AnalyticsSummaryMetrics({results} : {results?: FetchAnalyticsResponse}) {
+function ClicksAndImpressionsTrend({results}: {results?: FetchAnalyticsResponse}) {
+    if (!results) return null
+    return (<div id="clicks-and-impressions-trend" className="analytics-chart-container">
+        <h2>Google Clicks & Impressions</h2>
+        <ResponsiveContainer width={"100%"} height={250}>
+            <LineChart data={results.clicksAndImpressionsTrend.points} className="lineChart">
+                <Line
+                    name={"Clicks"}
+                    dataKey={"clicks"}
+                    dot={false}
+                    strokeWidth={3}
+                    stroke={chartBlueMed}
+                />
+                <Line
+                    name={"Impressions"}
+                    dataKey={"impressions"}
+                    dot={false}
+                    strokeWidth={3}
+                    stroke={chartPurpleDark}
+                />
+                <XAxis
+                    dataKey={"date"}
+                    tickFormatter={val => dateToDateString(new Date(val), true)}
+                    tickMargin={7}
+                    interval={"preserveStartEnd"}
+                    minTickGap={30}
+                />
+                <YAxis
+                    interval={"preserveStartEnd"}
+                />
+                <Tooltip
+                    labelFormatter={label => dateToDateString(new Date(label))}
+                    // [val, dateToDateString(new Date(props.payload.date))]
+                />
+            </LineChart>
+        </ResponsiveContainer>
+    </div>)
+}
+
+function EComSummaryMetrics({results}: {results?: FetchAnalyticsResponse}) {
     if (!results) return null
     return (<div className="analytics-summary-metrics">
-        <NumericalMetric metric={results.activeUsers} />
-        <NumericalMetric metric={results.newUsers} />
-        <NumericalMetric metric={results.newUserPercent} positiveDirection={"NEUTRAL"} />
-        <NumericalMetric metric={results.pageViewsPerUser} />
-        <DurationMetric metric={results.engagementTime} />
+        <NumericalMetric metric={results.eCommercePurchases} />
+        <MonetaryMetric metric={results.totalRevenue} />
+        <MonetaryMetric metric={results.ARPPU} />
+        <MonetaryMetric metric={results.ARPU} />
     </div>)
 }

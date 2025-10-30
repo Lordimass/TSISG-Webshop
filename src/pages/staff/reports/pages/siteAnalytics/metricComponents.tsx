@@ -73,3 +73,23 @@ export function DurationMetric({
         />
     )
 }
+
+export function MonetaryMetric({
+                                   metric,
+                                   positiveDirection = "INCREASE"
+                               }: {
+    metric: ReadableAnalyticsMetric<number>,
+    positiveDirection?: "INCREASE" | "DECREASE" | "NEUTRAL"
+}) {
+    let changeRatio = (metric.value - metric.lastValue) / metric.lastValue;
+    let changeString = (changeRatio >= 0 ? "+" : "") + (changeRatio * 100).toFixed(1) + "%"
+    return (
+        <Metric
+            label={metric.label}
+            value={"£" + metric.value.toFixed(2)}
+            change={changeString}
+            changeValue={changeRatio}
+            positiveDirection={positiveDirection}
+        />
+    )
+}
