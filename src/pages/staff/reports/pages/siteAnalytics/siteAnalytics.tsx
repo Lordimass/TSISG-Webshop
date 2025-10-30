@@ -1,12 +1,12 @@
-import { useContext, useState, type MouseEvent } from "react"
+import {type MouseEvent, useContext, useState} from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
 import ReportSubtitle from "../../components/reportSubtitle"
-import { ReportContext } from "../../report/lib"
+import {ReportContext} from "../../report/lib"
 import "./siteAnalytics.css"
-import { fetchFromNetlifyFunction } from "../../../../../lib/netlifyFunctions"
-import { getJWTToken } from "../../../../../lib/auth"
-import {durationToDurationString, openObjectInNewTab} from "../../../../../lib/lib"
-import {FetchAnalyticsResponse, ReadableAnalyticsMetric} from "@shared/types/analyticsTypes.mts";
+import {fetchFromNetlifyFunction} from "../../../../../lib/netlifyFunctions"
+import {getJWTToken} from "../../../../../lib/auth"
+import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
+import {DurationMetric, NumericalMetric} from "./metricComponents.tsx";
 
 export default function SiteAnalytics() {
     const {report: r, setReportMeta: setR} = useContext(ReportContext)
@@ -33,11 +33,11 @@ export default function SiteAnalytics() {
         </ReportSubtitle>
         <button onClick={handleButtonPress}>Fetch</button>
         {results ? <div className="analytics-summary-metrics">
-            <NumericalMetric metric={results.activeUsers}/>
-            <NumericalMetric metric={results.newUsers}/>
-            <NumericalMetric metric={results.newUserPercent}/>
-            <NumericalMetric metric={results.pageViewsPerUser}/>
-            <DurationMetric metric={results.engagementTime}/>
+            <NumericalMetric metric={results.activeUsers} />
+            <NumericalMetric metric={results.newUsers} />
+            <NumericalMetric metric={results.newUserPercent} positiveDirection={"NEUTRAL"} />
+            <NumericalMetric metric={results.pageViewsPerUser} />
+            <DurationMetric metric={results.engagementTime} />
             </div> : null}
 
         <pre>{JSON.stringify(results, undefined, 2)}</pre>
@@ -49,28 +49,4 @@ export default function SiteAnalytics() {
              onChange={(md) => setR("analyticsText", md)}
          />
     </div>)
-}
-
-function NumericalMetric({metric}: {metric: ReadableAnalyticsMetric<number>}) {
-    let changeRatio = (metric.value - metric.lastValue) / metric.lastValue;
-    let changeString = (changeRatio>=0 ? "+" : "") + (changeRatio*100).toFixed(1) + "%"
-    return (
-        <div className="analytics-metric">
-            <p className="label">{metric.label}</p>
-            <p className="value">{Math.round(metric.value*10)/10}</p>
-            <p className={"change" + (changeRatio>0 ? " green" : changeRatio<0 ? " red" : "")}>{changeString}</p>
-        </div>
-    )
-}
-
-function DurationMetric({metric}: {metric: ReadableAnalyticsMetric<number>}) {
-    let change = metric.value - metric.lastValue;
-    let changeString = (change>=0 ? "+" : "") + durationToDurationString(change)
-    return (
-        <div className="analytics-metric">
-            <p className="label">{metric.label}</p>
-            <p className="value">{durationToDurationString(metric.value)}</p>
-            <p className={"change" + (change>0 ? " green" : change<0 ? " red" : "")}>{changeString}</p>
-        </div>
-    )
 }

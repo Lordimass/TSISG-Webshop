@@ -19,6 +19,10 @@
         font-size: x-large;
     }
 
+    .change {
+        color: var(--jamie-grey);
+    }
+
     .change.green {
         color: var(--green);
     }
