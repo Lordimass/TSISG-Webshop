@@ -68,7 +68,26 @@ export default async function handler(request: Request, _context: Context): Prom
             ],
             dimensions: [{ name: "date" }],
             metrics: [
-                { name: "activeUsers" }, // TODO: If I include the click and impressions, it changes the values of active users returned?
+                { name: "activeUsers" }
+            ],
+            orderBys: [
+                { dimension: { dimensionName: "date" } }
+            ]
+        });
+    }
+
+    /**
+     *  Fetch daily search trends, separate to other daily trends since including these with the other trends seems to
+     *  modify the values of other trends???
+     */
+    async function fetchDailySearchTrends() {
+        return await client.runReport({
+            property: PROPERTY,
+            dateRanges: [
+                { startDate: formattedLastStart, endDate: formattedEnd }
+            ],
+            dimensions: [{ name: "date" }],
+            metrics: [
                 { name: "organicGoogleSearchClicks" },
                 { name: "organicGoogleSearchImpressions" }
             ],
@@ -123,6 +142,7 @@ export default async function handler(request: Request, _context: Context): Prom
     // Fetch data
     const [mainMetrics] = await fetchMainMetrics();
     const [trends] = await fetchDailyTrends();
+    const [searchTrends] = await fetchDailySearchTrends();
     const [productMetrics] = await fetchBestSellers();
     console.log("Data fetched")
     trends.rows?.forEach(row => console.log(JSON.stringify(row, undefined, 2)));
@@ -194,8 +214,8 @@ export default async function handler(request: Request, _context: Context): Prom
             points: calculateTrend(trends, 0, new Date(startStamp))
         },
         clicksAndImpressionsTrend: {
-            label: "Clicks",
-            points: calculateClicksAndImpressionsTrend(trends, new Date(startStamp))
+            label: "Search Clicks & Impressions",
+            points: calculateClicksAndImpressionsTrend(searchTrends, new Date(startStamp))
         },
         bestSellers: calculateBestSellers(productMetrics)
     };
@@ -249,8 +269,8 @@ function calculateClicksAndImpressionsTrend(
         if (date.getTime() < startDate.getTime()) continue;
         trend.push({
             date: getDate(row.dimensionValues?.[0]?.value || "19700101"),
-            clicks: Number(row.metricValues?.[1]?.value || 0),
-            impressions: Number(row.metricValues?.[2]?.value || 0)
+            clicks: Number(row.metricValues?.[0]?.value || 0),
+            impressions: Number(row.metricValues?.[1]?.value || 0)
         })
     }
     return trend
