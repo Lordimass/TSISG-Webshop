@@ -81,8 +81,7 @@ hr {
     flex-direction: column;
     flex-grow: 1;
     background-color: var(--yellow);
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow-x: hidden;
 }
 
 button {

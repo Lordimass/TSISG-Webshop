@@ -102,6 +102,7 @@
 
 .vanilla-report-table th {
     background-color: var(--bright-yellow);
+    padding: 10px;
 }
 
 .vanilla-report-table td {

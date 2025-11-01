@@ -40,7 +40,7 @@
 }
 
 @media screen and (max-width: 1100px) {
-    #analytics-charts-container {
+    .analytics-charts-container {
         flex-direction: column;
     }
 }
@@ -50,6 +50,7 @@
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    text-align: center;
 
     padding: 10px;
     border-radius: 10px;
@@ -64,7 +65,20 @@
 }
 
 @media screen and (max-width: 1100px) {
-    #active-users-trend {
+    .analytics-chart-container {
         width: 100%;
     }
+}
+
+#best-sellers-table {
+    overflow-x: auto;
+    width: max-content;
+}
+
+#best-sellers-table table {
+    width: max-content;
+}
+
+#best-sellers-table td, #best-sellers-table th {
+    width: min-content;
 }

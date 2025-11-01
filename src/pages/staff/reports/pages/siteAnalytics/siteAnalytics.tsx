@@ -52,6 +52,7 @@ export default function SiteAnalytics() {
             columnNames={["SKU", "Name", "Item Revenue (£)", "Items Purchased", "Refund Amount (£)"]}
             columnTypes={[undefined, "string", "money", undefined, "money"]}
             style={{alignSelf: "center"}}
+            id="best-sellers-table"
         />
 
         <MDXEditorAuth
