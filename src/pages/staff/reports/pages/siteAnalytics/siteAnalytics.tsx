@@ -53,7 +53,6 @@ export default function SiteAnalytics() {
             columnTypes={[undefined, "string", "money", undefined, "money"]}
             style={{alignSelf: "center"}}
         />
-        <pre>{JSON.stringify(results?.bestSellers, undefined, 2)}</pre>
 
         <MDXEditorAuth
              id="analytics-text"

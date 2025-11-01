@@ -1,29 +1,34 @@
 import { Context } from "@netlify/functions";
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
-import type {protos } from "@google-analytics/data";
 import {
-    ClicksAndImpressionsTrend,
     ClicksAndImpressionsTrendPoint,
-    FetchAnalyticsResponse, ProductAnalytic,
+    FetchAnalyticsResponse, ProductAnalytic, ReadableAnalyticsMetric,
     TrendPoint
 } from "@shared/types/analyticsTypes.mjs";
-import assert, {AssertionError} from "node:assert";
+import assert from "node:assert";
+import {google} from "@google-analytics/data/build/protos/protos"
+
+type IRow = google.analytics.data.v1beta.IRow;
+type IFilterExpression = google.analytics.data.v1beta.IFilterExpression;
+type IRunReportResponse = google.analytics.data.v1beta.IRunReportResponse;
 
 type Body = {
     start: string;
     end: string;
 }
 
-type RunReportResponse = protos.google.analytics.data.v1beta.IRunReportResponse;
-type RunReportRow = protos.google.analytics.data.v1beta.IRow;
-
 const PROPERTY = "properties/487921084";
 
-interface Metric {
-    label: string;
-    value: number;
-    lastValue: number;
+/** Filter to apply to GA4 analytics requests */
+const FILTER: IFilterExpression = {
+    notExpression: { filter: {
+            fieldName: "transactionID",
+            stringFilter: {
+                matchType: "CONTAINS",
+                value: "_test_"
+            }}
+    }
 }
 
 /**
@@ -48,7 +53,8 @@ export default async function handler(request: Request, _context: Context): Prom
                 { name: "userEngagementDuration" },
                 { name: "transactions" },
                 { name: "totalRevenue" }
-            ]
+            ],
+            dimensionFilter: FILTER
         });
     }
 
@@ -109,6 +115,7 @@ export default async function handler(request: Request, _context: Context): Prom
             orderBys: [
                 { metric: { metricName: "itemsPurchased" }, desc: true }
             ],
+            dimensionFilter: FILTER,
             limit: 10
         });
     }
@@ -219,21 +226,21 @@ export default async function handler(request: Request, _context: Context): Prom
 /**
  * Helper functions for parsing GA4 metrics
  */
-function getMetricValue(report: RunReportResponse, rowIndex: number, metricIndex: number): number {
+function getMetricValue(report: IRunReportResponse, rowIndex: number, metricIndex: number): number {
     return Number(report.rows?.[rowIndex]?.metricValues?.[metricIndex]?.value || 0);
 }
 
-function createMetric(label: string, value: number, lastValue: number): Metric {
+function createMetric<T>(label: string, value: T, lastValue: T): ReadableAnalyticsMetric<T> {
     return { label, value, lastValue };
 }
 
-function calculateTotal(rows: RunReportRow[] | undefined, metricIndex: number): number {
+function calculateTotal(rows: IRow[] | undefined, metricIndex: number): number {
     return rows?.reduce(
         (sum, row) => sum + Number(row.metricValues?.[metricIndex]?.value || 0), 0
     ) || 0;
 }
 
-function calculateTrend(report: RunReportResponse, metricIndex: number, startDate: Date): TrendPoint<number>[] {
+function calculateTrend(report: IRunReportResponse, metricIndex: number, startDate: Date): TrendPoint<number>[] {
     if (!report.rows) return [];
     const trend: TrendPoint<number>[] = [];
     const halfWay = report.rows.length/2
@@ -251,7 +258,7 @@ function calculateTrend(report: RunReportResponse, metricIndex: number, startDat
 }
 
 function calculateClicksAndImpressionsTrend(
-    report: RunReportResponse,
+    report: IRunReportResponse,
     startDate: Date
 ): ClicksAndImpressionsTrendPoint[] {
     if (!report.rows) return [];
@@ -281,7 +288,7 @@ function getDate(date: string): Date {
     return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
 }
 
-function calculateBestSellers(report: RunReportResponse): ProductAnalytic[] {
+function calculateBestSellers(report: IRunReportResponse): ProductAnalytic[] {
     if (!report.rows || !report.rowCount) return [];
     const halfPoint = Math.floor(report.rowCount / 2);
     return report.rows.slice(0, halfPoint).map((row, index) => {
