@@ -3,7 +3,7 @@ import { searchProducts } from "./lib";
 
 import "./search.css"
 import { CheckoutProduct } from "../product/product";
-import { ProductData } from "../../lib/types";
+import { ProductData } from "@shared/types/types";
 import { NotificationsContext } from "../notification/lib";
 import { triggerSearch, triggerViewItemList } from "../../lib/analytics/analytics";
 
@@ -14,7 +14,7 @@ import { triggerSearch, triggerViewItemList } from "../../lib/analytics/analytic
  * `search` triggers.
  * @returns 
  */
-export function ProductSearch({search_delay = 200}: {search_delay: number}) {
+export function ProductSearch({search_delay = 200}: {search_delay?: number}) {
   async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
     // Close any existing timeout

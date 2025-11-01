@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^3.3.1",
+    "@google-analytics/data": "^5.2.1",
     "@mdxeditor/editor": "^3.47.0",
     "@netlify/functions": "^3.0.4",
     "@octokit/types": "^15.0.0",
@@ -22,6 +23,7 @@
     "comma-separated-tokens": "^2.0.3",
     "express": "^5.1.0",
     "formidable": "^3.5.4",
+    "google-auth-library": "^10.4.2",
     "octokit": "^5.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.1.1",

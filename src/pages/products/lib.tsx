@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import { UnsubmittedProductData } from "./productEditor/types";
-import { ImageData, ProductData } from "../../lib/types";
+import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types";
+import { ImageData, ProductData } from "@shared/types/types";
 import { blank_product } from "../../lib/consts";
 
 export const ProductContext = createContext<{
@@ -32,6 +32,7 @@ export function extractSKU(): number {
  * unsubmitted images before updating the basket
  */
 export function cleanseUnsubmittedProduct(product: UnsubmittedProductData): ProductData {
-    const cleansedImages: ImageData[] = product.images?.filter((img) => "id" in img) ?? []
-    return {...product, images: cleansedImages}
+    const cleansedImages: ImageData[] = product.images?.filter((img): img is ImageData => "id" in img) ?? []
+    const { images, ...rest } = product as unknown as Omit<ProductData, 'images'> & { images: (ImageData | UnsubmittedImageData)[] }
+    return { ...rest, images: cleansedImages }
 }

@@ -4,7 +4,7 @@ import {useEffect, useState } from "react";
 import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { Basket, ProductData } from "../../lib/types";
+import { Basket, ProductData } from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";

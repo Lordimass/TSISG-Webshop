@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TSISG-Dev" type="CompoundRunConfigurationType">
+    <toRun name="Netlify Dev" type="ShConfigurationType" />
+    <toRun name="Stripe Listener" type="ShConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

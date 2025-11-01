@@ -1,4 +1,4 @@
-import { ImageData, ProductData } from "../../../lib/types";
+import { ImageData, ProductData } from "@shared/types/types";
 import { UnsubmittedImageData, UnsubmittedProductData } from "./types";
 
 /**
@@ -19,12 +19,12 @@ export function shiftImage(
 
     let currentIndex: number
     if ("id" in image) {
-        currentIndex = product.images.findIndex(img => (
+    currentIndex = product.images.findIndex((img: any) => (
             "id" in img &&
             img.id === image.id
         ));
     } else {
-        currentIndex = product.images.findIndex(img => (
+    currentIndex = product.images.findIndex((img: any) => (
             "local_url" in img &&
             img.local_url === image.local_url
         ))
@@ -63,12 +63,12 @@ export function removeImage(
     if (!setProduct) return;
     let newImages: (ImageData | UnsubmittedImageData)[]
     if ("id" in image) { // Image being removed was submitted
-        newImages = product.images.filter(img => (
+    newImages = product.images.filter((img: any) => (
             "local_url" in img || // Include all unsubmitted
             img.id !== image.id // And only submitted images that aren't this one
         ));
     } else { // Image being removed was unsubmitted
-        newImages = product.images.filter(img => (
+    newImages = product.images.filter((img: any) => (
             "id" in img || // Include all submitted
             img.local_url !== image.local_url // And only unsubmitted images that aren't this one
         ))

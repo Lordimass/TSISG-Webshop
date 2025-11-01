@@ -167,5 +167,5 @@ export function initGA4() {
   document.head.appendChild(script);
 }
 
-(window as any).dataLayer = (window as any).dataLayer || [];
-export const gtag: Gtag.Gtag = function () {(window as any).dataLayer.push(arguments);};
+(window).dataLayer = (window).dataLayer || [];
+export const gtag = function (...args: unknown[]) { (window).dataLayer?.push(arguments); };

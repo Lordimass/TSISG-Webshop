@@ -1,5 +1,5 @@
 import { callRPC } from "../../lib/supabaseRPC";
-import { ProductData } from "../../lib/types";
+import { ProductData } from "@shared/types/types";
 
 /**
  * Search the products using a full text search function in Supabase.

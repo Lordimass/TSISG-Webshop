@@ -1,5 +1,5 @@
 import { UnsubmittedImageData } from "../pages/products/productEditor/types"
-import { ImageData, Order, ProductData } from "./types"
+import { ImageData, Order, ProductData } from "@shared/types/types"
 
 export function compareProducts(a: ProductData, b: ProductData) {
   // Primary: Sort by sort_order

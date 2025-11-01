@@ -38,7 +38,3 @@
     color: black;
     font-size: 20px;
 }
-
-.report-employee-hours-graph .recharts-surface, .report-employee-hours-graph svg {
-    overflow: visible;
-}

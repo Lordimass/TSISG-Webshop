@@ -31,7 +31,7 @@ export default async function handler(request: Request, _context: Context) {
 
   // Wrap it in a Readable so formidable can parse it
   const req = bufferToReadable(buffer) as any;
-  req.headers = Object.fromEntries(request.headers.entries());
+  req.headers = Object.fromEntries((request.headers as any).entries());
 
   const form = formidable({ multiples: false });
 

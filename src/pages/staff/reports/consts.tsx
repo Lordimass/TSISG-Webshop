@@ -36,6 +36,8 @@ export const chartGreenDark = "#38761d";
 export const chartGreenMed = "#93c47d";
 export const chartGreenLight = "#b6d7a8";
 
+export const chartPurpleDark = "#6038b2"
+
 // GitHub REST API Info
 export const octokit = new Octokit()
 export const GITHUB_OWNER = "Lordimass"
