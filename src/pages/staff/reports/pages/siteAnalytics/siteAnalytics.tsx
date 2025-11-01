@@ -10,6 +10,7 @@ import {DurationMetric, MonetaryMetric, NumericalMetric} from "./metricComponent
 import {Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {dateToDateString} from "../../../../../lib/lib.tsx";
 import {chartBlueLight, chartBlueMed, chartPurpleDark} from "../../consts.tsx";
+import JSONTable from "../../components/JSONTable.tsx";
 
 export default function SiteAnalytics() {
     const {report: r, setReportMeta: setR} = useContext(ReportContext)
@@ -44,6 +45,14 @@ export default function SiteAnalytics() {
         <CAndISummaryMetrics results={results} />
         <hr style={{height: "2px"}}/>
         <EComSummaryMetrics results={results} />
+
+        <JSONTable
+            json={results?.bestSellers}
+            title={"Best Sellers"}
+            columnNames={["SKU", "Name", "Item Revenue (£)", "Items Purchased", "Refund Amount (£)"]}
+            columnTypes={[undefined, "string", "money", undefined, "money"]}
+            style={{alignSelf: "center"}}
+        />
         <pre>{JSON.stringify(results?.bestSellers, undefined, 2)}</pre>
 
         <MDXEditorAuth

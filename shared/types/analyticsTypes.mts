@@ -84,14 +84,16 @@ export interface TrendPoint<T> extends AnalyticsMetric<T> {
 }
 
 /** A collection of metrics relating to a product's performance */
-interface ProductAnalytic {
+export interface ProductAnalytic {
     sku: number
     /** User facing name of the product */
     name: string
     /** The total revenue earned on this product over the period */
-    itemRevenue: ReadableAnalyticsMetric<number>
+    itemRevenue: number
     /** The total number of times this product was purchased */
-    itemsPurchased: ReadableAnalyticsMetric<number>
+    itemsPurchased: number
+    /** The amount of money refunded from purchases on this product */
+    itemRefundAmount: number
 }
 
 /** A special collection of data points for Google search clicks and impressions*/

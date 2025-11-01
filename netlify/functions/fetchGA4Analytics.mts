@@ -5,7 +5,7 @@ import type {protos } from "@google-analytics/data";
 import {
     ClicksAndImpressionsTrend,
     ClicksAndImpressionsTrendPoint,
-    FetchAnalyticsResponse,
+    FetchAnalyticsResponse, ProductAnalytic,
     TrendPoint
 } from "@shared/types/analyticsTypes.mjs";
 import assert, {AssertionError} from "node:assert";
@@ -24,13 +24,6 @@ interface Metric {
     label: string;
     value: number;
     lastValue: number;
-}
-
-interface ProductMetric {
-    sku: number;
-    name: string;
-    itemRevenue: Metric;
-    itemsPurchased: Metric;
 }
 
 /**
@@ -102,8 +95,7 @@ export default async function handler(request: Request, _context: Context): Prom
         return await client.runReport({
             property: PROPERTY,
             dateRanges: [
-                { startDate: formattedStart, endDate: formattedEnd },
-                { startDate: formattedLastStart, endDate: formattedLastEnd }
+                { startDate: formattedStart, endDate: formattedEnd }
             ],
             dimensions: [
                 { name: "itemId" },
@@ -111,7 +103,8 @@ export default async function handler(request: Request, _context: Context): Prom
             ],
             metrics: [
                 { name: "itemRevenue" },
-                { name: "itemsPurchased" }
+                { name: "itemsPurchased" },
+                { name: "itemRefundAmount" }
             ],
             orderBys: [
                 { metric: { metricName: "itemsPurchased" }, desc: true }
@@ -288,7 +281,7 @@ function getDate(date: string): Date {
     return new Date(`${year}-${month}-${day}T00:00:00.000Z`);
 }
 
-function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
+function calculateBestSellers(report: RunReportResponse): ProductAnalytic[] {
     if (!report.rows || !report.rowCount) return [];
     const halfPoint = Math.floor(report.rowCount / 2);
     return report.rows.slice(0, halfPoint).map((row, index) => {
@@ -296,16 +289,9 @@ function calculateBestSellers(report: RunReportResponse): ProductMetric[] {
         return {
             sku: Number(row.dimensionValues?.[0].value),
             name: row.dimensionValues?.[1].value || "",
-            itemRevenue: createMetric(
-                `Item Revenue`,
-                Number(row.metricValues?.[0].value),
-                Number(lastPeriodRow?.metricValues?.[0].value ?? 0)
-            ),
-            itemsPurchased: createMetric(
-                `Units Sold`,
-                Number(row.metricValues?.[1].value),
-                Number(lastPeriodRow?.metricValues?.[1].value ?? 0)
-            )
+            itemRevenue: Number(row.metricValues?.[0].value),
+            itemsPurchased: Number(row.metricValues?.[1].value),
+            itemRefundAmount: Number(row.metricValues?.[2].value)
         };
     });
 }
