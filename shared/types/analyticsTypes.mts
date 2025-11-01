@@ -43,6 +43,9 @@ export interface FetchAnalyticsResponse {
 
     /** The products that sold the most in this period, sorted in descending order of `itemsPurchased` */
     bestSellers: ProductAnalytic[]
+
+    /** The amount of money refunded to customers over this period */
+    refundAmount: ReadableAnalyticsMetric<number>
 }
 
 /** A period of time between two dates */

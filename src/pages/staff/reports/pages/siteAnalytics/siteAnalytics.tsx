@@ -177,5 +177,6 @@ function EComSummaryMetrics({results}: {results?: FetchAnalyticsResponse}) {
         <MonetaryMetric metric={results.totalRevenue} />
         <MonetaryMetric metric={results.ARPPU} />
         <MonetaryMetric metric={results.ARPU} />
+        <MonetaryMetric metric={results.refundAmount} positiveDirection={"DECREASE"} />
     </div>)
 }

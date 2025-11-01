@@ -52,7 +52,8 @@ export default async function handler(request: Request, _context: Context): Prom
                 { name: "screenPageViewsPerUser" },
                 { name: "userEngagementDuration" },
                 { name: "transactions" },
-                { name: "totalRevenue" }
+                { name: "totalRevenue" },
+                { name: "refundAmount" }
             ],
             dimensionFilter: FILTER
         });
@@ -156,6 +157,8 @@ export default async function handler(request: Request, _context: Context): Prom
     const lastRevenue = getMetricValue(mainMetrics, 0, 5);
     const currentPurchases = getMetricValue(mainMetrics, 1, 4);
     const lastPurchases = getMetricValue(mainMetrics, 0, 4);
+    const currentRefundAmount = getMetricValue(mainMetrics, 1, 6);
+    const lastRefundAmount = getMetricValue(mainMetrics, 0, 6);
 
     const response: FetchAnalyticsResponse = {
         period: {
@@ -198,6 +201,11 @@ export default async function handler(request: Request, _context: Context): Prom
             "ARPU",
             currentActiveUsers ? currentRevenue / currentActiveUsers : 0,
             lastActiveUsers ? lastRevenue / lastActiveUsers : 0
+        ),
+        refundAmount: createMetric(
+            "Refund Amount",
+            currentRefundAmount,
+            lastRefundAmount
         ),
         clicks: createMetric(
             "Clicks",
