@@ -39,9 +39,12 @@ export default function SiteAnalytics() {
         <AnalyticsSummaryMetrics results={results} />
         <div className="analytics-charts-container">
             <ActiveUsersTrend results={results} />
-            <ClicksAndImpressionsTrend results={results} />
+            <CAndITrend results={results} />
         </div>
+        <CAndISummaryMetrics results={results} />
+        <hr style={{height: "2px"}}/>
         <EComSummaryMetrics results={results} />
+        <pre>{JSON.stringify(results?.bestSellers, undefined, 2)}</pre>
 
         <MDXEditorAuth
              id="analytics-text"
@@ -49,7 +52,7 @@ export default function SiteAnalytics() {
              background={true}
              toolbar={true}
              onChange={(md) => setR("analyticsText", md)}
-         />
+        />
     </div>)
 }
 
@@ -112,7 +115,7 @@ function ActiveUsersTrend({results}: {results?: FetchAnalyticsResponse}) {
     </div>)
 }
 
-function ClicksAndImpressionsTrend({results}: {results?: FetchAnalyticsResponse}) {
+function CAndITrend({results}: {results?: FetchAnalyticsResponse}) {
     if (!results) return null
     return (<div id="clicks-and-impressions-trend" className="analytics-chart-container">
         <h2>Google Clicks & Impressions</h2>
@@ -148,6 +151,14 @@ function ClicksAndImpressionsTrend({results}: {results?: FetchAnalyticsResponse}
                 />
             </LineChart>
         </ResponsiveContainer>
+    </div>)
+}
+
+function CAndISummaryMetrics({results}: {results?: FetchAnalyticsResponse}) {
+    if (!results) return null
+    return (<div className="analytics-summary-metrics">
+            <NumericalMetric metric={results.clicks} />
+            <NumericalMetric metric={results.impressions} />
     </div>)
 }
 

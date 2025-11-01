@@ -80,11 +80,11 @@ export default async function handler(request: Request, _context: Context): Prom
      *  Fetch daily search trends, separate to other daily trends since including these with the other trends seems to
      *  modify the values of other trends???
      */
-    async function fetchDailySearchTrends() {
+    async function fetchDailySearchTrends(start: string, end: string) {
         return await client.runReport({
             property: PROPERTY,
             dateRanges: [
-                { startDate: formattedLastStart, endDate: formattedEnd }
+                { startDate: start, endDate: end }
             ],
             dimensions: [{ name: "date" }],
             metrics: [
@@ -142,10 +142,10 @@ export default async function handler(request: Request, _context: Context): Prom
     // Fetch data
     const [mainMetrics] = await fetchMainMetrics();
     const [trends] = await fetchDailyTrends();
-    const [searchTrends] = await fetchDailySearchTrends();
+    const [searchTrends] = await fetchDailySearchTrends(formattedStart, formattedEnd);
+    const [lastSearchTrends] = await fetchDailySearchTrends(formattedLastStart, formattedLastEnd);
     const [productMetrics] = await fetchBestSellers();
     console.log("Data fetched")
-    trends.rows?.forEach(row => console.log(JSON.stringify(row, undefined, 2)));
 
     // Extract flat metrics from main metrics
     const currentActiveUsers = getMetricValue(mainMetrics, 1, 0);
@@ -201,13 +201,13 @@ export default async function handler(request: Request, _context: Context): Prom
         ),
         clicks: createMetric(
             "Clicks",
-            calculateTotal(trends.rows || [], 1),
-            0 // Need separate query for last period if needed
+            calculateTotal(searchTrends.rows || [], 0),
+            calculateTotal(lastSearchTrends.rows || [], 0)
         ),
         impressions: createMetric(
             "Impressions",
-            calculateTotal(trends.rows || [], 2),
-            0 // Need separate query for last period if needed
+            calculateTotal(searchTrends.rows || [], 1),
+            calculateTotal(lastSearchTrends.rows || [], 1)
         ),
         activeUsersTrend: {
             label: "Active Users",
