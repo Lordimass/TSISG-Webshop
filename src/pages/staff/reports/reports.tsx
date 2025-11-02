@@ -75,8 +75,7 @@ function ReportVisual({r}: {r: ReportData}) {
     const endDate = (new Date(r.end_date)).toLocaleString().slice(0,10)
 
     return <ObjectListItem 
-        className="report-visual" 
-        dropdown={<pre>{JSON.stringify(r, undefined, 2)}</pre>}
+        className="report-visual"
         style={r.published ? undefined : "yellow"}
     >
         <div className="report-visual-inner">
