@@ -45,7 +45,7 @@ function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
         <table><tbody>
             <tr><th colSpan={3}>
                 {type === "OPEN" 
-                    ? `Issues open on ${dateToDateString(new Date(r.start_date))}`
+                    ? `Issues open on ${dateToDateString(new Date(r.end_date))}`
                     : `Issues closed from ${dateToDateString(new Date(r.start_date))} to ${dateToDateString(new Date(r.end_date))}`
                 }
                 <p className="subtitle">{type === "OPEN"
