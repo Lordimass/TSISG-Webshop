@@ -1,3 +1,19 @@
+#fetch-analytics-button-container {
+    height: 0;
+    width: 0;
+    position: relative;
+}
+
+#fetch-analytics-button {
+    text-wrap: nowrap;
+    padding: 10px;
+    position: absolute;
+    background-color: rgba(239, 239, 239, 30%);
+    border: 1px solid;
+    top: -20px;
+    left: 10px;
+}
+
 .analytics-summary-metrics {
     display: flex;
     flex-wrap: wrap;

@@ -1,53 +1,71 @@
-import {type MouseEvent, useContext, useState} from "react"
+import {type MouseEvent, useContext} from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
 import ReportSubtitle from "../../components/reportSubtitle"
 import {ReportContext} from "../../report/lib"
 import "./siteAnalytics.css"
 import {fetchFromNetlifyFunction} from "../../../../../lib/netlifyFunctions"
-import {getJWTToken} from "../../../../../lib/auth"
+import {getJWTToken, LoginContext} from "../../../../../lib/auth"
 import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
 import {DurationMetric, MonetaryMetric, NumericalMetric} from "./metricComponents.tsx";
 import {Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {dateToDateString} from "../../../../../lib/lib.tsx";
-import {chartBlueLight, chartBlueMed, chartPurpleDark} from "../../consts.tsx";
+import {chartBlueLight, chartBlueMed, chartPurpleDark, managePermission} from "../../consts.tsx";
 import JSONTable from "../../components/JSONTable.tsx";
+import {NotificationsContext} from "../../../../../components/notification/lib.tsx";
 
 export default function SiteAnalytics() {
-    const {report: r, setReportMeta: setR} = useContext(ReportContext)
-    const [results, setResults] = useState<FetchAnalyticsResponse>()
+    const {report: r, setReportMeta: setRMeta, setReport, viewMode} = useContext(ReportContext)
+    const {notify} = useContext(NotificationsContext)
+    const {permissions} = useContext(LoginContext)
 
-    async function handleButtonPress(e: MouseEvent<HTMLButtonElement>) {
+    const edit = permissions.includes(managePermission) && !viewMode
+
+    async function fetchFreshData(e: MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
+        if (!r) return
         const {data, error} = await fetchFromNetlifyFunction("fetchGA4Analytics", JSON.stringify({
-            start: r!.start_date,
-            end: r!.end_date
+            start: r.start_date,
+            end: r.end_date
         }), getJWTToken())
         if (error) {
-            setResults(error.message)
+            notify("An error occured while fetching fresh report data: error.message");
         } else {
-            setResults(data)
+            await setReport({...r, ga4_saved_analytics: data});
         }
     }
 
     if (!r) return null
+
     return (<div id="site-analytics-page" className="report-page">
         <ReportSubtitle>
             <h2>Site Analytics</h2>
             <p>This is only a snapshot of the analytics captured, I can provide a more in depth report on request.</p>
         </ReportSubtitle>
-        <button onClick={handleButtonPress}>Fetch</button>
 
-        <AnalyticsSummaryMetrics results={results} />
+        {/* Fetch fresh report data button, only viewable to editors */}
+        {edit
+            ?
+            <div id="fetch-analytics-button-container">
+                <button id="fetch-analytics-button" onClick={fetchFreshData}>
+                    Fetch Analytics Data
+                </button>
+            </div>
+            : null
+        }
+
+        {/* General Analytics */}
+        <AnalyticsSummaryMetrics results={r.ga4_saved_analytics} />
         <div className="analytics-charts-container">
-            <ActiveUsersTrend results={results} />
-            <CAndITrend results={results} />
+            <ActiveUsersTrend results={r.ga4_saved_analytics} />
+            <CAndITrend results={r.ga4_saved_analytics} />
         </div>
-        <CAndISummaryMetrics results={results} />
+        <CAndISummaryMetrics results={r.ga4_saved_analytics} />
         <hr style={{height: "2px"}}/>
-        <EComSummaryMetrics results={results} />
 
+        {/* E-Commerce Analytics */}
+        <EComSummaryMetrics results={r.ga4_saved_analytics} />
         <JSONTable
-            json={results?.bestSellers}
+            json={r.ga4_saved_analytics?.bestSellers}
             title={"Best Sellers"}
             columnNames={["SKU", "Name", "Item Revenue (£)", "Items Purchased", "Refund Amount (£)"]}
             columnTypes={[undefined, "string", "money", undefined, "money"]}
@@ -55,12 +73,13 @@ export default function SiteAnalytics() {
             id="best-sellers-table"
         />
 
+        {/* Text box for any additional comments on the analytics */}
         <MDXEditorAuth
              id="analytics-text"
              markdown={r.metadata.analyticsText ?? ""}
              background={true}
              toolbar={true}
-             onChange={(md) => setR("analyticsText", md)}
+             onChange={(md) => setRMeta("analyticsText", md)}
         />
     </div>)
 }
