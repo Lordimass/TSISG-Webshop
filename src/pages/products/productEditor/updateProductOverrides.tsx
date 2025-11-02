@@ -3,7 +3,7 @@
 // to a property type which requires special handling
 
 import { getJWTToken } from "../../../lib/auth";
-import { ProductData } from "../../../lib/types";
+import { ProductData } from "@shared/types/types";
 import { prodPropParsers } from "./prodPropParsers";
 
 /**
@@ -21,7 +21,7 @@ export async function updateTagsOverride(
     fetchNewData: () => Promise<void>,
     constraint: (value: string) => boolean): Promise<void> {
     if (key !== "tags") {
-        throw new Error(`Tags override called on non-tags property: ${key}`);
+    throw new Error(`Tags override called on non-tags property: ${String(key)}`);
     }
 
     // Validate the value using the constraint function

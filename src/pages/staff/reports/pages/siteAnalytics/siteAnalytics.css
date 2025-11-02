@@ -1,0 +1,100 @@
+#fetch-analytics-button-container {
+    height: 0;
+    width: 0;
+    position: relative;
+}
+
+#fetch-analytics-button {
+    text-wrap: nowrap;
+    padding: 10px;
+    position: absolute;
+    background-color: rgba(239, 239, 239, 30%);
+    border: 1px solid;
+    top: -20px;
+    left: 10px;
+}
+
+.analytics-summary-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.analytics-metric {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: var(--bone-white);
+    min-width: 150px;
+
+    .label {
+        color: var(--jamie-grey);
+        font-size: smaller;
+    }
+
+    .value {
+        font-size: x-large;
+    }
+
+    .change {
+        color: var(--jamie-grey);
+    }
+
+    .change.green {
+        color: var(--green);
+    }
+    .change.red {
+        color: var(--red);
+    }
+}
+
+.analytics-charts-container {
+    display: flex;
+    gap: 10px;
+}
+
+@media screen and (max-width: 1100px) {
+    .analytics-charts-container {
+        flex-direction: column;
+    }
+}
+
+.analytics-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    text-align: center;
+
+    padding: 10px;
+    border-radius: 10px;
+    background-color: var(--bone-white);
+
+    width: 50%;
+
+    .lineChart {
+        margin-left: -20px;
+        overflow: visible;
+    }
+}
+
+@media screen and (max-width: 1100px) {
+    .analytics-chart-container {
+        width: 100%;
+    }
+}
+
+#best-sellers-table {
+    overflow-x: auto;
+    width: max-content;
+}
+
+#best-sellers-table table {
+    width: max-content;
+}
+
+#best-sellers-table td, #best-sellers-table th {
+    width: min-content;
+}

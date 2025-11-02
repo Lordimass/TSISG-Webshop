@@ -4,7 +4,7 @@
 
 import { Context } from "@netlify/functions";
 import { baseUrl } from "./sitemap.mts";
-import { ProductData } from "../lib/types/supabaseTypes.mts";
+import type { ProductData } from "../../shared/types/supabaseTypes.mts";
 import getSupabaseClient from "../lib/getSupabaseClient.mts"
 import { SupabaseClient } from "@supabase/supabase-js";
 

@@ -6,11 +6,11 @@ export function CookieBanner() {
   function acceptCookies() {
     // Update consent (Advanced mode)
     // Default values set in main.tsx
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).gtag = function () {
-      (window as any).dataLayer.push(arguments);
-    };
-    (window as any).gtag("consent", "update", {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () {
+      window.dataLayer!.push(arguments);
+    }
+    window.gtag && window.gtag("consent", "update", {
       analytics_storage: "granted",
     });
 

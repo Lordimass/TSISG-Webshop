@@ -1,4 +1,4 @@
-import { Basket, ImageData, ProductData, ProductInBasket } from "./types"
+import { Basket, ImageData, ProductData, ProductInBasket } from "@shared/types/types"
 import { getProducts, supabase } from "./supabaseRPC"
 import { compareProducts } from "./sortMethods"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
@@ -15,12 +15,12 @@ export async function refreshBasket() {
   const basket: Basket = JSON.parse(basketObj).basket
 
   // Fetch new data on products
-  const skusToFetch: number[] = basket.map((prod) => prod.sku)
+  const skusToFetch: number[] = basket.map((prod: ProductInBasket) => prod.sku)
   const newProducts = await getProducts(skusToFetch, false, false)
   // Save new data
   const newBasket: Basket = []
-  basket.forEach((basketProd) => {
-    newProducts.forEach((newProduct) => {
+  basket.forEach((basketProd: ProductInBasket) => {
+    newProducts.forEach((newProduct: ProductData) => {
       if (newProduct.sku === basketProd.sku) {
         newBasket.push({ ...newProduct, basketQuantity: basketProd.basketQuantity })
       }
@@ -60,8 +60,8 @@ export function getImageURL(image: ImageData | UnsubmittedImageData, highres = f
  * @returns The public URL of the image, or undefined if not found
  */
 export function getRepresentativeImageURL(group: UnsubmittedProductData[] | UnsubmittedProductData, highres = false): string | undefined {
-  const images = "map" in group ? group.map(prod => prod.images).flat(1) : group.images
-  const representatives = images.filter(img => img.association_metadata?.group_representative)
+  const images = "map" in group ? group.map((prod: UnsubmittedProductData) => prod.images).flat(1) : group.images
+  const representatives = images.filter((img: ImageData | UnsubmittedImageData) => img.association_metadata?.group_representative)
   if (representatives.length > 0) {
     return getImageURL(representatives[0])
   } else {

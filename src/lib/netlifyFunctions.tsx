@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ImageData, ProductData } from "./types"
+import { ImageData, ProductData } from "@shared/types/types"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { UUID } from "crypto"
 import { compareImages } from "./sortMethods"
@@ -86,7 +86,7 @@ export async function fetchFromNetlifyFunction(
   func: string, 
   body?: string | ArrayBuffer | Blob | File | FormData  | URLSearchParams | ReadableStream, 
   jwt?: Promise<string | undefined>
-): Promise<{data?: any, error?: Error}> {
+): Promise<{data?: any, error?: any}> {
   const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
   const jwtString = await jwt
   const headers = jwtString ? {Authorization: `Bearer ${jwtString}`} : undefined
@@ -102,10 +102,9 @@ export async function fetchFromNetlifyFunction(
     }
     return {data: softParseJSON(responseBody)}
 
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error(error)
-    if (error instanceof Error) return {error: error}
-    else return {error: new Error(JSON.stringify(error))}
+    return {error}
   }
 }
 
@@ -134,12 +133,9 @@ export async function updateProductData(
 ) : Promise<boolean> {
 
   // Find images that are yet to be uploaded
-  const unsubmittedImages = product.images.filter(
-    (img) => "local_url" in img
-  ) as UnsubmittedImageData[]
-  const submittedImages = product.images.filter(
-    (img) => "id" in img
-  ) as ImageData[]
+  const imagesUnion = product.images as (ImageData | UnsubmittedImageData)[]
+  const unsubmittedImages = imagesUnion.filter((img): img is UnsubmittedImageData => "local_url" in img)
+  const submittedImages = imagesUnion.filter((img): img is ImageData => "id" in img)
 
   // Upload all of these new images
   const compoundImagePromises = unsubmittedImages.map(async (img) => {

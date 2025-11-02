@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./squareImageBox.css";
 import { getImageURL } from "../../lib/lib";
-import { ImageData } from "../../lib/types";
+import { ImageData } from "@shared/types/types";
 
 type SquareImageBoxProps = {
   image?: ImageData | string;
@@ -53,16 +53,18 @@ export default function SquareImageBox({
     (!isCarousel && image && typeof image !== "string");
 
   // Normalize image data
-  let normalizedImages: { image_url?: string; alt?: string }[] | undefined =
-    images as any;
-
-  if (areImagesData && images) {
+  let normalizedImages: { image_url?: string; alt?: string }[] | undefined = undefined;
+  if (images) {
     normalizedImages = images.map((img) => {
-      const data = img as ImageData;
-      return {
-        image_url: getImageURL(data, loading === "eager"),
-        alt: data.alt,
-      };
+      if ((img as ImageData).id !== undefined) {
+        const data = img as ImageData;
+        return {
+          image_url: getImageURL(data, loading === "eager"),
+          alt: data.alt,
+        };
+      } else {
+        return { image_url: (img as any).image_url, alt: (img as any).alt };
+      }
     });
   }
 

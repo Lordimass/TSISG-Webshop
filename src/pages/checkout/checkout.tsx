@@ -13,7 +13,7 @@ import { CheckoutProducts } from "../../components/product/products";
 import { LoginContext, SiteSettingsContext } from "../../app";
 import { checkCanMakePayment, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
 import { page_title } from "../../lib/consts";
-import { Basket } from "../../lib/types";
+import { Basket } from "@shared/types/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';

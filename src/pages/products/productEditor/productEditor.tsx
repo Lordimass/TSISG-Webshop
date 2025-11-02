@@ -1,5 +1,5 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react"
-import { ProductData } from "../../../lib/types"
+import { ProductData } from "@shared/types/types"
 import { cleanseUnsubmittedProduct } from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
@@ -54,12 +54,12 @@ export default function ProductEditor() {
     const [tagsInput, setTagsInput] = useState<React.JSX.Element | undefined>()
     useEffect(() => {
         setCategoryInput(<>
-            <input list="category-options" id={category_prod_prop.propName+"-editor-input"} placeholder={product.category.name} ref={inputBox}/>
+            <input list="category-options" id={String(category_prod_prop.propName)+"-editor-input"} placeholder={product.category.name} ref={inputBox}/>
             <datalist id="category-options" defaultValue={product.category.name}>{catOpts}</datalist>
         </>)
         setTagsInput(<MultiAutocomplete
             values={tagOpts}
-            defaultValue={product.tags.map(tag => tag.name).join(", ")}
+            defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
         />)
     }, [product, catOpts, tagOpts])
 
@@ -73,7 +73,7 @@ export default function ProductEditor() {
             {editableProductProps.map((productProp) => 
             <EditableProductPropContext.Provider 
                 value={{product, setProduct, productProp, originalProd}} 
-                key={productProp.propName}
+                key={String(productProp.propName)}
             >
                 <EditableProdPropBox fetchNewData={fetchNewData}/>
             </EditableProductPropContext.Provider>)}
@@ -148,7 +148,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         // When the inputField is specified, the value of `value` will be undefined since the ref cannot point to it.
         // In this case we have to find the input box from the context.
         if (!value) {
-            const unvalidatedInputField = document.getElementById(category_prod_prop.propName + "-editor-input")
+            const unvalidatedInputField = document.getElementById(String(category_prod_prop.propName) + "-editor-input")
             if (unvalidatedInputField && unvalidatedInputField.tagName == "INPUT") {
                 const inputField = unvalidatedInputField as HTMLInputElement
                 value = inputField.value
@@ -159,7 +159,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
 
         const valid = constraint(value)
         if (!valid) {
-            notify(`Value for ${key} is invalid.`)
+            notify(`Value for ${String(key)} is invalid.`)
             return
         }
         if (!setProduct) {return}
