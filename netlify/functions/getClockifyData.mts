@@ -1,5 +1,5 @@
 import { Context } from "@netlify/functions";
-import { TimeEntry } from "../lib/types/clockifyTypes.mts";
+import type { TimeEntry } from "../../shared/types/clockifyTypes.mts";
 import { parseDuration } from "../lib/lib.mts"
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 
@@ -10,8 +10,8 @@ type DayDurations = {userID: string, durations: {day: number, duration: number, 
  * Returns a list with an object containing information about the duration of
  * time worked by each userID, for each day in between `start` and `end` (inclusive).
  * @param clockifyUsers A list of Clockify User IDs 
- * @param start A time string which relates to the start of the day
- * @param end A time string which relates to the start of the day
+ * @param start A time string which relates to the start of the first day in the period
+ * @param end A time string which relates to the start of the last day in the period
  * @returns `{day: Date, durations: {userID: string, duration: string}[]}[]`
  */
 export default async function handler(request: Request, _context: Context) {try{

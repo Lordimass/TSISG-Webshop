@@ -1,7 +1,7 @@
 import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
-import { Basket } from "../../lib/types"
+import { Basket } from "@shared/types/types"
 
 /**
  * Debug method to test Apple Pay

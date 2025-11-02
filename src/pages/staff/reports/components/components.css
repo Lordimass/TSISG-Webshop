@@ -102,6 +102,7 @@
 
 .vanilla-report-table th {
     background-color: var(--bright-yellow);
+    padding: 10px;
 }
 
 .vanilla-report-table td {
@@ -134,4 +135,8 @@
 .recharts-tooltip-item-list {
     font-family: "Perfect Penmanship";
     font-size: smaller;
+}
+
+.recharts-surface, svg {
+    overflow: visible;
 }

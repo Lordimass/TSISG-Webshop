@@ -1,3 +1,5 @@
+import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
+
 export type ReportData = {
     id: number
     /** YYYY-MM-DD start of date range that the report covers */
@@ -6,6 +8,8 @@ export type ReportData = {
     end_date: string
     /** Whether this report is readable by those with the view_reports permission */
     published: boolean
+    /** Analytics pulled from Google Analytics Data API */
+    ga4_saved_analytics?: FetchAnalyticsResponse
     /** Additional information related to the report */
     metadata: ReportDataMeta
 }

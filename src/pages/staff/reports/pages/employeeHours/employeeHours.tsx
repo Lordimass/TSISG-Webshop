@@ -11,7 +11,7 @@ import ReportSubtitle from "../../components/reportSubtitle";
 export default function EmployeeHours() {
     const {report} = useContext(ReportContext)
 
-    // TOOD: Allow manage_reports to add or remove userIDs to display hours for.
+    // TODO: Allow manage_reports to add or remove userIDs to display hours for.
     const clockifyUsers = ["687560d15adda104676f32d2", "67fe148f4c444a224b798195"] 
     const clockifyHours = useGetClockifyHours(report!, clockifyUsers)
 

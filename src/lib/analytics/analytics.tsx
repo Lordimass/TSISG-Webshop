@@ -1,5 +1,5 @@
 import ReactGA from "react-ga4"
-import { Basket, ProductData, ProductInBasket } from "../types"
+import { Basket, ProductData, ProductInBasket } from "@shared/types/types"
 import { GA4Product } from "./types";
 
 /**

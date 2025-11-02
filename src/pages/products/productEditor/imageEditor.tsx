@@ -1,5 +1,5 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
-import { AssociationMetadata, ImageData } from "../../../lib/types";
+import { ImageData } from "@shared/types/types";
 import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
 
 import "./imageEditor.css"
@@ -10,6 +10,7 @@ import { ProductContext } from "../lib";
 import { removeImage, shiftImage } from "./lib";
 import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
 import { NotificationsContext } from "../../../components/notification/lib";
+import {AssociationMetadata} from "@shared/types/supabaseTypes.mts";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {
@@ -108,7 +109,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
         }
 
         // If the extension was removed or modified, add the correct one back on
-        if (getFilenameExtension(newName) !== extension) {
+    if (getFilenameExtension(newName as string) !== extension) {
             newName += "." + extension
         }
 

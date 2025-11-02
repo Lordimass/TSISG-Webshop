@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import { stripe } from "./stripeObject.mts";
-import { StripeProductMeta } from "./types/stripeTypes.mts";
+import type { StripeProductMeta } from "@shared/types/stripeTypes.mts";
 
 export type StripeCompoundLineItem = {
     product: StripeProduct;

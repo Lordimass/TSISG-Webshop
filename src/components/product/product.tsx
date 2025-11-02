@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 
 import "./product.css"
 import { blank_product, max_product_order } from '../../lib/consts';
-import { CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket } from '../../lib/types';
+import { CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket } from '@shared/types/types';
 import SquareImageBox from '../squareImageBox/squareImageBox';
 import { getImageURL, getRepresentativeImageURL, setBasketStringQuantity } from '../../lib/lib';
 import { ProductContext } from '../../pages/products/lib';

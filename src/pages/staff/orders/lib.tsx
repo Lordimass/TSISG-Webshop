@@ -1,5 +1,5 @@
 import { createContext, Dispatch, SetStateAction } from "react";
-import { Order } from "../../../lib/types";
+import { Order } from "@shared/types/types";
 import { overdue_threshold } from "../../../lib/consts";
 
 export const OrdersContext = createContext<{

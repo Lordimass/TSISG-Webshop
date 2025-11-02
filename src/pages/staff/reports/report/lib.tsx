@@ -7,9 +7,13 @@ import { NotificationsContext } from "../../../../components/notification/lib";
 const SAVE_INTERVAL = 5
 
 export const ReportContext = createContext<{
+    /** The data of the report */
     report?: ReportData
+    /** Set report contents, updates Supabase too */
     setReport: (r: ReportData) => Promise<void>
+    /** Shortcut method to set the `metadata` property oon the report. */
     setReportMeta: <K extends keyof ReportDataMeta>(key: K, value: ReportDataMeta[K]) => Promise<void>
+    /** Whether the user has chosen to be in view mode or not. This does NOT represent lack of permission to edit. */
     viewMode?: boolean
 }>({
     setReport: () => {return new Promise(()=>{})},
