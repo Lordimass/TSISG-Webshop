@@ -1,4 +1,20 @@
-import { BlockTypeSelect, BoldItalicUnderlineToggles, CreateLink, diffSourcePlugin, headingsPlugin, imagePlugin, InsertImage, InsertTable, listsPlugin, markdownShortcutPlugin, MDXEditor, MDXEditorMethods, MDXEditorProps, toolbarPlugin } from "@mdxeditor/editor";
+import {
+    BlockTypeSelect,
+    BoldItalicUnderlineToggles,
+    CreateLink,
+    diffSourcePlugin,
+    headingsPlugin,
+    imagePlugin,
+    InsertImage,
+    InsertTable, linkDialogPlugin,
+    linkPlugin,
+    listsPlugin,
+    markdownShortcutPlugin,
+    MDXEditor,
+    MDXEditorMethods,
+    MDXEditorProps,
+    toolbarPlugin
+} from "@mdxeditor/editor";
 import { JSX, useContext, useEffect, useRef, useState } from "react";
 import { LoginContext } from "../../../../app";
 import { managePermission } from "../consts";
@@ -21,7 +37,9 @@ export default function MDXEditorAuth(
 
     // Set default plugins if none provided
     if (!props.plugins) props.plugins = [
-        headingsPlugin(), 
+        headingsPlugin(),
+        linkPlugin(),
+        linkDialogPlugin(),
         markdownShortcutPlugin(), 
         listsPlugin(),
         diffSourcePlugin({}),
