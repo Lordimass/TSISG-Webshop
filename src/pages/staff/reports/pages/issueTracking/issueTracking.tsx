@@ -40,6 +40,7 @@ function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
     const lastVal = r.metadata[id+"_last"]
     const thisVal = r.metadata[id+"_this"]
     const percentageChange = ((thisVal-lastVal)/thisVal)*100
+    const percentageChangeString = (percentageChange>0 ? "+" : "") + percentageChange.toFixed(0)+"%"
     return (
         <div className="vanilla-report-table">
         <table><tbody>
@@ -62,7 +63,7 @@ function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
             <tr>
                 <td><InputAuth id={id+"_average"} numericOnly defaultValue={0}/></td>
                 <td><InputAuth id={id+"_last"} numericOnly defaultValue={0}/></td>
-                <td><InputAuth id={id+"_this"} numericOnly defaultValue={0}/> ({percentageChange.toFixed(0)}%)</td>
+                <td><InputAuth id={id+"_this"} numericOnly defaultValue={0}/> ({percentageChangeString})</td>
             </tr>
         </tbody></table></div>
     )
