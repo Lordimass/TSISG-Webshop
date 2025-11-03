@@ -3,22 +3,28 @@ import type { TimeEntry } from "../../shared/types/clockifyTypes.mts";
 import { parseDuration } from "../lib/lib.mts"
 import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
 
+type Body = {
+    /** A list of Clockify User IDs*/
+    clockifyUsers: string[],
+    /** A time string which relates to the start of the first day in the period */
+    start: string,
+    /** A time string which relates to the start of the last day in the period */
+    end: string
+};
 type IDsEntries = {userID: string, entries: TimeEntry[]}
 type DayDurations = {userID: string, durations: {day: number, duration: number, pay: number}[]}
 
 /**
  * Returns a list with an object containing information about the duration of
  * time worked by each userID, for each day in between `start` and `end` (inclusive).
- * @param clockifyUsers A list of Clockify User IDs 
- * @param start A time string which relates to the start of the first day in the period
- * @param end A time string which relates to the start of the last day in the period
+ * @see Body
  * @returns `{day: Date, durations: {userID: string, duration: string}[]}[]`
  */
 export default async function handler(request: Request, _context: Context) {try{
     const perms = await getSupabaseUserPermissions(request)
     if (!perms.includes("view_reports")) return new Response(undefined, {status: 403})
     
-    let {clockifyUsers, start, end} = await request.json()
+    let {clockifyUsers, start, end} = await request.json() as Body
     end = (new Date(Date.parse(end)+8.64e+7)).toISOString()
     const responses: IDsEntries[] = []
     const days = (Date.parse(end) - Date.parse(start))/8.64e+7
