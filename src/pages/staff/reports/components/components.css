@@ -1,4 +1,8 @@
 /*************** MDX Editor ***************/
+.mdxeditor {
+    flex-direction: column;
+}
+
 .mdx-editor-container {
     background-color: var(--bone-white);
     border-radius: 10px;
@@ -9,16 +13,26 @@
     text-align: center;
 }
 
-.mdxeditor-toolbar[class*="readOnly"] {
+#root .mdxeditor-toolbar {
+    height: min-content;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+
+#root .content .mdxeditor .mdxeditor-toolbar[class*="readOnly"] {
     display: none;
 }
+
+/*#root .mdxeditor .mdxeditor-toolbar div[class*="toolbarGroupOfGroups"] {*/
+/*    display: none;*/
+/*}*/
 
 /*************** InputAuth ***************/
 
 .input-auth {
     border: 0;
     background-color: transparent;
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     font-size: inherit;
     min-width: 10px;
     margin-bottom: 10px;
@@ -47,7 +61,7 @@
 
 /*************** Editable Tables ***************/
 #report .report-table th, #report .report-table td {
-    border-width: 0px;
+    border-width: 0;
 }
 
 #report .report-table hr {
@@ -113,7 +127,7 @@
     box-sizing: border-box;
     width: 200px;
 
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
 }
 
 .vanilla-editor-table th {
@@ -123,7 +137,7 @@
 
 /*************** Charts ***************/
 .recharts-text, .recharts-legend-item-text {
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     font-size: smaller;
     user-select: none;
 }
@@ -133,7 +147,7 @@
 }
 
 .recharts-tooltip-item-list {
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     font-size: smaller;
 }
 

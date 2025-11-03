@@ -46,7 +46,7 @@ function BudgetTable({id, md, metaKey} : {
     const {setReportMeta} = useContext(ReportContext)
     return <MDXEditorAuth 
         id={id}
-        plugins={[tablePlugin({tablePipeAlign: false}), thematicBreakPlugin()]}
+        toolbar
         markdown={md}
         contentEditableClassName="report-table"
         onChange={md => (setReportMeta(metaKey, md))}

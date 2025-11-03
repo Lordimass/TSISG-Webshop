@@ -2,7 +2,7 @@ import {
     BlockTypeSelect,
     BoldItalicUnderlineToggles,
     CreateLink,
-    diffSourcePlugin,
+    diffSourcePlugin, DiffSourceToggleWrapper,
     headingsPlugin,
     imagePlugin,
     InsertImage,
@@ -12,15 +12,16 @@ import {
     markdownShortcutPlugin,
     MDXEditor,
     MDXEditorMethods,
-    MDXEditorProps,
-    toolbarPlugin
+    MDXEditorProps, tablePlugin, thematicBreakPlugin,
+    toolbarPlugin, UndoRedo
 } from "@mdxeditor/editor";
-import { JSX, useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { LoginContext } from "../../../../app";
 import { managePermission } from "../consts";
 import { ReportContext } from "../report/lib";
 import { uploadImage } from "../../../../lib/netlifyFunctions";
 import { supabase } from "../../../../lib/supabaseRPC";
+
 export default function MDXEditorAuth(
     {id, requiredPermission=managePermission, background=false, toolbar=false, ...props} 
     : MDXEditorProps & React.RefAttributes<MDXEditorMethods> & {
@@ -42,6 +43,8 @@ export default function MDXEditorAuth(
         linkDialogPlugin(),
         markdownShortcutPlugin(), 
         listsPlugin(),
+        tablePlugin({tablePipeAlign: false}),
+        thematicBreakPlugin(),
         diffSourcePlugin({}),
         imagePlugin({imageUploadHandler}),
         markdownShortcutPlugin(),
@@ -55,6 +58,9 @@ export default function MDXEditorAuth(
                 <CreateLink />
                 <InsertImage />
                 <InsertTable />
+                <DiffSourceToggleWrapper>
+                    <UndoRedo/>
+                </DiffSourceToggleWrapper>
             </>)
         })
     )}
