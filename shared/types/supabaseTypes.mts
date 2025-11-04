@@ -155,7 +155,7 @@ export type OrderProduct = {
 }
 
 export type Order = {
-    id?: string
+    id: string
     placed_at?: string,
     email: string,
     street_address: string,

@@ -23,13 +23,13 @@ export default async function handleCheckoutSessionCompleted(event: Stripe.Check
 
 async function createOrder(session: Stripe.Checkout.Session): Promise<Response | undefined> {
     // Save the order record
-    const orderID = await saveOrder(session, supabaseService)
+    const order = await saveOrder(session, supabaseService)
 
     // Get products associated with the order
     const orderProducts: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id)
 
     // Save the order_product record for each product
-    await saveOrderProducts(orderProducts, orderID, supabaseService)
+    await saveOrderProducts(orderProducts, order.id, supabaseService)
 
     // Perform actions only in Production
     if (process.env.VITE_ENVIRONMENT == "PRODUCTION") {
@@ -37,7 +37,7 @@ async function createOrder(session: Stripe.Checkout.Session): Promise<Response |
         await updateStock(orderProducts, supabaseService)
 
         // Create Royal Mail Order
-        const response = await createRMOrder(supabaseService, orderID)
+        const response = await createRMOrder(order)
         if (response?.status != 200) {
             return response;
         }
@@ -79,12 +79,8 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
         throw new Error(error.code + ": " + error.message)
     }
 
-    const returnedRecord = data as Order[]
-    orderID = returnedRecord[0].id
-    if (!orderID) {
-        throw new Error("Order ID not found in returned data " + data)
-    }
-    return orderID
+    const returnedRecords = data as Order[]
+    return returnedRecords[0]
 }
 
 async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string, supabase: SupabaseClient) {
@@ -164,33 +160,16 @@ async function updateStock(products: StripeCompoundLineItem[], supabase: Supabas
  * Creates an order on the Royal Mail Click & Drop API:
  * https://business.parcel.royalmail.com/
 */
-async function createRMOrder(supabase: SupabaseClient, orderId: string) {
+async function createRMOrder(order: Order) {
     // Get royalMailKey
     const royalMailKey = process.env.ROYAL_MAIL_KEY;
     if (!royalMailKey) {
         return new Response("No Royal Mail API Key Found", {status: 401})
     }
-    
-    // Fetch Orders with ID
-    const {error, data} = await supabase
-        .from("orders_compressed")
-        .select("*")
-        .eq("id", orderId)
-    if (error) {
-        return new Response(error.message, {status: 502})
-    }
-    
-    // IDs should map to unique Orders
-    if (data.length > 1) {
-        return new Response("More than one order mapped to this ID", {status: 409})
-    } else if (data.length == 0) {
-        return new Response("No orders mapped to this ID", {status: 400})
-    }
-    const order: Order = data[0];
 
     // Create RM Order
     const subtotal = calculateOrderSubtotal(order.products)
-    const orderReference = orderId.slice(0,40) // API max order ref length is 40
+    const orderReference = order.id.slice(0,40) // API max order ref length is 40
     const orderWeight = calculateOrderWeight(order.products)
     const packageFormat = calculatePackageFormat(order.products, orderWeight)
     const response = await fetch("https://api.parcel.royalmail.com/api/v1/orders", {
@@ -220,8 +199,8 @@ async function createRMOrder(supabase: SupabaseClient, orderId: string) {
                             name: prod.product_name,
                             SKU: prod.sku,
                             quantity: prod.quantity,
-                            unitValue: prod.line_value/prod.quantity,
-                            unitWeightInGrams: prod.weight ? prod.weight : 0, // Weight is nullable in database
+                            unitValue: prod.line_value/(prod.quantity*1.2), // Excluding tax for customs
+                            unitWeightInGrams: prod.weight ?? 0, // Weight is nullable in database
                             customsDescription: prod.customs_description,
                             originCountryCode: prod.origin_country_code,
                             customsDeclarationCategory: "saleOfGoods",
