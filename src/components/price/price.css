@@ -1,0 +1,37 @@
+.price {
+    display: flex;
+    height: 22px;
+
+    .price-major {
+        font-size: 22px
+    }
+
+    .price-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-right: 2px;
+        text-align: end;
+    }
+
+    .price-symbol {
+        font-size: 18px;
+        height: 18px
+    }
+
+    .price-minor {
+        font-size: 13px;
+        height: 13px;
+        margin-left: 1px;
+        letter-spacing: 1px;
+    }
+
+    .price-currency {
+        font-size: 9px;
+        height: 7px;
+        color: var(--jamie-grey);
+        vertical-align: bottom;
+        align-self: end;
+    }
+
+}

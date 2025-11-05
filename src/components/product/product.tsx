@@ -7,6 +7,7 @@ import SquareImageBox from '../squareImageBox/squareImageBox';
 import {getImageURL, getRepresentativeImageURL, setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
+import DineroFactory from "dinero.js";
 
 /**
  * I apologise sincerely for the following code.
@@ -204,6 +205,11 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
     // Format Price
     const string_price: string = "£" + price.toFixed(2)
 
+    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
+    // to convert it to the users locale later.
+    const priceUnits = Math.round(price*100)
+    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+
     // Check if item already in basket
     useEffect(() => {
         resetInputToBasket()
@@ -230,7 +236,7 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
                     <a className="product-name" href={"/products/" + sku}>
                         {name}
                     </a>
-                    <p className="product-price">{string_price}</p>
+                    <Price baseDinero={dinero}/>
                 </div>
                 <div className='spacer'/>
                 <div className='basket-modifier'>
