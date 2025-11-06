@@ -26,7 +26,7 @@
     grid-area: image;
 }
 
-.product-box .price {
+.product-box .price-container {
     grid-area: price;
     margin-bottom: 10px;
 }
@@ -172,6 +172,20 @@
 
     background-color: #ccc;
     transition: margin-bottom 0.1s;
+
+    .price {
+        align-self: center;
+        .price-major {
+            font-size: 15px;
+        }
+
+        .price-minor {
+            font-size: 10px;
+        }
+        .price-currency {
+            display: none;
+        }
+    }
 }
 
 .product-variant:hover {

@@ -1,4 +1,4 @@
-import DineroFactory, {Dinero} from "dinero.js";
+import {Dinero} from "dinero.js";
 import {useContext, useEffect, useState} from "react";
 import {convertDinero} from "./lib.tsx";
 
@@ -11,16 +11,15 @@ export default function Price({baseDinero}: {baseDinero: Dinero}) {
     useEffect(() => {
         async function convert() {
             if (currency === baseDinero.getCurrency()) {
-                setConverted(baseDinero);
+                setDinero(baseDinero);
             }
             const convertedDinero = await convertDinero(baseDinero, currency)
-            setConverted(convertedDinero)
+            setDinero(convertedDinero)
         }
         convert()
-    }, []);
+    }, [currency, baseDinero]);
 
-    const [converted, setConverted] = useState<Dinero>()
-    const dinero = converted ?? baseDinero
+    const [dinero, setDinero] = useState<Dinero>(baseDinero);
 
     // Extract major and minor currency amounts
     const formatString = dinero.toFormat('0.00')

@@ -78,9 +78,7 @@ export default function ProdPage() {
     // Set isEditMode based on loginContext permissions
     useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
 
-    // TODO: Implement this so that it displays the first image
-    // of the hovered product in place of the carousel if set.
-    // Also display the name of the variant.
+    // TODO: Implement this so that it displays the first image of the hovered product in place of the carousel if set.
     const [hoveredVariant, setHoveredVariant] = useState<UnsubmittedProductData | undefined>(undefined);
 
     // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
@@ -158,7 +156,10 @@ export default function ProdPage() {
                 : <><br/><div className="sku">SKUS{group.map(prod=>prod.sku).sort().map(sku => " "+sku).toString()}</div></>
             : <></>}
         </h1>
-        <Price baseDinero={dinero}/>
+        <div className="price-container">
+            <Price baseDinero={dinero}/>
+        </div>
+
 
     <div className="tags">{product.tags.map((tag: any) => (
             <div className="tag" key={tag.name}>{tag.name}</div>
@@ -226,8 +227,8 @@ function ProductVariant({
         img.association_metadata.group_product_icon
     )[0] ?? product.images?.[0]
     // TODO: Rename group_product_icon to variant_icon, it makes more sense
-    // TODO: Have variant icons stored in their own bucket which contains significantly
-    // smaller icons (they only need to be 100px max anyways)
+    // TODO: Have variant icons stored in their own bucket which contains significantly smaller icons (they only need to
+    //  be 100px max anyways)
 
     const {product: mainProduct, setProduct, hoveredVariant, setHoveredVariant} = useContext(ProductContext)
     if (!setHoveredVariant) return <></>
@@ -243,6 +244,9 @@ function ProductVariant({
         alt = image.alt ?? undefined
     }
 
+    const priceUnits = Math.round(product.price*100)
+    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+
     return (<button 
         className={"product-variant" + (product.sku === mainProduct.sku ? " selected-product-variant" : "")} 
         onMouseEnter={() => setHoveredVariant(product)}
@@ -253,7 +257,7 @@ function ProductVariant({
         alt={alt} 
         size="100px"
     />
-    <p className="p-small">£{product.price.toFixed(2)}</p>
+    <Price baseDinero={dinero}/>
     
     </button>);
 }
