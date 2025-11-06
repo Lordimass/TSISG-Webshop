@@ -3,8 +3,8 @@ import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
 
 
-const DEFAULT_LOCALE = 'en-GB';
-const DEFAULT_CURRENCY = getCurrency(DEFAULT_LOCALE) as Currency || "GBP";
+export const DEFAULT_LOCALE = 'en-GB';
+export const DEFAULT_CURRENCY = getCurrency(DEFAULT_LOCALE) as Currency || "GBP";
 
 /**
  * Response format from a successful call to `https://api.bigdatacloud.net/data/reverse-geocode-client`

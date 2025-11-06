@@ -23,6 +23,7 @@ import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePro
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
+import {LocaleContext} from "../../localeHandler.ts";
 
 export default function Checkout() {
     const [preparing, setPreparing] = useState(true)
@@ -47,6 +48,7 @@ export default function Checkout() {
 
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
+    const {currency} = useContext(LocaleContext)
     /**
      * Checks whether all of the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.

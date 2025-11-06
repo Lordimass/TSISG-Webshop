@@ -1,6 +1,7 @@
 import ReactGA from "react-ga4"
 import { Basket, ProductData, ProductInBasket } from "@shared/types/types"
 import { GA4Product } from "./types";
+import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 
 /**
  * Get the Google Analytics client ID from the cookie.
@@ -55,7 +56,10 @@ function convertToGA4Product(p: ProductData | ProductInBasket): GA4Product {
     }
 }
 
-function getBasketAsGA4Products(): {items: GA4Product[], value: number} {
+function getBasketAsGA4Products(): {
+    items: GA4Product[],
+    value: number
+} {
     const basketString = localStorage.getItem("basket")
     if (!basketString) return {items: [], value: 0}
     const basketObj = JSON.parse(basketString)
@@ -67,14 +71,22 @@ function getBasketAsGA4Products(): {items: GA4Product[], value: number} {
     return {items, value}
 }
 
-export function triggerAddShippingInfo(currency = "GBP", coupon?: string, shipping_tier?: string) {
+export function triggerAddShippingInfo(
+    currency = DEFAULT_CURRENCY,
+    coupon?: string,
+    shipping_tier?: string
+) {
     const {items, value} = getBasketAsGA4Products()
     gtag("event", "add_shipping_info", {
         currency, value, coupon, shipping_tier, items
     })
 }
 
-export function triggerAddPaymentInfo(currency = "GBP", coupon?: string, payment_type?: string) {
+export function triggerAddPaymentInfo(
+    currency = DEFAULT_CURRENCY,
+    coupon?: string,
+    payment_type?: string
+) {
     const {items, value} = getBasketAsGA4Products()
 
     gtag("event", "add_payment_info", {
@@ -82,7 +94,11 @@ export function triggerAddPaymentInfo(currency = "GBP", coupon?: string, payment
     })
 }
 
-export function triggerAddToCart(product: ProductData, change: number, currency = "GBP") {
+export function triggerAddToCart(
+    product: ProductData,
+    change: number,
+    currency = DEFAULT_CURRENCY
+) {
     const func = change>0 ? "add_to_cart" : "remove_from_cart"
     const value = product.price*change
     const item = convertToGA4Product(product)
@@ -95,7 +111,9 @@ export function triggerAddToCart(product: ProductData, change: number, currency 
     })
 }
 
-export function triggerViewCart(currency="GBP") {
+export function triggerViewCart(
+    currency= DEFAULT_CURRENCY
+) {
     const {items, value} = getBasketAsGA4Products()
     
     gtag("event", "view_cart", {
@@ -103,7 +121,10 @@ export function triggerViewCart(currency="GBP") {
     })
 }
 
-export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
+export function triggerBeginCheckout(
+    coupon?: string,
+    currency = DEFAULT_CURRENCY
+) {
     const {items, value} = getBasketAsGA4Products()
 
     gtag("event", "begin_checkout", {
@@ -111,7 +132,10 @@ export function triggerBeginCheckout(coupon?: string, currency = "GBP") {
     })
 }
 
-export function triggerViewItem(product: ProductData | ProductData[], currency = "GBP") {
+export function triggerViewItem(
+    product: ProductData | ProductData[],
+    currency = DEFAULT_CURRENCY
+) {
     const prods: ProductData[] = !("length" in product) ? [product] : product
     const items = prods.map(convertToGA4Product)
     let value = 0;
@@ -122,7 +146,12 @@ export function triggerViewItem(product: ProductData | ProductData[], currency =
     })
 }
 
-export function triggerViewItemList(products: ProductData[], item_list_id?: string, item_list_name?: string, currency = "GBP") {
+export function triggerViewItemList(
+    products: ProductData[],
+    item_list_id?: string,
+    item_list_name?: string,
+    currency = DEFAULT_CURRENCY
+) {
     const items = products.map(convertToGA4Product)
 
     gtag("event", "view_item_list", {
