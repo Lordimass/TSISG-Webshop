@@ -3,7 +3,8 @@
     height: 22px;
 
     .price-major {
-        font-size: 22px
+        font-size: 22px;
+        letter-spacing: 1px;
     }
 
     .price-left {
@@ -15,8 +16,8 @@
     }
 
     .price-symbol {
-        font-size: 18px;
-        height: 18px
+        font-size: 15px;
+        height: 15px
     }
 
     .price-minor {

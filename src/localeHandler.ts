@@ -1,9 +1,10 @@
 import {createContext, useEffect, useState} from "react";
 import {getCurrency} from "locale-currency";
+import {Currency} from "dinero.js";
 
 
 const DEFAULT_LOCALE = 'en-GB';
-const DEFAULT_CURRENCY = getCurrency(DEFAULT_LOCALE) || "GBP";
+const DEFAULT_CURRENCY = getCurrency(DEFAULT_LOCALE) as Currency || "GBP";
 
 /**
  * Response format from a successful call to `https://api.bigdatacloud.net/data/reverse-geocode-client`
@@ -56,7 +57,7 @@ interface ILocaleContext {
     locale: string;
     /** ISO4217 Currency Code
      * @example "GBP"*/
-    currency: string;
+    currency: Currency;
 }
 
 export const LocaleContext = createContext<ILocaleContext>({
@@ -85,19 +86,19 @@ export default function useLocale(): ILocaleContext {
                     console.error("Couldn't find locale: " + await resp.text());
                     locale = window.navigator.language
                     setLocale(locale);
-                    setCurrency(getCurrency(locale) || DEFAULT_CURRENCY);
+                    setCurrency(getCurrency(locale) as Currency || DEFAULT_CURRENCY);
                 } else {
                     const geocodeResponse: GeocodeResponse = await resp.json();
                     locale = geocodeResponse.localityLanguageRequested + "-" + geocodeResponse.countryCode;
                     setLocale(locale);
-                    setCurrency(getCurrency(locale) || DEFAULT_CURRENCY);
+                    setCurrency(getCurrency(locale) as Currency || DEFAULT_CURRENCY);
                 }
 
                 url.searchParams.set('locale', locale)
                 window.history.replaceState(null, '', url);
             } else {
                 setLocale(locale);
-                setCurrency(getCurrency(locale) || DEFAULT_CURRENCY);
+                setCurrency(getCurrency(locale) as Currency || DEFAULT_CURRENCY);
             }
         }
         getLocale();

@@ -1,14 +1,19 @@
 import DineroFactory, {Dinero} from "dinero.js";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {convertDinero} from "./lib.tsx";
 
 import "./price.css"
+import {LocaleContext} from "../../localeHandler.ts";
 
 export default function Price({baseDinero}: {baseDinero: Dinero}) {
-    // TODO: Convert to the user's local currency
+    const {currency} = useContext(LocaleContext);
+
     useEffect(() => {
         async function convert() {
-            const convertedDinero = await convertDinero(baseDinero, "EUR")
+            if (currency === baseDinero.getCurrency()) {
+                setConverted(baseDinero);
+            }
+            const convertedDinero = await convertDinero(baseDinero, currency)
             setConverted(convertedDinero)
         }
         convert()
