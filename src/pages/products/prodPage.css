@@ -28,10 +28,7 @@
 
 .product-box .price {
     grid-area: price;
-    color: black;
-    font-weight: 200;
-    font-size: 2em;
-    min-width: 0;
+    margin-bottom: 10px;
 }
 
 .product-box .title {
@@ -124,6 +121,14 @@
     box-sizing: border-box;
 }
 
+.title .sku {
+    font-size: 0.4em;
+    font-weight: 600;
+    line-height: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    text-wrap-mode: wrap;
+}
+
 .tags {
     display: flex;
     gap: 0 3px;
@@ -139,15 +144,6 @@
     font-family: "Perfect Penmanship";
     font-size: 0.8em;
     user-select: none;
-}
-
-.title .sku {
-    font-size: 0.4em;
-    font-weight: 600;
-    line-height: 1em;
-    margin-bottom: 1em;
-    font-family: 'Courier New', Courier, monospace;
-    text-wrap-mode: wrap;
 }
 
 .product-group {
@@ -243,10 +239,6 @@
 
     .product-box .desc {
         min-height: 150px;
-    }
-
-    .product-box .price {
-        font-size: 2.5em;
     }
 
     .prod-page-modifier {

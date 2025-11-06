@@ -15,6 +15,8 @@ import { NotificationsContext } from "../../components/notification/lib"
 import Page404 from "../404/404"
 import { triggerViewItem, triggerViewItemList } from "../../lib/analytics/analytics"
 import Page from "../../components/page/page"
+import DineroFactory from "dinero.js";
+import Price from "../../components/price/price.tsx";
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -81,13 +83,10 @@ export default function ProdPage() {
     // Also display the name of the variant.
     const [hoveredVariant, setHoveredVariant] = useState<UnsubmittedProductData | undefined>(undefined);
 
-    const priceSplit = product.price.toString().split(".")
-    const priceMajor = priceSplit[0]
-    let priceMinorString = priceSplit[1]
-    if (!priceMinorString) {
-        priceMinorString = "0"
-    }
-    const priceMinor = priceMinorString.padEnd(2, "0")
+    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
+    // to convert it to the users locale later.
+    const priceUnits = Math.round(product.price*100)
+    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
 
     if (return404.current) return <Page404/>
     return (<Page
@@ -159,11 +158,8 @@ export default function ProdPage() {
                 : <><br/><div className="sku">SKUS{group.map(prod=>prod.sku).sort().map(sku => " "+sku).toString()}</div></>
             : <></>}
         </h1>
-        <h2 className="price">
-            <span style={{fontSize: "0.7em"}}>£</span>
-            {priceMajor}
-            <span style={{fontSize: "0.6em", verticalAlign: "super"}}>{priceMinor}</span>
-        </h2>
+        <Price baseDinero={dinero}/>
+
     <div className="tags">{product.tags.map((tag: any) => (
             <div className="tag" key={tag.name}>{tag.name}</div>
             ))}</div>

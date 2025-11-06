@@ -358,6 +358,11 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
         syncWithBasket()
     }, [])
 
+    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
+    // to convert it to the users locale later.
+    const priceUnits = Math.round(price*100)
+    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+
     return (
         <div className="basket-product" id={"product-" + sku}>
             <a className="basket-prod-header" href={link}>
@@ -367,7 +372,7 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
             <div className="basket-prod-footer">
                 <div className="basket-product-text">
                     <a className="product-name" href={link}>{name}</a>
-                    <p className="product-price">{string_price}</p>
+                    <Price baseDinero={dinero}/>
                 </div>
 
                 <div className='basket-modifier'>
@@ -442,12 +447,17 @@ export function CheckoutProduct({
 
     if (image == "") image = undefined
 
+    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
+    // to convert it to the users locale later.
+    const priceUnits = Math.round(total*100)
+    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+
     return (<a className="checkout-product" href={href}>
         <SquareImageBox image={image} size='100%' loading='eager'/>
         <div className="checkout-product-text">
             {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> :
                 <p className='checkout-product-name'>{name}</p>}
-            <p className='checkout-product-price'>{"£" + total.toFixed(2)}</p>
+            <Price baseDinero={dinero}/>
             {admin ? <p>SKU: {sku}</p> : <></>}
         </div>
         {checkbox ? <>
