@@ -18,6 +18,7 @@ import {LoginContext} from "./lib/auth";
 import {SiteSettingsContext} from "@shared/types/types";
 import {useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings} from "./appHooks";
 import {Report} from "./pages/staff/reports/report/report";
+import useLocale, {LocaleContext} from "./localeHandler.ts";
 
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
@@ -32,6 +33,7 @@ export function App() {
     const {loggedIn, user, permissions, loading} = useLogin()
     const {newNotif, notify} = useNotifs()
     const siteSettings = useSiteSettings(notify)
+    const localeContext = useLocale();
     useConditionalBasketUpdate()
 
     return (<>
@@ -42,47 +44,49 @@ export function App() {
             <meta name='generator' content='react'/>
 
             <LoginContext.Provider value={{loggedIn, user, permissions, loading}}>
-                <SiteSettingsContext.Provider value={siteSettings}>
-                    <NotificationsContext.Provider value={{newNotif, notify}}>
-                        {/**
-                         * Make sure to update sitemap.mts (Netlify function) to include new static pages
-                         * in the sitemap
-                         */}
-                        <BrowserRouter>
-                            <Routes>
-                                <Route index element={<Home/>}/>
+            <SiteSettingsContext.Provider value={siteSettings}>
+            <NotificationsContext.Provider value={{newNotif, notify}}>
+            <LocaleContext.Provider value={localeContext}>
+                {/**
+                 * Make sure to update sitemap.mts (Netlify function) to include new static pages
+                 * in the sitemap
+                 */}
+                <BrowserRouter>
+                    <Routes>
+                        <Route index element={<Home/>}/>
 
-                                <Route path="products/*" element={<ProdPage/>}/>
+                        <Route path="products/*" element={<ProdPage/>}/>
 
-                                <Route path="checkout" element={<Checkout/>}/>
+                        <Route path="checkout" element={<Checkout/>}/>
 
-                                <Route path="thankyou" element={<ThankYou/>}/>
+                        <Route path="thankyou" element={<ThankYou/>}/>
 
-                                <Route path='login' element={<LoginPage/>}/>
+                        <Route path='login' element={<LoginPage/>}/>
 
-                                <Route path="staff/orders" element={<OrderManager/>}/>
-                                <Route path="staff/reports" element={<Reports/>}/>
-                                <Route path="staff/reports/*" element={<Report/>}/>
+                        <Route path="staff/orders" element={<OrderManager/>}/>
+                        <Route path="staff/reports" element={<Reports/>}/>
+                        <Route path="staff/reports/*" element={<Report/>}/>
 
-                                <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy'
-                                                                       canonical='privacy'/>}/>
-                                <Route path="returns"
-                                       element={<Policy file_name='returns' title='Refunds & Returns Policy'
-                                                        canonical='returns'/>}/>
-                                <Route path="refunds"
-                                       element={<Policy file_name='returns' title='Refunds & Returns Policy'
-                                                        canonical='returns'/>}/>
-                                <Route path="cancellations"
-                                       element={<Policy file_name='cancellation' title='Cancellation Policy'
-                                                        canonical='cancellation'/>}/>
-                                <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy'
-                                                                        canonical='shipping'/>}/>
+                        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy'
+                                                               canonical='privacy'/>}/>
+                        <Route path="returns"
+                               element={<Policy file_name='returns' title='Refunds & Returns Policy'
+                                                canonical='returns'/>}/>
+                        <Route path="refunds"
+                               element={<Policy file_name='returns' title='Refunds & Returns Policy'
+                                                canonical='returns'/>}/>
+                        <Route path="cancellations"
+                               element={<Policy file_name='cancellation' title='Cancellation Policy'
+                                                canonical='cancellation'/>}/>
+                        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy'
+                                                                canonical='shipping'/>}/>
 
-                                <Route path="*" element={<Page404/>}/>
-                            </Routes>
-                        </BrowserRouter>
-                    </NotificationsContext.Provider>
-                </SiteSettingsContext.Provider>
+                        <Route path="*" element={<Page404/>}/>
+                    </Routes>
+                </BrowserRouter>
+            </LocaleContext.Provider>
+            </NotificationsContext.Provider>
+            </SiteSettingsContext.Provider>
             </LoginContext.Provider></>
     )
 }

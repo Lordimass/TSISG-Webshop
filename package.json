@@ -26,6 +26,7 @@
     "express": "^5.1.0",
     "formidable": "^3.5.4",
     "google-auth-library": "^10.4.2",
+    "locale-currency": "^1.0.0",
     "octokit": "^5.0.4",
     "react": "^19.0.0",
     "react-dom": "^19.1.1",
