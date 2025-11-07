@@ -25,14 +25,6 @@ export function getGAClientId(): string | null {
     return null;
 }
 
-export async function getGAClientIdGtag(): Promise<string | null> {
-    return new Promise((resolve) => {
-        ReactGA.gtag("get", import.meta.env.VITE_GA4_MEASUREMENT_ID, "client_id", (id: any) => {
-            resolve(id);
-        });
-    });
-}
-
 /**
  * Get the Google Analytics session ID.
  * @returns The GA session ID or null if not found.
