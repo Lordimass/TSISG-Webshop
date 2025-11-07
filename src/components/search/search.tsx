@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import {ChangeEvent, useContext, useEffect, useRef, useState} from "react";
 import { searchProducts } from "./lib";
 
 import "./search.css"
@@ -6,6 +6,7 @@ import { CheckoutProduct } from "../product/product";
 import { ProductData } from "@shared/types/types";
 import { NotificationsContext } from "../notification/lib";
 import { triggerSearch, triggerViewItemList } from "../../lib/analytics/analytics";
+import {LocaleContext} from "../../localeHandler.ts";
 
 /**
  * 
@@ -15,7 +16,10 @@ import { triggerSearch, triggerViewItemList } from "../../lib/analytics/analytic
  * @returns 
  */
 export function ProductSearch({search_delay = 200}: {search_delay?: number}) {
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const {notify} = useContext(NotificationsContext)
+    const {currency} = useContext(LocaleContext)
+
+    async function handleChange(e: ChangeEvent<HTMLInputElement>) {
     e.preventDefault();
     // Close any existing timeout
     if (searchTimeout.current) clearTimeout(searchTimeout.current)
@@ -39,7 +43,7 @@ export function ProductSearch({search_delay = 200}: {search_delay?: number}) {
       const searchResults = await searchProducts(query);
       setResults(searchResults);
       triggerSearch(query);
-      triggerViewItemList(searchResults, "search-results", "Search Results")
+      await triggerViewItemList(searchResults, "search-results", "Search Results", currency)
     } catch (error: any) {
       notify("Something went wrong with your search, sorry!");
       console.error("Error searching products:", JSON.stringify(error, undefined, 2));
@@ -49,12 +53,12 @@ export function ProductSearch({search_delay = 200}: {search_delay?: number}) {
 
   const [results, setResults] = useState<ProductData[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const {notify} = useContext(NotificationsContext)
+
   const menuRef = useRef<HTMLUListElement>(null);
   const searchBarRef = useRef<HTMLDivElement>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null)
 
-  // Check for clicks outside of the container to close the menu.
+  // Check for clicks outside the container to close the menu.
   useEffect(() => {
       function handleClick(event: any) {
           // If click is outside the menu element, close it
@@ -90,7 +94,7 @@ export function ProductSearch({search_delay = 200}: {search_delay?: number}) {
               name="search"
               className="search-input"
               type="text"
-              onChange={(e) => {handleChange(e);}}
+              onChange={handleChange}
               placeholder="Search products..."
           />
         </div>

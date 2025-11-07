@@ -1,6 +1,6 @@
 import "./products.css"
 
-import {useEffect, useState } from "react";
+import {JSX, useContext, useEffect, useState} from "react";
 import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
@@ -9,15 +9,18 @@ import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 import { triggerViewItemList } from "../../lib/analytics/analytics";
+import {LocaleContext} from "../../localeHandler.ts";
 
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
     function decrementPage() {setPage(page - 1)}
 
+    const {currency} = useContext(LocaleContext)
+
     const [page, setPage] = useState(1)
     const getProductsResponse = useGetGroupedProducts(undefined, true, true);
     const productGroups: ProductData[][] = getProductsResponse.data || []
-    const [products, setProducts] = useState<React.JSX.Element[]>([])
+    const [products, setProducts] = useState<JSX.Element[]>([])
     const [pageCount, setPageCount] = useState(0)
     
     useEffect(() => {
@@ -39,7 +42,7 @@ export default function Products() {
         let start: number = (page-1)*productLoadChunks
         let end: number = Math.min(page*productLoadChunks, activeProductData.length)
 
-        const productComponents: React.JSX.Element[] = []
+        const productComponents: JSX.Element[] = []
         const displayedProducts: ProductData[] = []
         for (let i=start; i < Math.min(end, activeProductData.length); i++) {
             let group: ProductData[]|null = activeProductData[i]
@@ -53,7 +56,7 @@ export default function Products() {
             displayedProducts.push(...group)
         }
         setProducts(productComponents)
-        triggerViewItemList(displayedProducts, `home_page_${page}`, `Home Page ${page}`)
+        triggerViewItemList(displayedProducts, `home_page_${page}`, `Home Page ${page}`, currency)
         
         let pageCount = Math.floor(activeProductData.length/productLoadChunks);
         if (activeProductData.length % productLoadChunks != 0) {

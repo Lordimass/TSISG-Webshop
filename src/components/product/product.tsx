@@ -8,11 +8,14 @@ import {getImageURL, getRepresentativeImageURL, setBasketStringQuantity} from '.
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
 import DineroFactory from "dinero.js";
+import {LocaleContext} from "../../localeHandler.ts";
 
 /**
  * I apologise sincerely for the following code.
  */
 export default function Product({prod}: { prod: ProductData | ProductData[] }) {
+    const {currency} = useContext(LocaleContext);
+
     // Redefining variables after changing parameter to accept
     // full product instead of just select information. Done to
     // avoid refactoring the whole component to use product.???
@@ -54,6 +57,8 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
     }
 
     function BasketModifier() { // Text field and increment/decrement buttons
+        const {currency} = useContext(LocaleContext);
+
         return (<>
             <div className='decrement-basket-quantity-button' onClick={decrement}>
                 <h1>-</h1>
@@ -140,13 +145,13 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
         updateQuantity(+value)
     }
 
-    function updateQuantity(quant: number) {
+    async function updateQuantity(quant: number) {
         if (group) {
             return
         }
 
         // Typecast safe since modifier only active for non-grouped products
-        setBasketStringQuantity(product as ProductData, quant)
+        await setBasketStringQuantity(product as ProductData, quant, currency)
         setQuantityButActually(quant)
     }
 
@@ -268,23 +273,24 @@ function GroupBasketModifier() {
 
 export function BasketProduct({product}: { product: ProductInBasket }) {
     const {sku, name, price, images, stock} = product
+    const {currency} = useContext(LocaleContext)
 
-    function increment() { // Increase quantity of this product
+    async function increment() { // Increase quantity of this product
         if (quantity >= max_order) {
             return
         }
-        setBasketStringQuantity(product, quantity + 1)
+        await setBasketStringQuantity(product, quantity + 1, currency)
         setQuantityButActually(quantity + 1)
     }
 
-    function decrement() {
+    async function decrement() {
         if (quantity > 0) {
-            setBasketStringQuantity(product, quantity - 1)
+            await setBasketStringQuantity(product, quantity - 1, currency)
             setQuantityButActually(quantity - 1)
         }
     }
 
-    function updateQuantity() {
+    async function updateQuantity() {
         // Updating quantity based on the contents of the HTMLInput
 
         // Fetch HTMLElement
@@ -306,17 +312,17 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
         }
         // Check number in range
         if (value > max_order) {
-            setBasketStringQuantity(product, max_order)
+            await setBasketStringQuantity(product, max_order, currency)
             setQuantityButActually(max_order)
             return
         } else if (value <= 0) {
-            setBasketStringQuantity(product, 0)
+            await setBasketStringQuantity(product, 0, currency)
             setQuantityButActually(0)
             return
         }
 
         // Actually change the variable value
-        setBasketStringQuantity(product, value)
+        await setBasketStringQuantity(product, value, currency)
         setQuantityButActually(value)
     }
 

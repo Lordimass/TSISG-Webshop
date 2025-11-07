@@ -26,6 +26,8 @@ import Page from "../../components/page/page";
 import {LocaleContext} from "../../localeHandler.ts";
 
 export default function Checkout() {
+    const {currency} = useContext(LocaleContext)
+
     const [preparing, setPreparing] = useState(true)
     
     // If the user has nothing in their basket, they should not
@@ -41,7 +43,11 @@ export default function Checkout() {
         loadingText="We're loading your basket..."
     >
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
-            <CheckoutAux onReady={()=>{setPreparing(false); triggerBeginCheckout(); console.log("Test!")}}/>
+            <CheckoutAux onReady={async ()=>{
+                setPreparing(false);
+                await triggerBeginCheckout(currency);
+                console.log("Test!");
+            }}/>
         </CheckoutProvider>
     </Page>)
 }
@@ -50,7 +56,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
     const {currency} = useContext(LocaleContext)
     /**
-     * Checks whether all of the items in the basket are still in stock
+     * Checks whether all the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.
      */
     async function checkStock() {
@@ -116,7 +122,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             notify(error.error.message)
         }
         setIsLoading(false);
-    };
+    }
 
     /**
      * Checks if the session is still active, since they expire after a set time,
@@ -194,17 +200,17 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
         
         // TODO: Give customers multiple shipping options
-        checkout.updateShippingOption(rates[0])
+        await checkout.updateShippingOption(rates[0])
 
         addressComplete.current = true
-        triggerAddShippingInfo()
+        await triggerAddShippingInfo(currency)
     })
 
     const paymentElement = checkout.getPaymentElement()
-    paymentElement?.once("change", (e) => {
+    paymentElement?.once("change", async (e) => {
         if (e.complete && !paymentInfoComplete.current) {
             paymentInfoComplete.current = true
-            triggerAddPaymentInfo()
+            await triggerAddPaymentInfo(currency)
         }
         
     })

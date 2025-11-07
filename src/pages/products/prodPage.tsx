@@ -17,10 +17,12 @@ import { triggerViewItem, triggerViewItemList } from "../../lib/analytics/analyt
 import Page from "../../components/page/page"
 import DineroFactory from "dinero.js";
 import Price from "../../components/price/price.tsx";
+import {LocaleContext} from "../../localeHandler.ts";
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
     const {notify} = useContext(NotificationsContext)
+    const {currency} = useContext(LocaleContext)
 
     // The sku of the product, extracted from the URL. Should always match product.sku
     const sku = extractSKU()
@@ -53,7 +55,7 @@ export default function ProdPage() {
                 setOriginalProd(structuredClone(prod))
                 originalProdSet.current = true;
             }
-            triggerViewItem(prod)
+            triggerViewItem(prod, currency)
         } else if (!resp.loading && !prod) {
             return404.current = true;
         }
@@ -63,12 +65,13 @@ export default function ProdPage() {
         if (product.sku === 0) return
         // Fetch any products in group
         getGroup(product.group_name).then(
-            (g) => {
+            async (g) => {
                 setGroup(g); 
-                if (g.length > 0) triggerViewItemList(
+                if (g.length > 0) await triggerViewItemList(
                     g, 
                     `product-group-page`, 
-                    `Product Group Page`
+                    `Product Group Page`,
+                    currency
                 )
             }, 
             (error) => {setGroup([]); console.error(error)}
@@ -212,11 +215,13 @@ function ProductVariant({
 } : {
     product: UnsubmittedProductData
 }) {
-    function changeProduct() {
+    const {currency} = useContext(LocaleContext)
+
+    async function changeProduct() {
         if (!setProduct) return
         setProduct(product)
         window.history.pushState(undefined, product.name, `/products/${product.sku}`)
-        triggerViewItem(cleanseUnsubmittedProduct(product))
+        await triggerViewItem(cleanseUnsubmittedProduct(product), currency)
     }
     /** 
      * The image to display for the product, either the group_product_icon
@@ -230,7 +235,7 @@ function ProductVariant({
     // TODO: Have variant icons stored in their own bucket which contains significantly smaller icons (they only need to
     //  be 100px max anyways)
 
-    const {product: mainProduct, setProduct, hoveredVariant, setHoveredVariant} = useContext(ProductContext)
+    const {product: mainProduct, setProduct, setHoveredVariant} = useContext(ProductContext)
     if (!setHoveredVariant) return <></>
 
     // Since SquareImageBox doesn't take UnsubmittedImageData, we'll
@@ -263,21 +268,23 @@ function ProductVariant({
 }
 
 function QuantityTicker() {
-    function increment() {
+    const {currency} = useContext(LocaleContext)
+
+    async function increment() {
         if (basketQuant == undefined) {
             return
         }
-        updateQuantity(basketQuant + 1)
+        await updateQuantity(basketQuant + 1)
     }
 
-    function decrement() {
+    async function decrement() {
         if (basketQuant == undefined) {
             return
         }
-        updateQuantity(basketQuant - 1)
+        await updateQuantity(basketQuant - 1)
     }
 
-    function updateQuantity(newQuantity?: number) {
+    async function updateQuantity(newQuantity?: number) {
         if (basketQuant == undefined || !setBasketQuant || !product) {
             return
         }
@@ -301,7 +308,7 @@ function QuantityTicker() {
         // Update Input Text Field if it exists
         // It may not exist if, e.g. basketQuant is 0
         setInputValue(newQuantity)
-        setBasketStringQuantity(cleanseUnsubmittedProduct(product), newQuantity)
+        await setBasketStringQuantity(cleanseUnsubmittedProduct(product), newQuantity, currency)
         setBasketQuant(newQuantity)
     }
 
@@ -316,7 +323,7 @@ function QuantityTicker() {
         if (basketString) {
             let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
             let item: ProductInBasket | undefined = basket.find(item => item.sku === product.sku);
-            // If don't find the product, it must not be in the basket anymore, so set the quant to 0
+            // If it doesn't find the product, it must not be in the basket anymore, so set the quant to 0
             if (!item) {setBasketQuant(0); return;}
 
             // Set the basket quantity state for the product
@@ -338,14 +345,14 @@ function QuantityTicker() {
     const max_order = Math.min(max_product_order, product.stock)
     const [disabled, setDisabled] = useState(true)
     useEffect(() => {
-        const disabled = product.stock <= 0 
-            || product.active === false 
+        const disabled = product.stock <= 0
+            || !product.active
             || (siteSettings.kill_switch?.enabled ?? false)
         setDisabled(disabled)
         // If the product is disabled, ensure the basket quantity is 0
         if (disabled && product.sku != 0) {
             console.log("Product disabled, setting basket quantity to 0")
-            setBasketStringQuantity(cleanseUnsubmittedProduct(product), 0)
+            setBasketStringQuantity(cleanseUnsubmittedProduct(product), 0, currency)
             setBasketQuant?.(0)
         }
     }, [product])
@@ -395,7 +402,7 @@ function QuantityTicker() {
             className='basket-input' 
             type='text'
             inputMode='numeric'
-            onBlur={()=>{updateQuantity()}}
+            onBlur={async ()=>{await updateQuantity()}}
             defaultValue={basketQuant}
         />
         <div className='increment-basket-quantity-button' onClick={increment}>

@@ -4,6 +4,8 @@ import { compareProducts } from "./sortMethods"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { daysOfWeek, monthsOfYear } from "./consts"
 import { triggerAddToCart } from "./analytics/analytics"
+import {Currency} from "dinero.js";
+import {DEFAULT_CURRENCY} from "../localeHandler.ts";
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale
@@ -117,7 +119,11 @@ export async function getGroup(name?: string): Promise<ProductData[]> {
  * Given a new quantity and relevant information on a product to associate it with,
  * update the local storage basket to contain that new quantity
  */
-export function setBasketStringQuantity(prod: ProductData | ProductInBasket, quant: number) {
+export async function setBasketStringQuantity(
+    prod: ProductData | ProductInBasket,
+    quant: number,
+    currency: Currency = DEFAULT_CURRENCY
+) {
   console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
   /** Whether this is a new basket string or not */
   let freshBasket = false
@@ -165,7 +171,7 @@ export function setBasketStringQuantity(prod: ProductData | ProductInBasket, qua
   window.dispatchEvent(new CustomEvent("basketUpdate"))
 
   // Trigger GA4 Event
-  triggerAddToCart(prod, diff)
+  await triggerAddToCart(prod, diff, currency)
 }
 
 /**
