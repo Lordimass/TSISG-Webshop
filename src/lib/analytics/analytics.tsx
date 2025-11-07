@@ -2,6 +2,8 @@ import ReactGA from "react-ga4"
 import { Basket, ProductData, ProductInBasket } from "@shared/types/types"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
+import DineroFactory, {Currency} from "dinero.js";
+import {convertDinero} from "../../components/price/lib.tsx";
 
 /**
  * Get the Google Analytics client ID from the cookie.
@@ -37,63 +39,72 @@ export async function getGASessionId(): Promise<string | null> {
     });
 }
 
-function convertToGA4Product(p: ProductData | ProductInBasket): GA4Product {
+async function convertToGA4Product(
+    p: ProductData | ProductInBasket,
+    currency: Currency = DEFAULT_CURRENCY
+): Promise<GA4Product> {
+    const dinero = DineroFactory({amount: Math.round(p.price*100), currency: DEFAULT_CURRENCY, precision: 2});
+    const convertedDinero = await convertDinero(dinero, currency);
+
     return {
         item_id: p.sku.toString(),
         item_name: p.name,
         item_category: p.category.name,
         item_variant: p.metadata.variant_name,
-        price: p.price,
+        price: convertedDinero.getAmount(),
         quantity: "basketQuantity" in p ? p.basketQuantity : undefined
     }
 }
 
-function getBasketAsGA4Products(): {
+async function getBasketAsGA4Products(currency: Currency = DEFAULT_CURRENCY): Promise<{
     items: GA4Product[],
     value: number
-} {
+}> {
     const basketString = localStorage.getItem("basket")
     if (!basketString) return {items: [], value: 0}
     const basketObj = JSON.parse(basketString)
-    if (!("basket" in basketObj)) {console.error("localStorage Basket Malformed"); return {items: [], value: 0};}
+    if (!("basket" in basketObj)) {
+        console.error("localStorage Basket Malformed"); return {items: [], value: 0};
+    }
     const basket: Basket = basketObj.basket
-    const items = basket.map(convertToGA4Product)
+    const itemPromises = basket.map(p => convertToGA4Product(p, currency))
+    const items = await Promise.all(itemPromises)
     let value = 0; 
     items.forEach(p => value += p.price ?? 0)
     return {items, value}
 }
 
-export function triggerAddShippingInfo(
+export async function triggerAddShippingInfo(
     currency = DEFAULT_CURRENCY,
     coupon?: string,
     shipping_tier?: string
 ) {
-    const {items, value} = getBasketAsGA4Products()
+    const {items, value} = await getBasketAsGA4Products()
     gtag("event", "add_shipping_info", {
         currency, value, coupon, shipping_tier, items
     })
 }
 
-export function triggerAddPaymentInfo(
+export async function triggerAddPaymentInfo(
     currency = DEFAULT_CURRENCY,
     coupon?: string,
     payment_type?: string
 ) {
-    const {items, value} = getBasketAsGA4Products()
+    const {items, value} = await getBasketAsGA4Products()
 
     gtag("event", "add_payment_info", {
         currency, value, coupon, payment_type, items
     })
 }
 
-export function triggerAddToCart(
+export async function triggerAddToCart(
     product: ProductData,
     change: number,
     currency = DEFAULT_CURRENCY
 ) {
     const func = change>0 ? "add_to_cart" : "remove_from_cart"
     const value = product.price*change
-    const item = convertToGA4Product(product)
+    const item = await convertToGA4Product(product)
     item.quantity = change
     
     gtag("event", func, {
@@ -103,33 +114,34 @@ export function triggerAddToCart(
     })
 }
 
-export function triggerViewCart(
+export async function triggerViewCart(
     currency= DEFAULT_CURRENCY
 ) {
-    const {items, value} = getBasketAsGA4Products()
+    const {items, value} = await getBasketAsGA4Products()
     
     gtag("event", "view_cart", {
         currency, value, items
     })
 }
 
-export function triggerBeginCheckout(
+export async function triggerBeginCheckout(
     coupon?: string,
     currency = DEFAULT_CURRENCY
 ) {
-    const {items, value} = getBasketAsGA4Products()
+    const {items, value} = await getBasketAsGA4Products()
 
     gtag("event", "begin_checkout", {
         currency, value, coupon, items
     })
 }
 
-export function triggerViewItem(
+export async function triggerViewItem(
     product: ProductData | ProductData[],
     currency = DEFAULT_CURRENCY
 ) {
     const prods: ProductData[] = !("length" in product) ? [product] : product
-    const items = prods.map(convertToGA4Product)
+    const itemPromises = prods.map((p) => convertToGA4Product(p, currency))
+    const items = await Promise.all(itemPromises)
     let value = 0;
     prods.forEach(p => value+=p.price) 
 
@@ -138,13 +150,14 @@ export function triggerViewItem(
     })
 }
 
-export function triggerViewItemList(
-    products: ProductData[],
+export async function triggerViewItemList(
+    prods: ProductData[],
     item_list_id?: string,
     item_list_name?: string,
     currency = DEFAULT_CURRENCY
 ) {
-    const items = products.map(convertToGA4Product)
+    const itemPromises = prods.map((p) => convertToGA4Product(p, currency))
+    const items = await Promise.all(itemPromises)
 
     gtag("event", "view_item_list", {
         currency, item_list_id, item_list_name, items
