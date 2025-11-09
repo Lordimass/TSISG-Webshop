@@ -45,8 +45,7 @@ export default function Checkout() {
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
             <CheckoutAux onReady={async ()=>{
                 setPreparing(false);
-                await triggerBeginCheckout(currency);
-                console.log("Test!");
+                await triggerBeginCheckout(undefined, currency);
             }}/>
         </CheckoutProvider>
     </Page>)
