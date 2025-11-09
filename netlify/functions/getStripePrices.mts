@@ -2,11 +2,19 @@ import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 import { stripe } from "../lib/stripeObject.mts";
 import type { ProductInBasket } from "../../shared/types/types.mts";
-import type { StripeProductMeta } from "../../shared/types/stripeTypes.mts";
+import type { StripeProductMeta } from "@shared/types/stripeTypes.mts";
 import { checkObjectsEqual, getImageURL } from "../lib/lib.mts";
 import { callRPC } from "../lib/supabaseRPC.mts";
 import { supabaseAnon } from "../lib/getSupabaseClient.mts";
-import type { ImageData } from "../../shared/types/supabaseTypes.mts";
+import type { ImageData } from "@shared/types/supabaseTypes.mts";
+import DineroFactory, {Currency} from "dinero.js";
+import {DEFAULT_CURRENCY} from "../../src/localeHandler.ts";
+import {convertDinero} from "@shared/functions/price.ts";
+
+interface Body {
+    basket: ProductInBasket[];
+    currency: Currency;
+}
 
 export default async function handler(request: Request, context: Context) {
     console.log(process.env.STRIPE_SECRET_KEY)
@@ -14,82 +22,78 @@ export default async function handler(request: Request, context: Context) {
         "Stripe client not initialised, check STRIPE_SECRET_KEY environment variable"
     );
 
-    const pricePointIDs: Array<Object> = [];
-    const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
+    let {basket, currency} = await request.json() as Body
 
-    let basket = await request.json()
-
-    // Verify and update basket data with up to date information
+    // Verify and update basket data with up-to-date information
     const priceCheckResp = await updateBasketData(basket, context);
     if (!priceCheckResp.ok) return priceCheckResp
     else basket = await priceCheckResp.json()
 
-    for (let i = 0; i < basket.length; i++) {
-        const item: ProductInBasket = basket[i];
+    // Iterate through each item in the validated basket and fetch a Stripe Price Point ID
+    const pricePointIDs: {price: string, quantity: number}[] = [];
+    const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
+    for (const p of basket) {
+        /** The metadata that should be attached to this product on Stripe. */
         const prodMeta: StripeProductMeta = {
-            sku: item.sku,
-            category_id: item.category.id,
-            category: item.category.name
+            sku: p.sku,
+            category_id: p.category.id,
+            category: p.category.name
         }
-        let stripeItem: Stripe.Product | null = getProductOnStripe(stripeProducts, item);
-        const itemprice = Math.round(item.price*100) // Stripe requires prices in pennies
-        
-        if (stripeItem) { // If the item already exists on stripe, use it as is.
-            const price: Stripe.Price = await stripe.prices.retrieve(stripeItem.default_price as string)
-            if (price.unit_amount == itemprice) { // If the price is correct, again use that price as is
-                pricePointIDs.push({
-                    price: stripeItem.default_price as string, 
-                    quantity: item.basketQuantity
-                })
-            } else { // Price was changed since last, create a new price
+        // Construct a Dinero object to calculate the price in the correct currency
+        const baseDinero = DineroFactory({
+            amount: Math.round(p.price*100), currency: DEFAULT_CURRENCY, precision: 2
+        })
+        const dinero = await convertDinero(baseDinero, currency)
+
+        // Check if the product exists on Stripe
+        const stripeItem = getProductOnStripe(stripeProducts, p);
+        if (stripeItem) {
+            // The item does exist, so we can use it.
+            // Fetch the prices for the item and check if the one we're looking for exists.
+            const prices = (await stripe.prices.list({product: stripeItem.id})).data;
+            const price: Stripe.Price | undefined = prices.filter(sPrice =>
+                sPrice.unit_amount === dinero.getAmount() &&
+                sPrice.currency === dinero.getCurrency()
+            )[0];
+
+            // Add the price point ID to the array.
+            if (price) {
+                // The price exists already in the given currency with the right amount.
+                pricePointIDs.push({price: price.id, quantity: p.basketQuantity});
+            } else {
+                // Price did not already exist, so we'll create it.
                 const price = await stripe.prices.create({
-                    currency: "gbp",
-                    unit_amount: itemprice, 
+                    currency: dinero.getCurrency(),
+                    unit_amount: dinero.getAmount(),
                     product: stripeItem.id
                 })
-                pricePointIDs.push({
-                    price: price.id,
-                    quantity: item.basketQuantity
-                })
-                // Update the default price object to be this new price.
-                try {
-                    await stripe.products.update(stripeItem.id, {default_price: price.id})
-                } catch (error) {
-                    console.error("Error updating product default price:", error);
-                    return new Response(undefined, {status: 500});
-                }
+                pricePointIDs.push({price: price.id, quantity: p.basketQuantity})
             }
 
-            // Update other metadata if any has changed
+            // Update any product metadata that may have changed
             if (!checkObjectsEqual(stripeItem.metadata as unknown as StripeProductMeta, prodMeta)) {
-                try {
-                    await stripe.products.update(stripeItem.id, {metadata: prodMeta})
-                } catch (error) {
-                    console.warn("Failed to update product metadata:", error)
-                }
+                try {await stripe.products.update(stripeItem.id, {metadata: prodMeta})}
+                catch (error) {console.warn("Failed to update product metadata:", error)}
             }
-
-        } else { // If it doesn't already exist, we'll need to create it.
+        } else {
+            // The item does not yet exist, so we must try to create it.
             try {
+                // Create the product
                 const productData = {
-                    name: item.name,
-                    images: getListOfImageURLS(item.images),
-                    default_price_data: {
-                        currency: 'gbp',
-                        unit_amount: itemprice // Stripe requires prices in pennies
-                    },
+                    name: p.name,
+                    images: getListOfImageURLS(p.images),
+                    // Default used here as it provides a shortcut to create the price in one API call, the fact
+                    // that it's a default isn't relevant to functionality in any way.
+                    default_price_data: {currency: dinero.getCurrency(), unit_amount: dinero.getAmount()},
                     metadata: prodMeta
                 }
-                stripeItem = await stripe.products.create(productData)
-                if (stripeItem) { // Add item now that it's been created
-                    const priceID = stripeItem.default_price as string
-                    pricePointIDs.push({
-                        price: priceID, 
-                        quantity: item.basketQuantity
-                    });
-                } else {
-                    return new Response(undefined, {status: 502, statusText: "An item failed to create on Stripe"})
-                }
+                const stripeItem = await stripe.products.create(productData)
+                // Add price point ID to the list
+                pricePointIDs.push({
+                    price: stripeItem.default_price as string,
+                    quantity: p.basketQuantity
+                });
+
             } catch (error) {
                 console.error("Error creating product on Stripe:", error);
                 return new Response(undefined, {status: 500, statusText: "Internal server error"});
@@ -125,19 +129,27 @@ async function updateBasketData(basket: ProductInBasket[], _context: Context) {
     return new Response(JSON.stringify(basket), {status: 200})
 }
 
+/**
+ * Find the Stripe product that matches the given `ProductInBasket` from a list of Stripe products
+ * @param stripeProducts The list of `Stripe.Product`s to search for the product in.
+ * @param p The product to search for.
+ * @return A `Stripe.Product` object, or `undefined` if it cannot be found.
+ */
 function getProductOnStripe(
         stripeProducts: Array<Stripe.Product>, 
-        product: ProductInBasket
-    ): Stripe.Product | null {
-    let foundProduct: Stripe.Product | null = null;
-    stripeProducts.forEach((stripeProduct) => {
-        if (stripeProduct.metadata.sku === product.sku.toString()) {
-            foundProduct = stripeProduct
-        }
-    })
-    return foundProduct
+        p: ProductInBasket
+    ): Stripe.Product | undefined {
+    return stripeProducts.filter(sp => sp.metadata.sku === p.sku.toString())[0]
 }
 
+/**
+ * Construct a list of image URL strings in relation to a list of `ImageData` objects, filtering out any garbage
+ * URLs.
+ * @param images The list of `ImageData` objects from which to construct the URLs
+ * @return A list of URLs pointing to images.
+ * @see ImageData
+ * @see getImageURL
+ */
 function getListOfImageURLS(images: ImageData[]) {
     return images.map(img => getImageURL(img)).filter(img => img !== undefined)
 }

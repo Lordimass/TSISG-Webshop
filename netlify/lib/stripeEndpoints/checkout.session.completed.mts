@@ -6,7 +6,9 @@ import { SupabaseClient } from "@supabase/supabase-js"
 import { supabaseService } from "../getSupabaseClient.mts"
 import { sendGA4Event } from "../lib.mts"
 
-export default async function handleCheckoutSessionCompleted(event: Stripe.CheckoutSessionCompletedEvent): Promise<Response | undefined> {
+export default async function handleCheckoutSessionCompleted(
+    event: Stripe.CheckoutSessionCompletedEvent
+) : Promise<Response | undefined> {
     const createOrderResp = await createOrder(event.data.object)
     const triggerPurchaseEventResp = await triggerGA4PurchaseEvent(event)
     if (createOrderResp && !createOrderResp.ok) {return createOrderResp}

@@ -3,7 +3,7 @@ import { Basket, ProductData, ProductInBasket } from "@shared/types/types"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
-import {convertDinero} from "../../components/price/lib.tsx";
+import {convertDinero} from "@shared/functions/price.ts";
 
 /**
  * Get the Google Analytics client ID from the cookie.
@@ -131,7 +131,6 @@ export async function triggerBeginCheckout(
     currency = DEFAULT_CURRENCY
 ) {
     const {items, value} = await getBasketAsGA4Products(currency)
-
     gtag("event", "begin_checkout", {
         currency, value, coupon, items
     })

@@ -66,7 +66,7 @@ export const LocaleContext = createContext<ILocaleContext>({
 });
 
 /**
- * @return The user's locale string.
+ * @return The user's locale string and associated currency.
  */
 export default function useLocale(): ILocaleContext {
     const [locale, setLocale] = useState(DEFAULT_LOCALE);

@@ -1,5 +1,5 @@
 import { loadStripe, Stripe, StripeAddressElementOptions, StripePaymentElementOptions } from "@stripe/stripe-js";
-import { fetchClientSecret } from "./checkoutFunctions";
+import { createCheckoutSession } from "./checkoutFunctions";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 if (!STRIPE_KEY) {console.error("No VITE_STRIPE_KEY!")}
@@ -36,7 +36,7 @@ export const appearance: any = {
 };
 
 export const checkoutProviderOpts = { 
-    fetchClientSecret, 
+    fetchClientSecret: createCheckoutSession,
     elementsOptions: { 
         appearance,
         fonts: [{

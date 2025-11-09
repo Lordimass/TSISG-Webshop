@@ -1,9 +1,9 @@
 import {Dinero} from "dinero.js";
 import {useContext, useEffect, useState} from "react";
-import {convertDinero} from "./lib.tsx";
 
 import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
+import {convertDinero} from "@shared/functions/price.ts";
 
 export default function Price({baseDinero}: {baseDinero: Dinero}) {
     const {currency} = useContext(LocaleContext);

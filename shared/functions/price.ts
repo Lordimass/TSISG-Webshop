@@ -9,8 +9,6 @@ type Currency = DineroFactory.Currency
  */
 export const CURRENCY_CONVERSION_ENDPOINT = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{{from}}.min.json"
 
-
-
 type ConversionRates = {
     /** Date in YYYY-MM-DD format */
     date: string,
@@ -37,10 +35,20 @@ export async function convertDinero(dinero: Dinero, to: Currency): Promise<Diner
     let exchangeRates: ConversionRates;
 
     // Store current exchange rates in `sessionStorage` to save on API calls.
-    let exchangeRatesString = window.sessionStorage.getItem(`exchangeRates${dinero.getCurrency()}`);
+    let exchangeRatesString;
+    try {
+        exchangeRatesString = window.sessionStorage.getItem(`exchangeRates${dinero.getCurrency()}`);
+    } catch (e: unknown) {
+        if (!(e instanceof ReferenceError)) throw e
+    }
+
     if (!exchangeRatesString) {
         exchangeRates = await fetchExchangeRates(dinero.getCurrency());
-        window.sessionStorage.setItem(`exchangeRates${dinero.getCurrency()}`, JSON.stringify(exchangeRates));
+        try {
+            window.sessionStorage.setItem(`exchangeRates${dinero.getCurrency()}`, JSON.stringify(exchangeRates));
+        } catch (e: unknown) {
+            if (!(e instanceof ReferenceError)) throw e
+        }
     } else {
         exchangeRates = JSON.parse(exchangeRatesString);
     }

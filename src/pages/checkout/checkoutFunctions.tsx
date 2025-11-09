@@ -2,6 +2,9 @@ import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
 import { Basket } from "@shared/types/types"
+import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
+import {getCurrency} from "locale-currency";
+import {Currency} from "dinero.js";
 
 /**
  * Debug method to test Apple Pay
@@ -35,8 +38,18 @@ export function redirectIfEmptyBasket() {
     }
 }
 
-export async function fetchClientSecret(): Promise<string> {
-    const prices: Array<Object> = await fetchStripePrices()
+/**
+ * Creates a Stripe Checkout Session.
+ * @return The client secrete for the created checkout session.
+ */
+export async function createCheckoutSession(): Promise<string> {
+    // Get the user's currency from the query string, since we can't access LocaleContext
+    const urlParams = new URLSearchParams(window.location.search);
+    const locale = urlParams.get("locale") || DEFAULT_LOCALE;
+    const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
+
+    // Construct parameters for request to createCheckoutSession
+    const prices: Array<Object> = await fetchStripePrices(currency)
     const basketString = localStorage.getItem("basket")
     const gaClientID = getGAClientId();
     const gaSessionID = await getGASessionId();
@@ -52,7 +65,8 @@ export async function fetchClientSecret(): Promise<string> {
             basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
             origin: window.location.origin,
             gaClientID,
-            gaSessionID
+            gaSessionID,
+            currency: currency
         })
     })
     .then (
@@ -62,14 +76,14 @@ export async function fetchClientSecret(): Promise<string> {
     return result.client_secret
 }
 
-export async function fetchStripePrices(): Promise<Array<Object>> {
+export async function fetchStripePrices(currency: Currency): Promise<Array<Object>> {
     const oldBasket: Basket = JSON.parse(localStorage.getItem("basket")!).basket
     const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(oldBasket)
+        body: JSON.stringify({basket: oldBasket, currency})
     })
     .then (
         async function(value) {return await value.json()},
