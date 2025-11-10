@@ -38,7 +38,7 @@ export async function refreshBasket() {
  * @returns The public URL of the image, or undefined if not found
  */
 export function getImageURL(image: ImageData | UnsubmittedImageData, highres = false): string | undefined {
-  if ("local_url" in image) return image.local_url
+  if (image && "local_url" in image) return image.local_url
 
   if (!image) return undefined
   if (image.name) {
