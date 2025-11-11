@@ -196,7 +196,7 @@ export async function uploadImage(image: File, bucket: string): Promise<{
     formData.append("file", image)
     formData.append("bucket", bucket)
 
-    const {data, error} = await fetchFromNetlifyFunction("uploadProductImage", formData, getJWTToken())
+    const {data, error} = await fetchFromNetlifyFunction("uploadProdImage", formData, getJWTToken())
     console.log(data)
     if (error) throw error
     return data
