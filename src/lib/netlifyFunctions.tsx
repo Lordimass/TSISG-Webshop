@@ -5,6 +5,9 @@ import { UUID } from "crypto"
 import { compareImages } from "./sortMethods"
 import { getJWTToken } from "./auth"
 import { softParseJSON } from "./lib"
+import {supabase} from "./supabaseRPC.tsx";
+import imageCompression from "browser-image-compression";
+import {formatBytes} from "@shared/functions/functions.ts";
 
 /**
  * Calls the given Netlify function with the given body and JWT Auth token if supplied
@@ -180,24 +183,45 @@ export async function updateProductData(
  * Uploads an image to the given bucket.
  * @param image The image file to upload.
  * @param bucket The name of the bucket to upload the image to.
+ * @param compress If supplied, will run the image through a compression tool first with the given parameters.
+ * `maxSize` is in MB, and `maxWidthOrHeight` is in pixels.
  * @returns An object with 4 keys:
  *  * `fileName` - The name of the file in the bucket.
  *  * `size` - The size of the file in the bucket.
  *  * `fileID` - The ID of the created file object.
  *  * `fileURL` - The URL where the image can be accessed.
  */
-export async function uploadImage(image: File, bucket: string): Promise<{
+export async function uploadImage(
+    image: File,
+    bucket: string,
+    compress: {maxSize?: number, maxWidthOrHeight?: number} = {maxSize: 1, maxWidthOrHeight: 750}
+): Promise<{
     fileName: string
     size: number
     fileID: string
     fileURL: string
 }> {
-    const formData = new FormData()
-    formData.append("file", image)
-    formData.append("bucket", bucket)
+    // Compress first if enabled
+    if (compress) {
+        image = await imageCompression(image, {
+            useWebWorker: true,
+            fileType: "image/webp",
+            ...compress
+        })
+        console.log(`Image compressed, new file size ${formatBytes(image.size)}`);
+    }
 
-    const {data, error} = await fetchFromNetlifyFunction("uploadProdImage", formData, getJWTToken())
-    console.log(data)
-    if (error) throw error
-    return data
+    const date = new Date().getTime().toString();
+    const fileName = `${date.substring(6)}+${image.name}`
+    const uploadResp = await supabase.storage.from(bucket).upload(fileName, image)
+    if (uploadResp.error) throw uploadResp.error
+    else {
+        const dat = uploadResp.data
+        return {
+            fileName: dat.path,
+            size: image.size,
+            fileID: dat.id,
+            fileURL: supabase.storage.from(bucket).getPublicUrl(dat.path).data.publicUrl
+        }
+    }
 }

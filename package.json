@@ -20,6 +20,7 @@
     "@supabase/supabase-js": "^2.55.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.14.1",
+    "browser-image-compression": "^2.0.2",
     "comma-separated-tokens": "^2.0.3",
     "express": "^5.1.0",
     "formidable": "^3.5.4",
