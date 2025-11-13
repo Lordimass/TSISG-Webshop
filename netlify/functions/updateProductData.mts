@@ -29,7 +29,8 @@ export default async function handler(request: Request, _context: Context) { try
         .update({
             name: prod.name,
             price: userPerms.includes("edit_price") ? prod.price : undefined,
-            // TODO: This is problematic, if the stock changes in the time it takes for someone to edit a product, this will overwrite the change, making stock keeping inaccurate.
+            // TODO: This is problematic, if the stock changes in the time it takes for someone to edit a product,
+            //  this will overwrite the change, making stock keeping inaccurate.
             stock: prod.stock, 
             category_id: prod.category_id,
             active: prod.active,
@@ -38,7 +39,8 @@ export default async function handler(request: Request, _context: Context) { try
             origin_country_code: prod.origin_country_code,
             package_type_override: prod.package_type_override,
             description: prod.description, 
-            group_name: prod.group_name
+            group_name: prod.group_name,
+            sort_order: prod.sort_order
         })
         .eq("sku", prod.sku)
     if (prodErr) throw prodErr
