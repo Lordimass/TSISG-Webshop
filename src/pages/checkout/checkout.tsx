@@ -24,6 +24,8 @@ import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
 import {LocaleContext} from "../../localeHandler.ts";
+import DineroFactory, {Currency} from "dinero.js";
+import Price from "../../components/price/price.tsx";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -297,7 +299,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         <div className="checkout-right">
             <CheckoutProducts/>
             <p className="msg">To edit your basket, <a href="/">go back</a></p>
-            <CheckoutTotals checkoutTotal={checkout.total}/>
+            <CheckoutTotals checkoutTotal={checkout.total} currency={checkout.currency as Currency} />
             <p className="msg">{killSwitchMessage}</p>
             <button type="button" disabled={!readyToCheckout || isLoading || (killSwitch && !DEV)} id="submit" onClick={handleSubmit}>
                 <span id="button-text">
@@ -389,11 +391,14 @@ function RequiredInput({
     </div>)
 }
 
-function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSummary}) {
+function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckoutTotalSummary, currency: Currency}) {
     const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
     const sub = checkoutTotal.subtotal.amount
     const shp = checkoutTotal.shippingRate.amount
     const tot = checkoutTotal.total.amount
+    const totDinero = DineroFactory(
+        {amount: checkoutTotal.total.minorUnitsAmount, currency: currency, precision: 2}
+    );
     return (
     <div className="checkout-totals">
         <div className="left">
@@ -405,7 +410,9 @@ function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSumm
         <div className="right">
             <p>{sub}</p>
             <p style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>{shp}</p>
-            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}><p className="currency">GBP</p>{tot}</div>
+            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
+                <Price baseDinero={totDinero} />
+            </div>
         </div>
     </div>
     )
