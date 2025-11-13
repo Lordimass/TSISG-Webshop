@@ -6,10 +6,10 @@
 
 import { Context } from "@netlify/functions";
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
-import type { WebhookPayload } from "../../shared/types/supabaseTypes.mts";
+import type { WebhookPayload } from "@shared/types/supabaseTypes.mts";
 import sharp from "sharp";
-import { formatBytes } from '../lib/lib.mts';
 import { SupabaseClient } from "@supabase/supabase-js";
+import {formatBytes} from "@shared/functions/functions.ts";
 
 /**
  * Sync contents of product-images bucket with transformed-product-images

@@ -21,6 +21,7 @@
     "@types/dinero.js": "^1.9.4",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.14.1",
+    "browser-image-compression": "^2.0.2",
     "comma-separated-tokens": "^2.0.3",
     "dinero.js": "^1.9.1",
     "express": "^5.1.0",
