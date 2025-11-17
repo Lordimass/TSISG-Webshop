@@ -11,11 +11,17 @@ import DineroFactory, {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../../src/localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
 
+type CurrencyOptions = {[key: string]: {unit_amount: number, tax_behavior: 'exclusive' | 'inclusive' | 'unspecified'}};
+type LineItem = (Stripe.LineItem | {price: string})
+
 interface Body {
     basket: ProductInBasket[];
     currency: Currency;
 }
 
+// TODO: Instead of constructing products and prices for every user every time they open the checkout,
+//  use a webhook which updates the Stripe catalogue every time a change is made to the products, and
+//  once daily to ensure conversion rates are kept up to date.
 export default async function handler(request: Request, context: Context) {
     console.log(process.env.STRIPE_SECRET_KEY)
     if (!stripe) throw new Error(
@@ -30,8 +36,8 @@ export default async function handler(request: Request, context: Context) {
     else basket = await priceCheckResp.json()
 
     // Iterate through each item in the validated basket and fetch a Stripe Price Point ID
-    const pricePointIDs: {price: string, quantity: number}[] = [];
-    const stripeProducts: Array<Stripe.Product> = (await stripe.products.list()).data;
+    const pricePointIDs: LineItem[] = [];
+    const stripeProducts: Array<Stripe.Product> = (await stripe.products.list({active: true})).data;
     for (const p of basket) {
         /** The metadata that should be attached to this product on Stripe. */
         const prodMeta: StripeProductMeta = {
@@ -40,24 +46,29 @@ export default async function handler(request: Request, context: Context) {
             category: p.category.name
         }
         // Construct a Dinero object to calculate the price in the correct currency
-        const baseDinero = DineroFactory({
+        const dinero = DineroFactory({
             amount: Math.round(p.price*100), currency: DEFAULT_CURRENCY, precision: 2
         })
-        const dinero = await convertDinero(baseDinero, currency)
+        const convDin = await convertDinero(dinero, currency)
+        const currency_options: CurrencyOptions = {}
+        currency_options[currency.toLowerCase()] = {unit_amount: convDin.getAmount(), tax_behavior: "unspecified"};
 
         // Check if the product exists on Stripe
         const stripeItem = getProductOnStripe(stripeProducts, p);
         if (stripeItem) {
             // The item does exist, so we can use it.
             // Fetch the prices for the item and check if the one we're looking for exists.
-            const prices = (await stripe.prices.list({product: stripeItem.id})).data;
-            const price: Stripe.Price | undefined = prices.filter(sPrice =>
-                sPrice.unit_amount === dinero.getAmount() &&
-                sPrice.currency === dinero.getCurrency()
+            const prices = (await stripe.prices.list({product: stripeItem.id, active: true})).data;
+            const price: Stripe.Price | undefined = prices.filter(sPrice => {
+                    return sPrice.unit_amount === dinero.getAmount() &&
+                        sPrice.currency === dinero.getCurrency().toLowerCase()
+                }
             )[0];
 
             // Add the price point ID to the array.
             if (price) {
+                // Update the currency options to ensure there's an up-to-date price for this product displayed.
+                await stripe.prices.update(price.id, {currency_options})
                 // The price exists already in the given currency with the right amount.
                 pricePointIDs.push({price: price.id, quantity: p.basketQuantity});
             } else {
@@ -65,12 +76,14 @@ export default async function handler(request: Request, context: Context) {
                 const price = await stripe.prices.create({
                     currency: dinero.getCurrency(),
                     unit_amount: dinero.getAmount(),
-                    product: stripeItem.id
+                    product: stripeItem.id,
+                    currency_options
                 })
+                console.log(price)
                 pricePointIDs.push({price: price.id, quantity: p.basketQuantity})
             }
 
-            // Update any product metadata that may have changed
+            // Update any other product metadata that may have changed
             if (!checkObjectsEqual(stripeItem.metadata as unknown as StripeProductMeta, prodMeta)) {
                 try {await stripe.products.update(stripeItem.id, {metadata: prodMeta})}
                 catch (error) {console.warn("Failed to update product metadata:", error)}
@@ -79,12 +92,16 @@ export default async function handler(request: Request, context: Context) {
             // The item does not yet exist, so we must try to create it.
             try {
                 // Create the product
-                const productData = {
+                const productData: Stripe.ProductCreateParams = {
                     name: p.name,
                     images: getListOfImageURLS(p.images),
                     // Default used here as it provides a shortcut to create the price in one API call, the fact
                     // that it's a default isn't relevant to functionality in any way.
-                    default_price_data: {currency: dinero.getCurrency(), unit_amount: dinero.getAmount()},
+                    default_price_data: {
+                        currency: dinero.getCurrency(),
+                        unit_amount: dinero.getAmount(),
+                        currency_options
+                    },
                     metadata: prodMeta
                 }
                 const stripeItem = await stripe.products.create(productData)

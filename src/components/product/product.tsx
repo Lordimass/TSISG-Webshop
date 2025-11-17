@@ -7,7 +7,7 @@ import SquareImageBox from '../squareImageBox/squareImageBox';
 import {getImageURL, getRepresentativeImageURL, setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
-import DineroFactory from "dinero.js";
+import DineroFactory, {Currency} from "dinero.js";
 import {LocaleContext} from "../../localeHandler.ts";
 
 /**
@@ -413,17 +413,20 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
  * @param admin Whether the product should be rendered in admin mode or not
  * @param checkbox Whether to display a checkbox alongside the product, for ticking off lists etc.
  * @param linked Whether the product should be clickable to go to its product page
+ * @param currency Override currency to display. Only use to display a currency other than the user's local currency.
  */
 export function CheckoutProduct({
                                     product,
                                     admin,
                                     checkbox,
-                                    linked
+                                    linked,
+                                    currency
                                 }: {
     product: ProductData | ProductInBasket | OrderProduct
     admin?: boolean
     checkbox?: boolean
     linked?: boolean
+    currency?: Currency
 }) {
     // In some cases an undefined value may accidentally be passed
     // to the component, in which case we should escape it and
@@ -463,7 +466,7 @@ export function CheckoutProduct({
         <div className="checkout-product-text">
             {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> :
                 <p className='checkout-product-name'>{name}</p>}
-            <Price baseDinero={dinero}/>
+            <Price baseDinero={dinero} currency={currency} />
             {admin ? <p>SKU: {sku}</p> : <></>}
         </div>
         {checkbox ? <>

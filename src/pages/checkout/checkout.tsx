@@ -165,6 +165,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
+     useEffect(() => {
+         checkout.updateEmail("test+location_US@test.net")
+     }, []);
 
     const [readyToCheckout, setReadyToCheckout] = useState(false)
 
@@ -251,7 +254,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
         setReadyToCheckout(ready);
 
-    }; checkReadyToCheckout()}, [isEmailValid, addressComplete.current])
+    } checkReadyToCheckout()}, [isEmailValid, addressComplete.current])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
@@ -297,7 +300,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         </div>
 
         <div className="checkout-right">
-            <CheckoutProducts/>
+            <CheckoutProducts currency={checkout.currency as Currency} />
             <p className="msg">To edit your basket, <a href="/">go back</a></p>
             <CheckoutTotals checkoutTotal={checkout.total} currency={checkout.currency as Currency} />
             <p className="msg">{killSwitchMessage}</p>
@@ -395,9 +398,8 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
     const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
     const sub = checkoutTotal.subtotal.amount
     const shp = checkoutTotal.shippingRate.amount
-    const tot = checkoutTotal.total.amount
     const totDinero = DineroFactory(
-        {amount: checkoutTotal.total.minorUnitsAmount, currency: currency, precision: 2}
+        {amount: checkoutTotal.total.minorUnitsAmount, currency, precision: 2}
     );
     return (
     <div className="checkout-totals">
@@ -411,7 +413,7 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
             <p>{sub}</p>
             <p style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>{shp}</p>
             <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
-                <Price baseDinero={totDinero} />
+                <Price baseDinero={totDinero} currency={totDinero.getCurrency()} />
             </div>
         </div>
     </div>

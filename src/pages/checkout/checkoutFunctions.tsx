@@ -43,9 +43,12 @@ export function redirectIfEmptyBasket() {
  * @return The client secrete for the created checkout session.
  */
 export async function createCheckoutSession(): Promise<string> {
-    // Get the user's currency from the query string, since we can't access LocaleContext
+    // Get the user's location from the query string since we can't access Context here.
     const urlParams = new URLSearchParams(window.location.search);
     const locale = urlParams.get("locale") || DEFAULT_LOCALE;
+    /** 2-Character ISO Country Code of the user */
+    const countryCode: string = locale.split("-")[1]
+    /** 3-Character ISO Currency Code to use for the prices */
     const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
 
     // Construct parameters for request to createCheckoutSession
@@ -66,7 +69,8 @@ export async function createCheckoutSession(): Promise<string> {
             origin: window.location.origin,
             gaClientID,
             gaSessionID,
-            currency: currency
+            // Stripe uses the location to determine currency automatically, so we pass the location instead of currency.
+            currency
         })
     })
     .then (

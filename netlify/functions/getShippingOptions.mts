@@ -45,7 +45,7 @@ export default async function handler(request: Request, _context: Context) {try 
 
     console.log(applicableRates)
     await stripe.checkout.sessions.update(body.checkoutID, {
-        shipping_options: applicableRates.map((rate) => {return {shipping_rate: rate}})
+        shipping_options: applicableRates.map(rate => {return {shipping_rate: rate}})
     })
 
     return new Response(JSON.stringify(applicableRates))
