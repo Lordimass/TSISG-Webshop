@@ -1,4 +1,4 @@
-// NOTE: Stripe CLI will time-out the key after 90 days, so if things aren't working in
+// NOTE: Stripe CLI will time out the key after 90 days, so if things aren't working in
 // local development, try `stripe login`!
 
 // Also need to enable forwarding webhooks for local dev, use the following:
@@ -11,7 +11,7 @@ import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import { checkCanMakePayment, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
+import { redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
 import { page_title } from "../../lib/consts";
 import { Basket } from "@shared/types/types";
 
@@ -152,16 +152,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             return true;
         }
     }
-
-    const [debugInfo, setDebugInfo] = useState("")
-    useEffect(() => {
-        async function get() {
-            if (loginContext.permissions.includes("debug")) {
-                setDebugInfo(await checkCanMakePayment(stripePromise))
-            }
-        }
-        get()
-    }, [])
 
     const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
@@ -314,7 +304,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 </span>
             </button>
             {error}
-            {debugInfo ? debugInfo : ""}
         </div>
         
     </>)

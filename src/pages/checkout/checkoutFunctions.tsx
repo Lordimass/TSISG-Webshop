@@ -1,31 +1,9 @@
-import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
 import { Basket } from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
-
-/**
- * Debug method to test Apple Pay
- */
-export async function checkCanMakePayment(stripePromise: Promise<Stripe | null>) {
-    const pr = (await stripePromise)?.paymentRequest({
-        country: "GB",
-        currency: "gbp",
-        total: {
-        label: "Test Item",
-        amount: 1,
-        },
-        requestPayerName: true,
-        requestPayerEmail: true,
-    })
-    if (!pr) {
-        return `[PAYMENT REQUEST FAILED TO INITIALISE]`
-    } else {
-        return `pr.canMakePayment() => ${JSON.stringify(await pr.canMakePayment())}`
-    }
-}
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
