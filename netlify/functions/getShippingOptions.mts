@@ -5,9 +5,8 @@
 
 import { Context } from "@netlify/functions";
 import { stripe } from "../lib/stripeObject.mts";
+import {EU, UK} from "@shared/consts/shipping.ts";
 
-const uk = ["GB", "GG", "JE", "IM"]
-const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "ES", "LU", "BE", "PT", "BG", "MT", "NL", "HR", "PL", "CY", "PT", "CZ", "RO", "EE", "SK", "FI", "SI", "GR", "HU", "SE", "IT", "AL", "MD", "AD", "ME", "AM", "MK", "AZ", "NO", "BY", "RU", "BA", "SM", "FO", "RS", "GE", "CH", "GI", "TJ", "GL", "TR", "IS", "TM", "KZ", "UA", "XK", "UZ", "KG", "VA", "LI"]
 let rates = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
 
 export default async function handler(request: Request, _context: Context) {try {
@@ -40,8 +39,8 @@ export default async function handler(request: Request, _context: Context) {try 
 
     // Find shipping rates for the given country
     let applicableRates = typedRates.world
-    if (uk.includes(body.country)) applicableRates = typedRates.uk
-    else if (eu.includes(body.country)) applicableRates = typedRates.eu
+    if (UK.includes(body.country)) applicableRates = typedRates.uk
+    else if (EU.includes(body.country)) applicableRates = typedRates.eu
 
     console.log(applicableRates)
     await stripe.checkout.sessions.update(body.checkoutID, {
