@@ -51,7 +51,9 @@ export default async function handler(request: Request, context: Context) {
         })
         const convDin = await convertDinero(dinero, currency)
         const currency_options: CurrencyOptions = {}
-        currency_options[currency.toLowerCase()] = {unit_amount: convDin.getAmount(), tax_behavior: "unspecified"};
+        if (currency !== DEFAULT_CURRENCY) {
+            currency_options[currency.toLowerCase()] = {unit_amount: convDin.getAmount(), tax_behavior: "unspecified"};
+        }
 
         // Check if the product exists on Stripe
         const stripeItem = getProductOnStripe(stripeProducts, p);
