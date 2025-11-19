@@ -11,7 +11,7 @@ import CurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
  * Scheduled function to update Stripe shipping rates for other currencies.
  * @param request
  */
-export default async function handler(request: Request) {
+export default async function handler(request: Request) {try {
     // Fetch list of supported currencies
     const {supported_payment_currencies} = await stripe.countrySpecs.retrieve("GB")
 
@@ -21,7 +21,7 @@ export default async function handler(request: Request) {
         // Only need active rates.
         .list({active: true})
         // Fetch up to 10 rates per currency to safely fetch all.
-        .autoPagingToArray({limit: supported_payment_currencies.length*10});
+        .autoPagingToArray({limit: supported_payment_currencies.length * 10});
 
     /*
      Use ShippingRate.fixed_amount.currency_options to provide different amounts for each currency. Updating them
@@ -36,7 +36,7 @@ export default async function handler(request: Request) {
             continue;
         }
 
-        let new_currency_options: {[key: string]: CurrencyOptions} = {}
+        let new_currency_options: { [key: string]: CurrencyOptions } = {}
         if (shippingRate.fixed_amount.currency_options) {
             new_currency_options = {...shippingRate.fixed_amount.currency_options}
         }
@@ -58,9 +58,12 @@ export default async function handler(request: Request) {
         // Update on Stripe
         await stripe.shippingRates.update(shippingRate.id, {fixed_amount: {currency_options: new_currency_options}})
     }
-    const { next_run } = await request.json();
+    const {next_run} = await request.json();
     console.log("Shipping rates updated! Next run at:", next_run);
-}
+} catch (e) {
+    console.error(e);
+    return new Response("An internal error occurred while updating shipping rates.", {status: 500});
+}}
 
 export const config: Config = {
     schedule: "@daily"
