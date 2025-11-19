@@ -13,31 +13,6 @@ export type OrderProduct = {
   image_url: string
 }
 
-export type Order = {
-  id: number
-  placed_at: string
-  email: string
-  street_address: string
-  postal_code: string
-  country: string
-  name: string
-  fulfilled: boolean
-  total_value: number
-  dispatched: boolean
-  delivery_cost?: number
-  products: OrderProduct[]
-  royalMailData: {
-    orderIdentifier: number
-    orderReference?: string
-    createdOn: string
-    orderDate?: string
-    printedOn?: string
-    manifestedOn?: string
-    shippedOn?: string
-    trackingNumber?: string
-  }
-}
-
 // Site-wide settings fetched from the backend
 export const SiteSettingsContext = createContext<SiteSettings>({})
 export type SiteSettings = {

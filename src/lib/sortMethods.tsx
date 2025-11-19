@@ -1,5 +1,6 @@
 import { UnsubmittedImageData } from "../pages/products/productEditor/types"
-import { ImageData, Order, ProductData } from "@shared/types/types"
+import { ImageData, ProductData } from "@shared/types/types"
+import {OrderReturned} from "@shared/types/supabaseTypes.mts";
 
 export function compareProducts(a: ProductData, b: ProductData) {
   // Primary: Sort by sort_order
@@ -31,7 +32,7 @@ export function compareImages(a: ImageData | UnsubmittedImageData, b: ImageData 
   return 0;
 }
 
-export function compareOrders(a:Order, b:Order) {
+export function compareOrders(a:OrderReturned, b:OrderReturned) {
     const dateA = new Date(a.placed_at)
     const dateB = new Date(b.placed_at)
     // Place fulfilled orders after unfulfilled orders

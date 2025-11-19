@@ -1,7 +1,7 @@
 import { Context } from '@netlify/functions';
 import { SupabaseClient } from '@supabase/supabase-js';
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
-import type { OrdersCompressed as SbOrder } from '../../shared/types/supabaseTypes.mts';
+import type { CompressedOrder as SbOrder } from '../../shared/types/supabaseTypes.mts';
 import type { OrderFromPageable as RmOrder } from '../../shared/types/royalMailTypes.mts';
 
 interface MergedOrder extends SbOrder {
