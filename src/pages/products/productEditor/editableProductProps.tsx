@@ -15,9 +15,12 @@ export type EditableProductProp = {
     /** String to display next to display name as a hint for what should go in the box */
     tooltip?: string
     /** 
-     * The permission required to edit this prop, by default all props are editable under the
-     * edit_products permission, key allows specification of a further required permission.
-     * These values also need to be kept up to date in updateProductData to be secure.
+     * The permission required to edit this prop.
+     *
+     * By default, all props are only editable under the `edit_products` permission, key allows specification of a
+     * further required permission.
+     *
+     * These values also need to be kept up to date in `updateProductData` to be secure.
     */
     permission?: string
     /** Boolean method which returns true if the value passed is a valid value for this prop, false if not. */
@@ -44,7 +47,7 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "name",
         displayName: "Name",
         tooltip: "User facing name of the product. Max 50 characters.",
-        constraint: (value: string) => typeof value === "string" && value.length <= 50
+        constraint: (value: string) => value.length <= 50
     },
     {
         propName: "price",
@@ -76,14 +79,20 @@ export const editableProductProps: EditableProductProp[] = [
     {
         propName: "customs_description",
         displayName: "Customs Description",
-        tooltip: "A short description of the product for customs forms. max length: 50 characters",
-        constraint: (value: string) => typeof value === "string" && value.length < 50
+        tooltip: "A short description of the product for customs forms. Max length: 50 characters.",
+        constraint: (value: string) => value.length < 50
+    },
+    {
+        propName: "extended_customs_description",
+        displayName: "Extended Customs Description",
+        tooltip: "An extended description for customs forms applicable to higher value orders. Max length: 300 characters.",
+        constraint: (value: string) => value.length < 300
     },
     {
         propName: "origin_country_code",
         displayName: "Origin Country Code",
         tooltip: "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
-        constraint: (value: string) => typeof value === "string" && value.length === 3
+        constraint: (value: string) => value.length === 3
     },
     {
         propName: "sort_order",
@@ -95,13 +104,13 @@ export const editableProductProps: EditableProductProp[] = [
         propName: "description",
         displayName: "Description",
         tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
-        constraint: (value: string) => typeof value === "string"
+        constraint: (_value: string) => true
     },
     {
         propName: "group_name",
         displayName: "Group Name",
         tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
-        constraint: (value: string) => typeof value === "string"
+        constraint: (_value: string) => true
     },
     {
         propName: "last_edited",
