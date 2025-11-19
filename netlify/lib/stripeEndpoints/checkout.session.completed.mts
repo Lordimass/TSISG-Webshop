@@ -23,20 +23,24 @@ export default async function handleCheckoutSessionCompleted(
     }
 }
 
+/**
+ * Save the order event to Supabase. Also creates a Royal Mail order and updates Supabase stock if in production.
+ * @param session The completed checkout session to reference in regard to this order.
+ */
 async function createOrder(session: Stripe.Checkout.Session): Promise<Response | undefined> {
     // Save the order record
-    const order = await saveOrder(session, supabaseService)
+    const order = await saveOrder(session)
 
     // Get products associated with the order
     const orderProducts: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id)
 
     // Save the order_product record for each product
-    await saveOrderProducts(orderProducts, order.id, supabaseService)
+    await saveOrderProducts(orderProducts, order.id)
 
     // Perform actions only in Production
     if (process.env.VITE_ENVIRONMENT == "PRODUCTION") {
         // Update stock of products in database
-        await updateStock(orderProducts, supabaseService)
+        await updateStock(orderProducts)
 
         // Create Royal Mail Order
         const response = await createRMOrder(order)
@@ -51,30 +55,29 @@ async function createOrder(session: Stripe.Checkout.Session): Promise<Response |
 
 /**
  * Save an order to Supabase.
- * @param dataObj - The Stripe Checkout Session object.
- * @param supabase - The Supabase client instance.
+ * @param checkoutSession - The Stripe Checkout Session object.
  * @returns The ID of the created order.
  */
-async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseClient) {
-    const shipping_details = dataObj.collected_information?.shipping_details;
-    const amount_total = dataObj.amount_total;
-    const customer_details = dataObj.customer_details;
+async function saveOrder(checkoutSession: Stripe.Checkout.Session) {
+    const shipping_details = checkoutSession.collected_information?.shipping_details;
+    const amount_total = checkoutSession.amount_total;
+    const customer_details = checkoutSession.customer_details;
     if (!shipping_details || !amount_total || !customer_details) {
         throw new Error("Stripe object was missing crucial details, couldn't save order")
     }
 
-    let orderID: string | undefined;
-    const {data, error} = await supabase
+    const {data, error} = await supabaseService
         .from("orders")
         .insert({
-            id: dataObj.id,
-            email: customer_details.email,
-            street_address: shipping_details.address.line1,
-            name: shipping_details.name,
-            country: shipping_details.address.country,
-            total_value: amount_total/100,
-            postal_code: shipping_details.address.postal_code,
-            city: shipping_details.address.city
+                id: checkoutSession.id,
+                email: customer_details.email,
+                street_address: shipping_details.address.line1,
+                name: shipping_details.name,
+                country: shipping_details.address.country,
+                total_value: amount_total/100,
+                postal_code: shipping_details.address.postal_code,
+                city: shipping_details.address.city,
+                value: {total: amount_total/100, currency: checkoutSession.currency}
             })
         .select() 
     if (error) {
@@ -85,7 +88,7 @@ async function saveOrder(dataObj: Stripe.Checkout.Session, supabase: SupabaseCli
     return returnedRecords[0]
 }
 
-async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string, supabase: SupabaseClient) {
+async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderID: string) {
     // Construct objects for Supabase records
     let orderProdRecords: OrderProduct[] = []
     for (let i=0; i<orderProducts.length; i++) {
@@ -100,7 +103,7 @@ async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderI
     }
 
     // Save to Supabase
-    const {error} = await supabase
+    const {error} = await supabaseService
         .from("order_products")
         .insert(orderProdRecords)
     if (error) {
@@ -109,10 +112,10 @@ async function saveOrderProducts(orderProducts: StripeCompoundLineItem[], orderI
     }
 }
 
-async function updateStock(products: StripeCompoundLineItem[], supabase: SupabaseClient) {
+async function updateStock(products: StripeCompoundLineItem[]) {
     // Fetch current stock first
     let currStock: {sku: number, stock: number, edited?:boolean}[] = [];
-    const {data, error} = await supabase
+    const {data, error} = await supabaseService
         .from("products")
         .select("sku,stock")
         .in("sku", products.map((prod)=>prod.product.metadata.sku))
@@ -148,7 +151,7 @@ async function updateStock(products: StripeCompoundLineItem[], supabase: Supabas
                 This signifies that something is very wrong.`
             )
         }
-        const {data, error} = await supabase
+        const {data, error} = await supabaseService
             .from("products")
             .update({stock: stock_item.stock})
             .eq("sku", stock_item.sku)
@@ -161,6 +164,7 @@ async function updateStock(products: StripeCompoundLineItem[], supabase: Supabas
 /**
  * Creates an order on the Royal Mail Click & Drop API:
  * https://business.parcel.royalmail.com/
+ * @param order The data saved to Supabase about this order.
 */
 async function createRMOrder(order: Order) {
     // Get royalMailKey
@@ -271,26 +275,15 @@ function calculatePackageFormat(items: OrderProdCompressed[], weight?: number) {
  * @param event - The Stripe event object.
  */
 async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEvent): Promise<Response | undefined> {
-    // Do nothing if we're not in production
-    // const env = process.env.VITE_ENVIRONMENT
-    // if (env !== "PRODUCTION") {
-    //     console.log(`No GA4 Event Triggered since this is not a production environment: ${env}`)
-    //     return
-    // }
-
     // Extract checkout session from event.
     const session: Stripe.Checkout.Session = event.data.object
-    console.log(session)
 
     // Get the associated LineItems and Products compounded together.
     const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
-    console.log(`lineItems: ${lineItems}`)
 
     // Extract client ID and session ID
     const client_id = session.metadata?.gaClientID;
     const session_id = Number(session.metadata!.gaSessionID);
-    console.log("GA Client ID:", client_id);
-    console.log("GA Session ID:", session_id);
 
     // Compile payload for GA4.
     const payload = {
@@ -306,7 +299,7 @@ async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEve
             items: stripeCompoundItemsToGA4Items(lineItems, session.currency) // Map to GA4 item format
         }}]
     }
-    console.log(`GA4 Payload ${payload}`)
+    console.log(`Triggering PURCHASE event for transaction with value ${payload.events[0].params.currency}${payload.events[0].params.value}`)
     await sendGA4Event(payload);
     return new Response(undefined, {status: 200})
 }
