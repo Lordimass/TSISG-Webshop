@@ -12,7 +12,7 @@
   "dependencies": {
     "@flaticon/flaticon-uicons": "^3.3.1",
     "@google-analytics/data": "^5.2.1",
-    "@mdxeditor/editor": "^3.47.0",
+    "@mdxeditor/editor": "^3.49.2",
     "@netlify/functions": "^3.0.4",
     "@octokit/types": "^15.0.0",
     "@stripe/react-stripe-js": "^3.6.0",
