@@ -1,9 +1,7 @@
 import {FromSchema, JSONSchema} from "json-schema-to-ts"
-import Ajv from "ajv";
+import {ajv} from "@shared/schemas/schemas.ts";
 
-const ajv = new Ajv();
-
-const ShippingOptionGroupsSchema = /** @type {const} @satisfies {import('json-schema-to-ts').JSONSchema} */ ({
+export const ShippingOptionGroupsSchema = /** @satisfies {import('json-schema-to-ts').JSONSchema} */ ({
     type: "object",
     properties: {
         uk: {type: "array", items: {type: "string"}},

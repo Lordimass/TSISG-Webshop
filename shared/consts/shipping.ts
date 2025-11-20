@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-type AllowedCountry = Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry;
+export type AllowedCountry = Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry;
 
 /** A list of ISO alpha-2 country codes corresponding to countries classified as part of Royal Mail's "UK Zone" */
 export const UK: AllowedCountry[] = [
