@@ -42,7 +42,6 @@ export const blank_product: ProductData = {
     },
     tags: [],
     weight: 0,
-    customs_description: "",
     description: "",
     origin_country_code: "",
     package_type_override: "",

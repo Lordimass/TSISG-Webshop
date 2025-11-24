@@ -16,7 +16,7 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
-import {OrderReturned} from "@shared/types/supabaseTypes.mts";
+import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 
 export function OrderManager() { 

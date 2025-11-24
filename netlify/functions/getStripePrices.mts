@@ -1,12 +1,12 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 import { stripe } from "../lib/stripeObject.mts";
-import type { ProductInBasket } from "../../shared/types/types.mts";
-import type { StripeProductMeta } from "@shared/types/stripeTypes.mts";
+import type { ProductInBasket } from "@shared/types/types.ts";
+import type { StripeProductMeta } from "@shared/types/stripeTypes.ts";
 import { checkObjectsEqual, getImageURL } from "../lib/lib.mts";
 import { callRPC } from "../lib/supabaseRPC.mts";
 import { supabaseAnon } from "../lib/getSupabaseClient.mts";
-import type { ImageData } from "@shared/types/supabaseTypes.mts";
+import type { ImageData } from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../../src/localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";

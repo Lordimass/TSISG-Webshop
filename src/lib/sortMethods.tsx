@@ -1,6 +1,6 @@
 import { UnsubmittedImageData } from "../pages/products/productEditor/types"
 import { ImageData, ProductData } from "@shared/types/types"
-import {OrderReturned} from "@shared/types/supabaseTypes.mts";
+import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 
 export function compareProducts(a: ProductData, b: ProductData) {
   // Primary: Sort by sort_order

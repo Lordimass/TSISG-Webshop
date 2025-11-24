@@ -5,7 +5,7 @@ import {
     ClicksAndImpressionsTrendPoint,
     FetchAnalyticsResponse, ProductAnalytic, ReadableAnalyticsMetric,
     TrendPoint
-} from "@shared/types/analyticsTypes.mjs";
+} from "@shared/types/analyticsTypes.ts";
 import assert from "node:assert";
 import {google} from "@google-analytics/data/build/protos/protos"
 

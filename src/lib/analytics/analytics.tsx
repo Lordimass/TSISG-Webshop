@@ -1,5 +1,5 @@
 import ReactGA from "react-ga4"
-import { Basket, ProductData, ProductInBasket } from "@shared/types/types"
+import { Basket, ProductData, ProductInBasket } from "@shared/types/types.ts"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";

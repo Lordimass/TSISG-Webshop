@@ -1,7 +1,7 @@
 import { Context } from '@netlify/functions';
 import { SupabaseClient } from '@supabase/supabase-js';
 import getSupabaseClient from '../lib/getSupabaseClient.mts';
-import type { ProductData } from '@shared/types/supabaseTypes.mts';
+import type { ProductData } from '@shared/types/supabaseTypes.ts';
 
 export default async function handler(request: Request, _context: Context) { try {
     if (request.method !== 'POST') {

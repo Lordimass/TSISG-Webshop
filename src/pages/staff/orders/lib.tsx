@@ -1,6 +1,6 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 import { overdue_threshold } from "../../../lib/consts";
-import {OrderReturned} from "@shared/types/supabaseTypes.mts";
+import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 
 export const OrdersContext = createContext<{
     orders: OrderReturned[];

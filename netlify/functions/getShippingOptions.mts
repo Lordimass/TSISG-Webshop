@@ -56,7 +56,7 @@ export default async function handler(request: Request, _context: Context) {try 
     // Find rates with descriptions in the applicable array
     // Find shipping rates for the given country
     // Update checkout session
-    
+
     await stripe.checkout.sessions.update(body.checkoutID, {
         shipping_options: applicableRates.map(rate => {return {shipping_rate: rate}})
     })

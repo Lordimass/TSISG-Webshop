@@ -25,9 +25,9 @@ export interface ProductData {
     /** Weight of the product in grams */
     weight: number
     /** Short description for customs forms */
-    customs_description: string
+    customs_description?: string
     /** An extended description for customs forms applicable to higher value orders. */
-    extended_customs_description: string
+    extended_customs_description?: string
     /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
     origin_country_code: string
     /** The user facing description of the product */

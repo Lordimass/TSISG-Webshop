@@ -3,49 +3,49 @@ export interface FetchAnalyticsResponse {
     period: TimePeriod
 
     /** The number of active users. */
-    activeUsers: ReadableAnalyticsMetric<number>
+    activeUsers: ReadableAnalyticsMetric_number
 
     /** The number of active users who did not appear in previous periods. */
-    newUsers: ReadableAnalyticsMetric<number>
+    newUsers: ReadableAnalyticsMetric_number
 
     /** The percentage of active users who were new to the site. */
-    newUserPercent: ReadableAnalyticsMetric<number>
+    newUserPercent: ReadableAnalyticsMetric_number
 
     /** How many pages each user viewed on average. */
-    pageViewsPerUser: ReadableAnalyticsMetric<number>
+    pageViewsPerUser: ReadableAnalyticsMetric_number
 
     /** How long each user spent on the page in milliseconds, on average. */
-    engagementTime: ReadableAnalyticsMetric<number>
+    engagementTime: ReadableAnalyticsMetric_number
 
     /** How many e-commerce purchases were made in the period */
-    eCommercePurchases: ReadableAnalyticsMetric<number>
+    eCommercePurchases: ReadableAnalyticsMetric_number
 
     /** Total revenue over the period, including delivery */
-    totalRevenue: ReadableAnalyticsMetric<number>
+    totalRevenue: ReadableAnalyticsMetric_number
 
     /** Average Revenue Per Paying User  over the period */
-    ARPPU: ReadableAnalyticsMetric<number>
+    ARPPU: ReadableAnalyticsMetric_number
 
     /** Average Revenue Per User over the period */
-    ARPU: ReadableAnalyticsMetric<number>
+    ARPU: ReadableAnalyticsMetric_number
 
     /** Total Clicks on Google search results over the period */
-    clicks: ReadableAnalyticsMetric<number>
+    clicks: ReadableAnalyticsMetric_number
 
     /** The number of times the website was served as a Google search result */
-    impressions: ReadableAnalyticsMetric<number>
+    impressions: ReadableAnalyticsMetric_number
 
     /** How total clicks and impressions on Google search results varied over the period */
     clicksAndImpressionsTrend: ClicksAndImpressionsTrend
 
     /** Data-points representing the number of active users day by day, throughout the period */
-    activeUsersTrend: MetricTrend<number>
+    activeUsersTrend: MetricTrend_number
 
     /** The products that sold the most in this period, sorted in descending order of `itemsPurchased` */
     bestSellers: ProductAnalytic[]
 
     /** The amount of money refunded to customers over this period */
-    refundAmount: ReadableAnalyticsMetric<number>
+    refundAmount: ReadableAnalyticsMetric_number
 }
 
 /** A period of time between two dates */
@@ -65,21 +65,41 @@ export interface AnalyticsMetric<T> {
     lastValue: T,
 }
 
+export interface AnalyticsMetric_number {
+    /** The value of the metric in this time period. */
+    value: number,
+
+    /** The value of the metric in the last time period. */
+    lastValue: number,
+}
+
 export interface ReadableAnalyticsMetric<T> extends AnalyticsMetric<T> {
     /** A human-readable name for the metric. */
     label: string,
 }
 
+export interface ReadableAnalyticsMetric_number extends AnalyticsMetric_number {
+    /** A human-readable name for the metric. */
+    label: string,
+}
+
 /** A collection of data points */
-interface MetricTrend<T> {
+export interface MetricTrend_number {
     /** A human-readable name for the metric. */
     label: string,
     /** The data points in the collection */
-    points: TrendPoint<T>[],
+    points: TrendPoint_number[],
 }
 
 /** A point in a trend */
 export interface TrendPoint<T> extends AnalyticsMetric<T> {
+    /** The date which this point corresponds to in the trend */
+    date: Date
+    /** The date at which the `lastValue` corresponds to in the trend */
+    lastDate: Date
+}
+
+export interface TrendPoint_number extends AnalyticsMetric_number {
     /** The date which this point corresponds to in the trend */
     date: Date
     /** The date at which the `lastValue` corresponds to in the trend */
