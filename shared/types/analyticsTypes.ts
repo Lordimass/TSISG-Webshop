@@ -1,5 +1,5 @@
 export interface FetchAnalyticsResponse {
-    /** The period over which these analytics represent */
+    /** The period over which these analytics represent. */
     period: TimePeriod
 
     /** The number of active users. */

@@ -103,7 +103,7 @@
             "description": "How many pages each user viewed on average."
           },
           "period": {
-            "description": "The period over which these analytics represent",
+            "description": "The period over which these analytics represent.",
             "properties": {
               "end": {
                 "description": "The end of the period",
@@ -544,7 +544,7 @@
           "customFieldValues": {
             "description": "Represents a list of custom field value objects.",
             "items": {
-              "description": "Represents a custom field value object.",
+              "description": "Represents a custom field value object",
               "properties": {
                 "customFieldID": {
                   "description": "Represents custom field identifier across the system.",
@@ -805,6 +805,7 @@
             "type": "number"
           },
           "sku": {
+            "description": "SKU of the product on Supabase.",
             "type": "number"
           }
         },

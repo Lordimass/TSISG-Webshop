@@ -4,16 +4,23 @@ import path from 'path';
 import ts from 'typescript';
 import {fileURLToPath} from 'url';
 
-/**
- * Refs to types that AJV won't understand in validation.
- */
-const unsupportedRefs: string[] = ['#/definitions/Date']
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const typesDir = path.resolve(__dirname, '../shared/types');
 const outDir = path.resolve(__dirname, '../shared/schemas');
+const outFile = path.join(outDir, "schemas.json")
+
+console.log("Updating Schemas")
+/** Path to file that changed */
+let changed: string | undefined = undefined
+process.argv.forEach(function (val, index) {
+    if (index >= 2) {
+        const splitPath = val.split(`\\`)
+        changed = splitPath[splitPath.length-1]
+    }
+});
+
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
 function getExportedTypes(filePath: string): string[] {
@@ -37,31 +44,24 @@ function getExportedTypes(filePath: string): string[] {
     return exported;
 }
 
-/**
- * Replace unsupported refs in schema definitions with `any` in order to prevent AJV from getting scared when it sees
- * things beyond its understanding.
- * @param obj
- */
-function replaceUnsupportedRefs(obj: any) {
-    if (Array.isArray(obj)) {
-        // If there are more types defined here, recursively remove unsupported refs from those too
-        obj.forEach(item => replaceUnsupportedRefs(item));
-    } else if (typeof obj === 'object' && obj !== null) {
-        // Replace unsupported $ref
-        if (obj.$ref && unsupportedRefs.includes(obj.$ref)) {
-            // Remove the $ref and treat as "any"
-            delete obj.$ref;
-        }
-
-        // Recursively process properties
-        Object.values(obj).forEach(v => replaceUnsupportedRefs(v));
+function getCurrentSchemasJson(): Record<string, any> {
+    let schemas: Record<string, any> = {}
+    try {
+        schemas = JSON.parse(fs.readFileSync(outFile, "utf-8"));
+    } catch (e: unknown) {
+        return {}
     }
+    console.log(Object.values(schemas).length)
+    return schemas
 }
 
-const fileSchema: Record<string, any> = {};
+// Fetch current schemas, or start from scratch if we're not just updating based on a changed file.
+const fileSchema: Record<string, any> = changed ? getCurrentSchemasJson() : {};
+// Iterate over files and update schema accordingly
 fs.readdirSync(typesDir, { withFileTypes: true }).forEach(dirent => {
     const file = dirent.name;
 
+    if (changed && file !== changed) return; // If we passed the name of a file that changed, and this isn't it, skip.
     if (!file.endsWith('.ts')) return; // skip declaration files
 
     const filePath = path.join(typesDir, file);
@@ -76,12 +76,12 @@ fs.readdirSync(typesDir, { withFileTypes: true }).forEach(dirent => {
             { encoding: 'utf-8' }
         );
         fileSchema[typeName] = JSON.parse(schemaJson);
-        //replaceUnsupportedRefs(fileSchema);
     });
 });
 
 // Write a single JSON file with the all the schemas files
 fs.writeFileSync(
-    path.join(outDir, `schemas.json`),
+    outFile,
     JSON.stringify(fileSchema, null, 2)
 );
+console.log("Schemas updated.")

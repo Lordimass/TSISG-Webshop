@@ -5,9 +5,14 @@ import rawSchemas from "@shared/schemas/schemas.json";
 
 export const ajv = new Ajv();
 
-/**
- * Compiled Schemas from types defined in `@shared/types`
- */
+/* NOTE: Run `npm run generate-schemas` to generate the schemas.json file for the first time. It is excluded from version
+ control since the file can grow quite large.
+
+ Once you have the file generated, it can be updated automatically by running `npm run watch:generate-schemas`, or by
+  using the WebStorm configuration `TSISG-Dev`, which runs this task silently in the background.
+*/
+
+/*** Compiled Schemas from types defined in `@shared/types`*/
 export const SCHEMAS = rawSchemas;
 
 /** A defined Schema name. */
