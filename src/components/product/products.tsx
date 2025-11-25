@@ -10,6 +10,7 @@ import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 import { triggerViewItemList } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
+import {Currency} from "dinero.js";
 
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
@@ -80,9 +81,15 @@ export default function Products() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function CheckoutProducts() {
+/**
+ * An ordered list of products from the user's basket
+ * @param currency Override currency to display. Only use to display a currency other than the user's local currency.
+ */
+export function CheckoutProducts({currency}: {currency?: Currency}) {
   const basketString: string | null = localStorage.getItem("basket")
   if (!basketString) {return (<></>)}
   const basket: Basket = JSON.parse(basketString).basket
-  return (<div className="checkout-products">{basket.map((prod) => <CheckoutProduct product={prod} key={prod.sku}/>)}</div>)
+  return (<div className="checkout-products">{basket.map(
+      prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}</div>
+  )
 }

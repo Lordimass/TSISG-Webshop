@@ -40,8 +40,9 @@ export default async function handler(request: Request, _context: Context) {
                 break;
             case "refund.created":
                 await handleRefundCreated(body)
+                break;
             default:
-                console.log("Event did not map to a function")
+                console.log(`Event '${type}'did not map to a function`)
                 break;
         }
         return new Response(undefined, {status: 200})

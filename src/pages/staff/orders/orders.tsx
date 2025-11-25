@@ -5,7 +5,6 @@ import Throbber from "../../../components/throbber/throbber";
 
 import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
-import { Order } from "@shared/types/types";
 import { compareOrders } from "../../../lib/sortMethods";
 import { overdue_threshold } from "../../../lib/consts";
 import { callRPC } from "../../../lib/supabaseRPC";
@@ -17,10 +16,12 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
+import {OrderReturned} from "@shared/types/supabaseTypes.ts";
+import DineroFactory, {Currency} from "dinero.js";
 
 export function OrderManager() { 
-    const unsetOrders: Order[] = useGetOrderList() || []
-    const [orders, setOrders] = useState<Order[]>([])
+    const unsetOrders: OrderReturned[] = useGetOrderList() || []
+    const [orders, setOrders] = useState<OrderReturned[]>([])
     useEffect(() => {
         if (unsetOrders.length > 0) setOrders(unsetOrders)
     }, [unsetOrders])
@@ -51,7 +52,7 @@ export function OrderManager() {
 )
 }
 
-function OrderDisplay({order}:{order:Order}) {
+function OrderDisplay({order}:{order:OrderReturned}) {
     const date = new Date(order.placed_at)
     const today = new Date()
     const timeDifference = Math.floor((today.getTime() - date.getTime())/(86400000));
@@ -132,10 +133,16 @@ function OrderDropdown() {
     const dateString = dateToDateString(date)
     const timeString = dateToTimeString(date)
     const deliveryCostInput = useRef<HTMLInputElement | null>(null)
+    const totalValueDinero = DineroFactory(
+        {amount: Math.round(order.value.total*100), currency: order.value.currency as Currency}
+    )
+    const shippingDinero = order.value.shipping ? DineroFactory(
+        {amount: Math.round(order.value.shipping*100), currency: order.value.currency as Currency}
+    ) : undefined
 
     return (<>
         <div className="order-values">
-            Short ID: {order.id.toString().slice(0,40)} <br/>
+            Short ID: {order.id.slice(0,40)} <br/>
             {order.royalMailData ? <>Royal Mail ID: {order.royalMailData.orderIdentifier}<br/></> : <></>}
             Name: {order.name}<br/>
             Email: {order.email}<br/>
@@ -143,8 +150,8 @@ function OrderDropdown() {
             Street Address: {order.street_address}<br/>
             Postal Code: {order.postal_code}<br/>
             Country: {order.country}<br/>
-            Total Value: £{order.total_value.toFixed(2)}<br/>
-            {order.delivery_cost ? <>Royal Mail Delivery Cost: £{order.delivery_cost.toFixed(2)}<br/></> : <></>}
+            Total Value: {totalValueDinero.toFormat("$0.00")}<br/>
+            {shippingDinero ? <>Royal Mail Delivery Cost: {shippingDinero.toFormat("$0.00")}<br/></> : <></>}
             {order.dispatched ? <>Dispatched: {dateToDateString(shippedOn)}, {dateToTimeString(shippedOn)}<br/></>: <></>}
         </div>
 
@@ -154,6 +161,7 @@ function OrderDropdown() {
                 key={prod.sku} 
                 admin={true} 
                 checkbox={true}
+                currency={order.value.currency as Currency}
             />}
             ) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>

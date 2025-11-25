@@ -1,10 +1,6 @@
-import { ProductData } from "@shared/types/types";
+import {ProductData} from "@shared/types/types";
 
 export const shipping_options: Array<{shipping_rate: string}> = JSON.parse(import.meta.env.VITE_SHIPPING_OPTION_GROUPS)
-
-/** The image to use when no image is provided */
-export const PLACEHOLDER_IMAGE = "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/logo.webp"
-
 /** The number of days before an unfulfilled order is considered overdue */
 export const overdue_threshold: number = 2;
 
@@ -14,17 +10,13 @@ export const overdue_threshold: number = 2;
 */
 export const reading_speed_cps = 16;
 
-// The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap.
+/** The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap. */
 export const max_product_order: number = 10
 /** The number of products per page */
 export const productLoadChunks: number = 20;
 
 /** The default page title, usually followed by something else like " - 404 Not Found" */
 export const page_title: string = "This Shop Is So GAY"
-
-// Region definitions for the purpose of shipping
-export const uk = ["GB", "GG", "JE", "IM"]
-export const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "ES", "LU", "BE", "PT", "BG", "MT", "NL", "HR", "PL", "CY", "PT", "CZ", "RO", "EE", "SK", "FI", "SI", "GR", "HU", "SE", "IT", "AL", "MD", "AD", "ME", "AM", "MK", "AZ", "NO", "BY", "RU", "BA", "SM", "FO", "RS", "GE", "CH", "GI", "TJ", "GL", "TR", "IS", "TM", "KZ", "UA", "XK", "UZ", "KG", "VA", "LI"]
 
 // Date time constants
 export const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -50,7 +42,6 @@ export const blank_product: ProductData = {
     },
     tags: [],
     weight: 0,
-    customs_description: "",
     description: "",
     origin_country_code: "",
     package_type_override: "",

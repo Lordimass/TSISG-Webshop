@@ -1,23 +1,30 @@
-import {Dinero} from "dinero.js";
+import {Currency, Dinero} from "dinero.js";
 import {useContext, useEffect, useState} from "react";
 
 import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
 
-export default function Price({baseDinero}: {baseDinero: Dinero}) {
-    const {currency} = useContext(LocaleContext);
+/**
+ * Price display in user's local currency.
+ * @param baseDinero Dinero object representing the price to display to the user.
+ * @param currency Override currency to display.
+ * only use if you want this currency to show instead of the user's local currency.
+ */
+export default function Price({baseDinero, currency}: {baseDinero: Dinero, currency?: Currency}) {
+    const {currency: defaultCurrency} = useContext(LocaleContext);
+    const curr = currency ?? defaultCurrency;
 
     useEffect(() => {
         async function convert() {
-            if (currency === baseDinero.getCurrency()) {
+            if (curr === baseDinero.getCurrency()) {
                 setDinero(baseDinero);
             }
-            const convertedDinero = await convertDinero(baseDinero, currency)
+            const convertedDinero = await convertDinero(baseDinero, curr)
             setDinero(convertedDinero)
         }
         convert()
-    }, [currency, baseDinero]);
+    }, [curr, baseDinero]);
 
     const [dinero, setDinero] = useState<Dinero>(baseDinero);
 
@@ -29,7 +36,7 @@ export default function Price({baseDinero}: {baseDinero: Dinero}) {
     return <div className="price">
         <div className="price-left">
             <p className="price-symbol">{symbol}</p>
-            <p className="price-currency">{dinero.getCurrency()}</p>
+            <p className="price-currency">{dinero.getCurrency().toUpperCase()}</p>
         </div>
         <p className="price-major">{major}</p>
         <p className="price-minor">{minor}</p>

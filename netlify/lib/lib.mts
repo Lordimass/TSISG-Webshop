@@ -1,5 +1,5 @@
 import { supabaseAnon } from "./getSupabaseClient.mts";
-import type { ImageData } from "@shared/types/supabaseTypes.mts";
+import type { ImageData } from "@shared/types/supabaseTypes.ts";
 
 /**
  * Checks if two objects contain the same data

@@ -19,7 +19,7 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
     -   **Netlify Functions (`netlify/functions/`):** Serverless functions written in TypeScript (`.mts` files) that handle API requests, integrate with external services like Stripe and Google Analytics, and perform database operations via Supabase.
         -   Examples: `createCheckoutSession.mts`, `stripeWebhook.mts`, `fetchGA4Analytics.mts`, `updateProductData.mts`.
     -   **Netlify Lib (`netlify/lib/`):** Backend utility functions and type definitions shared among Netlify Functions.
-        -   Examples: `getSupabaseClient.mts`, `stripeObject.mts`, `types/stripeTypes.mts`, `types/supabaseTypes.mts`.
+        -   Examples: `getSupabaseClient.mts`, `stripeObject.mts`, `types/stripeTypes.ts`, `types/supabaseTypes.ts`.
     -   **Integration Points:**
         -   **Stripe:** Handled by functions like `createCheckoutSession.mts` and `stripeWebhook.mts`. Webhooks are configured to listen for `checkout.session.completed` and `refund.created` events.
         -   **Supabase:** Accessed via `getSupabaseClient.mts` in Netlify Functions and `supabaseRPC.tsx` on the frontend.

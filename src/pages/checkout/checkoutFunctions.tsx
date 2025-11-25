@@ -1,31 +1,9 @@
-import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
 import { Basket } from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
-
-/**
- * Debug method to test Apple Pay
- */
-export async function checkCanMakePayment(stripePromise: Promise<Stripe | null>) {
-    const pr = (await stripePromise)?.paymentRequest({
-        country: "GB",
-        currency: "gbp",
-        total: {
-        label: "Test Item",
-        amount: 1,
-        },
-        requestPayerName: true,
-        requestPayerEmail: true,
-    })
-    if (!pr) {
-        return `[PAYMENT REQUEST FAILED TO INITIALISE]`
-    } else {
-        return `pr.canMakePayment() => ${JSON.stringify(await pr.canMakePayment())}`
-    }
-}
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -43,9 +21,12 @@ export function redirectIfEmptyBasket() {
  * @return The client secrete for the created checkout session.
  */
 export async function createCheckoutSession(): Promise<string> {
-    // Get the user's currency from the query string, since we can't access LocaleContext
+    // Get the user's location from the query string since we can't access Context here.
     const urlParams = new URLSearchParams(window.location.search);
     const locale = urlParams.get("locale") || DEFAULT_LOCALE;
+    /** 2-Character ISO Country Code of the user */
+    const countryCode: string = locale.split("-")[1]
+    /** 3-Character ISO Currency Code to use for the prices */
     const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
 
     // Construct parameters for request to createCheckoutSession
@@ -66,7 +47,8 @@ export async function createCheckoutSession(): Promise<string> {
             origin: window.location.origin,
             gaClientID,
             gaSessionID,
-            currency: currency
+            // Stripe uses the location to determine currency automatically, so we pass the location instead of currency.
+            currency
         })
     })
     .then (

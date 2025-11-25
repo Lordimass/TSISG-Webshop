@@ -1,4 +1,4 @@
-import {ReadableAnalyticsMetric} from "@shared/types/analyticsTypes.mts";
+import {ReadableAnalyticsMetric} from "@shared/types/analyticsTypes.ts";
 import {durationToDurationString} from "../../../../../lib/lib.tsx";
 
 function Metric({

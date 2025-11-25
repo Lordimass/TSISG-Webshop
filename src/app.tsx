@@ -19,6 +19,7 @@ import {SiteSettingsContext} from "@shared/types/types";
 import {useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings} from "./appHooks";
 import {Report} from "./pages/staff/reports/report/report";
 import useLocale, {LocaleContext} from "./localeHandler.ts";
+import {VALIDATORS} from "@shared/schemas/schemas.ts";
 
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:

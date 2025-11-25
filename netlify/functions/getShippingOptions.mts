@@ -1,15 +1,28 @@
+import { Context } from "@netlify/functions";
+import { stripe } from "../lib/stripeObject.mts";
+import {AllowedCountry, EU, UK} from "@shared/consts/shipping.ts";
+import {ShippingOptionGroups, validateShippingOptionGroups} from "@shared/schemas/shipping.ts";
+import {FromSchema, JSONSchema} from "json-schema-to-ts";
+import {ajv} from "@shared/schemas/schemas.ts";
+
+const BodySchema = ({
+    type: "object",
+    properties: {
+        country: {type: "string"}, // Should be AllowedCountry, but this is a Stripe type.
+        checkoutID: {type: "string"},
+    },
+    required: ["country", "checkoutID"]
+}) as const satisfies JSONSchema;
+type Body = FromSchema<typeof BodySchema>;
+const validateBody = ajv.compile(BodySchema);
+
+let rates: ShippingOptionGroups = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
+
 /**
  * Returns a list of shipping options that are available based on the
  * location of the customer.
+ * @see Body
  */
-
-import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.mts";
-
-const uk = ["GB", "GG", "JE", "IM"]
-const eu = ["IE", "FR", "DE", "FR", "DK", "MC", "AT", "LV", "PT", "LT", "ES", "LU", "BE", "PT", "BG", "MT", "NL", "HR", "PL", "CY", "PT", "CZ", "RO", "EE", "SK", "FI", "SI", "GR", "HU", "SE", "IT", "AL", "MD", "AD", "ME", "AM", "MK", "AZ", "NO", "BY", "RU", "BA", "SM", "FO", "RS", "GE", "CH", "GI", "TJ", "GL", "TR", "IS", "TM", "KZ", "UA", "XK", "UZ", "KG", "VA", "LI"]
-let rates = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
-
 export default async function handler(request: Request, _context: Context) {try {
     // Validate request
     const contentType = request.headers.get("Content-Type")
@@ -20,32 +33,32 @@ export default async function handler(request: Request, _context: Context) {try 
         console.error("Request did not have a body")
         return new Response("No body supplied", {status: 400})
     }
-    const body = await request.json()
-    if (!("country" in body) || typeof body.country !== "string") {
+    const body: Body = await request.json()
+    if (!validateBody(body)) {
         console.error(`Request body was malformed: ${body}`)
         return new Response("Request body is malformed", {status: 400})
     } 
 
     // Validate form of `rates`
-    if (
-        !("uk" in rates && "eu" in rates && "world" in rates) ||
-        !(rates.uk instanceof Array && rates.eu instanceof Array && rates.world instanceof Array)
-    ) {
-        console.error(`VITE_SHIPPING_OPTION_GROUPS object malformed: ${rates}`)
-        console.error(rates)
-        console.error(rates.uk instanceof Array && rates.eu instanceof Array && rates.world instanceof Array)
-        return new Response("Shipping rates object malformed", {status: 500})
+    if (!validateShippingOptionGroups(rates)) {
+        console.error(
+            `VITE_SHIPPING_OPTION_GROUPS is malformed: ${JSON.stringify(rates, undefined, 2)}`
+        )
+        return new Response("VITE_SHIPPING_OPTION_GROUPS is malformed", {status: 400})
     }
-    const typedRates = rates as {uk: any[], eu: any[], world: any[]}
 
-    // Find shipping rates for the given country
-    let applicableRates = typedRates.world
-    if (uk.includes(body.country)) applicableRates = typedRates.uk
-    else if (eu.includes(body.country)) applicableRates = typedRates.eu
-
+    let applicableRates = rates.world
+    if (UK.includes(body.country as AllowedCountry)) applicableRates = rates.uk
+    else if (EU.includes(body.country as AllowedCountry)) applicableRates = rates.eu
     console.log(applicableRates)
+
+    // Fetch list of active shipping rates
+    // Find rates with descriptions in the applicable array
+    // Find shipping rates for the given country
+    // Update checkout session
+
     await stripe.checkout.sessions.update(body.checkoutID, {
-        shipping_options: applicableRates.map((rate) => {return {shipping_rate: rate}})
+        shipping_options: applicableRates.map(rate => {return {shipping_rate: rate}})
     })
 
     return new Response(JSON.stringify(applicableRates))

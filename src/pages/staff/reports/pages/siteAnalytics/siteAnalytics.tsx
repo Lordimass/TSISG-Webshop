@@ -5,7 +5,7 @@ import {ReportContext} from "../../report/lib"
 import "./siteAnalytics.css"
 import {fetchFromNetlifyFunction} from "../../../../../lib/netlifyFunctions"
 import {getJWTToken, LoginContext} from "../../../../../lib/auth"
-import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
+import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.ts";
 import {DurationMetric, MonetaryMetric, NumericalMetric} from "./metricComponents.tsx";
 import {Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {dateToDateString} from "../../../../../lib/lib.tsx";
