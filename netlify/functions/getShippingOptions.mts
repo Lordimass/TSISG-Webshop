@@ -1,9 +1,9 @@
 import { Context } from "@netlify/functions";
 import { stripe } from "../lib/stripeObject.mts";
 import {AllowedCountry, EU, UK} from "@shared/consts/shipping.ts";
-import {ShippingOptionGroups, validateShippingOptionGroups} from "@shared/schemas/shipping.ts";
 import {FromSchema, JSONSchema} from "json-schema-to-ts";
-import {ajv} from "@shared/schemas/schemas.ts";
+import {ajv, VALIDATORS} from "@shared/schemas/schemas.ts";
+import {ShippingOptionGroups} from "@shared/types/shipping.ts";
 
 const BodySchema = ({
     type: "object",
@@ -16,7 +16,7 @@ const BodySchema = ({
 type Body = FromSchema<typeof BodySchema>;
 const validateBody = ajv.compile(BodySchema);
 
-let rates: ShippingOptionGroups = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
+let untypedRates: unknown = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
 
 /**
  * Returns a list of shipping options that are available based on the
@@ -40,12 +40,13 @@ export default async function handler(request: Request, _context: Context) {try 
     } 
 
     // Validate form of `rates`
-    if (!validateShippingOptionGroups(rates)) {
+    if (!VALIDATORS.ShippingOptionGroups(untypedRates)) {
         console.error(
-            `VITE_SHIPPING_OPTION_GROUPS is malformed: ${JSON.stringify(rates, undefined, 2)}`
+            `VITE_SHIPPING_OPTION_GROUPS is malformed: ${JSON.stringify(untypedRates, undefined, 2)}`
         )
         return new Response("VITE_SHIPPING_OPTION_GROUPS is malformed", {status: 400})
     }
+    const rates = untypedRates as ShippingOptionGroups;
 
     let applicableRates = rates.world
     if (UK.includes(body.country as AllowedCountry)) applicableRates = rates.uk

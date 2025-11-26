@@ -2449,5 +2449,40 @@
         "type": "object"
       }
     }
+  },
+  "ShippingOptionGroups": {
+    "$ref": "#/definitions/ShippingOptionGroups",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "ShippingOptionGroups": {
+        "description": "Required shape of environment variable for VITE_SHIPPING_OPTION_GROUPS.",
+        "properties": {
+          "eu": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "uk": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "world": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "uk",
+          "eu",
+          "world"
+        ],
+        "type": "object"
+      }
+    }
   }
 }
