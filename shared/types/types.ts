@@ -28,3 +28,14 @@ export type SiteSettings = {
     clockify_users?: { userID: string; name: string }[]
     [key: string]: any
 }
+
+/**
+ * Thrown from functions implemented by Netlify functions to signify that something has gone wrong.
+ * This should be caught by the base Netlify function and a suitable `Response` returned based on this.
+ * @see @shared/errors.ts/NetlifyFunctionError
+ */
+export interface NetlifyFunctionError extends Error {
+    message: string;
+    status: number;
+}
+

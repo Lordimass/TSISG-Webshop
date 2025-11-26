@@ -115,7 +115,7 @@ export default async function handler(request: Request, context: Context) {
 
             } catch (error) {
                 console.error("Error creating product on Stripe:", error);
-                return new Response(undefined, {status: 500, statusText: "Internal server error"});
+                return new Response(undefined, {status: 500});
             }
         }
     }

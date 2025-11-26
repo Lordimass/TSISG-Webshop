@@ -1,43 +1,28 @@
 import {UUID} from "crypto"
 
-export interface ProductData {
-    sku: number,
-    /** Time at which the product was added to the database as an ISO date string */
-    inserted_at: string
+export interface ProductData extends RawProductData {
     /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was last confirmed valid */
     fetched_at: string
-    /** The time which this data was last edited as an ISO date string. */
-    last_edited: string
-    /** The last person to edit this product */
-    last_edited_by?: string
+    /** DEPRECATED: Please use `category.id` instead */
+    category_id: number
+    /** The category the product belongs to */
+    category: CategoryData
+    images: ImageData[]
+    /** The tags attached to the product */
+    tags: TagData[]
+}
+
+/** A product data record directly from Supabase, with no modifications made to it */
+export interface RawProductData {
+    sku: number,
     /** Customer facing name of the product */
     name: string
     /** Price of product in GBP inc. Tax */
     price: number
     stock: number
     active: boolean
-    /** DEPRECATED: Please use `category.id` instead */
-    category_id: number
-    /** The category the product belongs to */
-    category: CategoryData
-    sort_order: number
-    images: ImageData[]
     /** Weight of the product in grams */
     weight: number
-    /** Short description for customs forms */
-    customs_description?: string
-    /** An extended description for customs forms applicable to higher value orders. */
-    extended_customs_description?: string
-    /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
-    origin_country_code: string
-    /** The user facing description of the product */
-    description: string
-    /** The tags attached to the product */
-    tags: TagData[]
-    /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
-    package_type_override: string
-    /** Products with the same group name are displayed as one product with variants, instead of each as unique products. */
-    group_name?: string
     /** Additional information on the product */
     metadata: {
         /** The name of this specific variant, if `group_name != undefined` */
@@ -46,6 +31,27 @@ export interface ProductData {
         seo_priority?: number
         [key: string]: unknown
     }
+    /** Products with the same group name are displayed as one product with variants, instead of each as unique products. */
+    group_name?: string
+    sort_order: number
+    /** The ID of the category this product is in */
+    category_id: number
+    /** The customer facing description of the product */
+    description: string
+    /** Time at which the product was added to the database as an ISO date string */
+    inserted_at: string
+    /** The time which this data was last edited as an ISO date string. */
+    last_edited: string
+    /** The last person to edit this product */
+    last_edited_by?: string
+    /** Short description for customs forms */
+    customs_description?: string
+    /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
+    origin_country_code: string
+    /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
+    package_type_override: string
+    /** An extended description for customs forms applicable to higher value orders. */
+    extended_customs_description?: string
 }
 
 export type ImageData = {
@@ -195,10 +201,20 @@ export interface OrderReturned extends Order {
     }
 }
 
+/**
+ * The body of a request from a Supabase webhook.
+ */
 export interface WebhookPayload {
+    /** What triggered the request? Either an Update, Insertion, or Deletion on `table` */
     type: 'UPDATE' | 'INSERT' | 'DELETE'
+    /** The table which was updated to trigger this webhook call */
     table: string
+    /** The Postgres schema which `table` belongs to
+     * @example public
+     */
     schema: string
+    /** The new record as a result of the action performed */
     record: any
+    /** The old record, before the action was performed */
     old_record: any
 }

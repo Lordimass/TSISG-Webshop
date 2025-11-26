@@ -946,7 +946,7 @@
             "type": "string"
           },
           "description": {
-            "description": "The user facing description of the product",
+            "description": "The customer facing description of the product",
             "type": "string"
           },
           "extended_customs_description": {
@@ -1032,24 +1032,24 @@
           }
         },
         "required": [
-          "sku",
-          "inserted_at",
-          "fetched_at",
-          "last_edited",
-          "name",
-          "price",
-          "stock",
           "active",
-          "category_id",
           "category",
-          "sort_order",
-          "images",
-          "weight",
-          "origin_country_code",
+          "category_id",
           "description",
-          "tags",
+          "fetched_at",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "metadata",
+          "name",
+          "origin_country_code",
           "package_type_override",
-          "metadata"
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
         ],
         "type": "object"
       },
@@ -1455,29 +1455,25 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
       "OrderProduct": {
+        "description": "A product from the order_products table",
         "properties": {
-          "image_url": {
+          "order_id": {
             "type": "string"
           },
-          "line_value": {
+          "product_sku": {
             "type": "number"
-          },
-          "product_name": {
-            "type": "string"
           },
           "quantity": {
             "type": "number"
           },
-          "sku": {
+          "value": {
             "type": "number"
           }
         },
         "required": [
-          "sku",
-          "product_name",
+          "product_sku",
           "quantity",
-          "line_value",
-          "image_url"
+          "value"
         ],
         "type": "object"
       }
@@ -1812,16 +1808,24 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
       "WebhookPayload": {
+        "description": "The body of a request from a Supabase webhook.",
         "properties": {
-          "old_record": {},
-          "record": {},
+          "old_record": {
+            "description": "The old record, before the action was performed"
+          },
+          "record": {
+            "description": "The new record as a result of the action performed"
+          },
           "schema": {
+            "description": "The Postgres schema which `table` belongs to",
             "type": "string"
           },
           "table": {
+            "description": "The table which was updated to trigger this webhook call",
             "type": "string"
           },
           "type": {
+            "description": "What triggered the request? Either an Update, Insertion, or Deletion on `table`",
             "enum": [
               "UPDATE",
               "INSERT",
@@ -2480,6 +2484,142 @@
           "uk",
           "eu",
           "world"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "NetlifyFunctionError": {
+    "$ref": "#/definitions/NetlifyFunctionError",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "NetlifyFunctionError": {
+        "description": "Thrown from functions implemented by Netlify functions to signify that something has gone wrong. This should be caught by the base Netlify function and a suitable `Response` returned based on this.",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "stack": {
+            "type": "string"
+          },
+          "status": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "message",
+          "name",
+          "status"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "RawProductData": {
+    "$ref": "#/definitions/RawProductData",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "RawProductData": {
+        "description": "A product data record directly from Supabase, with no modifications made to it",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": "string"
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": "string"
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": "string"
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": "string"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": "string"
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": "string"
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "weight": {
+            "description": "Weight of the product in grams",
+            "type": "number"
+          }
+        },
+        "required": [
+          "sku",
+          "name",
+          "price",
+          "stock",
+          "active",
+          "weight",
+          "metadata",
+          "sort_order",
+          "category_id",
+          "description",
+          "inserted_at",
+          "last_edited",
+          "origin_country_code",
+          "package_type_override"
         ],
         "type": "object"
       }

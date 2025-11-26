@@ -1,9 +1,3 @@
-// This function is called by a Supabase Webhook, 
-// DOCS: https://supabase.com/docs/guides/database/webhooks
-// Webhook Configuration: https://supabase.com/dashboard/project/iumlpfiybqlkwoscrjzt/integrations/webhooks/webhooks
-
-// For local development, use cloudflared tunnel or similar with `cloudflared tunnel run`
-
 import { Context } from "@netlify/functions";
 import getSupabaseClient from "../lib/getSupabaseClient.mts";
 import type { WebhookPayload } from "@shared/types/supabaseTypes.ts";
@@ -13,6 +7,11 @@ import {formatBytes} from "@shared/functions/functions.ts";
 
 /**
  * Sync contents of product-images bucket with transformed-product-images
+ *
+ * This function is called by a Supabase Webhook,
+ * DOCS: https://supabase.com/docs/guides/database/webhooks
+ * Webhook Configuration: https://supabase.com/dashboard/project/iumlpfiybqlkwoscrjzt/integrations/webhooks/webhooks
+ * For local development, use Cloudflared tunnel or similar with `cloudflared tunnel run`
  * @param request 
  * @param _context 
  * @returns 
@@ -22,7 +21,7 @@ export default async function handler(request: Request, _context: Context): Prom
     if (request.method !== "POST") {
         return new Response(`Method ${request.method} not allowed`, {status: 405});
     } else if (request.headers.get("Content-Type") !== "application/json") {
-        return new Response(undefined, {status: 412, statusText: "'Content-Type' must be 'application/json'"})
+        return new Response("'Content-Type' must be 'application/json'", {status: 412})
     }
     const body: WebhookPayload = await request.json()
 
@@ -34,7 +33,7 @@ export default async function handler(request: Request, _context: Context): Prom
 
     // Ignore changes not in product-images bucket
     if (body.record?.bucket_id !== "product-images" && body.old_record?.bucket_id !== "product-images") {
-        return new Response(undefined, {status: 200, statusText: "Bucket modification was not in product-images, no action performed"})
+        return new Response("Bucket modification was not in product-images, no action performed", {status: 200})
     }
 
     // Get service role Supabase Client for uploading new images and checking request contents
@@ -57,7 +56,7 @@ export default async function handler(request: Request, _context: Context): Prom
             .from("product-images")
             .download(body.record.name)
         if (error) throw error
-        if (!downloadData) return new Response(undefined, {status: 404, statusText: "File not found"})
+        if (!downloadData) return new Response("File not found", {status: 404})
 
         // Transform
         const untransformed: ArrayBuffer = await downloadData.arrayBuffer()
@@ -80,7 +79,7 @@ export default async function handler(request: Request, _context: Context): Prom
         
         const log = `Transformed ${body.record.name} transformed: ${formatBytes(untransformed.byteLength)} -> ${formatBytes(transformed.byteLength)}`
         console.log(log)
-        return new Response(undefined, {status: 204, statusText: log})
+        return new Response(log, {status: 204})
     } 
     // Delete transformed image to clean up unused files
     else if (body.type === "DELETE") {
@@ -91,7 +90,7 @@ export default async function handler(request: Request, _context: Context): Prom
 
         const log = `Deleted image ${transformedName}`
         console.log(log)
-        return new Response(undefined, {status: 204, statusText: log})
+        return new Response(log, {status: 204})
     }
 
     return new Response()
