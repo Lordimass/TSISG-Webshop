@@ -1,5 +1,6 @@
-import { callRPC } from "../../lib/supabaseRPC";
 import { ProductData } from "@shared/types/types";
+import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {supabase} from "../../lib/supabaseRPC.tsx";
 
 /**
  * Search the products using a full text search function in Supabase.
@@ -10,7 +11,8 @@ import { ProductData } from "@shared/types/types";
 export async function searchProducts(query: string): Promise<ProductData[]> {
     // Could be improved using GIN/GIN+trgm indexes, but this is fine for now
     const data = await callRPC(
-        "search_products", 
+        "search_products",
+        supabase,
         { q: query, limit_results: 20 }, 
         () => {});
     return data;

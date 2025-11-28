@@ -1,4 +1,4 @@
-import Ajv from "ajv";
+import Ajv, {ValidationError} from "ajv";
 import addFormats from "ajv-formats";
 import {FromSchema, JSONSchema} from "json-schema-to-ts";
 import rawSchemas from "@shared/schemas/schemas.json";
@@ -33,10 +33,20 @@ Object.entries(SCHEMAS).forEach(([key, schema]) => {
 addFormats(ajv)
 
 /** Pre-compiled validator functions for types with associated schemas. */
-export const VALIDATORS: { [K in SchemaName]: (data: unknown) => data is SchemaTypeMap[K] } =
+export const VALIDATORS: { [K in SchemaName]: ((data: unknown) => data is SchemaTypeMap[K]) & {errors: ValidationError[]}; } =
     Object.fromEntries(
         (Object.entries(SCHEMAS) as [SchemaName, JSONSchema][]).map(([key, schema]) => [
             key,
-            ajv.compile(schema) as (data: unknown) => data is SchemaTypeMap[typeof key]
+            ajv.compile(schema) as ((data: unknown) => data is SchemaTypeMap[typeof key])
         ])
-    ) as { [K in SchemaName]: (data: unknown) => data is SchemaTypeMap[K] };
+    ) as { [K in SchemaName]: ((data: unknown) => data is SchemaTypeMap[K]) & {errors: ValidationError[]}; };
+
+export function logValidationErrors(validator: keyof typeof VALIDATORS) {
+    if (VALIDATORS[validator].errors) {
+        VALIDATORS[validator].errors.forEach(error => {
+            console.log(error);
+        })
+    } else {
+        console.log("No validation errors")
+    }
+}

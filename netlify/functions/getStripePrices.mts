@@ -4,12 +4,13 @@ import { stripe } from "../lib/stripeObject.mts";
 import type { ProductInBasket } from "@shared/types/types.ts";
 import type { StripeProductMeta } from "@shared/types/stripeTypes.ts";
 import { checkObjectsEqual, getImageURL } from "../lib/lib.mts";
-import { callRPC } from "../lib/supabaseRPC.mts";
 import { supabaseAnon } from "../lib/getSupabaseClient.mts";
 import type { ImageData } from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../../src/localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
+import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {supabase} from "../../src/lib/supabaseRPC.tsx";
 
 type CurrencyOptions = {[key: string]: {unit_amount: number, tax_behavior: 'exclusive' | 'inclusive' | 'unspecified'}};
 type LineItem = (Stripe.LineItem | {price: string})
@@ -131,7 +132,7 @@ export default async function handler(request: Request, context: Context) {
 */ 
 async function updateBasketData(basket: ProductInBasket[], _context: Context) {
     // Fetch products
-    const freshProducts = await callRPC("get_products", {skus: basket.map(p=>p.sku), in_stock_only: false, active_only: false}, supabaseAnon)
+    const freshProducts = await callRPC("get_products", supabaseAnon, {skus: basket.map(p=>p.sku), in_stock_only: false, active_only: false})
 
     // Check and ammend prices 
     for (let i=0; i<basket.length; i++) {

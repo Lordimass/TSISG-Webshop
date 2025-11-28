@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react"
-import { ImageData, ProductData } from "@shared/types/types"
-import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
-import { UUID } from "crypto"
-import { compareImages } from "./sortMethods"
-import { getJWTToken } from "./auth"
-import { softParseJSON } from "./lib"
+import {useEffect, useState} from "react"
+import {ImageData, ProductData} from "@shared/types/types"
+import {UnsubmittedImageData, UnsubmittedProductData} from "../pages/products/productEditor/types"
+import {UUID} from "crypto"
+import {compareImages} from "./sortMethods"
+import {getJWTToken} from "./auth"
+import {softParseJSON} from "./lib"
 import {supabase} from "./supabaseRPC.tsx";
 import imageCompression from "browser-image-compression";
 import {formatBytes} from "@shared/functions/functions.ts";
@@ -17,111 +17,116 @@ import {formatBytes} from "@shared/functions/functions.ts";
  * @returns Data or error
  */
 export function useFetchFromNetlifyFunction(
-  func: string, 
-  body?: string | ArrayBuffer | Blob | File | FormData  | URLSearchParams | ReadableStream, 
-  jwt?: Promise<string | undefined>
-): {loading: boolean, data?: any, error?: any} {
-  const [data, setData] = useState<any>(null)
-  const [error, setError] = useState<any>(null)  
-  const [loading, setIsLoading] = useState(true)
-  let errored = false
-  
-  const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
-  
-  useEffect(() => {
-    async function fetchData() {
-      const jwtString = await jwt
-      try {
-        // Standard case where no body supplied
-        if (!body) {
-          // Supply JWT as auth if supplied
-          await fetch(endpoint, {headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}}) 
-          .then((response) => {
-            errored = response.status != 200; 
-            return response.json();
-          })
-          .then((data) => {
-            if (errored) {
-              console.error(data)
-              setError(data)
-            } else {setData(data)}
-            setIsLoading(false)
-          })
-          
-        // Alternative POST case
-        } else {
-          await fetch(endpoint, {
-            method: "POST",
-            body: body,
-            // Supply JWT as auth if supplied
-            headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}
-          })
-          .then((response) => {
-            errored = response.status != 200; 
-            return response.json();
-          })
-          .then((data) => {
-            if (errored) {
-              console.error(data)
-              setError(data)
-            } else {setData(data)}
-            setIsLoading(false)
-          })
+    func: string,
+    body?: string | ArrayBuffer | Blob | File | FormData | URLSearchParams | ReadableStream,
+    jwt?: Promise<string | undefined>
+): { loading: boolean, data?: any, error?: any } {
+    const [data, setData] = useState<any>(null)
+    const [error, setError] = useState<any>(null)
+    const [loading, setIsLoading] = useState(true)
+    let errored = false
+
+    const endpoint: string = window.location.origin + "/.netlify/functions/" + func
+
+    useEffect(() => {
+        async function fetchData() {
+            const jwtString = await jwt
+            try {
+                // Standard case where no body supplied
+                if (!body) {
+                    // Supply JWT as auth if supplied
+                    await fetch(endpoint, {headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}})
+                        .then((response) => {
+                            errored = response.status != 200;
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (errored) {
+                                console.error(data)
+                                setError(data)
+                            } else {
+                                setData(data)
+                            }
+                            setIsLoading(false)
+                        })
+
+                    // Alternative POST case
+                } else {
+                    await fetch(endpoint, {
+                        method: "POST",
+                        body: body,
+                        // Supply JWT as auth if supplied
+                        headers: jwtString ? {Authorization: `Bearer ${jwtString}`} : {}
+                    })
+                        .then((response) => {
+                            errored = response.status != 200;
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (errored) {
+                                console.error(data)
+                                setError(data)
+                            } else {
+                                setData(data)
+                            }
+                            setIsLoading(false)
+                        })
+                }
+
+            } catch (error: any) {
+                console.error(error)
+                setError(error);
+                setIsLoading(false)
+            }
         }
 
-      } catch (error: any) {
-        console.error(error)
-        setError(error);
-        setIsLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+        fetchData()
+    }, [])
 
-  return {
-    loading: loading,
-    data: data,
-    error: error
-  }
+    return {
+        loading: loading,
+        data: data,
+        error: error
+    }
 }
 
 export async function fetchFromNetlifyFunction(
-  func: string, 
-  body?: string | ArrayBuffer | Blob | File | FormData  | URLSearchParams | ReadableStream, 
-  jwt?: Promise<string | undefined>
-): Promise<{data?: any, error?: any}> {
-  const endpoint: string = window.location.origin + "/.netlify/functions/" + func 
-  const jwtString = await jwt
-  const headers = jwtString ? {Authorization: `Bearer ${jwtString}`} : undefined
+    func: string,
+    body?: string | ArrayBuffer | Blob | File | FormData | URLSearchParams | ReadableStream,
+    jwt?: Promise<string | undefined>
+): Promise<{ data?: any, error?: any }> {
+    const endpoint: string = window.location.origin + "/.netlify/functions/" + func
+    const jwtString = await jwt
+    const headers = jwtString ? {Authorization: `Bearer ${jwtString}`} : undefined
 
-  try {
-    const response = await (body 
-      ? fetch(endpoint, { headers, method: "POST", body }) 
-      : fetch(endpoint, { headers })
-    )
-    const responseBody = await response.text()
-    if (!response.ok) {
-      throw new Error(responseBody)
+    try {
+        const response = await (body
+                ? fetch(endpoint, {headers, method: "POST", body})
+                : fetch(endpoint, {headers})
+        )
+        const responseBody = await response.text()
+        if (!response.ok) {
+            throw new Error(responseBody)
+        }
+        return {data: softParseJSON(responseBody)}
+
+    } catch (error: any) {
+        console.error(error)
+        return {error}
     }
-    return {data: softParseJSON(responseBody)}
-
-  } catch (error: any) {
-    console.error(error)
-    return {error}
-  }
 }
 
 export function useGetOrderList(): any {
-  const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, getJWTToken())
-  return data
+    const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, getJWTToken())
+    return data
 }
 
 /**
  * Creates a new product category if it doesn't already exist and returns the ID
  */
 export async function getCategoryID(name: string): Promise<number> {
-  const {data} = await fetchFromNetlifyFunction("getCategoryID", name, getJWTToken())
-  return data.id
+    const {data} = await fetchFromNetlifyFunction("getCategoryID", name, getJWTToken())
+    return data.id
 }
 
 /**
@@ -131,52 +136,54 @@ export async function getCategoryID(name: string): Promise<number> {
  * @returns A promise that resolves to true if the update was successful, false otherwise.
  */
 export async function updateProductData(
-  product: ProductData | UnsubmittedProductData,
-  imageMap?: Map<string, File>
-) : Promise<boolean> {
+    product: ProductData | UnsubmittedProductData,
+    imageMap?: Map<string, File>
+): Promise<boolean> {
 
-  // Find images that are yet to be uploaded
-  const imagesUnion = product.images as (ImageData | UnsubmittedImageData)[]
-  const unsubmittedImages = imagesUnion.filter((img): img is UnsubmittedImageData => "local_url" in img)
-  const submittedImages = imagesUnion.filter((img): img is ImageData => "id" in img)
+    // Find images that are yet to be uploaded
+    const imagesUnion = product.images as (ImageData | UnsubmittedImageData)[]
+    const unsubmittedImages = imagesUnion.filter((img): img is UnsubmittedImageData => "local_url" in img)
+    const submittedImages = imagesUnion.filter((img): img is ImageData => "id" in img)
 
-  // Upload all of these new images
-  const compoundImagePromises = unsubmittedImages.map(async (img) => {
-    // Construct new image with chosen name
-    const imgFile = imageMap?.get(img.local_url)
-    if (!imgFile) throw new Error("Image file not found in image map")
-    // Create a new File object with the correct name
-    const named_image = new File([imgFile], img.name, { type: imgFile.type });
-    const resp = await uploadImage(named_image, "product-images");
-    return { resp, unsubmittedImage: img };
-  });
+    // Upload all of these new images
+    const compoundImagePromises = unsubmittedImages.map(async (img) => {
+        // Construct new image with chosen name
+        const imgFile = imageMap?.get(img.local_url)
+        if (!imgFile) throw new Error("Image file not found in image map")
+        // Create a new File object with the correct name
+        const named_image = new File([imgFile], img.name, {type: imgFile.type});
+        const resp = await uploadImage(named_image, "product-images");
+        return {resp, unsubmittedImage: img};
+    });
 
-  const compoundImageResults = await Promise.all(compoundImagePromises)
-    
-  // Reconstruct product with new images
-  const newImages: ImageData[] = compoundImageResults.map((img) => {return {
-    alt: img.unsubmittedImage.alt ?? undefined,
-    bucket_id: "product-images",
-    display_order: img.unsubmittedImage.display_order,
-    id: img.resp.fileID as UUID,
-    image_url: img.resp.fileURL,
-    inserted_at: (new Date()).toISOString(),
-    metadata: {},
-    name: img.unsubmittedImage.name,
-    path_tokens: [img.unsubmittedImage.name],
-    product_sku: product.sku,
-    association_metadata: img.unsubmittedImage.association_metadata
-  }})
-  const combinedImages = [...submittedImages, ...newImages].sort(compareImages)
-  const reconstructedProduct: ProductData = {...product, images: combinedImages}
+    const compoundImageResults = await Promise.all(compoundImagePromises)
 
-  // Submit reconstructed product
-  await fetchFromNetlifyFunction(
-    "updateProductData", 
-    JSON.stringify(reconstructedProduct), 
-    getJWTToken()
-  )
-  return true
+    // Reconstruct product with new images
+    const newImages: ImageData[] = compoundImageResults.map((img) => {
+        return {
+            alt: img.unsubmittedImage.alt ?? null,
+            bucket_id: "product-images",
+            display_order: img.unsubmittedImage.display_order,
+            id: img.resp.fileID as UUID,
+            image_url: img.resp.fileURL,
+            inserted_at: (new Date()).toISOString(),
+            metadata: {},
+            name: img.unsubmittedImage.name,
+            path_tokens: [img.unsubmittedImage.name],
+            product_sku: product.sku,
+            association_metadata: img.unsubmittedImage.association_metadata,
+        }
+    })
+    const combinedImages = [...submittedImages, ...newImages].sort(compareImages)
+    const reconstructedProduct: ProductData = {...product, images: combinedImages}
+
+    // Submit reconstructed product
+    await fetchFromNetlifyFunction(
+        "updateProductData",
+        JSON.stringify(reconstructedProduct),
+        getJWTToken()
+    )
+    return true
 }
 
 /**
@@ -194,7 +201,7 @@ export async function updateProductData(
 export async function uploadImage(
     image: File,
     bucket: string,
-    compress: {maxSize?: number, maxWidthOrHeight?: number} = {maxSize: 1, maxWidthOrHeight: 750}
+    compress: { maxSize?: number, maxWidthOrHeight?: number } = {maxSize: 1, maxWidthOrHeight: 750}
 ): Promise<{
     fileName: string
     size: number

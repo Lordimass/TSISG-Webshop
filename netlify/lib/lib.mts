@@ -1,5 +1,11 @@
 import { supabaseAnon } from "./getSupabaseClient.mts";
 import type { ImageData } from "@shared/types/supabaseTypes.ts";
+import {Stripe} from "stripe";
+import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
+import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions
+import DineroFactory, {Currency} from "dinero.js";
+import {convertDinero} from "@shared/functions/price.ts";
+import {stripe} from "./stripeObject.mts";
 
 /**
  * Checks if two objects contain the same data
@@ -93,4 +99,58 @@ export function parseDuration(duration: string): number {
     seconds * 1000;
 
   return ms;
+}
+
+
+
+
+type CurrencyOptionType = "SHIPPING" | "PRODUCT"
+type CurrencyOptions<T extends CurrencyOptionType> =
+    T extends "PRODUCT" ? { [key: string]: PriceCurrencyOptions } :
+    T extends "SHIPPING" ? { [key: string]: ShippingCurrencyOptions } :
+    never
+/**
+ * Generate price points for all of Stripe's supported currencies (ex. base currency).
+ * @param price The price point in base currency in cents
+ * @param type Whether the currency options are for shipping rates or product prices, since structure is marginally
+ * different between the two (for some reason...)
+ * @param baseCurrency The currency of `price`
+ */
+export async function generateStripeCurrencyOptions<T extends CurrencyOptionType>(
+    price: number,
+    type: T,
+    baseCurrency: Currency = "GBP",
+):
+    Promise<CurrencyOptions<T>>
+{
+    process.stdout.write("Generating currency options... ")
+    const {supported_payment_currencies} = await stripe.countrySpecs.retrieve("GB")
+
+    let new_currency_options: CurrencyOptions<T> = {} as CurrencyOptions<T>
+    const dinero = DineroFactory({
+        amount: price,
+        currency: baseCurrency
+    })
+
+    // Fetch new values for each currency
+    for (const currency of supported_payment_currencies) {
+        // Skip the base currency from the options
+        if (currency === baseCurrency.toLowerCase()) continue;
+
+        // Convert and add
+        const convDin = await convertDinero(dinero, currency as Currency)
+        if (convDin.getAmount() > 99999999) {
+            // Skip currencies where converted currency leads to numbers too large for Stripe request.
+            continue;
+        }
+        // TODO: Implement tax exclusivity for countries that need it
+        if (type === "SHIPPING") {
+            new_currency_options[currency] = {amount: convDin.getAmount(), tax_behavior: "unspecified"}
+        } else {
+            new_currency_options[currency] = {unit_amount: convDin.getAmount(), tax_behavior: "unspecified"}
+        }
+
+    }
+    process.stdout.write("\r\x1b[K") // Clear line
+    return new_currency_options
 }

@@ -1,8 +1,6 @@
 import {UUID} from "crypto"
 
 export interface ProductData extends RawProductData {
-    /** Time at which the product was fetched from the database as an ISO date string, representative of when this data was last confirmed valid */
-    fetched_at: string
     /** DEPRECATED: Please use `category.id` instead */
     category_id: number
     /** The category the product belongs to */
@@ -32,12 +30,12 @@ export interface RawProductData {
         [key: string]: unknown
     }
     /** Products with the same group name are displayed as one product with variants, instead of each as unique products. */
-    group_name?: string
+    group_name: string | null
     sort_order: number
     /** The ID of the category this product is in */
     category_id: number
     /** The customer facing description of the product */
-    description: string
+    description: string | null
     /** Time at which the product was added to the database as an ISO date string */
     inserted_at: string
     /** The time which this data was last edited as an ISO date string. */
@@ -45,18 +43,18 @@ export interface RawProductData {
     /** The last person to edit this product */
     last_edited_by?: string
     /** Short description for customs forms */
-    customs_description?: string
+    customs_description: string | null
     /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
-    origin_country_code: string
+    origin_country_code: string | null
     /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
-    package_type_override: string
+    package_type_override: string | null
     /** An extended description for customs forms applicable to higher value orders. */
-    extended_customs_description?: string
+    extended_customs_description: string | null
 }
 
 export type ImageData = {
     /** Alt text for the image */
-    alt: string | undefined
+    alt: string | null
     /** The identifier of the bucket that the image object belongs to */
     bucket_id: string
     /** The order to display this image in when in a list, higher numbers come later */
@@ -111,7 +109,7 @@ export type CategoryData = {
     id: number,
     created_at: string
     name: string,
-    description?: string
+    description: string | null,
 }
 
 
@@ -129,7 +127,7 @@ export interface CompressedOrder {
     postal_code: string
     id: string
     city: string
-    delivery_cost?: number
+    delivery_cost: number | null
     products: OrderProdCompressed[]
     value: { total: number, shipping: number, currency: string },
 }

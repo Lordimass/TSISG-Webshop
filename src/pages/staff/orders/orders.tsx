@@ -7,7 +7,6 @@ import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
 import { compareOrders } from "../../../lib/sortMethods";
 import { overdue_threshold } from "../../../lib/consts";
-import { callRPC } from "../../../lib/supabaseRPC";
 import { getColourClass, OrderDropdownContext, OrdersContext } from "./lib";
 import { getJWTToken } from "../../../lib/auth";
 import { dateToDateString, dateToTimeString } from "../../../lib/lib";
@@ -18,6 +17,8 @@ import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
 import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
+import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {supabase} from "../../../lib/supabaseRPC.tsx";
 
 export function OrderManager() { 
     const unsetOrders: OrderReturned[] = useGetOrderList() || []
@@ -110,7 +111,7 @@ function OrderDropdown() {
         const val = deliveryCostInput.current?.value ?? "s"
         if (+val <= 0) {notify("Cost must be a valid number greater than 0!"); return}
         try {
-            await callRPC("update_delivery_cost", {order_id: order.id, new_cost: val}, notify)
+            await callRPC("update_delivery_cost", supabase, {order_id: order.id, new_cost: val}, notify)
         } catch {return}
 
         // Update the order state

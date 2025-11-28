@@ -26,7 +26,6 @@ export const monthsOfYear = ["January", "February", "March", "April", "May", "Ju
 export const blank_product: ProductData = {
     sku: 0,
     inserted_at: new Date().toISOString(),
-    fetched_at: new Date().toISOString(),
     last_edited: new Date().toISOString(),
     name: "...",
     price: 0,
@@ -39,11 +38,15 @@ export const blank_product: ProductData = {
         id: 0, 
         created_at: new Date().toISOString(),
         name: "...",
+        description: null
     },
     tags: [],
     weight: 0,
     description: "",
     origin_country_code: "",
     package_type_override: "",
-    metadata: {}
+    metadata: {},
+    group_name: null,
+    customs_description: null,
+    extended_customs_description: null,
 }

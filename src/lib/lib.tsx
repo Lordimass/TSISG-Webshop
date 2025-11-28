@@ -1,11 +1,12 @@
 import { Basket, ImageData, ProductData, ProductInBasket } from "@shared/types/types"
-import { getProducts, supabase } from "./supabaseRPC"
+import { supabase } from "./supabaseRPC"
 import { compareProducts } from "./sortMethods"
 import { UnsubmittedImageData, UnsubmittedProductData } from "../pages/products/productEditor/types"
 import { daysOfWeek, monthsOfYear } from "./consts"
 import { triggerAddToCart } from "./analytics/analytics"
 import {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../localeHandler.ts";
+import {getProducts} from "@shared/functions/supabaseRPC.ts";
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale
@@ -18,7 +19,7 @@ export async function refreshBasket() {
 
   // Fetch new data on products
   const skusToFetch: number[] = basket.map((prod: ProductInBasket) => prod.sku)
-  const newProducts = await getProducts(skusToFetch, false, false)
+  const newProducts = await getProducts(supabase, skusToFetch, false, false)
   // Save new data
   const newBasket: Basket = []
   basket.forEach((basketProd: ProductInBasket) => {
@@ -98,7 +99,7 @@ export function getFilenameExtension(filename: string) {
  * @returns A list of products in the given group, empty if no such
  * group exists
  */
-export async function getGroup(name?: string): Promise<ProductData[]> {
+export async function getGroup(name: string | null): Promise<ProductData[]> {
     if (!name) return []
 
     // Fetch SKU list
@@ -111,7 +112,7 @@ export async function getGroup(name?: string): Promise<ProductData[]> {
     if (skus.length === 0) return []
 
     // Return the products associated with these skus
-    const products = await getProducts(skus.map(sku => sku.sku))
+    const products = await getProducts(supabase, skus.map(sku => sku.sku))
     return products.sort(compareProducts)
 }
 

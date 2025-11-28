@@ -1,9 +1,7 @@
 import {Config} from "@netlify/functions";
 import {stripe} from "../lib/stripeObject.mts";
-import DineroFactory, {Currency} from "dinero.js";
-import {convertDinero} from "@shared/functions/price.ts";
-import Stripe from "stripe";
-import CurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
+import {Currency} from "dinero.js";
+import {generateStripeCurrencyOptions} from "../lib/lib.mts";
 
 // TODO: Implement the same logic for items, using currency_options instead of lots of price points.
 
@@ -36,25 +34,12 @@ export default async function handler(request: Request) {try {
             continue;
         }
 
-        let new_currency_options: { [key: string]: CurrencyOptions } = {}
-        if (shippingRate.fixed_amount.currency_options) {
-            new_currency_options = {...shippingRate.fixed_amount.currency_options}
-        }
-        const dinero = DineroFactory({
-            amount: shippingRate.fixed_amount.amount,
-            currency: shippingRate.fixed_amount.currency as Currency
-        })
+        let new_currency_options = await generateStripeCurrencyOptions(
+            shippingRate.fixed_amount.amount,
+            "SHIPPING",
+            shippingRate.fixed_amount.currency as Currency
+        )
 
-        // Fetch new values for each currency
-        for (const currency of supported_payment_currencies) {
-            // Skip the base currency from the options
-            if (currency === shippingRate.fixed_amount.currency) continue;
-
-            // Convert and add
-            const convDin = await convertDinero(dinero, currency as Currency)
-            // TODO: Implement tax exclusivity for countries that need it
-            new_currency_options[currency] = {amount: convDin.getAmount(), tax_behavior: "unspecified"}
-        }
         // Update on Stripe
         await stripe.shippingRates.update(shippingRate.id, {fixed_amount: {currency_options: new_currency_options}})
     }

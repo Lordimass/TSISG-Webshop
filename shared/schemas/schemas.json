@@ -847,7 +847,10 @@
             "type": "string"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "number"
@@ -859,7 +862,8 @@
         "required": [
           "id",
           "created_at",
-          "name"
+          "name",
+          "description"
         ],
         "type": "object"
       },
@@ -867,7 +871,10 @@
         "properties": {
           "alt": {
             "description": "Alt text for the image",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "association_metadata": {
             "$ref": "#/definitions/AssociationMetadata",
@@ -915,6 +922,7 @@
           }
         },
         "required": [
+          "alt",
           "bucket_id",
           "display_order",
           "id",
@@ -943,23 +951,31 @@
           },
           "customs_description": {
             "description": "Short description for customs forms",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "description": {
             "description": "The customer facing description of the product",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "extended_customs_description": {
             "description": "An extended description for customs forms applicable to higher value orders.",
-            "type": "string"
-          },
-          "fetched_at": {
-            "description": "Time at which the product was fetched from the database as an ISO date string, representative of when this data was last confirmed valid",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "group_name": {
             "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "images": {
             "items": {
@@ -1000,11 +1016,17 @@
           },
           "origin_country_code": {
             "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "package_type_override": {
             "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "price": {
             "description": "Price of product in GBP inc. Tax",
@@ -1035,8 +1057,10 @@
           "active",
           "category",
           "category_id",
+          "customs_description",
           "description",
-          "fetched_at",
+          "extended_customs_description",
+          "group_name",
           "images",
           "inserted_at",
           "last_edited",
@@ -1100,7 +1124,10 @@
         "properties": {
           "alt": {
             "description": "Alt text for the image",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "association_metadata": {
             "$ref": "#/definitions/AssociationMetadata",
@@ -1148,6 +1175,7 @@
           }
         },
         "required": [
+          "alt",
           "bucket_id",
           "display_order",
           "id",
@@ -1222,7 +1250,10 @@
             "type": "string"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "id": {
             "type": "number"
@@ -1234,7 +1265,8 @@
         "required": [
           "id",
           "created_at",
-          "name"
+          "name",
+          "description"
         ],
         "type": "object"
       }
@@ -1254,7 +1286,10 @@
             "type": "string"
           },
           "delivery_cost": {
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "email": {
             "type": "string"
@@ -1317,6 +1352,7 @@
           "postal_code",
           "id",
           "city",
+          "delivery_cost",
           "products",
           "value"
         ],
@@ -2534,19 +2570,31 @@
           },
           "customs_description": {
             "description": "Short description for customs forms",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "description": {
             "description": "The customer facing description of the product",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "extended_customs_description": {
             "description": "An extended description for customs forms applicable to higher value orders.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "group_name": {
             "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "inserted_at": {
             "description": "Time at which the product was added to the database as an ISO date string",
@@ -2581,11 +2629,17 @@
           },
           "origin_country_code": {
             "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "package_type_override": {
             "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "price": {
             "description": "Price of product in GBP inc. Tax",
@@ -2613,13 +2667,16 @@
           "active",
           "weight",
           "metadata",
+          "group_name",
           "sort_order",
           "category_id",
           "description",
           "inserted_at",
           "last_edited",
+          "customs_description",
           "origin_country_code",
-          "package_type_override"
+          "package_type_override",
+          "extended_customs_description"
         ],
         "type": "object"
       }

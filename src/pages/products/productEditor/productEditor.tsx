@@ -12,12 +12,13 @@ import "./productEditor.css"
 import { prodPropParsers } from "./prodPropParsers"
 import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
 import { ProductContext } from "../lib"
-import { getProducts } from "../../../lib/supabaseRPC"
 import { NotificationsContext } from "../../../components/notification/lib"
+import {getProducts} from "@shared/functions/supabaseRPC.ts";
+import {supabase} from "../../../lib/supabaseRPC.tsx";
 
 export default function ProductEditor() {
     async function fetchNewData() {
-        const response = await getProducts([product.sku])
+        const response = await getProducts(supabase, [product.sku])
         if (setProduct) {
             setProduct(response[0])
         }
