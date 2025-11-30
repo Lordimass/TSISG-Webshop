@@ -828,15 +828,24 @@
         "properties": {
           "global": {
             "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_product_icon": {
             "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_representative": {
             "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -993,7 +1002,10 @@
           },
           "last_edited_by": {
             "description": "The last person to edit this product",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "metadata": {
             "additionalProperties": {},
@@ -1049,8 +1061,11 @@
             "type": "array"
           },
           "weight": {
-            "description": "Weight of the product in grams",
-            "type": "number"
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -1064,6 +1079,7 @@
           "images",
           "inserted_at",
           "last_edited",
+          "last_edited_by",
           "metadata",
           "name",
           "origin_country_code",
@@ -1107,15 +1123,24 @@
         "properties": {
           "global": {
             "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_product_icon": {
             "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_representative": {
             "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -1204,15 +1229,24 @@
         "properties": {
           "global": {
             "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_product_icon": {
             "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "group_representative": {
             "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         },
         "type": "object"
@@ -2606,7 +2640,10 @@
           },
           "last_edited_by": {
             "description": "The last person to edit this product",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "metadata": {
             "additionalProperties": {},
@@ -2655,8 +2692,11 @@
             "type": "number"
           },
           "weight": {
-            "description": "Weight of the product in grams",
-            "type": "number"
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
           }
         },
         "required": [
@@ -2673,6 +2713,7 @@
           "description",
           "inserted_at",
           "last_edited",
+          "last_edited_by",
           "customs_description",
           "origin_country_code",
           "package_type_override",

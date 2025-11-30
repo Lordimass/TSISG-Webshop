@@ -19,10 +19,10 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
     -   **Netlify Functions (`netlify/functions/`):** Serverless functions written in TypeScript (`.mts` files) that handle API requests, integrate with external services like Stripe and Google Analytics, and perform database operations via Supabase.
         -   Examples: `createCheckoutSession.mts`, `stripeWebhook.mts`, `fetchGA4Analytics.mts`, `updateProductData.mts`.
     -   **Netlify Lib (`netlify/lib/`):** Backend utility functions and type definitions shared among Netlify Functions.
-        -   Examples: `getSupabaseClient.mts`, `stripeObject.mts`, `types/stripeTypes.ts`, `types/supabaseTypes.ts`.
+        -   Examples: `getSupabaseClient.ts`, `stripeObject.ts`, `types/stripeTypes.ts`, `types/supabaseTypes.ts`.
     -   **Integration Points:**
         -   **Stripe:** Handled by functions like `createCheckoutSession.mts` and `stripeWebhook.mts`. Webhooks are configured to listen for `checkout.session.completed` and `refund.created` events.
-        -   **Supabase:** Accessed via `getSupabaseClient.mts` in Netlify Functions and `supabaseRPC.tsx` on the frontend.
+        -   **Supabase:** Accessed via `getSupabaseClient.ts` in Netlify Functions and `supabaseRPC.tsx` on the frontend.
         -   **Google Analytics (GA4):** `fetchGA4Analytics.mts` retrieves analytics data.
 
 ## 2. Critical Developer Workflows
@@ -57,10 +57,10 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
     -   Webhook handling: `netlify/functions/stripeWebhook.mts` and related files in `netlify/lib/stripeEndpoints/`.
 -   **Supabase:**
     -   Frontend and Backend integration: `@supabase/supabase-js`.
-    -   Client initialization: `netlify/lib/getSupabaseClient.mts`.
+    -   Client initialization: `netlify/lib/getSupabaseClient.ts`.
 -   **Google Analytics (GA4):**
     -   Frontend: `react-ga4` and `src/appHooks.tsx` (`initGA4`).
-    -   Backend: `@google-analytics/data` and `google-auth-library` (`netlify/functions/fetchGA4Analytics.mts`, `netlify/lib/betaAnalyticsDataClient.mts`).
+    -   Backend: `@google-analytics/data` and `google-auth-library` (`netlify/functions/fetchGA4Analytics.mts`, `netlify/lib/betaAnalyticsDataClient.ts`).
 -   **MDX Editor:** `@mdxeditor/editor` is used for rich text editing, likely in staff-facing content management.
 -   **Image Transformation:** `sharp` is used in `netlify/functions/imageTransformer.mts` for image processing.
 -   **GitHub API:** `octokit` is used, likely for integrations related to staff or reporting features.
@@ -71,8 +71,8 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
 -   `src/lib/netlifyFunctions.tsx`: Centralized utility for calling Netlify Functions from the frontend.
 -   `src/lib/supabaseRPC.tsx`: Centralized utility for making Supabase RPC calls from the frontend.
 -   `netlify/functions/`: Directory containing all serverless functions.
--   `netlify/lib/getSupabaseClient.mts`: Standardized way to get a Supabase client in Netlify Functions.
--   `netlify/lib/stripeObject.mts`: Utility for Stripe API interactions on the backend.
+-   `netlify/lib/getSupabaseClient.ts`: Standardized way to get a Supabase client in Netlify Functions.
+-   `netlify/lib/stripeObject.ts`: Utility for Stripe API interactions on the backend.
 -   `netlify/lib/types/`: Shared TypeScript type definitions for backend services.
 -   `src/lib/types.tsx`: Shared TypeScript type definitions for frontend components.
 -   `launch-dev-server.ps1`: Script for setting up the local development environment.

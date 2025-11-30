@@ -7,7 +7,10 @@ import DineroFactory, {Currency, Dinero} from "dinero.js";
  */
 export const CURRENCY_CONVERSION_ENDPOINT = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{{from}}.min.json"
 
-type ConversionRates = {
+/**
+ * A mapping from currency strings to their conversion rates.
+ */
+export type ConversionRates = {
     /** Date in YYYY-MM-DD format */
     date: string,
 } & {
@@ -51,7 +54,11 @@ const PRECISION_MAP: {[currency: string]: number} = {
     "KWD": 3
 }
 
-async function fetchExchangeRates(from: string): Promise<ConversionRates> {
+/**
+ * Fetch the current exchange rates in relation to a currency.
+ * @param from The currency to fetch exchange rates in relation to.
+ */
+export async function fetchExchangeRates(from: string): Promise<ConversionRates> {
     const resp = await fetch(CURRENCY_CONVERSION_ENDPOINT.replace("{{from}}", from.toLowerCase()))
     if (!resp.ok) {
         throw new Error("Could not fetch conversion rates")
@@ -60,29 +67,38 @@ async function fetchExchangeRates(from: string): Promise<ConversionRates> {
     }
 }
 
-export async function convertDinero(dinero: Dinero, to: Currency): Promise<Dinero> {
-    let exchangeRates: ConversionRates;
-
-    // Store current exchange rates in `sessionStorage` to save on API calls.
-    let exchangeRatesString;
-    try {
-        exchangeRatesString = window.sessionStorage.getItem(`exchangeRates${dinero.getCurrency()}`);
-    } catch (e: unknown) {
-        if (!(e instanceof ReferenceError)) throw e
-    }
-
-    if (!exchangeRatesString) {
-        exchangeRates = await fetchExchangeRates(dinero.getCurrency());
+/**
+ * Convert between currencies
+ * @param dinero An object representing the money amount to convert from.
+ * @param to The currency to convert to.
+ * @param exchangeRates Cached exchange rates if they exist, used to prevent fetching exchange rates all the time if
+ * many conversions are needed.
+ */
+export async function convertDinero(dinero: Dinero, to: Currency, exchangeRates?: ConversionRates): Promise<Dinero> {
+    // Accept passed in conversion rates to save on API calls from instances where `sessionStorage` isn't available.
+    if (!exchangeRates) {
+        // Store current exchange rates in `sessionStorage` to save on API calls.
+        let exchangeRatesString;
         try {
-            window.sessionStorage.setItem(`exchangeRates${dinero.getCurrency()}`, JSON.stringify(exchangeRates));
+            exchangeRatesString = window.sessionStorage.getItem(`exchangeRates${dinero.getCurrency()}`);
         } catch (e: unknown) {
             if (!(e instanceof ReferenceError)) throw e
         }
-    } else {
-        exchangeRates = JSON.parse(exchangeRatesString);
+
+        if (!exchangeRatesString) {
+            exchangeRates = await fetchExchangeRates(dinero.getCurrency());
+            try {
+                window.sessionStorage.setItem(`exchangeRates${dinero.getCurrency()}`, JSON.stringify(exchangeRates));
+            } catch (e: unknown) {
+                if (!(e instanceof ReferenceError)) throw e
+            }
+        } else {
+            exchangeRates = JSON.parse(exchangeRatesString);
+        }
     }
 
-    const rate = exchangeRates[dinero.getCurrency().toLowerCase()][to.toLowerCase()]
+
+    const rate = exchangeRates![dinero.getCurrency().toLowerCase()][to.toLowerCase()]
     return DineroFactory({
         amount: Math.round(dinero.getAmount() * rate),
         currency: to,

@@ -1,5 +1,5 @@
 import { Context } from "@netlify/functions";
-import getSupabaseClient from "../lib/getSupabaseClient.mts";
+import getSupabaseClient from "../lib/getSupabaseClient.ts";
 import type { WebhookPayload } from "@shared/types/supabaseTypes.ts";
 import sharp from "sharp";
 import { SupabaseClient } from "@supabase/supabase-js";

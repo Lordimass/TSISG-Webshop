@@ -1,8 +1,8 @@
 import Stripe from "stripe"
-import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.mts"
-import { stripe } from "../stripeObject.mts"
-import { stripeCompoundItemsToGA4Items } from "./checkout.session.completed.mts"
-import { sendGA4Event } from "../lib.mts"
+import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.ts"
+import { stripe } from "../stripeObject.ts"
+import { stripeCompoundItemsToGA4Items } from "./checkout.session.completed.ts"
+import { sendGA4Event } from "../lib.ts"
 
 /**
  * Triggers a GA4 event for a refund.

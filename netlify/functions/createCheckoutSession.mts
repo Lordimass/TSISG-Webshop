@@ -1,6 +1,6 @@
 import { Context } from "@netlify/functions";
 import express from 'express';
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripeObject.ts";
 import {Currency} from "dinero.js";
 import {SHIPPING_COUNTRIES} from "@shared/consts/shipping.ts";
 

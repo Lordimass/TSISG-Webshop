@@ -2,7 +2,7 @@
 // in the body of the call.
 
 import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripeObject.ts";
 
 export default async function handler(request: Request, _context: Context) {
     if (!stripe) {

@@ -1,6 +1,6 @@
 import { Context } from "@netlify/functions";
-import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
-import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
+import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.ts";
+import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.ts";
 import {
     ClicksAndImpressionsTrendPoint,
     FetchAnalyticsResponse, ProductAnalytic, ReadableAnalyticsMetric,

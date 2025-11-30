@@ -3,10 +3,10 @@
  * to the function it needs to be at
  */
 import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripeObject.ts";
 import Stripe from "stripe";
-import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.mts";
-import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.mts";
+import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.ts";
+import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.ts";
 
 export default async function handler(request: Request, _context: Context) {
     try {

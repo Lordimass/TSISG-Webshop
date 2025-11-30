@@ -29,3 +29,4 @@ dist-ssr
 # Manually ignored
 commits.csv
 shared/schemas/schemas.json
+/.env.netlify

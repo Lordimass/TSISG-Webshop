@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="watch:generate-schemas" type="js.build_tools.npm" activateToolWindowBeforeRun="false">
+  <configuration default="false" name="watch:generate-schemas" type="js.build_tools.npm" activateToolWindowBeforeRun="false" singleton="false">
     <package-json value="$PROJECT_DIR$/package.json" />
     <command value="run" />
     <scripts>

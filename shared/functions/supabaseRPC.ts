@@ -1,6 +1,5 @@
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import {SupabaseClient} from "@supabase/supabase-js";
-import {supabase} from "../../src/lib/supabaseRPC.tsx";
 import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
 
 export async function callRPC(
@@ -28,7 +27,7 @@ export async function getProducts(supabase: SupabaseClient, skus?: number[], in_
     );
     if (!VALIDATORS.ProductData(prods[0])) { // Checking the first item is enough since they'll all be the same shape
         console.warn("Fetched products not in expected shape 'ProductData'")
-        console.log(prods[0].images)
+        console.log(JSON.stringify(prods[0], null, 2));
         logValidationErrors("ProductData");
     }
     return prods;

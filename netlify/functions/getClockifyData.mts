@@ -1,7 +1,7 @@
 import { Context } from "@netlify/functions";
 import type { TimeEntry } from "@shared/types/clockifyTypes.ts";
-import { parseDuration } from "../lib/lib.mts"
-import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
+import { parseDuration } from "../lib/lib.ts"
+import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.ts";
 
 type Body = {
     /** A list of Clockify User IDs*/

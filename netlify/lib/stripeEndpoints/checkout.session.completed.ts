@@ -1,10 +1,10 @@
 import Stripe from "stripe"
-import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.mts"
+import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.ts"
 import type { StripeProductMeta } from "@shared/types/stripeTypes.ts"
 import type { Order, OrderProdCompressed, OrderProduct } from "@shared/types/supabaseTypes.ts"
 import { SupabaseClient } from "@supabase/supabase-js"
-import { supabaseService } from "../getSupabaseClient.mts"
-import { sendGA4Event } from "../lib.mts"
+import { supabaseService } from "../getSupabaseClient.ts"
+import { sendGA4Event } from "../lib.ts"
 
 export default async function handleCheckoutSessionCompleted(
     event: Stripe.CheckoutSessionCompletedEvent

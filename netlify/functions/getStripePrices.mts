@@ -1,10 +1,10 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripeObject.ts";
 import type { ProductInBasket } from "@shared/types/types.ts";
 import type { StripeProductMeta } from "@shared/types/stripeTypes.ts";
-import { checkObjectsEqual, getImageURL } from "../lib/lib.mts";
-import { supabaseAnon } from "../lib/getSupabaseClient.mts";
+import { checkObjectsEqual, getImageURL } from "../lib/lib.ts";
+import { supabaseAnon } from "../lib/getSupabaseClient.ts";
 import type { ImageData } from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../../src/localeHandler.ts";

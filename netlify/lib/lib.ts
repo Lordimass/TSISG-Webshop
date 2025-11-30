@@ -1,11 +1,11 @@
-import { supabaseAnon } from "./getSupabaseClient.mts";
+import { supabaseAnon } from "./getSupabaseClient.ts";
 import type { ImageData } from "@shared/types/supabaseTypes.ts";
 import {Stripe} from "stripe";
 import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
 import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions
 import DineroFactory, {Currency} from "dinero.js";
-import {convertDinero} from "@shared/functions/price.ts";
-import {stripe} from "./stripeObject.mts";
+import {ConversionRates, convertDinero} from "@shared/functions/price.ts";
+import {stripe} from "./stripeObject.ts";
 
 /**
  * Checks if two objects contain the same data
@@ -101,9 +101,6 @@ export function parseDuration(duration: string): number {
   return ms;
 }
 
-
-
-
 type CurrencyOptionType = "SHIPPING" | "PRODUCT"
 type CurrencyOptions<T extends CurrencyOptionType> =
     T extends "PRODUCT" ? { [key: string]: PriceCurrencyOptions } :
@@ -115,11 +112,13 @@ type CurrencyOptions<T extends CurrencyOptionType> =
  * @param type Whether the currency options are for shipping rates or product prices, since structure is marginally
  * different between the two (for some reason...)
  * @param baseCurrency The currency of `price`
+ * @param cachedExchangeRates Cached conversion rates to prevent having to fetch new ones
  */
 export async function generateStripeCurrencyOptions<T extends CurrencyOptionType>(
     price: number,
     type: T,
     baseCurrency: Currency = "GBP",
+    cachedExchangeRates?: ConversionRates
 ):
     Promise<CurrencyOptions<T>>
 {
@@ -138,7 +137,7 @@ export async function generateStripeCurrencyOptions<T extends CurrencyOptionType
         if (currency === baseCurrency.toLowerCase()) continue;
 
         // Convert and add
-        const convDin = await convertDinero(dinero, currency as Currency)
+        const convDin = await convertDinero(dinero, currency as Currency, cachedExchangeRates)
         if (convDin.getAmount() > 99999999) {
             // Skip currencies where converted currency leads to numbers too large for Stripe request.
             continue;

@@ -1,7 +1,7 @@
 import {Config} from "@netlify/functions";
-import {stripe} from "../lib/stripeObject.mts";
+import {stripe} from "../lib/stripeObject.ts";
 import {Currency} from "dinero.js";
-import {generateStripeCurrencyOptions} from "../lib/lib.mts";
+import {generateStripeCurrencyOptions} from "../lib/lib.ts";
 
 // TODO: Implement the same logic for items, using currency_options instead of lots of price points.
 

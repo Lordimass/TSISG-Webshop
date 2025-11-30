@@ -19,8 +19,8 @@ export interface RawProductData {
     price: number
     stock: number
     active: boolean
-    /** Weight of the product in grams */
-    weight: number
+    /** Weight of the product in grams. */
+    weight: number | null
     /** Additional information on the product */
     metadata: {
         /** The name of this specific variant, if `group_name != undefined` */
@@ -41,7 +41,7 @@ export interface RawProductData {
     /** The time which this data was last edited as an ISO date string. */
     last_edited: string
     /** The last person to edit this product */
-    last_edited_by?: string
+    last_edited_by: string | null
     /** Short description for customs forms */
     customs_description: string | null
     /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
@@ -83,19 +83,19 @@ export type AssociationMetadata = {
      * Whether this image is relevant to all products in the product group
      * (if it exists), rather than just the SKU it's assigned to
      */
-    global?: boolean
+    global?: boolean | null
 
     /**
      * Whether this image is to be used as an icon for the product when
      *  in a group, rather than as a standard product image
      */
-    group_product_icon?: boolean
+    group_product_icon?: boolean | null
 
     /**
      * Whether this image is used to represent the group as a whole, rather
      * than an individual variant.
      */
-    group_representative?: boolean
+    group_representative?: boolean | null
 
     [key: string]: unknown
 }

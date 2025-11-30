@@ -8,7 +8,9 @@
     "build": "npm install && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-schemas": "node --loader ts-node/esm scripts/generateSchemas.ts ",
+    "update-stripe-products": "npm run update-netlify-env && npx tsx scripts/updateStripeProducts.ts",
+    "update-netlify-env": "npx tsx scripts/getNetlifyEnv.ts",
+    "generate-schemas": "node --loader ts-node/esm scripts/generateSchemas.ts",
     "watch:generate-schemas": "chokidar \"shared/types/*.ts\" -c \"npm run generate-schemas -- {path}\""
   },
   "dependencies": {
@@ -48,6 +50,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/cli-progress": "^3.11.6",
     "@types/express": "^5.0.1",
     "@types/formidable": "^3.4.5",
     "@types/gtag.js": "^0.0.20",
@@ -56,6 +59,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.3.4",
     "chokidar-cli": "^3.0.0",
+    "cli-progress": "^3.12.0",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
@@ -63,6 +67,7 @@
     "nodemon": "^3.1.11",
     "ts-json-schema-generator": "^2.4.0",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1"
   }
