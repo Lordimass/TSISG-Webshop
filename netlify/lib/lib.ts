@@ -5,7 +5,7 @@ import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
 import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions
 import DineroFactory, {Currency} from "dinero.js";
 import {ConversionRates, convertDinero} from "@shared/functions/price.ts";
-import {stripe} from "./stripeObject.ts";
+import {stripe} from "./stripe.ts";
 
 /**
  * Checks if two objects contain the same data

@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import {parseArgs} from "node:util";
 import dotenv from "dotenv";
 import cliProgress from "cli-progress";
-import {stripe} from "../netlify/lib/stripeObject.ts";
+import {stripe} from "../netlify/lib/stripe.ts";
 import {fetchExchangeRates} from "@shared/functions/price.ts";
 dotenv.config({path: ".env.netlify"});
 dotenv.config({path: ".env", override: true});

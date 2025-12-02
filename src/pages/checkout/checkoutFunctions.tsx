@@ -24,13 +24,11 @@ export async function createCheckoutSession(): Promise<string> {
     // Get the user's location from the query string since we can't access Context here.
     const urlParams = new URLSearchParams(window.location.search);
     const locale = urlParams.get("locale") || DEFAULT_LOCALE;
-    /** 2-Character ISO Country Code of the user */
-    const countryCode: string = locale.split("-")[1]
     /** 3-Character ISO Currency Code to use for the prices */
     const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
 
     // Construct parameters for request to createCheckoutSession
-    const prices: Array<Object> = await fetchStripePrices(currency)
+    const prices: Array<Object> = await fetchStripePrices()
     const basketString = localStorage.getItem("basket")
     const gaClientID = getGAClientId();
     const gaSessionID = await getGASessionId();
@@ -58,22 +56,22 @@ export async function createCheckoutSession(): Promise<string> {
     return result.client_secret
 }
 
-export async function fetchStripePrices(currency: Currency): Promise<Array<Object>> {
+export async function fetchStripePrices(): Promise<Array<Object>> {
     const oldBasket: Basket = JSON.parse(localStorage.getItem("basket")!).basket
-    const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
+    const {stripePrices, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({basket: oldBasket, currency})
+        body: JSON.stringify({basket: oldBasket})
     })
     .then (
         async function(value) {return await value.json()},
-        function(error) {console.error(error); return error}
+        function(error) {throw error}
     )
     localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
     
-    return pricePointIDs;
+    return stripePrices;
 }
 
 export async function validateEmail(email: string, checkout: any) {

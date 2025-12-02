@@ -6,7 +6,7 @@ import { LoginContext, SiteSettingsContext } from "../../app"
 import { ImageData, ProductData, ProductInBasket } from "@shared/types/types"
 import ProductEditor from "./productEditor/productEditor"
 import { UnsubmittedImageData, UnsubmittedProductData } from "./productEditor/types"
-import { getGroup, getImageURL, setBasketStringQuantity } from "../../lib/lib"
+import { getGroup, setBasketStringQuantity } from "../../lib/lib"
 import { cleanseUnsubmittedProduct, extractSKU, ProductContext } from "./lib"
 import { useGetProducts } from "../../lib/supabaseRPC"
 import { compareImages } from "../../lib/sortMethods"
@@ -18,6 +18,8 @@ import Page from "../../components/page/page"
 import DineroFactory from "dinero.js";
 import Price from "../../components/price/price.tsx";
 import {LocaleContext} from "../../localeHandler.ts";
+
+import {getImageURL} from "@shared/functions/images.ts";
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)

@@ -19,7 +19,7 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
     -   **Netlify Functions (`netlify/functions/`):** Serverless functions written in TypeScript (`.mts` files) that handle API requests, integrate with external services like Stripe and Google Analytics, and perform database operations via Supabase.
         -   Examples: `createCheckoutSession.mts`, `stripeWebhook.mts`, `fetchGA4Analytics.mts`, `updateProductData.mts`.
     -   **Netlify Lib (`netlify/lib/`):** Backend utility functions and type definitions shared among Netlify Functions.
-        -   Examples: `getSupabaseClient.ts`, `stripeObject.ts`, `types/stripeTypes.ts`, `types/supabaseTypes.ts`.
+        -   Examples: `getSupabaseClient.ts`, `stripe.ts`, `types/stripeTypes.ts`, `types/supabaseTypes.ts`.
     -   **Integration Points:**
         -   **Stripe:** Handled by functions like `createCheckoutSession.mts` and `stripeWebhook.mts`. Webhooks are configured to listen for `checkout.session.completed` and `refund.created` events.
         -   **Supabase:** Accessed via `getSupabaseClient.ts` in Netlify Functions and `supabaseRPC.tsx` on the frontend.
@@ -72,7 +72,7 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
 -   `src/lib/supabaseRPC.tsx`: Centralized utility for making Supabase RPC calls from the frontend.
 -   `netlify/functions/`: Directory containing all serverless functions.
 -   `netlify/lib/getSupabaseClient.ts`: Standardized way to get a Supabase client in Netlify Functions.
--   `netlify/lib/stripeObject.ts`: Utility for Stripe API interactions on the backend.
+-   `netlify/lib/stripe.ts`: Utility for Stripe API interactions on the backend.
 -   `netlify/lib/types/`: Shared TypeScript type definitions for backend services.
 -   `src/lib/types.tsx`: Shared TypeScript type definitions for frontend components.
 -   `launch-dev-server.ps1`: Script for setting up the local development environment.

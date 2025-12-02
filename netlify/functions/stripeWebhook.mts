@@ -3,7 +3,7 @@
  * to the function it needs to be at
  */
 import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.ts";
+import { stripe } from "../lib/stripe.ts";
 import Stripe from "stripe";
 import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.ts";
 import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.ts";

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./squareImageBox.css";
-import { getImageURL } from "../../lib/lib";
 import { ImageData } from "@shared/types/types";
+
+import {getImageURL} from "@shared/functions/images.ts";
 
 type SquareImageBoxProps = {
   image?: ImageData | string;

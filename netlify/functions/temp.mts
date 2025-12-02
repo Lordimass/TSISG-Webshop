@@ -1,7 +1,7 @@
 import {Context} from "@netlify/functions";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabaseAnon} from "../lib/getSupabaseClient.ts";
-import {stripe} from "../lib/stripeObject.ts";
+import {stripe} from "../lib/stripe.ts";
 
 export default async function handler(request: Request, context: Context): Promise<Response> {
     const supProds = await getProducts(supabaseAnon)

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { stripe } from "./stripeObject.ts";
+import { stripe } from "./stripe.ts";
 import type { StripeProductMeta } from "@shared/types/stripeTypes.ts";
 
 export type StripeCompoundLineItem = {

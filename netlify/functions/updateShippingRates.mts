@@ -1,5 +1,5 @@
 import {Config} from "@netlify/functions";
-import {stripe} from "../lib/stripeObject.ts";
+import {stripe} from "../lib/stripe.ts";
 import {Currency} from "dinero.js";
 import {generateStripeCurrencyOptions} from "../lib/lib.ts";
 

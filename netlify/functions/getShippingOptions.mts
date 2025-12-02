@@ -1,5 +1,5 @@
 import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.ts";
+import { stripe } from "../lib/stripe.ts";
 import {AllowedCountry, EU, UK} from "@shared/consts/shipping.ts";
 import {FromSchema, JSONSchema} from "json-schema-to-ts";
 import {ajv, VALIDATORS} from "@shared/schemas/schemas.ts";

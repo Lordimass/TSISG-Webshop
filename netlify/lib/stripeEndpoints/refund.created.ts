@@ -1,6 +1,6 @@
 import Stripe from "stripe"
 import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.ts"
-import { stripe } from "../stripeObject.ts"
+import { stripe } from "../stripe.ts"
 import { stripeCompoundItemsToGA4Items } from "./checkout.session.completed.ts"
 import { sendGA4Event } from "../lib.ts"
 

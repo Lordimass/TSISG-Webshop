@@ -3,11 +3,10 @@ import type {ProductData, RawProductData, WebhookPayload} from "@shared/types/su
 import {VALIDATORS} from "@shared/schemas/schemas.ts";
 import {NetlifyFunctionError} from "@shared/errors.ts";
 import {supabaseAnon} from "../lib/getSupabaseClient.ts";
-import {stripe} from "../lib/stripeObject.ts";
+import {fetchStripeProduct, stripe} from "../lib/stripe.ts";
 import Stripe from "stripe";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {generateStripeCurrencyOptions, getImageURL} from "../lib/lib.ts";
-import {supabase} from "../../src/lib/supabaseRPC.tsx";
 import {ConversionRates} from "@shared/functions/price.ts";
 
 /**
@@ -117,28 +116,6 @@ async function processBody(body: any): Promise<WebhookPayload> {
         throw new NetlifyFunctionError("Request body malformed", 400);
     }
     return body as WebhookPayload;
-}
-
-/**
- * Fetch the Stripe product that matches a given SKU on Supabase.
- * @param supabaseSKU The SKU of the product to find a match for.
- * @return The Stripe product, or undefined if no product was able to be found.
- */
-export async function fetchStripeProduct(supabaseSKU: number): Promise<Stripe.Product | undefined> {
-    // Try to find product by URL first
-    const prods = await stripe
-        .products
-        .list({url: `https://thisshopissogay.com/products/${supabaseSKU}`, active: true})
-    if (prods.data.length > 0) {return prods.data[0]}
-
-    // Products which are running on the outdated per-checkout update flow may not have a URL set. Fetch all products
-    // and filter for metadata.sku match.
-    const skuSearchProds = (await stripe
-        .products
-        .list({active: true}))
-        .data.filter(prod => prod.metadata.sku === ""+supabaseSKU);
-    return skuSearchProds[0]
-    // Note that this still may find nothing if the product actually doesn't exist, in which case undefined is returned.
 }
 
 /**

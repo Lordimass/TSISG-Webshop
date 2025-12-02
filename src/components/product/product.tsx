@@ -4,11 +4,12 @@ import "./product.css"
 import {blank_product, max_product_order} from '../../lib/consts';
 import {CategoryData, ImageData, OrderProduct, ProductData, ProductInBasket} from '@shared/types/types';
 import SquareImageBox from '../squareImageBox/squareImageBox';
-import {getImageURL, getRepresentativeImageURL, setBasketStringQuantity} from '../../lib/lib';
+import {setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
 import DineroFactory, {Currency} from "dinero.js";
 import {LocaleContext} from "../../localeHandler.ts";
+import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.ts";
 
 /**
  * I apologise sincerely for the following code.
