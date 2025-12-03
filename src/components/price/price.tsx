@@ -4,6 +4,7 @@ import {useContext, useEffect, useState} from "react";
 import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
+import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 
 /**
  * Price display in user's local currency.
@@ -32,7 +33,9 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
     // Extract major and minor currency amounts
     const formatString = dinero.toFormat('0.00')
     const [major, minor] = formatString.split('.')
-    const symbol = dinero.toFormat(`$0.00`).charAt(0)
+    const symbol = currency && Object.keys(CURRENCY_SYMBOLS).includes(currency.toUpperCase())
+        ? CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].symbol
+        : dinero.toFormat(`$0.00`).charAt(0)
 
     if (!simple) {
         return <div className="price">
@@ -44,7 +47,7 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
             <p className="price-minor">{minor}</p>
         </div>
     } else {
-        return <p>{dinero.toFormat('$0.00')}</p>
+        return <p>{symbol}{major}.{minor}</p>
     }
 
 }

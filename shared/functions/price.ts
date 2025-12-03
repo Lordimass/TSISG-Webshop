@@ -1,4 +1,5 @@
 import DineroFactory, {Currency, Dinero} from "dinero.js";
+import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 
 /**
  * API Endpoint for currency conversion requests.
@@ -21,37 +22,6 @@ export type ExchangeRates = {
     [key: string]: {
         [key: string]: number
     }
-}
-
-/** Maps currencies to precisions, if their precision differs from 2
- *
- * > *A precision, expressed as an integer, to represent the number of decimal places in the amount. This is helpful
- * when you want to represent fractional minor currency units (e.g.: $10.4545). You can also use it to represent a
- * currency with a different exponent than 2 (e.g.: Iraqi dinar with 1000 fils in 1 dinar (exponent of 3), Japanese
- * yen with no subunits (exponent of 0)).*
- * \- [dinerojs.com](https://dinerojs.com/module-dinero#main)
- * @example "JPY": 0
- * */
-const PRECISION_MAP: {[currency: string]: number} = {
-    "BIF": 0,
-    "CLP": 0,
-    "DJF": 0,
-    "GNF": 0,
-    "JPY": 0,
-    "KMF": 0,
-    "KRW": 0,
-    "MGA": 0,
-    "PYG": 0,
-    "RWF": 0,
-    "UGX": 0,
-    "VND": 0,
-    "VUV": 0,
-    "XAF": 0,
-    "XOF": 0,
-    "XPF": 0,
-    "BHD": 3,
-    "IQD": 3,
-    "KWD": 3
 }
 
 /**
@@ -102,6 +72,6 @@ export async function convertDinero(dinero: Dinero, to: Currency, exchangeRates?
     return DineroFactory({
         amount: Math.round(dinero.getAmount() * rate),
         currency: to,
-        precision: PRECISION_MAP[to] ?? 2,
+        precision: CURRENCY_SYMBOLS[dinero.getCurrency().toLowerCase() as keyof typeof CURRENCY_SYMBOLS]?.precision ?? 2,
     })
 }
