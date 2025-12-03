@@ -262,11 +262,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" ref={formRef}>
-                <p className="msg">
-                    Shipping is currently limited to the United Kingdom. 
-                    International shipping will be coming soon!
-                </p><br/>
-
                 <AddressElement 
                     options={addressElementOpts}
                 />
