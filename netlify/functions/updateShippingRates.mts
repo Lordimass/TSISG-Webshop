@@ -4,8 +4,6 @@ import {Currency} from "dinero.js";
 import {generateStripeCurrencyOptions} from "../lib/lib.ts";
 import {fetchExchangeRates} from "@shared/functions/price.ts";
 
-// TODO: Implement the same logic for items, using currency_options instead of lots of price points.
-
 /**
  * Scheduled function to update Stripe shipping rates for other currencies.
  * @param request

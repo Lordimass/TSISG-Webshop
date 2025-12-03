@@ -389,9 +389,9 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
             const basket = JSON.parse(basketString).basket as Basket
             let basketTotal = 0;
             for (const p of basket) {
-                const din = DineroFactory({amount: Math.round(p.price * 100), currency: DEFAULT_CURRENCY});
+                const din = DineroFactory({amount: Math.round(p.price * p.basketQuantity * 100), currency: DEFAULT_CURRENCY});
                 const convDin = await convertDinero(din, currency);
-                basketTotal += convDin.getAmount()*p.basketQuantity;
+                basketTotal += convDin.getAmount();
             }
             setPreFeeTotal(DineroFactory({amount: basketTotal, currency}))
         }
@@ -413,15 +413,17 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
     <div className="checkout-totals">
         <div className="left">
             <p>Subtotal</p>
-            <p>Conversion Fee</p>
+            {fee.getAmount()==0 ? null : <p>Conversion Fee</p>}
             <p>Shipping</p>
             <p className="total">Total</p>
         </div>
         <div className="spacer"></div>
         <div className="right">
             <Price baseDinero={preFeeTotal} currency={currency} simple />
-            <Price baseDinero={fee} currency={currency} simple />
-            <Price baseDinero={shp} currency={currency} simple />
+            {fee.getAmount()==0 ? null : <Price baseDinero={fee} currency={currency} simple />}
+            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
+                <Price baseDinero={shp} currency={currency} simple />
+            </div>
             <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
                 <Price baseDinero={tot} currency={tot.getCurrency()} />
             </div>

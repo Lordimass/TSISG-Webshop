@@ -123,7 +123,8 @@ export async function generateStripeCurrencyOptions<T extends CurrencyOptionType
     Promise<CurrencyOptions<T>>
 {
     process.stdout.write("Generating currency options... ")
-    const {supported_payment_currencies} = await stripe.countrySpecs.retrieve("GB")
+    const supported_payment_currencies = ["gbp", "usd"]
+    //const {supported_payment_currencies} = await stripe.countrySpecs.retrieve("GB")
 
     let new_currency_options: CurrencyOptions<T> = {} as CurrencyOptions<T>
     const dinero = DineroFactory({
