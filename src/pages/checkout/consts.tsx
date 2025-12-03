@@ -43,6 +43,7 @@ export const checkoutProviderOpts = {
             cssSrc: "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/PerfectPenmanship.css"
         }]
     },
+    adaptivePricing: {allowed: true}
 };
 
 export const paymentElementOpts: StripePaymentElementOptions = {

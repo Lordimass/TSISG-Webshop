@@ -17,15 +17,22 @@ import { Basket } from "@shared/types/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
-import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
+import {
+    AddressElement,
+    CheckoutProvider,
+    CurrencySelectorElement,
+    PaymentElement,
+    useCheckout
+} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
-import {LocaleContext} from "../../localeHandler.ts";
-import DineroFactory, {Currency} from "dinero.js";
+import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
+import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
 import Price from "../../components/price/price.tsx";
+import {convertDinero} from "@shared/functions/price.ts";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -299,6 +306,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 </span>
             </button>
             {error}
+            <CurrencySelectorElement />
         </div>
         
     </>)
@@ -372,25 +380,50 @@ function RequiredInput({
 }
 
 function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckoutTotalSummary, currency: Currency}) {
+    // Calculate total before 4% conversion rate fee
+    const [preFeeTotal, setPreFeeTotal] = useState<Dinero>(DineroFactory({amount: 0, currency}))
+    useEffect(() => {
+        async function getPreFeeTotal() {
+            const basketString = localStorage.getItem("basket");
+            if (!basketString) {throw ("No basket string available when calculating checkout total")}
+            const basket = JSON.parse(basketString).basket as Basket
+            let basketTotal = 0;
+            for (const p of basket) {
+                const din = DineroFactory({amount: Math.round(p.price * 100), currency: DEFAULT_CURRENCY});
+                const convDin = await convertDinero(din, currency);
+                basketTotal += convDin.getAmount()*p.basketQuantity;
+            }
+            setPreFeeTotal(DineroFactory({amount: basketTotal, currency}))
+        }
+        getPreFeeTotal();
+    }, [checkoutTotal]);
+
+    // Get Stripe's calculated prices
     const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
-    const sub = checkoutTotal.subtotal.amount
-    const shp = checkoutTotal.shippingRate.amount
-    const totDinero = DineroFactory(
-        {amount: checkoutTotal.total.minorUnitsAmount, currency, precision: 2}
+    const fee = DineroFactory(
+        {amount: checkoutTotal.subtotal.minorUnitsAmount-preFeeTotal.getAmount(), currency}
+    )
+    const shp = DineroFactory(
+        {amount: checkoutTotal.shippingRate.minorUnitsAmount, currency}
+    )
+    const tot = DineroFactory(
+        {amount: checkoutTotal.total.minorUnitsAmount, currency}
     );
     return (
     <div className="checkout-totals">
         <div className="left">
             <p>Subtotal</p>
+            <p>Conversion Fee</p>
             <p>Shipping</p>
             <p className="total">Total</p>
         </div>
         <div className="spacer"></div>
         <div className="right">
-            <p>{sub}</p>
-            <p style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>{shp}</p>
+            <Price baseDinero={preFeeTotal} currency={currency} simple />
+            <Price baseDinero={fee} currency={currency} simple />
+            <Price baseDinero={shp} currency={currency} simple />
             <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
-                <Price baseDinero={totDinero} currency={totDinero.getCurrency()} />
+                <Price baseDinero={tot} currency={tot.getCurrency()} />
             </div>
         </div>
     </div>
