@@ -8,7 +8,8 @@ import {ShippingOptionGroups} from "@shared/types/shipping.ts";
 const BodySchema = ({
     type: "object",
     properties: {
-        country: {type: "string"}, // Should be AllowedCountry, but this is a Stripe type.
+        // Should be AllowedCountry, but this is a Stripe type so can't go here without generating a Schema for it
+        country: {type: "string"},
         checkoutID: {type: "string"},
     },
     required: ["country", "checkoutID"]
@@ -16,7 +17,7 @@ const BodySchema = ({
 type Body = FromSchema<typeof BodySchema>;
 const validateBody = ajv.compile(BodySchema);
 
-let untypedRates: unknown = JSON.parse(process.env.VITE_SHIPPING_OPTION_GROUPS ?? "{}")
+let untypedRates: unknown = JSON.parse(process.env.VITE_SHIPPING_RATES ?? "{}")
 
 /**
  * Returns a list of shipping options that are available based on the
@@ -42,27 +43,30 @@ export default async function handler(request: Request, _context: Context) {try 
     // Validate form of `rates`
     if (!VALIDATORS.ShippingOptionGroups(untypedRates)) {
         console.error(
-            `VITE_SHIPPING_OPTION_GROUPS is malformed: ${JSON.stringify(untypedRates, undefined, 2)}`
+            `VITE_SHIPPING_RATES is malformed: ${JSON.stringify(untypedRates, undefined, 2)}`
         )
-        return new Response("VITE_SHIPPING_OPTION_GROUPS is malformed", {status: 400})
+        return new Response("VITE_SHIPPING_RATES is malformed", {status: 400})
     }
-    const rates = untypedRates as ShippingOptionGroups;
+    const rateNames = untypedRates as ShippingOptionGroups;
 
-    let applicableRates = rates.world
-    if (UK.includes(body.country as AllowedCountry)) applicableRates = rates.uk
-    else if (EU.includes(body.country as AllowedCountry)) applicableRates = rates.eu
-    console.log(applicableRates)
+    let applicableRateNames = rateNames.world
+    if (UK.includes(body.country as AllowedCountry)) applicableRateNames = rateNames.uk
+    else if (EU.includes(body.country as AllowedCountry)) applicableRateNames = rateNames.eu
+
 
     // Fetch list of active shipping rates
+    const rates = await stripe.shippingRates.list({active: true})
     // Find rates with descriptions in the applicable array
-    // Find shipping rates for the given country
+    console.log(rates.data.map(r => r.display_name))
+    const applicableRates = rates.data.filter(r => applicableRateNames.includes(r.display_name || ""))
     // Update checkout session
-
     await stripe.checkout.sessions.update(body.checkoutID, {
-        shipping_options: applicableRates.map(rate => {return {shipping_rate: rate}})
+        shipping_options: applicableRates.map(rate => {return {shipping_rate: rate.id}})
     })
-
-    return new Response(JSON.stringify(applicableRates))
+    const applicableRateIds = applicableRates.map(rate => rate.id)
+    console.log(applicableRateNames)
+    console.log(applicableRateIds)
+    return new Response(JSON.stringify(applicableRateIds))
 
 } catch (e) {
     console.error(e)

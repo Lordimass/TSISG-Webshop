@@ -4,7 +4,7 @@ import {Stripe} from "stripe";
 import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
 import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions
 import DineroFactory, {Currency} from "dinero.js";
-import {ConversionRates, convertDinero} from "@shared/functions/price.ts";
+import {ExchangeRates, convertDinero} from "@shared/functions/price.ts";
 import {stripe} from "./stripe.ts";
 
 /**
@@ -118,7 +118,7 @@ export async function generateStripeCurrencyOptions<T extends CurrencyOptionType
     price: number,
     type: T,
     baseCurrency: Currency = "GBP",
-    cachedExchangeRates?: ConversionRates
+    cachedExchangeRates?: ExchangeRates
 ):
     Promise<CurrencyOptions<T>>
 {

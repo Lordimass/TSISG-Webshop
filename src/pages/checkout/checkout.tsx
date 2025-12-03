@@ -309,13 +309,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     </>)
 }
 
-function Loading() {
-    return (<div className="loading-screen">
-        <p>We're loading your basket...</p>
-        <Throbber/>
-    </div>)
-}
-
 function RequiredInput({ 
     setIsValid, 
     value,

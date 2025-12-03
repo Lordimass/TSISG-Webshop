@@ -10,7 +10,7 @@ export const CURRENCY_CONVERSION_ENDPOINT = "https://cdn.jsdelivr.net/npm/@fawaz
 /**
  * A mapping from currency strings to their conversion rates.
  */
-export type ConversionRates = {
+export type ExchangeRates = {
     /** Date in YYYY-MM-DD format */
     date: string,
 } & {
@@ -58,12 +58,12 @@ const PRECISION_MAP: {[currency: string]: number} = {
  * Fetch the current exchange rates in relation to a currency.
  * @param from The currency to fetch exchange rates in relation to.
  */
-export async function fetchExchangeRates(from: string): Promise<ConversionRates> {
+export async function fetchExchangeRates(from: string): Promise<ExchangeRates> {
     const resp = await fetch(CURRENCY_CONVERSION_ENDPOINT.replace("{{from}}", from.toLowerCase()))
     if (!resp.ok) {
         throw new Error("Could not fetch conversion rates")
     } else {
-        return await resp.json() as ConversionRates
+        return await resp.json() as ExchangeRates
     }
 }
 
@@ -74,7 +74,7 @@ export async function fetchExchangeRates(from: string): Promise<ConversionRates>
  * @param exchangeRates Cached exchange rates if they exist, used to prevent fetching exchange rates all the time if
  * many conversions are needed.
  */
-export async function convertDinero(dinero: Dinero, to: Currency, exchangeRates?: ConversionRates): Promise<Dinero> {
+export async function convertDinero(dinero: Dinero, to: Currency, exchangeRates?: ExchangeRates): Promise<Dinero> {
     // Accept passed in conversion rates to save on API calls from instances where `sessionStorage` isn't available.
     if (!exchangeRates) {
         // Store current exchange rates in `sessionStorage` to save on API calls.

@@ -2,6 +2,7 @@ import {Config} from "@netlify/functions";
 import {stripe} from "../lib/stripe.ts";
 import {Currency} from "dinero.js";
 import {generateStripeCurrencyOptions} from "../lib/lib.ts";
+import {fetchExchangeRates} from "@shared/functions/price.ts";
 
 // TODO: Implement the same logic for items, using currency_options instead of lots of price points.
 
@@ -21,6 +22,9 @@ export default async function handler(request: Request) {try {
         // Fetch up to 10 rates per currency to safely fetch all.
         .autoPagingToArray({limit: supported_payment_currencies.length * 10});
 
+    // Fetch current exchange rates
+    const exchangeRates = await fetchExchangeRates("GBP")
+
     /*
      Use ShippingRate.fixed_amount.currency_options to provide different amounts for each currency. Updating them
      each with new values if they already exist, or creating new options for currencies that don't yet have a key.
@@ -37,11 +41,28 @@ export default async function handler(request: Request) {try {
         let new_currency_options = await generateStripeCurrencyOptions(
             shippingRate.fixed_amount.amount,
             "SHIPPING",
-            shippingRate.fixed_amount.currency as Currency
+            shippingRate.fixed_amount.currency as Currency,
+            exchangeRates
         )
+        // Create new rate
+        await stripe.shippingRates.create({
+            display_name: shippingRate.display_name!,
+            fixed_amount: {
+                amount: shippingRate.fixed_amount.amount,
+                currency: shippingRate.fixed_amount.currency,
+                currency_options: new_currency_options // Set to new currency options.
+            },
+            metadata: shippingRate.metadata,
+            tax_behavior: shippingRate.tax_behavior || "unspecified",
+            delivery_estimate: {
+                maximum: shippingRate.delivery_estimate?.maximum || undefined,
+                minimum: shippingRate.delivery_estimate?.minimum || undefined,
+            },
+            type: shippingRate.type
+        })
 
-        // Update on Stripe
-        await stripe.shippingRates.update(shippingRate.id, {fixed_amount: {currency_options: new_currency_options}})
+        // Deactivate old rate
+        await stripe.shippingRates.update(shippingRate.id, {active: false})
     }
     const {next_run} = await request.json();
     console.log("Shipping rates updated! Next run at:", next_run);

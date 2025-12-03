@@ -7,7 +7,7 @@ import {fetchStripeProduct, stripe} from "../lib/stripe.ts";
 import Stripe from "stripe";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {generateStripeCurrencyOptions, getImageURL} from "../lib/lib.ts";
-import {ConversionRates} from "@shared/functions/price.ts";
+import {ExchangeRates} from "@shared/functions/price.ts";
 
 /**
  * Sync saved Stripe Product data with Supabase
@@ -130,7 +130,7 @@ async function updateStripeProduct(
     stripeProduct: Stripe.Product,
     supabaseProduct: ProductData,
     archiveAllOldPrices = false,
-    cachedExchangeRates?: ConversionRates
+    cachedExchangeRates?: ExchangeRates
 ) {
     console.log(`Updating ${supabaseProduct.name} on Stripe...`)
 
@@ -199,7 +199,7 @@ async function updateStripeProduct(
  * @param supabaseProduct The data to create the new Stripe product to match.
  * @param cachedExchangeRates Cached conversion rates to prevent having to fetch new ones.
  */
-async function createStripeProduct(supabaseProduct: ProductData, cachedExchangeRates?: ConversionRates) {
+async function createStripeProduct(supabaseProduct: ProductData, cachedExchangeRates?: ExchangeRates) {
     console.log(`Creating new Stripe product for ${supabaseProduct.name}`);
     // Update price data for the product
     const unit_amount = Math.round(supabaseProduct.price*100)
@@ -277,7 +277,7 @@ async function handleUpdateCase(prod: RawProductData, archiveAllOldPrices = fals
  * @param archiveAllOldPrices
  * @param cachedExchangeRates
  */
-async function updateFromSku(sku: number, archiveAllOldPrices = false, cachedExchangeRates?: ConversionRates) {
+async function updateFromSku(sku: number, archiveAllOldPrices = false, cachedExchangeRates?: ExchangeRates) {
     const supabaseProds = await getProducts(supabaseAnon, [sku]);
     const stripeProd = await fetchStripeProduct(sku);
     if (stripeProd && supabaseProds.length > 0) {
