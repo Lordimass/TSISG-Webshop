@@ -192,7 +192,7 @@ export const CURRENCY_SYMBOLS = {
         "precision": 2
     },
     "INR": {
-        "symbol": "টকা",
+        "symbol": "₹",
         "precision": 2
     },
     "IQD": {

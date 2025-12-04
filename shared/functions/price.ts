@@ -69,9 +69,10 @@ export async function convertDinero(dinero: Dinero, to: Currency, exchangeRates?
 
 
     const rate = exchangeRates![dinero.getCurrency().toLowerCase()][to.toLowerCase()]
+    const toPrecision = CURRENCY_SYMBOLS[to.toUpperCase() as keyof typeof CURRENCY_SYMBOLS]?.precision ?? 2
     return DineroFactory({
-        amount: Math.round(dinero.getAmount() * rate),
+        amount: Math.round(dinero.getAmount() * rate * 10**(toPrecision-2)),
         currency: to,
-        precision: CURRENCY_SYMBOLS[dinero.getCurrency().toLowerCase() as keyof typeof CURRENCY_SYMBOLS]?.precision ?? 2,
+        precision: toPrecision,
     })
 }

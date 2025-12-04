@@ -14,16 +14,17 @@ import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
  * only use if you want this currency to show instead of the user's local currency.
  */
 export default function Price({baseDinero, currency, simple}: {baseDinero: Dinero, currency?: Currency, simple?: boolean}) {
-    const {currency: defaultCurrency} = useContext(LocaleContext);
+    const {currency: defaultCurrency, locale} = useContext(LocaleContext);
     const curr = currency ?? defaultCurrency;
 
     useEffect(() => {
         async function convert() {
             if (curr === baseDinero.getCurrency()) {
                 setDinero(baseDinero);
+            } else {
+                const convertedDinero = await convertDinero(baseDinero, curr)
+                setDinero(convertedDinero)
             }
-            const convertedDinero = await convertDinero(baseDinero, curr)
-            setDinero(convertedDinero)
         }
         convert()
     }, [curr, baseDinero]);
@@ -43,11 +44,17 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
                 <p className="price-symbol">{symbol}</p>
                 <p className="price-currency">{dinero.getCurrency().toUpperCase()}</p>
             </div>
-            <p className="price-major">{major}</p>
-            <p className="price-minor">{minor}</p>
+            <p className="price-major">{Number(major).toLocaleString(locale)}</p>
+            {dinero.getPrecision()>0 ? <p className="price-minor">{minor}</p> : null}
         </div>
     } else {
-        return <p>{symbol}{major}.{minor}</p>
+        return <p>{symbol}{
+            Number(`${major}.${minor}`)
+            .toLocaleString(
+                locale,
+                {minimumFractionDigits: dinero.getPrecision()}
+            )
+        }</p>
     }
 
 }

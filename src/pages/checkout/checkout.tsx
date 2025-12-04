@@ -34,6 +34,7 @@ import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
 import Price from "../../components/price/price.tsx";
 import {convertDinero} from "@shared/functions/price.ts";
 import {getPath} from "../../lib/paths.ts";
+import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -383,6 +384,7 @@ function RequiredInput({
 function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckoutTotalSummary, currency: Currency}) {
     // Calculate total before 4% conversion rate fee
     const [preFeeTotal, setPreFeeTotal] = useState<Dinero>(DineroFactory({amount: 0, currency}))
+    const precision = CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].precision;
     useEffect(() => {
         async function getPreFeeTotal() {
             const basketString = localStorage.getItem("basket");
@@ -394,22 +396,22 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
                 const convDin = await convertDinero(din, currency);
                 basketTotal += convDin.getAmount();
             }
-            setPreFeeTotal(DineroFactory({amount: basketTotal, currency}))
+            setPreFeeTotal(DineroFactory({amount: basketTotal, currency, precision}))
         }
         getPreFeeTotal();
     }, [checkoutTotal]);
 
     // Get Stripe's calculated prices
     const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
-    const fee = DineroFactory(
-        {amount: checkoutTotal.subtotal.minorUnitsAmount-preFeeTotal.getAmount(), currency}
-    )
-    const shp = DineroFactory(
-        {amount: checkoutTotal.shippingRate.minorUnitsAmount, currency}
-    )
-    const tot = DineroFactory(
-        {amount: checkoutTotal.total.minorUnitsAmount, currency}
-    );
+    const fee = DineroFactory({
+        amount: checkoutTotal.subtotal.minorUnitsAmount-preFeeTotal.getAmount(), currency, precision
+    })
+    const shp = DineroFactory({
+        amount: checkoutTotal.shippingRate.minorUnitsAmount, currency, precision
+    })
+    const tot = DineroFactory({
+        amount: checkoutTotal.total.minorUnitsAmount, currency, precision
+    });
     return (
     <div className="checkout-totals">
         <div className="left">
@@ -426,7 +428,7 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
                 <Price baseDinero={shp} currency={currency} simple />
             </div>
             <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
-                <Price baseDinero={tot} currency={tot.getCurrency()} />
+                <Price baseDinero={tot} currency={currency} />
             </div>
         </div>
     </div>
