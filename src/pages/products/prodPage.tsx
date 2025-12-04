@@ -20,6 +20,7 @@ import Price from "../../components/price/price.tsx";
 import {LocaleContext} from "../../localeHandler.ts";
 
 import {getImageURL} from "@shared/functions/images.ts";
+import {getPath, getProductPagePath} from "../../lib/paths.ts";
 
 export default function ProdPage() {
     const loginContext = useContext(LoginContext)
@@ -110,14 +111,14 @@ export default function ProdPage() {
     }}>
     
     {/* Above actual product */}
-    <a className="go-home-button" href="/">
+    <a className="go-home-button" href={getPath("HOME")}>
         <i className="fi fi-sr-left"/>
         <h1>Go Home</h1>
     </a>
     {isEditMode ? 
     <p className="logged-in-disclaimer">
         You see additional information on this page because you
-        are <a href="/login">logged into</a> an account with special
+        are <a href={getPath("LOGIN")}>logged into</a> an account with special
         access.
     </p> : <></>}
 
@@ -222,7 +223,7 @@ function ProductVariant({
     async function changeProduct() {
         if (!setProduct) return
         setProduct(product)
-        window.history.pushState(undefined, product.name, `/products/${product.sku}`)
+        window.history.pushState(undefined, product.name, getProductPagePath(product.sku))
         await triggerViewItem(cleanseUnsubmittedProduct(product), currency)
     }
     /** 

@@ -4,6 +4,7 @@ import { Basket } from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
+import {getPath} from "../../lib/paths.ts";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -12,7 +13,7 @@ export function redirectIfEmptyBasket() {
         || basketString == "{\"basket\":[]}" 
         || basketString == "{}"
     ) {
-        window.location.href = "/"
+        window.location.href = getPath("HOME")
     }
 }
 

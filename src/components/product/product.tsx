@@ -10,6 +10,7 @@ import Price from "../price/price.tsx";
 import DineroFactory, {Currency} from "dinero.js";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.ts";
+import {getPath, getProductPagePath} from "../../lib/paths.ts";
 
 /**
  * I apologise sincerely for the following code.
@@ -231,7 +232,7 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
     }}>
         <div className="product" id={"product-" + sku}>
             {/* Product Image + Link to dedicated product page*/}
-            <a className="product-image-link" href={"/products/" + sku}>
+            <a className="product-image-link" href={getProductPagePath(sku)}>
                 <SquareImageBox image={imageURL} size='100%'/>
             </a>
 
@@ -239,7 +240,7 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
             <div className="prod-footer">
                 <div className="product-text">
                     {/* Product Name + Link to dedicated product page */}
-                    <a className="product-name" href={"/products/" + sku}>
+                    <a className="product-name" href={getProductPagePath(sku)}>
                         {name}
                     </a>
                     <Price baseDinero={dinero}/>
@@ -262,7 +263,7 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
 function GroupBasketModifier() {
     const {product} = useContext(ProductContext)
     return (
-        <a className="basket-button" href={`/products/${product.sku}`}>
+        <a className="basket-button" href={getProductPagePath(product.sku)}>
             <p>View Options <i className="fi fi-rr-angle-right"></i></p>
         </a>
     )
@@ -357,7 +358,7 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
         setImageURL(getImageURL(images[0]))
     }, [])
 
-    const link = `/products/${sku}`
+    const link = getProductPagePath(sku)
     let string_price: string = "£" + price.toFixed(2);
     let max_order: number = Math.min(max_product_order, stock);
     window.addEventListener("basketUpdate", syncWithBasket)
@@ -452,7 +453,7 @@ export function CheckoutProduct({
         : getImageURL(product.images?.[0]);
 
     let href = linked
-        ? `/products/${sku}`
+        ? getProductPagePath(sku)
         : undefined;
 
     if (image == "") image = undefined

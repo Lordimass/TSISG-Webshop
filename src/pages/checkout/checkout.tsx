@@ -33,6 +33,7 @@ import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
 import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
 import Price from "../../components/price/price.tsx";
 import {convertDinero} from "@shared/functions/price.ts";
+import {getPath} from "../../lib/paths.ts";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -103,7 +104,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
             const err = <><p className="checkout-error">
                 <i>Too slow!</i><br/>Part of your order is now out of stock, head
-                back to the <a style={{color: "white"}} href="/">home page</a> to
+                back to the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to
                 change your order, then come back:<br/><br/></p>
                 {
                     discrepencies.map((discrep) => <p 
@@ -293,7 +294,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
         <div className="checkout-right">
             <CheckoutProducts currency={checkout.currency as Currency} />
-            <p className="msg">To edit your basket, <a href="/">go back</a></p>
+            <p className="msg">To edit your basket, <a href={getPath("HOME")}>go back</a></p>
             <CheckoutTotals checkoutTotal={checkout.total} currency={checkout.currency as Currency} />
             <p className="msg">{killSwitchMessage}</p>
             <button type="button" disabled={!readyToCheckout || isLoading || (killSwitch && !DEV)} id="submit" onClick={handleSubmit}>

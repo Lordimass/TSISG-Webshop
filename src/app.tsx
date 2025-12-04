@@ -20,6 +20,7 @@ import {useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings} from "
 import {Report} from "./pages/staff/reports/report/report";
 import useLocale, {LocaleContext} from "./localeHandler.ts";
 import {VALIDATORS} from "@shared/schemas/schemas.ts";
+import {getRoute} from "./lib/paths.ts";
 
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
@@ -56,33 +57,30 @@ export function App() {
                     <Routes>
                         <Route index element={<Home/>}/>
 
-                        <Route path="products/*" element={<ProdPage/>}/>
+                        <Route path={getRoute("PRODUCT")} element={<ProdPage/>}/>
 
-                        <Route path="checkout" element={<Checkout/>}/>
+                        <Route path={getRoute("CHECKOUT")} element={<Checkout/>}/>
 
-                        <Route path="thankyou" element={<ThankYou/>}/>
+                        <Route path={getRoute("POST_CHECKOUT")} element={<ThankYou/>}/>
 
-                        <Route path='login' element={<LoginPage/>}/>
+                        <Route path={getRoute("LOGIN")} element={<LoginPage/>}/>
 
-                        <Route path="staff/orders" element={<OrderManager/>}/>
-                        <Route path="staff/reports" element={<Reports/>}/>
-                        <Route path="staff/reports/*" element={<Report/>}/>
+                        <Route path={getRoute("ORDERS")} element={<OrderManager/>}/>
+                        <Route path={getRoute("REPORTS")} element={<Reports/>}/>
+                        <Route path={getRoute("REPORT")} element={<Report/>}/>
 
-                        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy'
-                                                               canonical='privacy'/>}/>
-                        <Route path="returns"
-                               element={<Policy file_name='returns' title='Refunds & Returns Policy'
-                                                canonical='returns'/>}/>
-                        <Route path="refunds"
-                               element={<Policy file_name='returns' title='Refunds & Returns Policy'
-                                                canonical='returns'/>}/>
-                        <Route path="cancellations"
-                               element={<Policy file_name='cancellation' title='Cancellation Policy'
-                                                canonical='cancellation'/>}/>
-                        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy'
-                                                                canonical='shipping'/>}/>
+                        <Route path={getRoute("PRIVACY_POLICY")} element={
+                            <Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
+                        <Route path={getRoute("REFUNDS_POLICY")} element={
+                            <Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+                        <Route path={getRoute("RETURNS_POLICY")} element={
+                            <Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+                        <Route path={getRoute("CANCELLATIONS_POLICY")} element={
+                            <Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
+                        <Route path={getRoute("SHIPPING_POLICY")} element={
+                            <Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
 
-                        <Route path="*" element={<Page404/>}/>
+                        <Route path={getRoute("404")} element={<Page404/>}/>
                     </Routes>
                 </BrowserRouter>
             </LocaleContext.Provider>

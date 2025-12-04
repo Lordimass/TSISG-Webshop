@@ -6,6 +6,7 @@ import { SiteSettingsContext } from "../../app";
 import { NotificationsContext } from "../notification/lib";
 import { triggerViewCart } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
+import {getPath} from "../../lib/paths.ts";
 
 export default function Basket() {
     async function redirectToCheckout() {
@@ -14,7 +15,7 @@ export default function Basket() {
             await toggleBasket()
             return
         }
-        window.location.href = "/checkout"
+        window.location.href = getPath("CHECKOUT");
     }
 
     function updateBasketQuantity() {

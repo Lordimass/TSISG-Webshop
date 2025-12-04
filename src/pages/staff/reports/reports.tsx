@@ -7,6 +7,7 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import { LoginContext } from "../../../app";
 import { ReportData } from "./types";
 import { managePermission, ReportsContext, viewPermission } from "./consts";
+import {getReportPagePath} from "../../../lib/paths.ts";
 
 export default function Reports() {
     const title = "TSISG STAFF - Report Manager"
@@ -80,7 +81,7 @@ function ReportVisual({r}: {r: ReportData}) {
     >
         <div className="report-visual-inner">
             <i className="fi fi-sr-document"/>
-            <a href={`/staff/reports/${r.id}`}>
+            <a href={getReportPagePath(r.id)}>
                 View Report: <b>{startDate} - {endDate}</b>
             </a>
             <div className="spacer"/>
