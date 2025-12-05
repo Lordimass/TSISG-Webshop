@@ -34,7 +34,15 @@
         font-size: 9px;
         height: 7px;
         color: var(--jamie-grey);
-        vertical-align: bottom;
+        align-self: end;
+    }
+
+    .price-tax-disclaimer {
+        font-size: 12px;
+        height: 10px;
+        margin-left: 2px;
+        letter-spacing: -0.7px;
+        color: var(--jamie-grey);
         align-self: end;
     }
 

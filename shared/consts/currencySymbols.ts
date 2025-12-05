@@ -1,3 +1,5 @@
+export const TAX_EXCLUSIVE_COUNTRIES = ["US", "CA"]
+
 export const CURRENCY_SYMBOLS = {
     "USD": {
         "symbol": "$",

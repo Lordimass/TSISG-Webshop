@@ -4,7 +4,7 @@ import {useContext, useEffect, useState} from "react";
 import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
-import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
+import {CURRENCY_SYMBOLS, TAX_EXCLUSIVE_COUNTRIES} from "@shared/consts/currencySymbols.ts";
 
 /**
  * Price display in user's local currency.
@@ -14,7 +14,7 @@ import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
  * only use if you want this currency to show instead of the user's local currency.
  */
 export default function Price({baseDinero, currency, simple}: {baseDinero: Dinero, currency?: Currency, simple?: boolean}) {
-    const {currency: defaultCurrency, locale} = useContext(LocaleContext);
+    const {currency: defaultCurrency, locale, country} = useContext(LocaleContext);
     const curr = currency ?? defaultCurrency;
 
     useEffect(() => {
@@ -34,22 +34,32 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
     // Extract major and minor currency amounts
     const formatString = dinero.toFormat('0.00')
     const [major, minor] = formatString.split('.')
-    const symbol = currency && Object.keys(CURRENCY_SYMBOLS).includes(currency.toUpperCase())
-        ? CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].symbol
+    const symbol = Object.keys(CURRENCY_SYMBOLS).includes(curr.toUpperCase())
+        ? CURRENCY_SYMBOLS[curr.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].symbol
         : dinero.toFormat(`$0.00`).charAt(0)
 
     if (!simple) {
         return <div className="price">
+
             <div className="price-left">
                 <p className="price-symbol">{symbol}</p>
-                <p className="price-currency">{dinero.getCurrency().toUpperCase()}</p>
+                <p className="price-currency">{curr.toUpperCase()}</p>
             </div>
+
             <p className="price-major">{Number(major).toLocaleString(locale)}</p>
             {dinero.getPrecision()>0 ? <p className="price-minor">{minor}</p> : null}
+
+            {/* Disclaimer for tax-exclusive countries that prices here are tax-inclusive */
+                TAX_EXCLUSIVE_COUNTRIES.includes(country)
+                ? <p className="price-tax-disclaimer">inc. tax</p>
+                : null
+            }
+
         </div>
     } else {
         return <p>{symbol}{
-            Number(`${major}.${minor}`)
+            Number(`${major}.${minor}`
+            )
             .toLocaleString(
                 locale,
                 {minimumFractionDigits: dinero.getPrecision()}

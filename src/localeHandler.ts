@@ -5,6 +5,7 @@ import {Currency} from "dinero.js";
 
 export const DEFAULT_LOCALE = 'en-GB';
 export const DEFAULT_CURRENCY = getCurrency(DEFAULT_LOCALE) as Currency || "GBP";
+export const DEFAULT_COUNTRY = "GB"
 
 /**
  * Response format from a successful call to `https://api.bigdatacloud.net/data/reverse-geocode-client`
@@ -58,11 +59,16 @@ interface ILocaleContext {
     /** ISO4217 Currency Code
      * @example "GBP"*/
     currency: Currency;
+    /** ISO3166-1 alpha-2 Country Code
+     * @example "GB"
+     */
+    country: string;
 }
 
 export const LocaleContext = createContext<ILocaleContext>({
     locale: DEFAULT_LOCALE,
-    currency: DEFAULT_CURRENCY
+    currency: DEFAULT_CURRENCY,
+    country: DEFAULT_COUNTRY
 });
 
 /**
@@ -71,6 +77,7 @@ export const LocaleContext = createContext<ILocaleContext>({
 export default function useLocale(): ILocaleContext {
     const [locale, setLocale] = useState(DEFAULT_LOCALE);
     const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
+    const [country, setCountry] = useState(DEFAULT_COUNTRY);
 
     useEffect(() => {
         async function getLocale() {
@@ -99,12 +106,13 @@ export default function useLocale(): ILocaleContext {
             } else {
                 setLocale(locale);
                 setCurrency(getCurrency(locale) as Currency || DEFAULT_CURRENCY);
+                setCountry(locale.split("-")[1])
             }
         }
         getLocale();
     }, [])
 
-    return {locale, currency}
+    return {locale, currency, country}
 
 
 }
