@@ -162,11 +162,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
     }
 
-    const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
-     useEffect(() => {
-         checkout.updateEmail("test+location_US@test.net")
-     }, []);
 
     const [readyToCheckout, setReadyToCheckout] = useState(false)
 
@@ -176,18 +172,26 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
 
-    const addressComplete = useRef(false)
+    const [addressComplete, setAddressComplete] = useState(false);
+    const countryChanged = useRef(true);
     const paymentInfoComplete = useRef(false)
     const country = useRef<string>("")
 
     // Handle changes in address and update shipping options
     const addressElement = checkout.getShippingAddressElement()
     addressElement?.once("change", async (e) => {
-        // Don't check again unless the country has changed
-        if (e.value.address.country === country.current) return
-        // Don't bother checking until the full address is complete
-        if (!e.complete) return
+        countryChanged.current = (e.value.address.country !== country.current) || countryChanged.current
         country.current = e.value.address.country
+
+        // Don't bother checking until the full address is complete
+        if (!e.complete) {
+            setAddressComplete(false);
+            return;
+        }
+
+        // Don't check again unless the country has changed since last check
+        if (!countryChanged.current) return;
+        setAddressComplete(false);
 
         const resp = await fetch(window.location.origin + "/.netlify/functions/getShippingOptions", {
             method: "POST",
@@ -203,9 +207,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
         
         // TODO: Give customers multiple shipping options
+        countryChanged.current = false;
         await checkout.updateShippingOption(rates[0])
-
-        addressComplete.current = true
+        setAddressComplete(true)
         await triggerAddShippingInfo(currency)
     })
 
@@ -230,7 +234,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     // Run checks to see if checkout is ready or not once fields have all been validated
     useEffect(() => {async function checkReadyToCheckout() {
-        let ready = isEmailValid && addressComplete.current
+        let ready = isEmailValid && addressComplete
 
         console.log("Ready to checkout: ", ready);
         if (ready) {
@@ -238,22 +242,20 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             if (!await checkSessionStatus()) {
                 ready = false
                 setError(<p>"Checkout Expired! Please reload the page"</p>)
-                return
             }
 
             // Check stock if it's not already been checked
-            if (!hasCheckedStock) {
+            else if (!hasCheckedStock) {
                 const inStock = await checkStock();
                 if (!inStock) {
                     ready = false
-                    return
                 }
                 setHasCheckedStock(true);
             }
         }
         setReadyToCheckout(ready);
 
-    } checkReadyToCheckout()}, [isEmailValid, addressComplete.current])
+    } checkReadyToCheckout()}, [isEmailValid, addressComplete])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
