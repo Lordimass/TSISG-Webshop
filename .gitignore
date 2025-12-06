@@ -30,3 +30,4 @@ dist-ssr
 commits.csv
 shared/schemas/schemas.json
 /.env.netlify
+/.env.production

@@ -3,11 +3,13 @@ import type {ProductData, RawProductData, WebhookPayload} from "@shared/types/su
 import {VALIDATORS} from "@shared/schemas/schemas.ts";
 import {NetlifyFunctionError} from "@shared/errors.ts";
 import {supabaseAnon} from "../lib/getSupabaseClient.ts";
-import {fetchStripeProduct, stripe} from "../lib/stripe.ts";
+import {fetchStripeProduct, stripe as testModeStripe} from "../lib/stripe.ts";
 import Stripe from "stripe";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {generateStripeCurrencyOptions, getImageURL} from "../lib/lib.ts";
 import {ExchangeRates} from "@shared/functions/price.ts";
+import dotenv from "dotenv";
+dotenv.config({path: ".env.production", override: true}); // Production keys for updating Live Mode
 
 /**
  * Sync saved Stripe Product data with Supabase
@@ -27,6 +29,8 @@ import {ExchangeRates} from "@shared/functions/price.ts";
  * Specify `sku` as a Supabase product SKU to request that a specific SKU be updated. This only works if the body is
  * empty and the request is local (i.e. running in Netlify Local Development Environment). This is only designed to be
  * used in development and is not an available option in production.
+ *
+ * Specify 'liveMode' to update products in live mode. Only works if STRIPE_SECRET_KEY is supplied in `.env.production`.
  *
  * @endpoint POST /.netlify/functions/updateStripeProducts
  * @see [Supabase Documentation](https://supabase.com/docs/guides/database/webhooks)
@@ -49,35 +53,42 @@ export default async function handler(request: Request, context: Context): Promi
         return new Response(undefined, {status: 403})
     }
 
+    const searchParams = new URL(request.url).searchParams
+
     // Check if request was called locally.
     // Locally, this function can be run to update products without need for a change to the products table.
     let local = context.ip === "::1"
+    let livemode = searchParams.has("liveMode") && local
 
     const body = await request.json()
-    const searchParams = new URL(request.url).searchParams
     const archiveAllOldPrices = searchParams.has("archiveAllOldPrices")
     let payload // Supabase Webhook Payload (If this is a webhook request)
     switch (body.type) {
         case "INSERT": // Add a new product on Stripe
             payload = await processBody(request);
-            await handleInsertCase(payload.record)
+            await handleInsertCase(payload.record, testModeStripe)
             break;
         case "UPDATE": // Update product data on Stripe
             payload = await processBody(request);
-            await handleUpdateCase(payload.record, archiveAllOldPrices)
+            await handleUpdateCase(payload.record, archiveAllOldPrices, testModeStripe)
             break;
         case "DELETE": // Remove a product from Stripe
             payload = await processBody(request);
-            await handleDeleteCase(payload.old_record);
+            await handleDeleteCase(payload.old_record, testModeStripe);
             break;
-        default: // Payload not from Supabase, if local, ignore this and update the product from query string.
+        default: // Payload not from Supabase, if local, update the product from query string.
             if (local && searchParams.has("sku")) {
-                // TODO: Handle deleting old products on Stripe too.
+                /** Stripe object, in live mode if requested to be so */
+                if (livemode) console.log(`Livemode update enabled, will update products on live mode if STRIPE_SECRET_KEY key has been supplied in .env.production`)
+                if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY does not exist!")
+                const stripe = livemode
+                    ? new Stripe(process.env.STRIPE_SECRET_KEY, {apiVersion: '2025-08-27.basil'})
+                    : testModeStripe;
                 const sku = Number(searchParams.get("sku")!);
                 if (!Number.isNaN(Number(sku))) {
-                    // Local request means the body contains exchange rates
                     await updateFromSku(
                         sku,
+                        stripe,
                         searchParams.has("archiveAllOldPrices"),
                         body
                     )
@@ -122,6 +133,7 @@ async function processBody(body: any): Promise<WebhookPayload> {
  * Update a product on Stripe with the data from the given Supabase product.
  * @param stripeProduct The product to update on Stripe.
  * @param supabaseProduct The data to update the Stripe product with.
+ * @param stripe Stripe object to use for update
  * @param archiveAllOldPrices Whether to archive all the old prices, instead of just the current default, when updating
  * prices.
  * @param cachedExchangeRates Cached conversion rates to prevent having to fetch new ones
@@ -129,6 +141,7 @@ async function processBody(body: any): Promise<WebhookPayload> {
 async function updateStripeProduct(
     stripeProduct: Stripe.Product,
     supabaseProduct: ProductData,
+    stripe: Stripe,
     archiveAllOldPrices = false,
     cachedExchangeRates?: ExchangeRates
 ) {
@@ -197,9 +210,14 @@ async function updateStripeProduct(
 /**
  * Create a new product on Stripe with the data from the given Supabase product.
  * @param supabaseProduct The data to create the new Stripe product to match.
+ * @param stripe The Stripe object to create the product with
  * @param cachedExchangeRates Cached conversion rates to prevent having to fetch new ones.
  */
-async function createStripeProduct(supabaseProduct: ProductData, cachedExchangeRates?: ExchangeRates) {
+async function createStripeProduct(
+    supabaseProduct: ProductData,
+    stripe: Stripe,
+    cachedExchangeRates?: ExchangeRates
+) {
     console.log(`Creating new Stripe product for ${supabaseProduct.name}`);
     // Update price data for the product
     const unit_amount = Math.round(supabaseProduct.price*100)
@@ -242,17 +260,20 @@ async function createStripeProduct(supabaseProduct: ProductData, cachedExchangeR
 }
 
 /** Handle insertion of a new product record .
- * @param prod The new product record */
-async function handleInsertCase(prod: RawProductData) {
+ * @param prod The new product record
+ * @param stripe Stripe object to handle the insert case with
+ */
+async function handleInsertCase(prod: RawProductData, stripe: Stripe) {
     const supabaseProd = await getProducts(supabaseAnon, [prod.sku]);
-    await createStripeProduct(supabaseProd[0]);
+    await createStripeProduct(supabaseProd[0], stripe);
 }
 
 /** Handle deletion of a product record.
  * @param prod The contents of the record prior to deletion
+ * @param stripe The Stripe object to handle the deletion with
  */
-async function handleDeleteCase(prod: RawProductData) {
-    const stripeProd = await fetchStripeProduct(prod.sku)
+async function handleDeleteCase(prod: RawProductData, stripe: Stripe) {
+    const stripeProd = await fetchStripeProduct(prod.sku, undefined, stripe)
     if (stripeProd) {
         await stripe.products.update(stripeProd.id, {active: false})
     }
@@ -262,27 +283,29 @@ async function handleDeleteCase(prod: RawProductData) {
  * @param prod The new product record.
  * @param archiveAllOldPrices Whether to archive all the old prices, instead of just the current default, when updating
  * prices.
+ * @param stripe Stripe object to handle the update with
  */
-async function handleUpdateCase(prod: RawProductData, archiveAllOldPrices = false) {
+async function handleUpdateCase(prod: RawProductData, archiveAllOldPrices = false, stripe: Stripe) {
     const supabaseProds = await getProducts(supabaseAnon, [prod.sku]);
-    const stripeProd = await fetchStripeProduct(prod.sku)
+    const stripeProd = await fetchStripeProduct(prod.sku, undefined, stripe)
     if (stripeProd && supabaseProds.length > 0) {
-        await updateStripeProduct(stripeProd, supabaseProds[0], archiveAllOldPrices)
+        await updateStripeProduct(stripeProd, supabaseProds[0], stripe, archiveAllOldPrices)
     }
 }
 
 /**
  * Update to product on Stripe from only a Supabase SKU. If no Stripe product exists, create one.
- * @param sku
- * @param archiveAllOldPrices
- * @param cachedExchangeRates
+ * @param sku The SKU on supabase of the product to update from
+ * @param stripe The Stripe object to handle the update with
+ * @param archiveAllOldPrices Whether to archive all old prices, or just the current default
+ * @param cachedExchangeRates Cached exchange rates to prevent having to fetch them for every update
  */
-async function updateFromSku(sku: number, archiveAllOldPrices = false, cachedExchangeRates?: ExchangeRates) {
+async function updateFromSku(sku: number, stripe: Stripe, archiveAllOldPrices = false, cachedExchangeRates?: ExchangeRates) {
     const supabaseProds = await getProducts(supabaseAnon, [sku]);
-    const stripeProd = await fetchStripeProduct(sku);
+    const stripeProd = await fetchStripeProduct(sku, undefined, stripe);
     if (stripeProd && supabaseProds.length > 0) {
-        await updateStripeProduct(stripeProd, supabaseProds[0], archiveAllOldPrices, cachedExchangeRates)
+        await updateStripeProduct(stripeProd, supabaseProds[0], stripe, archiveAllOldPrices, cachedExchangeRates)
     } else if (supabaseProds.length > 0) {
-        await createStripeProduct(supabaseProds[0], cachedExchangeRates)
+        await createStripeProduct(supabaseProds[0], stripe, cachedExchangeRates)
     }
 }
