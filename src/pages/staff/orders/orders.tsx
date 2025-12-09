@@ -19,6 +19,7 @@ import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {callRPC} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
 export function OrderManager() { 
     const unsetOrders: OrderReturned[] = useGetOrderList() || []
@@ -134,13 +135,14 @@ function OrderDropdown() {
     const dateString = dateToDateString(date)
     const timeString = dateToTimeString(date)
     const deliveryCostInput = useRef<HTMLInputElement | null>(null)
-    const totalValueDinero = DineroFactory(
-        {amount: Math.round(order.value.total*100), currency: order.value.currency as Currency}
-    )
-    const shippingDinero = order.value.shipping ? DineroFactory(
-        {amount: Math.round(order.value.shipping*100), currency: order.value.currency as Currency}
-    ) : undefined
-
+    const totalValueDinero = DineroFactory({
+        amount: Math.round((order.value.total || order.total_value)*100),
+        currency: (order.value.currency || DEFAULT_CURRENCY) as Currency
+    })
+    const shippingDinero = (order.value.shipping || order.delivery_cost) ? DineroFactory({
+        amount: Math.round((order.value.shipping || order.delivery_cost || 0)*100),
+        currency: DEFAULT_CURRENCY
+    }) : undefined
     return (<>
         <div className="order-values">
             Short ID: {order.id.slice(0,40)} <br/>

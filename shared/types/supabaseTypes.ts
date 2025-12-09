@@ -173,6 +173,7 @@ export interface Order {
     name: string,
     country: string,
     fulfilled: boolean,
+    /** @Deprecated Use `value.total` instead */
     total_value: number,
     postal_code: string,
     products: OrderProdCompressed[],
