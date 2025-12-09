@@ -170,9 +170,11 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             <label>Global 
                 <input 
                     type="Checkbox" 
-                    defaultChecked={image.association_metadata?.global}
+                    defaultChecked={image.association_metadata?.global || undefined}
                     id={`image-global-${image.name}${image.display_order}`}
-                    onChange={(e) => {updateAssMetadata("global", e.target.value)}}
+                    onChange={(e) => {
+                        updateAssMetadata("global", e.target.checked)
+                    }}
                 />
             </label>
 
@@ -180,9 +182,10 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             <label>Variant Icon 
                 <input 
                     type="Checkbox" 
-                    defaultChecked={image.association_metadata?.group_product_icon}
+                    defaultChecked={image.association_metadata?.group_product_icon || undefined}
                     id={`image-variant-icon-${image.name}${image.display_order}`}
-                    onChange={(e) => {updateAssMetadata("group_product_icon", e.target.value)}}
+                    onChange={(e) => {
+                        updateAssMetadata("group_product_icon", e.target.checked)}}
                 />
             </label>
 
@@ -190,9 +193,11 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             <label>Group Representative 
                 <input 
                     type="Checkbox" 
-                    defaultChecked={image.association_metadata?.group_representative}
+                    defaultChecked={image.association_metadata?.group_representative || undefined}
                     id={`image-group-representative-${image.name}${image.display_order}`}
-                    onChange={(e) => {updateAssMetadata("group_representative", e.target.checked)}}
+                    onChange={(e) => {
+                        updateAssMetadata("group_representative", e.target.checked)
+                    }}
                 />
             </label>
 
