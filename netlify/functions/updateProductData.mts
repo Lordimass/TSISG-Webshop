@@ -1,7 +1,7 @@
 import { Context } from '@netlify/functions';
 import { SupabaseClient } from '@supabase/supabase-js';
-import getSupabaseClient from '../lib/getSupabaseClient.mts';
-import type { ProductData } from '../../shared/types/supabaseTypes.mts';
+import getSupabaseClient from '../lib/getSupabaseClient.ts';
+import type { ProductData } from '@shared/types/supabaseTypes.ts';
 
 export default async function handler(request: Request, _context: Context) { try {
     if (request.method !== 'POST') {
@@ -21,33 +21,31 @@ export default async function handler(request: Request, _context: Context) { try
     const userPerms: string[] = JSON.parse(await AuthorisationResult.text())
     
     // Extract product from body
-    const prod: ProductData = await request.json()
-    console.log(prod)
+    const prod: Partial<ProductData> = await request.json()
+
+    // Remove keys not defined in the `products` table
+    prod.category = undefined
+    const images = prod.images || []
+    prod.images = undefined
+    prod.tags = undefined
+
+    console.log(`Setting product to ${JSON.stringify(prod, undefined, 2)}`)
+
     // Update Supabase product table
     const { error: prodErr } = await supabase!
         .from("products")
-        .update({
-            name: prod.name,
+        .update({...prod,
             price: userPerms.includes("edit_price") ? prod.price : undefined,
             // TODO: This is problematic, if the stock changes in the time it takes for someone to edit a product,
             //  this will overwrite the change, making stock keeping inaccurate.
-            stock: prod.stock, 
-            category_id: prod.category_id,
-            active: prod.active,
-            weight: prod.weight,
-            customs_description: prod.customs_description,
-            origin_country_code: prod.origin_country_code,
-            package_type_override: prod.package_type_override,
-            description: prod.description, 
-            group_name: prod.group_name,
-            sort_order: prod.sort_order
+            stock: prod.stock,
         })
         .eq("sku", prod.sku)
     if (prodErr) throw prodErr
 
     const now = new Date().toISOString()
     // Create new product_images mappings
-    const imgPayload = prod.images.map((img) => {return {
+    const imgPayload = images.map((img) => {return {
             product_sku: prod.sku,
             image_id: img.id,
             image_url: img.image_url,
@@ -85,4 +83,4 @@ async function getPerms(token: string, supabase: SupabaseClient) {
     const perms = user.user.app_metadata.permissions
 
     return new Response(JSON.stringify(perms), {status: 200});
-};
+}

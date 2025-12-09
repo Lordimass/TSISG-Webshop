@@ -1,6 +1,6 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
 import { ImageData } from "@shared/types/types";
-import { getFilenameExtension, getImageURL, openObjectInNewTab } from "../../../lib/lib";
+import { getFilenameExtension, openObjectInNewTab } from "../../../lib/lib";
 
 import "./imageEditor.css"
 import { UnsubmittedImageData } from "./types";
@@ -10,7 +10,9 @@ import { ProductContext } from "../lib";
 import { removeImage, shiftImage } from "./lib";
 import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
 import { NotificationsContext } from "../../../components/notification/lib";
-import {AssociationMetadata} from "@shared/types/supabaseTypes.mts";
+import {AssociationMetadata} from "@shared/types/supabaseTypes.ts";
+
+import {getImageURL} from "@shared/functions/images.ts";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {
@@ -93,7 +95,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
     : getImageURL(image, true) // Submitted
 
     function setAlt(e: React.FocusEvent) {
-        const newImage = {...image, alt: altInput.current?.value}
+        const newImage = {...image, alt: altInput.current?.value ?? null}
         setImage(newImage)
     }
 
@@ -120,7 +122,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
     function setImage(newImage: UnsubmittedImageData | ImageData) {
         const newImages = [
             ...product.images.filter((img) => 
-                // This isn't entirely robust but I'll be surprised if there's
+                // This isn't entirely robust, but I'll be surprised if there's
                 // two images with the same display order and name.
                 (img.display_order !== image.display_order) &&
                 (img.name !== image.name)
@@ -258,7 +260,8 @@ function UploadNewImage({imageFiles}: {imageFiles: React.RefObject<Map<string, F
             display_order: greatestDisplayOrder+1+i,
             name: file.name,
             local_url,
-            association_metadata: {}
+            association_metadata: {},
+            alt: null
         }
         // Also create a mapping from local_url to the File object
         imageFiles.current.set(local_url, file);

@@ -1,4 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+dotenv.config({path: ".env.netlify"});
 
 export const supabaseAnon = await getSupabaseClient()
 export const supabaseService = await getSupabaseClient(undefined, true)

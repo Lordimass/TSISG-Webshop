@@ -3,10 +3,10 @@
  * to the function it needs to be at
  */
 import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripe.ts";
 import Stripe from "stripe";
-import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.mts";
-import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.mts";
+import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.ts";
+import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.ts";
 
 export default async function handler(request: Request, _context: Context) {
     try {
@@ -40,8 +40,9 @@ export default async function handler(request: Request, _context: Context) {
                 break;
             case "refund.created":
                 await handleRefundCreated(body)
+                break;
             default:
-                console.log("Event did not map to a function")
+                console.log(`Event '${type}'did not map to a function`)
                 break;
         }
         return new Response(undefined, {status: 200})

@@ -26,12 +26,9 @@
     grid-area: image;
 }
 
-.product-box .price {
+.product-box .price-container {
     grid-area: price;
-    color: black;
-    font-weight: 200;
-    font-size: 2em;
-    min-width: 0;
+    margin-bottom: 10px;
 }
 
 .product-box .title {
@@ -124,6 +121,14 @@
     box-sizing: border-box;
 }
 
+.title .sku {
+    font-size: 0.4em;
+    font-weight: 600;
+    line-height: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    text-wrap-mode: wrap;
+}
+
 .tags {
     display: flex;
     gap: 0 3px;
@@ -139,15 +144,6 @@
     font-family: "Perfect Penmanship";
     font-size: 0.8em;
     user-select: none;
-}
-
-.title .sku {
-    font-size: 0.4em;
-    font-weight: 600;
-    line-height: 1em;
-    margin-bottom: 1em;
-    font-family: 'Courier New', Courier, monospace;
-    text-wrap-mode: wrap;
 }
 
 .product-group {
@@ -176,6 +172,20 @@
 
     background-color: #ccc;
     transition: margin-bottom 0.1s;
+
+    .price {
+        align-self: center;
+        .price-major {
+            font-size: 15px;
+        }
+
+        .price-minor {
+            font-size: 10px;
+        }
+        .price-currency {
+            display: none;
+        }
+    }
 }
 
 .product-variant:hover {
@@ -243,10 +253,6 @@
 
     .product-box .desc {
         min-height: 150px;
-    }
-
-    .product-box .price {
-        font-size: 2.5em;
     }
 
     .prod-page-modifier {

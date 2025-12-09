@@ -1,0 +1,49 @@
+.price {
+    display: flex;
+    height: 22px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+    .price-major {
+        font-size: 22px;
+        letter-spacing: 1px;
+    }
+
+    .price-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-right: 2px;
+        text-align: end;
+        box-sizing: border-box;
+    }
+
+    .price-symbol {
+        font-size: 15px;
+        height: 15px
+    }
+
+    .price-minor {
+        font-size: 13px;
+        height: 13px;
+        margin-left: 1px;
+        letter-spacing: 1px;
+    }
+
+    .price-currency {
+        font-size: 9px;
+        height: 7px;
+        color: var(--jamie-grey);
+        align-self: end;
+    }
+
+    .price-tax-disclaimer {
+        font-size: 12px;
+        height: 10px;
+        margin-left: 2px;
+        letter-spacing: -0.7px;
+        color: var(--jamie-grey);
+        align-self: end;
+    }
+
+}

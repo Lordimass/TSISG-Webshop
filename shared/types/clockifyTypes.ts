@@ -1,6 +1,6 @@
 /* Type definitions based on documentation at https://docs.clockify.me/*/
 
-/** A TimeEntry for a Clockify User*/
+/** A TimeEntry for a Clockify User */
 export type TimeEntry = {
     /** Indicates whether a time entry is billable. */
     billable: boolean
@@ -57,7 +57,7 @@ type RateDtoV1 = {
     currency: string
 }
 
-/** Represents a custom field value object. */
+/** Represents a custom field value object */
 type CustomFieldValueDtoV1 = {
     /** Represents custom field identifier across the system. */
     customFieldID: string

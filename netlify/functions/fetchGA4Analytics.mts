@@ -1,11 +1,11 @@
 import { Context } from "@netlify/functions";
-import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.mts";
-import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.mts";
+import { getSupabaseUserPermissions } from "../lib/getSupabaseClient.ts";
+import getBetaAnalyticsDataClient from "../lib/betaAnalyticsDataClient.ts";
 import {
     ClicksAndImpressionsTrendPoint,
     FetchAnalyticsResponse, ProductAnalytic, ReadableAnalyticsMetric,
     TrendPoint
-} from "@shared/types/analyticsTypes.mjs";
+} from "@shared/types/analyticsTypes.ts";
 import assert from "node:assert";
 import {google} from "@google-analytics/data/build/protos/protos"
 

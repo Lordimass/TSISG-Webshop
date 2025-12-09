@@ -11,6 +11,7 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
     origin_country_code: async (val) => val,
     description: async (val) => val,
     customs_description: async (val) => val,
+    extended_customs_description: async (val) => val,
     group_name: async (val) => val,
 
     // Convert to integer

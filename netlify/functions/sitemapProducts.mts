@@ -4,8 +4,8 @@
 
 import { Context } from "@netlify/functions";
 import { baseUrl } from "./sitemap.mts";
-import type { ProductData } from "../../shared/types/supabaseTypes.mts";
-import getSupabaseClient from "../lib/getSupabaseClient.mts"
+import type { ProductData } from "@shared/types/supabaseTypes.ts";
+import getSupabaseClient from "../lib/getSupabaseClient.ts"
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export default async function handler(_request: Request, _context: Context) {

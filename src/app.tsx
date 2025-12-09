@@ -11,13 +11,16 @@ import Policy from './pages/policies/policies';
 import ProdPage from "./pages/products/prodPage";
 import Reports from "./pages/staff/reports/reports";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { OrderManager } from './pages/staff/orders/orders';
-import { NotificationsContext } from "./components/notification/lib";
-import { LoginContext } from "./lib/auth";
-import { SiteSettingsContext } from "@shared/types/types";
-import { useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings } from "./appHooks";
-import { Report } from "./pages/staff/reports/report/report";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
+import {OrderManager} from './pages/staff/orders/orders';
+import {NotificationsContext} from "./components/notification/lib";
+import {LoginContext} from "./lib/auth";
+import {SiteSettingsContext} from "@shared/types/types";
+import {useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings} from "./appHooks";
+import {Report} from "./pages/staff/reports/report/report";
+import useLocale, {LocaleContext} from "./localeHandler.ts";
+import {VALIDATORS} from "@shared/schemas/schemas.ts";
+import {getRoute} from "./lib/paths.ts";
 
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
@@ -29,55 +32,63 @@ import { Report } from "./pages/staff/reports/report/report";
 // Stripe CLI login expires every 90 days, run `stripe login` to refresh this if you receive an authentication error.
 
 export function App() {
-  const {loggedIn, user, permissions, loading} = useLogin()
-  const {newNotif, notify} = useNotifs()
-  const siteSettings = useSiteSettings(notify)
-  useConditionalBasketUpdate()
+    const {loggedIn, user, permissions, loading} = useLogin()
+    const {newNotif, notify} = useNotifs()
+    const siteSettings = useSiteSettings(notify)
+    const localeContext = useLocale();
+    useConditionalBasketUpdate()
 
-  return (<>
-    <meta name='author' content='Sam Knight'/>
-    <meta name='author' content='Lordimass'/>
-    <meta name='creator' content='Sam Knight'/>
-    <meta name='creator' content='Lordimass'/>
-    <meta name='generator' content='react'/>
+    return (<>
+            <meta name='author' content='Sam Knight'/>
+            <meta name='author' content='Lordimass'/>
+            <meta name='creator' content='Sam Knight'/>
+            <meta name='creator' content='Lordimass'/>
+            <meta name='generator' content='react'/>
 
-    <LoginContext.Provider value={{loggedIn, user, permissions, loading}}>
-    <SiteSettingsContext.Provider value={siteSettings}>
-    <NotificationsContext.Provider value={{newNotif, notify}}>
-    {/**
-     * Make sure to update sitemap.mts (Netlify function) to include new static pages
-     * in the sitemap 
-    */}
-    <BrowserRouter>
-      <Routes>
-        <Route index element={<Home />} />
-  
-        <Route path="products/*" element={<ProdPage/>} />
+            <LoginContext.Provider value={{loggedIn, user, permissions, loading}}>
+            <SiteSettingsContext.Provider value={siteSettings}>
+            <NotificationsContext.Provider value={{newNotif, notify}}>
+            <LocaleContext.Provider value={localeContext}>
+                {/**
+                 * Make sure to update sitemap.mts (Netlify function) to include new static pages
+                 * in the sitemap
+                 */}
+                <BrowserRouter>
+                    <Routes>
+                        <Route index element={<Home/>}/>
 
-        <Route path="checkout" element={<Checkout/>} />
-  
-        <Route path="thankyou" element={<ThankYou/>} />
+                        <Route path={getRoute("PRODUCT")} element={<ProdPage/>}/>
 
-        <Route path='login' element={<LoginPage/>} />
+                        <Route path={getRoute("CHECKOUT")} element={<Checkout/>}/>
 
-        <Route path="staff/orders" element={<OrderManager/>} />
-        <Route path="staff/reports" element={<Reports/>} />
-        <Route path="staff/reports/*" element={<Report/>} />
-  
-        <Route path="privacy" element={<Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
-        <Route path="returns" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
-        <Route path="refunds" element={<Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
-        <Route path="cancellations" element={<Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
-        <Route path="shipping" element={<Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
+                        <Route path={getRoute("POST_CHECKOUT")} element={<ThankYou/>}/>
 
-        <Route path="*" element={<Page404/>} />
-      </Routes>
-    </BrowserRouter>
-    </NotificationsContext.Provider>
-    </SiteSettingsContext.Provider>
-    </LoginContext.Provider></>
-  )
+                        <Route path={getRoute("LOGIN")} element={<LoginPage/>}/>
+
+                        <Route path={getRoute("ORDERS")} element={<OrderManager/>}/>
+                        <Route path={getRoute("REPORTS")} element={<Reports/>}/>
+                        <Route path={getRoute("REPORT")} element={<Report/>}/>
+
+                        <Route path={getRoute("PRIVACY_POLICY")} element={
+                            <Policy file_name='privacy-policy' title='Privacy Policy' canonical='privacy'/>}/>
+                        <Route path={getRoute("REFUNDS_POLICY")} element={
+                            <Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+                        <Route path={getRoute("RETURNS_POLICY")} element={
+                            <Policy file_name='returns' title='Refunds & Returns Policy' canonical='returns'/>}/>
+                        <Route path={getRoute("CANCELLATIONS_POLICY")} element={
+                            <Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
+                        <Route path={getRoute("SHIPPING_POLICY")} element={
+                            <Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
+
+                        <Route path={getRoute("404")} element={<Page404/>}/>
+                    </Routes>
+                </BrowserRouter>
+            </LocaleContext.Provider>
+            </NotificationsContext.Provider>
+            </SiteSettingsContext.Provider>
+            </LoginContext.Provider></>
+    )
 }
 
-export { LoginContext, SiteSettingsContext };
+export {LoginContext, SiteSettingsContext};
 

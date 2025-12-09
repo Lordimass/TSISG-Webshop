@@ -1,28 +1,10 @@
-import { Stripe } from "@stripe/stripe-js"
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
 import { Basket } from "@shared/types/types"
-
-/**
- * Debug method to test Apple Pay
- */
-export async function checkCanMakePayment(stripePromise: Promise<Stripe | null>) {
-    const pr = (await stripePromise)?.paymentRequest({
-        country: "GB",
-        currency: "gbp",
-        total: {
-        label: "Test Item",
-        amount: 1,
-        },
-        requestPayerName: true,
-        requestPayerEmail: true,
-    })
-    if (!pr) {
-        return `[PAYMENT REQUEST FAILED TO INITIALISE]`
-    } else {
-        return `pr.canMakePayment() => ${JSON.stringify(await pr.canMakePayment())}`
-    }
-}
+import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
+import {getCurrency} from "locale-currency";
+import {Currency} from "dinero.js";
+import {getPath} from "../../lib/paths.ts";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -31,11 +13,22 @@ export function redirectIfEmptyBasket() {
         || basketString == "{\"basket\":[]}" 
         || basketString == "{}"
     ) {
-        window.location.href = "/"
+        window.location.href = getPath("HOME")
     }
 }
 
-export async function fetchClientSecret(): Promise<string> {
+/**
+ * Creates a Stripe Checkout Session.
+ * @return The client secrete for the created checkout session.
+ */
+export async function createCheckoutSession(): Promise<string> {
+    // Get the user's location from the query string since we can't access Context here.
+    const urlParams = new URLSearchParams(window.location.search);
+    const locale = urlParams.get("locale") || DEFAULT_LOCALE;
+    /** 3-Character ISO Currency Code to use for the prices */
+    const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
+
+    // Construct parameters for request to createCheckoutSession
     const prices: Array<Object> = await fetchStripePrices()
     const basketString = localStorage.getItem("basket")
     const gaClientID = getGAClientId();
@@ -52,7 +45,9 @@ export async function fetchClientSecret(): Promise<string> {
             basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
             origin: window.location.origin,
             gaClientID,
-            gaSessionID
+            gaSessionID,
+            // Stripe uses the location to determine currency automatically, so we pass the location instead of currency.
+            currency
         })
     })
     .then (
@@ -64,20 +59,20 @@ export async function fetchClientSecret(): Promise<string> {
 
 export async function fetchStripePrices(): Promise<Array<Object>> {
     const oldBasket: Basket = JSON.parse(localStorage.getItem("basket")!).basket
-    const {pricePointIDs, basket} = await fetch(".netlify/functions/getStripePrices", {
+    const {stripePrices, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify(oldBasket)
+        body: JSON.stringify({basket: oldBasket})
     })
     .then (
         async function(value) {return await value.json()},
-        function(error) {console.error(error); return error}
+        function(error) {throw error}
     )
     localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
     
-    return pricePointIDs;
+    return stripePrices;
 }
 
 export async function validateEmail(email: string, checkout: any) {

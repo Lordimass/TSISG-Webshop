@@ -3,7 +3,7 @@ import { GoogleAuth, JWT } from "google-auth-library";
 import path from "path";
 import fs from "fs";
 import os from "os";
-import { supabaseService } from "./getSupabaseClient.mts";
+import { supabaseService } from "./getSupabaseClient.ts";
 
 /**
  * Constructs a GA4 BetaAnalyticsDataClient object. Assumes that calling function has authorised request.

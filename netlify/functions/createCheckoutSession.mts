@@ -1,6 +1,8 @@
 import { Context } from "@netlify/functions";
 import express from 'express';
-import { stripe } from "../lib/stripeObject.mts";
+import { stripe } from "../lib/stripe.ts";
+import {Currency} from "dinero.js";
+import {SHIPPING_COUNTRIES} from "@shared/consts/shipping.ts";
 
 const app = express();
 app.use(express.static('public'));
@@ -11,7 +13,8 @@ type bodyParams = {
     basket: {basket:basketItem[]}
     origin: string,
     gaClientID: string | null,
-    gaSessionID: string | null
+    gaSessionID: string | null,
+    currency: Currency
 }
 
 type basketItem = {
@@ -36,10 +39,9 @@ export default async function handler(request: Request, _context: Context) {
         ui_mode: "custom",
         line_items: body.stripe_line_items,
         mode: "payment",
-        currency: "gbp",
         // TODO: Replace body origin with the origin of actual request.
         return_url: body.origin + "/thankyou?session_id={CHECKOUT_SESSION_ID}", 
-        shipping_address_collection: { allowed_countries: ['GB']}, // Update this once we add shipping support for more countries
+        shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES}, // Update this once we add shipping support for more countries
         metadata: {
             "gaClientID": body.gaClientID,
             "gaSessionID": body.gaSessionID

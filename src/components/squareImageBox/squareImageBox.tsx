@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import "./squareImageBox.css";
-import { getImageURL } from "../../lib/lib";
 import { ImageData } from "@shared/types/types";
+
+import {getImageURL} from "@shared/functions/images.ts";
 
 type SquareImageBoxProps = {
   image?: ImageData | string;
-  alt?: string;
+  alt?: string | null;
   size?: string;
   images?: (ImageData | { image_url?: string; alt?: string })[];
   loading?: "eager" | "lazy";
@@ -268,7 +269,7 @@ export default function SquareImageBox({
           <div className="square-image-center">
             <img
               src={normalizedImage}
-              alt={normalizedAlt}
+              alt={normalizedAlt ?? undefined}
               className="square-image-foreground"
               loading={loading}
             />

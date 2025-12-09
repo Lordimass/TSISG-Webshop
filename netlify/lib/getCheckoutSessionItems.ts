@@ -1,6 +1,6 @@
 import Stripe from "stripe";
-import { stripe } from "./stripeObject.mts";
-import type { StripeProductMeta } from "@shared/types/stripeTypes.mts";
+import { stripe } from "./stripe.ts";
+import type { StripeProductMeta } from "@shared/types/stripeTypes.ts";
 
 export type StripeCompoundLineItem = {
     product: StripeProduct;
@@ -23,7 +23,6 @@ export async function getCheckoutSessionItems(sessionId: string): Promise<Stripe
     const products = await stripe.products.list({
         ids: productIDs
     });
-    console.log(`products from lineItems: ${products}`)
 
     // Map all products to their line items to form compound items
     return resp.data.map(lineItem => {

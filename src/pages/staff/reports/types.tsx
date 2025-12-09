@@ -1,4 +1,4 @@
-import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.mts";
+import {FetchAnalyticsResponse} from "@shared/types/analyticsTypes.ts";
 
 export type ReportData = {
     id: number

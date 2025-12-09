@@ -1,4 +1,4 @@
-// NOTE: Stripe CLI will time-out the key after 90 days, so if things aren't working in
+// NOTE: Stripe CLI will time out the key after 90 days, so if things aren't working in
 // local development, try `stripe login`!
 
 // Also need to enable forwarding webhooks for local dev, use the following:
@@ -11,20 +11,34 @@ import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import { checkCanMakePayment, redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
+import { redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
 import { page_title } from "../../lib/consts";
 import { Basket } from "@shared/types/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
-import {AddressElement, CheckoutProvider, PaymentElement, useCheckout} from '@stripe/react-stripe-js';
+import {
+    AddressElement,
+    CheckoutProvider,
+    CurrencySelectorElement,
+    PaymentElement,
+    useCheckout
+} from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
 import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
+import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
+import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
+import Price from "../../components/price/price.tsx";
+import {convertDinero} from "@shared/functions/price.ts";
+import {getPath} from "../../lib/paths.ts";
+import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 
 export default function Checkout() {
+    const {currency} = useContext(LocaleContext)
+
     const [preparing, setPreparing] = useState(true)
     
     // If the user has nothing in their basket, they should not
@@ -40,15 +54,19 @@ export default function Checkout() {
         loadingText="We're loading your basket..."
     >
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
-            <CheckoutAux onReady={()=>{setPreparing(false); triggerBeginCheckout(); console.log("Test!")}}/>
+            <CheckoutAux onReady={async ()=>{
+                setPreparing(false);
+                await triggerBeginCheckout(undefined, currency);
+            }}/>
         </CheckoutProvider>
     </Page>)
 }
 
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
+    const {currency} = useContext(LocaleContext)
     /**
-     * Checks whether all of the items in the basket are still in stock
+     * Checks whether all the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.
      */
     async function checkStock() {
@@ -87,7 +105,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
             const err = <><p className="checkout-error">
                 <i>Too slow!</i><br/>Part of your order is now out of stock, head
-                back to the <a style={{color: "white"}} href="/">home page</a> to
+                back to the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to
                 change your order, then come back:<br/><br/></p>
                 {
                     discrepencies.map((discrep) => <p 
@@ -114,7 +132,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             notify(error.error.message)
         }
         setIsLoading(false);
-    };
+    }
 
     /**
      * Checks if the session is still active, since they expire after a set time,
@@ -144,17 +162,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
     }
 
-    const [debugInfo, setDebugInfo] = useState("")
-    useEffect(() => {
-        async function get() {
-            if (loginContext.permissions.includes("debug")) {
-                setDebugInfo(await checkCanMakePayment(stripePromise))
-            }
-        }
-        get()
-    }, [])
-
-    const loginContext = useContext(LoginContext)
     const checkout = useCheckout();
 
     const [readyToCheckout, setReadyToCheckout] = useState(false)
@@ -165,18 +172,26 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [error, setError] = useState(<p></p>)
     const [isLoading, setIsLoading] = useState(false);
 
-    const addressComplete = useRef(false)
+    const [addressComplete, setAddressComplete] = useState(false);
+    const countryChanged = useRef(true);
     const paymentInfoComplete = useRef(false)
     const country = useRef<string>("")
 
     // Handle changes in address and update shipping options
     const addressElement = checkout.getShippingAddressElement()
     addressElement?.once("change", async (e) => {
-        // Don't check again unless the country has changed
-        if (e.value.address.country === country.current) return
-        // Don't bother checking until the full address is complete
-        if (!e.complete) return
+        countryChanged.current = (e.value.address.country !== country.current) || countryChanged.current
         country.current = e.value.address.country
+
+        // Don't bother checking until the full address is complete
+        if (!e.complete) {
+            setAddressComplete(false);
+            return;
+        }
+
+        // Don't check again unless the country has changed since last check
+        if (!countryChanged.current) return;
+        setAddressComplete(false);
 
         const resp = await fetch(window.location.origin + "/.netlify/functions/getShippingOptions", {
             method: "POST",
@@ -192,17 +207,17 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
         
         // TODO: Give customers multiple shipping options
-        checkout.updateShippingOption(rates[0])
-
-        addressComplete.current = true
-        triggerAddShippingInfo()
+        countryChanged.current = false;
+        await checkout.updateShippingOption(rates[0])
+        setAddressComplete(true)
+        await triggerAddShippingInfo(currency)
     })
 
     const paymentElement = checkout.getPaymentElement()
-    paymentElement?.once("change", (e) => {
+    paymentElement?.once("change", async (e) => {
         if (e.complete && !paymentInfoComplete.current) {
             paymentInfoComplete.current = true
-            triggerAddPaymentInfo()
+            await triggerAddPaymentInfo(currency)
         }
         
     })
@@ -219,7 +234,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     // Run checks to see if checkout is ready or not once fields have all been validated
     useEffect(() => {async function checkReadyToCheckout() {
-        let ready = isEmailValid && addressComplete.current
+        let ready = isEmailValid && addressComplete
 
         console.log("Ready to checkout: ", ready);
         if (ready) {
@@ -227,22 +242,20 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             if (!await checkSessionStatus()) {
                 ready = false
                 setError(<p>"Checkout Expired! Please reload the page"</p>)
-                return
             }
 
             // Check stock if it's not already been checked
-            if (!hasCheckedStock) {
+            else if (!hasCheckedStock) {
                 const inStock = await checkStock();
                 if (!inStock) {
                     ready = false
-                    return
                 }
                 setHasCheckedStock(true);
             }
         }
         setReadyToCheckout(ready);
 
-    }; checkReadyToCheckout()}, [isEmailValid, addressComplete.current])
+    } checkReadyToCheckout()}, [isEmailValid, addressComplete])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
@@ -260,11 +273,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" ref={formRef}>
-                <p className="msg">
-                    Shipping is currently limited to the United Kingdom. 
-                    International shipping will be coming soon!
-                </p><br/>
-
                 <AddressElement 
                     options={addressElementOpts}
                 />
@@ -288,9 +296,9 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         </div>
 
         <div className="checkout-right">
-            <CheckoutProducts/>
-            <p className="msg">To edit your basket, <a href="/">go back</a></p>
-            <CheckoutTotals checkoutTotal={checkout.total}/>
+            <CheckoutProducts currency={checkout.currency as Currency} />
+            <p className="msg">To edit your basket, <a href={getPath("HOME")}>go back</a></p>
+            <CheckoutTotals checkoutTotal={checkout.total} currency={checkout.currency as Currency} />
             <p className="msg">{killSwitchMessage}</p>
             <button type="button" disabled={!readyToCheckout || isLoading || (killSwitch && !DEV)} id="submit" onClick={handleSubmit}>
                 <span id="button-text">
@@ -302,17 +310,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                 </span>
             </button>
             {error}
-            {debugInfo ? debugInfo : ""}
+            <CurrencySelectorElement />
         </div>
         
     </>)
-}
-
-function Loading() {
-    return (<div className="loading-screen">
-        <p>We're loading your basket...</p>
-        <Throbber/>
-    </div>)
 }
 
 function RequiredInput({ 
@@ -382,23 +383,55 @@ function RequiredInput({
     </div>)
 }
 
-function CheckoutTotals({checkoutTotal}: {checkoutTotal: StripeCheckoutTotalSummary}) {
+function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckoutTotalSummary, currency: Currency}) {
+    // Calculate total before 4% conversion rate fee
+    const [preFeeTotal, setPreFeeTotal] = useState<Dinero>(DineroFactory({amount: 0, currency}))
+    const precision = CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].precision;
+    useEffect(() => {
+        async function getPreFeeTotal() {
+            const basketString = localStorage.getItem("basket");
+            if (!basketString) {throw ("No basket string available when calculating checkout total")}
+            const basket = JSON.parse(basketString).basket as Basket
+            let basketTotal = 0;
+            for (const p of basket) {
+                const din = DineroFactory({amount: Math.round(p.price * p.basketQuantity * 100), currency: DEFAULT_CURRENCY});
+                const convDin = await convertDinero(din, currency);
+                basketTotal += convDin.getAmount();
+            }
+            setPreFeeTotal(DineroFactory({amount: basketTotal, currency, precision}))
+        }
+        getPreFeeTotal();
+    }, [checkoutTotal]);
+
+    // Get Stripe's calculated prices
     const isShippingCalculated = checkoutTotal.shippingRate.minorUnitsAmount !== 0
-    const sub = checkoutTotal.subtotal.amount
-    const shp = checkoutTotal.shippingRate.amount
-    const tot = checkoutTotal.total.amount
+    const fee = DineroFactory({
+        amount: checkoutTotal.subtotal.minorUnitsAmount-preFeeTotal.getAmount(), currency, precision
+    })
+    const shp = DineroFactory({
+        amount: checkoutTotal.shippingRate.minorUnitsAmount, currency, precision
+    })
+    const tot = DineroFactory({
+        amount: checkoutTotal.total.minorUnitsAmount, currency, precision
+    });
     return (
     <div className="checkout-totals">
         <div className="left">
             <p>Subtotal</p>
+            {fee.getAmount()==0 ? null : <p>Conversion Fee</p>}
             <p>Shipping</p>
             <p className="total">Total</p>
         </div>
         <div className="spacer"></div>
         <div className="right">
-            <p>{sub}</p>
-            <p style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>{shp}</p>
-            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}><p className="currency">GBP</p>{tot}</div>
+            <Price baseDinero={preFeeTotal} currency={currency} simple />
+            {fee.getAmount()==0 ? null : <Price baseDinero={fee} currency={currency} simple />}
+            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
+                <Price baseDinero={shp} currency={currency} simple />
+            </div>
+            <div className="total" style={{color: isShippingCalculated ? undefined : "var(--jamie-grey)"}}>
+                <Price baseDinero={tot} currency={currency} />
+            </div>
         </div>
     </div>
     )

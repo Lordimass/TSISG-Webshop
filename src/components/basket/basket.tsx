@@ -5,15 +5,17 @@ import { ProductInBasket } from "@shared/types/types";
 import { SiteSettingsContext } from "../../app";
 import { NotificationsContext } from "../notification/lib";
 import { triggerViewCart } from "../../lib/analytics/analytics";
+import {LocaleContext} from "../../localeHandler.ts";
+import {getPath} from "../../lib/paths.ts";
 
 export default function Basket() {
-    function redirectToCheckout() {
+    async function redirectToCheckout() {
         if (basketQuantity == 0) {
             notify("You can't checkout without anything in your cart, silly!")
-            toggleBasket()
+            await toggleBasket()
             return
         }
-        window.location.href = "/checkout"
+        window.location.href = getPath("CHECKOUT");
     }
 
     function updateBasketQuantity() {
@@ -48,7 +50,7 @@ export default function Basket() {
         changeBasketPrice("£" + basketPriceTemp.toFixed(2))
     }
 
-    function toggleBasket() {
+    async function toggleBasket() {
         // Get the basket
         const basket = menuRef.current
         if (!basket) return
@@ -69,11 +71,12 @@ export default function Basket() {
         basket.style.display = isOpen ? "none" : "flex"
 
         // Trigger GA4 Event if Basket Opened
-        if (newIsOpen) triggerViewCart()
+        if (newIsOpen) await triggerViewCart(currency)
     }
 
     const siteSettings = useContext(SiteSettingsContext)
     const {notify} = useContext(NotificationsContext)
+    const {currency} = useContext(LocaleContext)
 
     const [basketQuantity, changeBasketQuantity] = useState(0);
     const [basketPrice, changeBasketPrice] = useState("£0.00");
@@ -99,9 +102,9 @@ export default function Basket() {
         return () => {window.removeEventListener("basketUpdate", updateBasketQuantity)}
     }, [])
 
-    // Check for clicks outside of the basket container to close the basket.
+    // Check for clicks outside the basket container to close the basket.
     useEffect(() => {
-        function handleClickOutside(event: any) {
+        async function handleClickOutside(event: any) {
             // If click is outside the menu element, close it
             let close = false
             if (menuRef.current && buttonRef.current) {
@@ -111,7 +114,7 @@ export default function Basket() {
                 )
             }
             if (menuRef.current && !menuRef.current.contains(event.target) && close) {
-                toggleBasket();
+                await toggleBasket();
             }
         }
 
@@ -144,7 +147,7 @@ export default function Basket() {
     }
     
     return (<>
-        <div className="basket" id="basket" onClick={() => {toggleBasket()}} ref={buttonRef}>
+        <div className="basket" id="basket" onClick={toggleBasket} ref={buttonRef}>
             <i className="fi fi-sr-shopping-basket"/>
             <div className="basket-item-count" id="basket-item-count">
                 <p>{basketQuantity}</p>

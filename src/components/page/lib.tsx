@@ -8,5 +8,5 @@ export type PageParams = {
     title?: string
     loadCondition?: boolean
     loadingText?: string
-    metaDescription?: string
+    metaDescription?: string | null
 }
