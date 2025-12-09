@@ -79,7 +79,7 @@ async function saveOrder(checkoutSession: Stripe.Checkout.Session) {
                 city: shipping_details.address.city,
                 value: {total: amount_total/100, currency: checkoutSession.currency}
             })
-        .select() 
+        .select("*")
     if (error) {
         throw new Error(error.code + ": " + error.message)
     }
@@ -165,13 +165,18 @@ async function updateStock(products: StripeCompoundLineItem[]) {
  * Creates an order on the Royal Mail Click & Drop API:
  * https://business.parcel.royalmail.com/
  * @param order The data saved to Supabase about this order.
-*/
+ */
 async function createRMOrder(order: Order) {
     // Get royalMailKey
     const royalMailKey = process.env.ROYAL_MAIL_KEY;
     if (!royalMailKey) {
         return new Response("No Royal Mail API Key Found", {status: 401})
     }
+
+    // Fetch compressed order from Supabase
+    const {data, error} = await supabaseService.from("orders_compressed").select("*").eq("id", order.id)
+    if (error) {throw error}
+    order = data[0] as Order
 
     // Create RM Order
     const subtotal = calculateOrderSubtotal(order.products)
@@ -201,7 +206,7 @@ async function createRMOrder(order: Order) {
                     {
                         weightInGrams: orderWeight,
                         packageFormatIdentifier: packageFormat,
-                        contents: order.products.map((prod: any) => {return {
+                        contents: order.products.map((prod) => {return {
                             name: prod.product_name,
                             SKU: prod.sku,
                             quantity: prod.quantity,
