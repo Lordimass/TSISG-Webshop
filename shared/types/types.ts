@@ -11,14 +11,6 @@ export * from './clockifyTypes.ts'
 export type ProductInBasket = ProductData & { basketQuantity: number }
 export type Basket = ProductInBasket[]
 
-export type OrderProduct = {
-    sku: number
-    product_name: string
-    quantity: number
-    line_value: number
-    image_url: string
-}
-
 // Site-wide settings fetched from the backend
 export const SiteSettingsContext = createContext<SiteSettings>({})
 export type SiteSettings = {
@@ -27,15 +19,5 @@ export type SiteSettings = {
     product_disabled_messages?: { disabled: string; out_of_stock: string; [key: string]: string }
     clockify_users?: { userID: string; name: string }[]
     [key: string]: any
-}
-
-/**
- * Thrown from functions implemented by Netlify functions to signify that something has gone wrong.
- * This should be caught by the base Netlify function and a suitable `Response` returned based on this.
- * @see @shared/errors.ts/NetlifyFunctionError
- */
-export interface NetlifyFunctionError extends Error {
-    message: string;
-    status: number;
 }
 

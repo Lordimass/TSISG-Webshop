@@ -1,6 +1,8 @@
-import {ImageData} from "@shared/types/supabaseTypes.ts";
+import {ImageData, OrderProdCompressed, ProductData} from "@shared/types/supabaseTypes.ts";
 import {UnsubmittedImageData, UnsubmittedProductData} from "../../src/pages/products/productEditor/types.tsx";
 import {supabase} from "../../src/lib/supabaseRPC.tsx";
+import {ProductInBasket} from "@shared/types/types.ts";
+import {useState} from "react";
 
 /**
  * Gets the public URL of a product image
@@ -34,20 +36,8 @@ export function getRepresentativeImageURL(group: UnsubmittedProductData[] | Unsu
     const images = "map" in group ? group.map((prod: UnsubmittedProductData) => prod.images).flat(1) : group.images
     const representatives = images.filter((img: ImageData | UnsubmittedImageData) => img.association_metadata?.group_representative)
     if (representatives.length > 0) {
-        return getImageURL(representatives[0])
+        return getImageURL(representatives[0], highres)
     } else {
-        return getImageURL(images[0])
+        return getImageURL(images[0], highres)
     }
-}
-
-/**
- * Construct a list of image URL strings in relation to a list of `ImageData` objects, filtering out any garbage
- * URLs.
- * @param images The list of `ImageData` objects from which to construct the URLs
- * @return A list of URLs pointing to images.
- * @see ImageData
- * @see getImageURL
- */
-export function getListOfImageURLS(images: ImageData[]) {
-    return images.map(img => getImageURL(img)).filter(img => img !== undefined)
 }
