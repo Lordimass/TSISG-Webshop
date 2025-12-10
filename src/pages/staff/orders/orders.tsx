@@ -17,7 +17,7 @@ import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
 import {OrderReturned} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
-import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {callRPC, toggleOrderFulfilment} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
@@ -83,24 +83,14 @@ function OrderDropdown() {
     async function toggleFulfilment() {
         if (toggleInProgress || !order || !setColourClass) return
         setToggleInProgress(true);
-    
-        const response = await fetch("../.netlify/functions/toggleOrderFulfilment", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${await getJWTToken()}`
-            },
-            body: JSON.stringify({id: order.id})
-        })
 
-        if (response.ok) {
-            order.fulfilled = !order.fulfilled
-            setColourClass(getColourClass(order))
-        } else {
-            const respText = await response.text()
-            console.error(respText)
-            notify(respText)
-        }
+        try { // Toggle order fulfilment
+            const new_order = await toggleOrderFulfilment(supabase, order.id)
+            order.fulfilled = new_order.fulfilled
+        } catch (e: unknown) {notify(`Something went wrong toggling order fulfilment! ${JSON.stringify(e)}`)}
+
+        // Update colour of the display.
+        setColourClass(getColourClass(order))
         setToggleInProgress(false);  
     }
 
@@ -113,7 +103,7 @@ function OrderDropdown() {
         if (+val <= 0) {notify("Cost must be a valid number greater than 0!"); return}
         try {
             await callRPC("update_delivery_cost", supabase, {order_id: order.id, new_cost: val}, notify)
-        } catch {return}
+        } catch (e) {notify(`Something went wrong setting delivery cost! ${JSON.stringify(e)}`)}
 
         // Update the order state
         const newOrders = orders.map(o => {
