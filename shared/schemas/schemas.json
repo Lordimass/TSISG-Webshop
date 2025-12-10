@@ -1311,19 +1311,13 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
       "CompressedOrder": {
-        "description": "An order from the orders_compressed table",
+        "description": "An order from the `orders_compressed` table",
         "properties": {
           "city": {
             "type": "string"
           },
           "country": {
             "type": "string"
-          },
-          "delivery_cost": {
-            "type": [
-              "number",
-              "null"
-            ]
           },
           "email": {
             "type": "string"
@@ -1376,18 +1370,17 @@
           }
         },
         "required": [
+          "id",
           "placed_at",
           "email",
           "street_address",
-          "country",
           "name",
+          "country",
           "fulfilled",
           "total_value",
           "postal_code",
-          "id",
-          "city",
-          "delivery_cost",
           "products",
+          "city",
           "value"
         ],
         "type": "object"
@@ -2644,15 +2637,9 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
       "NetlifyFunctionError": {
-        "description": "Thrown from functions implemented by Netlify functions to signify that something has gone wrong. This should be caught by the base Netlify function and a suitable `Response` returned based on this.",
+        "description": "Interface should only be used for type validation with `VALIDATORS`",
         "properties": {
           "message": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "stack": {
             "type": "string"
           },
           "status": {
@@ -2660,9 +2647,7 @@
           }
         },
         "required": [
-          "message",
-          "name",
-          "status"
+          "message"
         ],
         "type": "object"
       }
@@ -2798,6 +2783,238 @@
           "origin_country_code",
           "package_type_override",
           "extended_customs_description"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "RmOrder": {
+    "$ref": "#/definitions/RmOrder",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "RmOrder": {
+        "properties": {
+          "createdOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "manifestedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderDate": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderIdentifier": {
+            "type": "number"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "printedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "shippedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "trackingNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderIdentifier",
+          "createdOn"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "MergedOrder": {
+    "$ref": "#/definitions/MergedOrder",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "MergedOrder": {
+        "description": "An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order.",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "dispatched": {
+            "description": "Whether the order has been passed over to Royal Mail",
+            "type": "boolean"
+          },
+          "email": {
+            "type": "string"
+          },
+          "fulfilled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "placed_at": {
+            "type": "string"
+          },
+          "postal_code": {
+            "type": "string"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/definitions/OrderProdCompressed"
+            },
+            "type": "array"
+          },
+          "royalMailData": {
+            "$ref": "#/definitions/RmOrder",
+            "description": "Data from the Royal Mail API about this order."
+          },
+          "street_address": {
+            "type": "string"
+          },
+          "total_value": {
+            "type": "number"
+          },
+          "value": {
+            "properties": {
+              "currency": {
+                "type": "string"
+              },
+              "shipping": {
+                "type": "number"
+              },
+              "total": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "total",
+              "shipping",
+              "currency"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "dispatched",
+          "email",
+          "fulfilled",
+          "id",
+          "name",
+          "placed_at",
+          "postal_code",
+          "products",
+          "street_address",
+          "total_value",
+          "value"
+        ],
+        "type": "object"
+      },
+      "OrderProdCompressed": {
+        "description": "A product from the orders_compressed table",
+        "properties": {
+          "category": {
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "type": "object"
+          },
+          "customs_description": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "line_value": {
+            "type": "number"
+          },
+          "origin_country_code": {
+            "type": "string"
+          },
+          "package_type_override": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "sku",
+          "product_name",
+          "weight",
+          "quantity",
+          "customs_description",
+          "origin_country_code",
+          "package_type_override",
+          "category",
+          "line_value",
+          "image_url"
+        ],
+        "type": "object"
+      },
+      "RmOrder": {
+        "properties": {
+          "createdOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "manifestedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderDate": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderIdentifier": {
+            "type": "number"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "printedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "shippedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "trackingNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderIdentifier",
+          "createdOn"
         ],
         "type": "object"
       }

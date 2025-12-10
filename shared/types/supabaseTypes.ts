@@ -1,4 +1,5 @@
 import {UUID} from "crypto"
+import type {RmOrder} from "@shared/types/royalMailTypes.ts";
 
 export interface ProductData extends RawProductData {
     /** DEPRECATED: Please use `category.id` instead */
@@ -112,23 +113,36 @@ export type CategoryData = {
     description: string | null,
 }
 
+/**
+ * A product from the order_products table
+ */
+export interface OrderProduct {
+    order_id?: string
+    product_sku: number,
+    quantity: number,
+    value: number
+}
 
 /**
- * An order from the orders_compressed table
+ * An order from the `orders_compressed` table
  */
 export interface CompressedOrder {
-    placed_at: string
-    email: string
-    street_address: string
-    country: string
-    name: string
-    fulfilled: boolean
-    total_value: number
-    postal_code: string
+    /**
+     * @example cs_live_a1amiEmM5s3bJ9nDqlMoOivEyY49iWgu8J6dCREnaitD9SEelsAMBiT5rH
+     * @example cs_test_a17gEfh6yFOOZrYfPOH4NDXWUUfNoUMh1RjJfvwPrWqaB8WQifa3QDnBhP
+     */
     id: string
+    placed_at: string,
+    email: string,
+    street_address: string,
+    name: string,
+    country: string,
+    fulfilled: boolean,
+    /** @Deprecated Use `value.total` instead */
+    total_value: number,
+    postal_code: string,
+    products: OrderProdCompressed[],
     city: string
-    delivery_cost: number | null
-    products: OrderProdCompressed[]
     value: { total: number, shipping: number, currency: string },
 }
 
@@ -151,53 +165,12 @@ export interface OrderProdCompressed {
     image_url: string
 }
 
-/**
- * A product from the order_products table
- */
-export interface OrderProduct {
-    order_id?: string
-    product_sku: number,
-    quantity: number,
-    value: number
-}
-
-export interface Order {
-    /**
-     * @example cs_live_a1amiEmM5s3bJ9nDqlMoOivEyY49iWgu8J6dCREnaitD9SEelsAMBiT5rH
-     * @example cs_test_a17gEfh6yFOOZrYfPOH4NDXWUUfNoUMh1RjJfvwPrWqaB8WQifa3QDnBhP
-     */
-    id: string
-    placed_at: string,
-    email: string,
-    street_address: string,
-    name: string,
-    country: string,
-    fulfilled: boolean,
-    /** @Deprecated Use `value.total` instead */
-    total_value: number,
-    postal_code: string,
-    products: OrderProdCompressed[],
-    city: string
-    value: { total: number, shipping: number, currency: string },
-}
-
 /** An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order. */
-export interface OrderReturned extends Order {
+export interface MergedOrder extends CompressedOrder {
     /** Whether the order has been passed over to Royal Mail*/
     dispatched: boolean
-    delivery_cost?: number
-    products: OrderProdCompressed[]
     /** Data from the Royal Mail API about this order. */
-    royalMailData: {
-        orderIdentifier: number
-        orderReference?: string
-        createdOn: string
-        orderDate?: string
-        printedOn?: string
-        manifestedOn?: string
-        shippedOn?: string
-        trackingNumber?: string
-    }
+    royalMailData?: RmOrder
 }
 
 /**

@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.ts"
 import type { StripeProductMeta } from "@shared/types/stripeTypes.ts"
-import type { Order, OrderProdCompressed, OrderProduct } from "@shared/types/supabaseTypes.ts"
+import type { CompressedOrder, OrderProdCompressed, OrderProduct } from "@shared/types/supabaseTypes.ts"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { supabaseService } from "../getSupabaseClient.ts"
 import { sendGA4Event } from "../lib.ts"
@@ -84,7 +84,7 @@ async function saveOrder(checkoutSession: Stripe.Checkout.Session) {
         throw new Error(error.code + ": " + error.message)
     }
 
-    const returnedRecords = data as Order[]
+    const returnedRecords = data as CompressedOrder[]
     return returnedRecords[0]
 }
 
@@ -166,7 +166,7 @@ async function updateStock(products: StripeCompoundLineItem[]) {
  * https://business.parcel.royalmail.com/
  * @param order The data saved to Supabase about this order.
  */
-async function createRMOrder(order: Order) {
+async function createRMOrder(order: CompressedOrder) {
     // Get royalMailKey
     const royalMailKey = process.env.ROYAL_MAIL_KEY;
     if (!royalMailKey) {
@@ -176,7 +176,7 @@ async function createRMOrder(order: Order) {
     // Fetch compressed order from Supabase
     const {data, error} = await supabaseService.from("orders_compressed").select("*").eq("id", order.id)
     if (error) {throw error}
-    order = data[0] as Order
+    order = data[0] as CompressedOrder
 
     // Create RM Order
     const subtotal = calculateOrderSubtotal(order.products)

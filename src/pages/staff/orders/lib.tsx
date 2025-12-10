@@ -1,18 +1,18 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 import { overdue_threshold } from "../../../lib/consts";
-import {OrderReturned} from "@shared/types/supabaseTypes.ts";
+import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 
 export const OrdersContext = createContext<{
-    orders: OrderReturned[];
-    setOrders?: React.Dispatch<React.SetStateAction<OrderReturned[]>>
+    orders: MergedOrder[];
+    setOrders?: React.Dispatch<React.SetStateAction<MergedOrder[]>>
 }>({orders: []})
 
 export const OrderDropdownContext = createContext<{
-    order?: OrderReturned
+    order?: MergedOrder
     setColourClass?: Dispatch<SetStateAction<"green" | "red" | "yellow">>
 }>({})
 
-export function getColourClass(order: OrderReturned) {
+export function getColourClass(order: MergedOrder) {
     const today = new Date()
     const date = new Date(order.placed_at)
     const timeDifference = Math.floor((today.getTime() - date.getTime())/(86400000));

@@ -15,15 +15,15 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
-import {OrderReturned} from "@shared/types/supabaseTypes.ts";
+import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {callRPC, toggleOrderFulfilment} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
 export function OrderManager() { 
-    const unsetOrders: OrderReturned[] = useGetOrderList() || []
-    const [orders, setOrders] = useState<OrderReturned[]>([])
+    const unsetOrders: MergedOrder[] = useGetOrderList() || []
+    const [orders, setOrders] = useState<MergedOrder[]>([])
     useEffect(() => {
         if (unsetOrders.length > 0) setOrders(unsetOrders)
     }, [unsetOrders])
@@ -54,7 +54,7 @@ export function OrderManager() {
 )
 }
 
-function OrderDisplay({order}:{order:OrderReturned}) {
+function OrderDisplay({order}:{order:MergedOrder}) {
     const date = new Date(order.placed_at)
     const today = new Date()
     const timeDifference = Math.floor((today.getTime() - date.getTime())/(86400000));

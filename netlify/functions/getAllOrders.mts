@@ -1,134 +1,157 @@
-import { Context } from '@netlify/functions';
-import { SupabaseClient } from '@supabase/supabase-js';
+import {Context} from '@netlify/functions';
+import {SupabaseClient} from '@supabase/supabase-js';
 import getSupabaseClient from "../lib/getSupabaseClient.ts";
-import type { CompressedOrder as SbOrder } from '@shared/types/supabaseTypes.ts';
-import type { OrderFromPageable as RmOrder } from '@shared/types/royalMailTypes.ts';
+import type {CompressedOrder, MergedOrder} from '@shared/types/supabaseTypes.ts';
+import type {RmOrder} from '@shared/types/royalMailTypes.ts';
+import {NetlifyFunctionError} from "@shared/errors.ts";
+import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
 
-interface MergedOrder extends SbOrder {
-  royalMailData?: RmOrder
-  dispatched: boolean
-}
-
+/**
+ * Compiles and returns merged order objects containing data from both Supabase and Royal Mail.
+ */
 export default async function handler(request: Request, _context: Context) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) {
-    return new Response("No Authorization supplied", {status: 403})
-  }
-  
-  let supabase: SupabaseClient
-  try {supabase = await getSupabaseClient(authHeader);}
-  catch (e: any) {return new Response(e.message, { status: e.status })}
+    try {
+        // Check that Supabase JWT auth is present in headers.
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader) {
+            return new Response(undefined, {status: 403})
+        }
 
-  const supabaseOrdersResp = await fetchSupabaseOrders(supabase!)
-  if (!supabaseOrdersResp.ok) {return supabaseOrdersResp}
-  const sbOrders: SbOrder[] = await supabaseOrdersResp.json()
+        // Check that Royal Mail auth is present in env variables.
+        if (!process.env.ROYAL_MAIL_KEY) {
+            return new Response("ROYAL_MAIL_KEY not found in environment variables", {status: 403})
+        }
 
-  const rmOrdersResp = await fetchRoyalMailOrders(
-    getEarliestUnfulfilledOrderDate(sbOrders)
-  )
-  if (!rmOrdersResp.ok) {return rmOrdersResp}
-  const rmOrders: RmOrder[] = await rmOrdersResp.json()
+        // Get Supabase client associated with the provided JWT token.
+        let supabase: SupabaseClient
+        try {
+            supabase = await getSupabaseClient(authHeader);
+        } catch (e: any) {
+            return new Response(e.message, {status: e.status ?? 500})
+        }
 
-  const mergedOrders: MergedOrder[] = await mergeOrders(sbOrders, rmOrders)
+        // Fetch all orders from Supabase
+        const supabaseOrders = await fetchCompressedOrders(supabase!)
 
-  console.log(`Returning ${mergedOrders.length} orders from getAllOrders`)
-  return new Response(JSON.stringify(mergedOrders), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
+        // Fetch all orders from Royal Mail
+        // We want to fetch all orders placed between today and the
+        // date of the oldest unfulfilled Supabase Order.
+        const startDate = getEarliestUnfulfilledOrderDate(supabaseOrders)
+        const rmOrders = await fetchRoyalMailOrders(startDate)
+
+        // Merge Supabase and RM orders together to create objects which contain both sets of data.
+        const mergedOrders: MergedOrder[] = mergeOrders(supabaseOrders, rmOrders)
+
+        console.log(`Returning ${mergedOrders.length} orders from getAllOrders`)
+        return new Response(JSON.stringify(mergedOrders), {
+            status: 200,
+            headers: {'Content-Type': 'application/json'},
+        });
+
+    } catch (error: any) {
+        console.error(error);
+        if (VALIDATORS.NetlifyFunctionError(error)) {
+            error = error as NetlifyFunctionError;
+            return new Response(error.message, {status: error.status})
+        }
+        return new Response(JSON.stringify(error), {status: 500})
+    }
 };
 
-async function fetchSupabaseOrders(supabase: SupabaseClient) {
-  try {
-    const { data, error } = await supabase.from("orders_compressed").select("*")
-
+/**
+ * Fetch all orders from the `compressed_orders` view table on Supabase.
+ * @param supabase The supabsae object to use to fetch this data.
+ * @returns A list of `CompressedOrder` objects
+ */
+async function fetchCompressedOrders(supabase: SupabaseClient) {
+    const {data, error} = await supabase.from("orders_compressed").select("*")
     if (error) {
-      console.error(error)
-      return new Response(JSON.stringify(error.message), { status: 500 });
-    } else {
-      return new Response(JSON.stringify(data), {status: 200})
+        throw new NetlifyFunctionError(JSON.stringify(error.message), 500);
+    } else if (VALIDATORS.CompressedOrder(data[0])) {
+        console.warn("Fetched orders not in expected shape 'CompressedOrder'")
+        console.log(JSON.stringify(data[0], null, 2))
+        logValidationErrors("CompressedOrder");
     }
-  } catch (err: any) {
-    console.error(err)
-    return new Response(JSON.stringify({ message: err.message }), {status: 500})
-  }
+    return data as CompressedOrder[];
 }
 
-async function fetchRoyalMailOrders(earliestDate: string) {
-  // Attempt to fetch Royal Mail Data
-  // We want to fetch all orders placed between today and the
-  // date of the oldest unfulfilled Supabase Order. 
-  // Royal Mail paginates the result if its over 25 orders 
-  // so we need to combine them all.
-  const key = process.env.ROYAL_MAIL_KEY
-  if (!key) {
-    return new Response("Royal Mail key not set", {status: 500})
-  }
+/**
+ * Fetch all orders after some given date from Royal Mail
+ * @param start The start date to return all orders afterwards.
+ * @returns An array of `RmOrder`s
+ */
+async function fetchRoyalMailOrders(start: Date) {
+    const key = process.env.ROYAL_MAIL_KEY!
 
-  let orders: any[] = []
-  let continuationToken: string | null = null
-  while (continuationToken != "COMPLETED") {
-    try {
-      const url = "https://api.parcel.royalmail.com/api/v1/orders?" +
-      `${continuationToken ? `continuationToken=${continuationToken}&` : ""}` +
-      `startDateTime=${earliestDate}`
-      const response: Response = await fetch(url, {
-        headers: {Authorization: `Bearer ${key}`},
-      })
-      const data = await response.json()
-      if (response.ok) {
-        continuationToken = data.continuationToken ? data.continuationToken : "COMPLETED"
-        orders = orders.concat(data.orders)
-      } else {
-        console.error(data)
-        return new Response(data.message, {status: 503})
-      }
-    } catch (err: any) {
-      console.error(err)
-      return new Response(JSON.stringify({ message: err.message }), {status: 500})
+    // Construct URL for RM API requests.
+    const url = new URL("https://api.parcel.royalmail.com/api/v1/orders")
+    url.searchParams.set("startDateTime", start.toISOString());
+
+    // Royal Mail paginates the result if its over 25 orders
+    // so we need to combine them all.
+    let orders: RmOrder[] = []
+    let continuationToken: string | null = null
+    while (continuationToken != "COMPLETED") {
+        if (continuationToken) url.searchParams.set("continuationToken", continuationToken);
+        const response: Response = await fetch(url, {headers: {Authorization: `Bearer ${key}`}})
+        const data = await response.json()
+        if (response.ok) {
+            continuationToken = data.continuationToken ? data.continuationToken : "COMPLETED"
+            orders = [...orders, ...data.orders]
+        } else {
+            console.error(data)
+            throw new NetlifyFunctionError(data.message, 503)
+        }
     }
-  }
-  return new Response(JSON.stringify(orders), {status: 200})
+    return orders;
 }
 
-function getEarliestUnfulfilledOrderDate(sbOrders: Array<SbOrder>): string {
-  let earliestDate = new Date()
-  for (let i=0; i<sbOrders.length; i++) {
-    const order = sbOrders[i]
-    if (order.fulfilled) {
-      // We're only interested in checking unfulfilled orders to prevent huge API calls
-      continue
-    }
-    const placed_at = new Date(order.placed_at)
-    if (placed_at < earliestDate) {
-      earliestDate = placed_at
-    }
-  }
-  return earliestDate.toISOString()
+/**
+ * Fetch the date of the oldest unfulfilled order from a given list of orders
+ * @param supabseOrders An array of `CompressedOrder`s
+ * @returns A date object representing the date of the oldest unfulfilled order in `supabseOrders`
+ */
+function getEarliestUnfulfilledOrderDate(supabseOrders: CompressedOrder[]): Date {
+    let earliestTime = Number.POSITIVE_INFINITY
+    supabseOrders.forEach(order => {
+        if (order.fulfilled) {
+            return
+        } // Skip fulfilled orders
+        const placed_at = new Date(order.placed_at)
+        earliestTime = Math.min(placed_at.getTime(), earliestTime)
+    })
+    return new Date(earliestTime)
 }
 
-function mergeOrders(sbOrders: SbOrder[], rmOrders: RmOrder[]): MergedOrder[] {
-  const mergedOrders: MergedOrder[] = []
-  for (let i=0; i<sbOrders.length; i++) {
-    let found = false;
-    const sbOrder = sbOrders[i]
-    for (let k=0; k<rmOrders.length; k++) {
-      const rmOrder = rmOrders[k]
-      const truncatedID = sbOrder.id.slice(0, 40)
-      // Check if the two types of order correspond to the same order
-      if (truncatedID == rmOrder.orderReference) {
-        found = true
-        const mergedOrder: MergedOrder = JSON.parse(JSON.stringify(sbOrder))
-        mergedOrder.royalMailData = rmOrder
-        mergedOrder.dispatched = rmOrder.shippedOn != undefined
+/**
+ * Combine Supabase and Royal Mail orders into `MergedOrder`s which contain data from both supplied objects
+ * @param sbOrders
+ * @param rmOrders
+ */
+function mergeOrders(sbOrders: CompressedOrder[], rmOrders: RmOrder[]): MergedOrder[] {
+    const mergedOrders: MergedOrder[] = []
+    sbOrders.forEach(sbOrder => {
+        const truncatedID = sbOrder.id.slice(0, 40)
+        const matchedRMOrders = rmOrders.filter(
+            (rmOrder) => {
+                return truncatedID === rmOrder.orderReference
+            }
+        )
+        let mergedOrder: MergedOrder
+        // Matching RM order found
+        if (matchedRMOrders.length > 0) {
+            const matchedRMOrder = matchedRMOrders[0]
+            mergedOrder = {
+                ...sbOrder,
+                royalMailData: matchedRMOrder,
+                dispatched: matchedRMOrder.shippedOn !== undefined
+            }
+        }
+        // No matching RM Order found
+        else mergedOrder = {...sbOrder, dispatched: false}
+
+        // Either way, add the new merged order to the array
         mergedOrders.push(mergedOrder)
-      }
-    }
-    if (!found) {
-      const mergedOrder: MergedOrder = JSON.parse(JSON.stringify(sbOrder))
-      mergedOrder.dispatched = false
-      mergedOrders.push(mergedOrder)
-    }
-  }
-  return mergedOrders
+    })
+    return mergedOrders
 }

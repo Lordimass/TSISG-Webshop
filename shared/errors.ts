@@ -7,9 +7,9 @@ export class NetlifyFunctionError extends Error {
     message: string;
     status: number;
 
-    constructor(message: string, status: number) {
+    constructor(message: string, status?: number) {
         super(message)
         this.message = message;
-        this.status = status;
+        this.status = status || 500;
     }
 }

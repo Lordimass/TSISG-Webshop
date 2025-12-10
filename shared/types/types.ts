@@ -21,3 +21,11 @@ export type SiteSettings = {
     [key: string]: any
 }
 
+/**
+ * Interface should only be used for type validation with `VALIDATORS`
+ * @see @shared/errors.ts
+ */
+export interface NetlifyFunctionError {
+    message: string
+    status?: number
+}
