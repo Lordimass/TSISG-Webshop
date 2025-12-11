@@ -3,7 +3,7 @@ import {useState, useEffect, useContext} from 'react';
 import "./product.css"
 import {blank_product, max_product_order} from '../../lib/consts';
 import SquareImageBox from '../squareImageBox/squareImageBox';
-import {setBasketStringQuantity} from '../../lib/lib';
+import {getBasket, getBasketProducts, setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
 import DineroFactory, {Currency} from "dinero.js";
@@ -60,8 +60,6 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
     }
 
     function BasketModifier() { // Text field and increment/decrement buttons
-        const {currency} = useContext(LocaleContext);
-
         return (<>
             <div className='decrement-basket-quantity-button' onClick={decrement}>
                 <h1>-</h1>
@@ -162,45 +160,35 @@ export default function Product({prod}: { prod: ProductData | ProductData[] }) {
         // Resets the value in the HTMLInput to the value from the basket
         // Called whenever the basket gets updated.
 
-        // Getting basket
-        let basketString: string | null = localStorage.getItem("basket");
-        if (basketString) {
-            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
+        // Iterating through basket to find product
+        const basket = getBasketProducts()
+        for (let i = 0; i < basket.length; i++) {
+            let p: ProductInBasket = basket[i];
+            if (p.sku == sku) {
+                // Set quantity variable to match basket
+                setQuantityButActually(p.basketQuantity);
 
-            // Iterating through basket to find product
-            for (let i = 0; i < basket.length; i++) {
-                let item: ProductInBasket = basket[i];
-                if (item.sku == sku) {
-                    // Set quantity variable to match basket
-                    setQuantityButActually(item.basketQuantity);
+                if (p.basketQuantity > 0) setShowModifer(true)
+                else setShowModifer(false)
 
-                    if (item.basketQuantity > 0) {
-                        setShowModifer(true)
-                    } else {
-                        setShowModifer(false)
-                    }
-
-                    // Update HTMLInput if it exists
-                    const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
-                    if (basketElement != null) {
-                        const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                        basketInput.value = item.basketQuantity as unknown as string
-                    }
-                    return
+                // Update HTMLInput if it exists
+                const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
+                if (basketElement != null) {
+                    const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+                    basketInput.value = p.basketQuantity as unknown as string
                 }
+                return // Don't check any further, we've found what we're looking for.
             }
-
-            // Run when not found in basket
-
-            // Update HTMLInput to 0 if it exists
-            const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
-            if (basketElement != null) {
-                const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                basketInput.value = "0"
-            }
-            setShowModifer(false)
-            setQuantityButActually(0)
         }
+        // If we don't find it, it must have been removed from the basket
+        // Update HTMLInput to 0 if it exists
+        const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
+        if (basketElement != null) {
+            const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+            basketInput.value = "0"
+        }
+        setShowModifer(false)
+        setQuantityButActually(0)
     }
 
     const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
@@ -332,35 +320,25 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
     function syncWithBasket() {
         // Resets the value in the HTMLInput to the value from the basket
         // Called whenever the basket gets updated from a different source
-        let basketString: string | null = localStorage.getItem("basket");
-        if (basketString) {
-            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
-            for (let i = 0; i < basket.length; i++) {
-                let item: ProductInBasket = basket[i];
-                if (item.sku == sku) {
-                    setQuantityButActually(item.basketQuantity);
-                    const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
-                    if (basketElement == null) {
-                        return
-                    }
-                    const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                    basketInput.value = item.basketQuantity as unknown as string
+        const basket = getBasketProducts()
+        for (let i = 0; i < basket.length; i++) {
+            let item: ProductInBasket = basket[i];
+            if (item.sku == sku) {
+                setQuantityButActually(item.basketQuantity);
+                const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
+                if (basketElement == null) {
                     return
                 }
+                const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
+                basketInput.value = item.basketQuantity as unknown as string
+                return
             }
         }
     }
 
     const [quantity, setQuantityButActually] = useState(0);
-    const [imageURL, setImageURL] = useState<undefined | string>(undefined)
-    // If the user's basket is yet to be updated with new data (from old system using image_url)
-    // images[0].name will be undefined, so it has to check its existence first.
-    useEffect(() => {
-        setImageURL(getImageURL(images[0]))
-    }, [])
-
+    const imageURL = getImageURL(images[0])
     const link = getProductPagePath(sku)
-    let string_price: string = "£" + price.toFixed(2);
     let max_order: number = Math.min(max_product_order, stock);
     window.addEventListener("basketUpdate", syncWithBasket)
     useEffect(() => {

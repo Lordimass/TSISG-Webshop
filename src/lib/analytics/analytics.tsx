@@ -4,6 +4,7 @@ import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {convertDinero} from "@shared/functions/price.ts";
+import {getBasket, getBasketProducts} from "../lib.tsx";
 
 /**
  * Get the Google Analytics client ID from the cookie.
@@ -62,13 +63,7 @@ async function getBasketAsGA4Products(
     items: GA4Product[],
     value: number
 }> {
-    const basketString = localStorage.getItem("basket")
-    if (!basketString) return {items: [], value: 0}
-    const basketObj = JSON.parse(basketString)
-    if (!("basket" in basketObj)) {
-        console.error("localStorage Basket Malformed"); return {items: [], value: 0};
-    }
-    const basket: ProductsInBasket = basketObj.basket
+    const basket = getBasketProducts();
     const itemPromises = basket.map(p => convertToGA4Product(p, currency))
     const items = await Promise.all(itemPromises)
     let value = 0; 

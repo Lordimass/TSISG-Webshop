@@ -35,6 +35,7 @@ import Price from "../../components/price/price.tsx";
 import {convertDinero} from "@shared/functions/price.ts";
 import {getPath} from "../../lib/paths.ts";
 import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
+import {getBasketProducts} from "../../lib/lib.tsx";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -362,11 +363,8 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
     const precision = CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].precision;
     useEffect(() => {
         async function getPreFeeTotal() {
-            const basketString = localStorage.getItem("basket");
-            if (!basketString) {throw ("No basket string available when calculating checkout total")}
-            const basket = JSON.parse(basketString).basket as ProductsInBasket
             let basketTotal = 0;
-            for (const p of basket) {
+            for (const p of getBasketProducts()) {
                 const din = DineroFactory({amount: Math.round(p.price * p.basketQuantity * 100), currency: DEFAULT_CURRENCY});
                 const convDin = await convertDinero(din, currency);
                 basketTotal += convDin.getAmount();

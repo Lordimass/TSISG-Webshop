@@ -4,13 +4,14 @@ import {JSX, useContext, useEffect, useState} from "react";
 import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { ProductsInBasket, ProductData } from "@shared/types/types";
+import {ProductsInBasket, ProductData, ProductInBasket} from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 import { triggerViewItemList } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {Currency} from "dinero.js";
+import {getBasket, getBasketProducts} from "../../lib/lib.tsx";
 
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
@@ -86,9 +87,7 @@ export default function Products() {
  * @param currency Override currency to display. Only use to display a currency other than the user's local currency.
  */
 export function CheckoutProducts({currency}: {currency?: Currency}) {
-  const basketString: string | null = localStorage.getItem("basket")
-  if (!basketString) {return (<></>)}
-  const basket: ProductsInBasket = JSON.parse(basketString).basket
+  const basket = getBasketProducts();
   return (<div className="checkout-products">{basket.map(
       prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}</div>
   )

@@ -1,6 +1,6 @@
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
-import {ProductsInBasket, StockDiscrepency} from "@shared/types/types"
+import {ProductInBasket, ProductsInBasket, StockDiscrepency} from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
@@ -60,7 +60,7 @@ export async function createCheckoutSession(): Promise<string> {
 }
 
 export async function fetchStripePrices(): Promise<Array<Object>> {
-    const oldBasket: ProductsInBasket = JSON.parse(localStorage.getItem("basket")!).basket
+    const oldBasket: ProductInBasket[] = getBasketProducts()
     const {stripePrices, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
@@ -72,7 +72,8 @@ export async function fetchStripePrices(): Promise<Array<Object>> {
         async function(value) {return await value.json()},
         function(error) {throw error}
     )
-    localStorage.setItem("basket", JSON.stringify({basket, "lastUpdated": (new Date()).toISOString()}))
+    console.log("Updated prices from remote")
+    localStorage.setItem("basket", JSON.stringify({products: basket, "lastUpdated": (new Date()).toISOString()}))
     
     return stripePrices;
 }

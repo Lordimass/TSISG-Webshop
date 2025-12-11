@@ -13,9 +13,12 @@ export type ProductsInBasket = ProductInBasket[]
 /** The shape of the data in `localStorage.basket` */
 export interface Basket {
     /** The products in the basket and their quantities */
-    basket: ProductInBasket[]
-    /** The date-time at which this version of the basket was last updated with information from the database */
-    lastUpdated: Date
+    products: ProductInBasket[]
+    /**
+     * The date-time in milliseconds since epoch at which this version of the basket was last updated with
+     * information from the database
+     */
+    lastUpdated: number
 }
 
 /** Represents a discrepency between the stock available for a product, and the quantity in the customer's basket. */

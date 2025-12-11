@@ -6,7 +6,7 @@ import { LoginContext, SiteSettingsContext } from "../../app"
 import { ImageData, ProductData, ProductInBasket } from "@shared/types/types"
 import ProductEditor from "./productEditor/productEditor"
 import { UnsubmittedImageData, UnsubmittedProductData } from "./productEditor/types"
-import { getGroup, setBasketStringQuantity } from "../../lib/lib"
+import {getBasketProducts, getGroup, setBasketStringQuantity} from "../../lib/lib"
 import { cleanseUnsubmittedProduct, extractSKU, ProductContext } from "./lib"
 import { useGetProducts } from "../../lib/supabaseRPC"
 import { compareImages } from "../../lib/sortMethods"
@@ -321,20 +321,17 @@ function QuantityTicker() {
      */
     function syncWithBasket() {
         if (basketQuant == null || !setBasketQuant || product.sku === 0) return
+        const basket = getBasketProducts()
+        const item: ProductInBasket | undefined = basket.find(item => item.sku === product.sku);
+        // If it doesn't find the product, it must not be in the basket anymore, so set the quant to 0
+        if (!item) {setBasketQuant(0); return;}
 
-        let basketString: string | null = localStorage.getItem("basket");
-        if (basketString) {
-            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
-            let item: ProductInBasket | undefined = basket.find(item => item.sku === product.sku);
-            // If it doesn't find the product, it must not be in the basket anymore, so set the quant to 0
-            if (!item) {setBasketQuant(0); return;}
+        // Set the basket quantity state for the product
+        setBasketQuant(item.basketQuantity);
 
-            // Set the basket quantity state for the product
-            setBasketQuant(item.basketQuantity);
-            
-            // Update product input to be correct
-            setInputValue(item.basketQuantity)
-        }
+        // Update product input to be correct
+        setInputValue(item.basketQuantity)
+
     }
 
     function setInputValue(value: number) {

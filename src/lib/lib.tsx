@@ -12,26 +12,28 @@ import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
  * Refresh the data associated with products in the basket, to prevent data getting stale
  */
 export async function refreshBasket() {
-  // Fetch Current Basket
-  const basketObj = localStorage.getItem("basket")
-  if (!basketObj) return
-  const basket: ProductsInBasket = JSON.parse(basketObj).basket
+    console.log("Refreshing Basket");
+    const basket = getBasketProducts()
 
-  // Fetch new data on products
-  const skusToFetch: number[] = basket.map((prod: ProductInBasket) => prod.sku)
-  const newProducts = await getProducts(supabase, skusToFetch, false, false)
-  // Save new data
-  const newBasket: ProductsInBasket = []
-  basket.forEach((basketProd: ProductInBasket) => {
-    newProducts.forEach((newProduct: ProductData) => {
-      if (newProduct.sku === basketProd.sku) {
-        newBasket.push({ ...newProduct, basketQuantity: basketProd.basketQuantity })
-      }
+    // Fetch new data on products
+    const skusToFetch: number[] = basket.map((prod: ProductInBasket) => prod.sku)
+    const newProducts = await getProducts(supabase, skusToFetch, false, false)
+
+    // Save new data
+    const newBasket: ProductInBasket[] = []
+    basket.forEach((basketProd: ProductInBasket) => {
+        newProducts.forEach((newProduct: ProductData) => {
+            if (newProduct.sku === basketProd.sku) {
+                newBasket.push({...newProduct, basketQuantity: basketProd.basketQuantity})
+            }
+        })
     })
-  })
-  if (newBasket) {
-    localStorage.setItem("basket", JSON.stringify({basket: newBasket, lastUpdated: (new Date()).toISOString()}))
-  }
+    if (newBasket.length > 0) {
+        localStorage.setItem("basket", JSON.stringify({
+            products: newBasket,
+            lastUpdated: (new Date()).toISOString()
+        }))
+    }
 }
 
 /**
@@ -39,12 +41,12 @@ export async function refreshBasket() {
  * @param obj The JSON object to open
  */
 export function openObjectInNewTab(obj: any) {
-  const jsonString = JSON.stringify(obj, null, 2); // pretty-print
+    const jsonString = JSON.stringify(obj, null, 2); // pretty-print
 
-  const blob = new Blob([jsonString], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+    const blob = new Blob([jsonString], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
 
-  window.open(url, "_blank");
+    window.open(url, "_blank");
 }
 
 /**
@@ -52,10 +54,10 @@ export function openObjectInNewTab(obj: any) {
  * @param filename The filename to extract an extension from.
  */
 export function getFilenameExtension(filename: string) {
-  return filename.split(".").slice(-1)[0]
+    return filename.split(".").slice(-1)[0]
 }
 
-/** 
+/**
  * Get the ProductData for the products in the group with `name`
  * @param name The name of the group to fetch products for
  * @returns A list of products in the given group, empty if no such
@@ -66,9 +68,9 @@ export async function getGroup(name: string | null): Promise<ProductData[]> {
 
     // Fetch SKU list
     const {data: skus, error} = await supabase
-      .from("products")
-      .select("sku")
-      .eq("group_name", name)
+        .from("products")
+        .select("sku")
+        .eq("group_name", name)
     if (error) throw error
     // No products with this group name
     if (skus.length === 0) return []
@@ -87,62 +89,51 @@ export async function setBasketStringQuantity(
     quant: number,
     currency: Currency = DEFAULT_CURRENCY
 ) {
-  console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
-  /** Whether this is a new basket string or not */
-  let freshBasket = false
-  /** The change in quantity from this update */
-  let diff = 0
-  // Fetch the current basket contents
-  let basketString: string | null = localStorage.getItem("basket")
-  if (!basketString) { // Create basket if it doesn't exist
-    basketString = "{\"basket\": []}"
-    freshBasket = true
-  }
-  const basketObj = JSON.parse(basketString)
-  let basket: ProductsInBasket = basketObj.basket;
+    console.log(`Setting basket quantity of SKU ${prod.sku} to ${quant}`);
+    /** The change in quantity from this update, used for GA4 triggers */
+    let diff = 0
+    const basket = getBasket();
 
-  // Find product and set quantity
-  let found: boolean = false
-  for (let i = 0; i<basket.length; i++) {
-    let item: ProductInBasket = basket[i]
-    if (item.sku == prod.sku) {
-      diff = quant - item.basketQuantity
-      found = true
-      // Just remove it from the basket if 0
-      if (quant == 0) {
-        basket.splice(i, 1)
-        break
-      }
-      item.basketQuantity = quant
-      break
+    // If this is a new basket, set last updated to current time
+    if (basket.lastUpdated === 0) basket.lastUpdated = Date.now()
+
+    // Find product and set quantity
+    let found: boolean = false
+    // Using for loop instead of forEach for splicing
+    for (let i = 0; i < basket.products.length; i++) {
+        let item: ProductInBasket = basket.products[i]
+        if (item.sku == prod.sku) {
+            diff = quant - item.basketQuantity
+            found = true
+            // Just remove it from the basket if 0
+            if (quant == 0) {
+                basket.products.splice(i, 1)
+                break
+            }
+            item.basketQuantity = quant
+            break
+        }
     }
-  }
+    // If it wasn't found, create it
+    if (!found && quant > 0) {
+        diff = quant
+        basket.products.push({...prod, basketQuantity: quant})
+    }
 
-  // If it wasn't found, create it
-  if (!found && quant > 0) {
-    diff = quant
-    basket.push({...prod, basketQuantity: quant})
-  }
+    // Save to localStorage
+    localStorage.setItem("basket", JSON.stringify(basket))
+    window.dispatchEvent(new CustomEvent("basketUpdate"))
 
-  // Save to localStorage
-  const newBasketObj = freshBasket 
-      ? {"basket": basket, "lastUpdated": (new Date()).toISOString()} 
-      : {"basket": basket, "lastUpdated": basketObj.lastUpdated}
-  localStorage.setItem("basket",
-    JSON.stringify(newBasketObj)
-  )
-  window.dispatchEvent(new CustomEvent("basketUpdate"))
-
-  // Trigger GA4 Event
-  await triggerAddToCart(prod, diff, currency)
+    // Trigger GA4 Event
+    await triggerAddToCart(prod, diff, currency)
 }
 
 /**
  * Checks whether a given value is able to be converted to a number
- * @param value 
+ * @param value
  */
 export function isNumeric(value: string): boolean {
-  return !Number.isNaN(value);
+    return !Number.isNaN(value);
 }
 
 /**
@@ -152,30 +143,30 @@ export function isNumeric(value: string): boolean {
  * @returns Either the start string or a JSON object
  */
 export function softParseJSON(value: string): any {
-  try {
-    return JSON.parse(value)
-  } catch {
-    return value
-  }
+    try {
+        return JSON.parse(value)
+    } catch {
+        return value
+    }
 }
 
-export async function fetchPolicy(name: string): Promise<string>{
-  const resp = await fetch(`https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/policies//${name}.md`)
-  return resp.text()
+export async function fetchPolicy(name: string): Promise<string> {
+    const resp = await fetch(`https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/policies//${name}.md`)
+    return resp.text()
 }
 
 export function dateToDateString(date: Date, short = false) {
-  if (!short) return daysOfWeek[date.getDay()] +
-      " " + date.getDate() +
-      " " + monthsOfYear[date.getMonth()] + 
-      " " + date.getFullYear();
-  else return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear().toString(10).slice(2)}`
+    if (!short) return daysOfWeek[date.getDay()] +
+        " " + date.getDate() +
+        " " + monthsOfYear[date.getMonth()] +
+        " " + date.getFullYear();
+    else return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear().toString(10).slice(2)}`
 }
 
 export function dateToTimeString(date: Date) {
-  return date.getHours().toString().padStart(2, "0") + ":" 
-  + date.getMinutes().toString().padStart(2, "0") + ":" 
-  + date.getSeconds().toString().padStart(2, "0")
+    return date.getHours().toString().padStart(2, "0") + ":"
+        + date.getMinutes().toString().padStart(2, "0") + ":"
+        + date.getSeconds().toString().padStart(2, "0")
 }
 
 /**
@@ -185,12 +176,12 @@ export function dateToTimeString(date: Date) {
  * @returns A string hh:mm:ss
  */
 export function durationToDurationString(duration: number): string {
-  const hours = Math.floor(duration / 3.6e+6)
-  duration -= hours * 3.6e+6
-  const minutes = Math.floor(duration / 6e+4)
-  duration -= minutes * 6e+4
-  const seconds = Math.floor(duration / 1000)
-  return `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:${seconds.toString().padStart(2,"0")}`
+    const hours = Math.floor(duration / 3.6e+6)
+    duration -= hours * 3.6e+6
+    const minutes = Math.floor(duration / 6e+4)
+    duration -= minutes * 6e+4
+    const seconds = Math.floor(duration / 1000)
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
 
 /**
@@ -201,8 +192,8 @@ export function durationToDurationString(duration: number): string {
 export function getBasket(): Basket {
     // Fetch from localStorage
     const basketString = localStorage.getItem("basket");
-    if (!basketString) return {basket: [], lastUpdated: new Date(0)}
-    const basketObj = JSON.parse(basketString);
+    if (!basketString) return {products: [], lastUpdated: 0}
+    const basketObj = JSON.parse(basketString) as Basket;
 
     // Validate shape
     if (VALIDATORS.Basket(basketObj)) return basketObj as Basket;
@@ -216,4 +207,6 @@ export function getBasket(): Basket {
  * Fetch and return the products in the basket from localStorage, including type validation.
  * @returns An array of {@link ProductInBasket}s. This will be an empty array if no basket was found in localStorage.
  */
-export function getBasketProducts(): ProductInBasket[] {return getBasket().basket}
+export function getBasketProducts(): ProductInBasket[] {
+    return getBasket().products
+}

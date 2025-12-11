@@ -2218,21 +2218,20 @@
       "Basket": {
         "description": "The shape of the data in `localStorage.basket`",
         "properties": {
-          "basket": {
+          "lastUpdated": {
+            "description": "The date-time in milliseconds since epoch at which this version of the basket was last updated with information from the database",
+            "type": "number"
+          },
+          "products": {
             "description": "The products in the basket and their quantities",
             "items": {
               "$ref": "#/definitions/ProductInBasket"
             },
             "type": "array"
-          },
-          "lastUpdated": {
-            "description": "The date-time at which this version of the basket was last updated with information from the database",
-            "format": "date-time",
-            "type": "string"
           }
         },
         "required": [
-          "basket",
+          "products",
           "lastUpdated"
         ],
         "type": "object"

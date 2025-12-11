@@ -7,6 +7,7 @@ import { NotificationsContext } from "../notification/lib";
 import { triggerViewCart } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
+import {getBasketProducts} from "../../lib/lib.tsx";
 
 export default function Basket() {
     async function redirectToCheckout() {
@@ -22,15 +23,10 @@ export default function Basket() {
         let basketQuantTemp: number = 0
         let basketPriceTemp: number = 0
 
-        const basketString: string | null = localStorage.getItem("basket");
-        if (basketString) {
-            let basket: Array<ProductInBasket> = JSON.parse(basketString).basket;
-            for (let i=0; i<basket.length; i++) {
-                let item: ProductInBasket = basket[i];
-                basketQuantTemp += item.basketQuantity;
-                basketPriceTemp += item.price * item.basketQuantity;
-            }
-        }
+        getBasketProducts().forEach((p) => {
+            basketQuantTemp += p.basketQuantity;
+            basketPriceTemp += p.price * p.basketQuantity;
+        })
 
         // Animate if it changed
         if (basketQuantity - basketQuantTemp != 0) {
@@ -130,20 +126,11 @@ export default function Basket() {
     }, [isOpen])
 
     // Fetch the current contents of the basket and display it
-    let basketItems: Array<ReactElement> = []
-    let basket: Array<ProductInBasket> = []
-    const basketString: string | null = localStorage.getItem("basket")
-    if (basketString) {
-        basket = JSON.parse(basketString).basket
-        // Handle broken basket
-        if (!basket) {
-            basket = []
-            localStorage.removeItem("basket")
-        }
-    }
+    const basketComponents: ReactElement[] = []
+    const basket = getBasketProducts()
     for (let i = 0; i < basket.length; i++) {
         let prod : ProductInBasket = basket[i]
-        basketItems.push(<BasketProduct product={prod} key={prod.sku}/>)
+        basketComponents.push(<BasketProduct product={prod} key={prod.sku}/>)
     }
     
     return (<>
@@ -157,7 +144,7 @@ export default function Basket() {
         <div className="basket-display" id="basket-display" ref={menuRef}>
             <p> Basket ({basketQuantity} items)</p>
             <div className="basketItems">
-                {basketItems}
+                {basketComponents}
             </div>
             <p> Subtotal: {basketPrice}</p>
             <p style={{color: "var(--jamie-grey)"}}> {killSwitchMessage} </p>

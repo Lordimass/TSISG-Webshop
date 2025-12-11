@@ -49,4 +49,5 @@ export const blank_product: ProductData = {
     group_name: null,
     customs_description: null,
     extended_customs_description: null,
+    last_edited_by: null,
 }
