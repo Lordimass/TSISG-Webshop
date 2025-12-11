@@ -1,5 +1,5 @@
 import { loadStripe, Stripe, StripeAddressElementOptions, StripePaymentElementOptions } from "@stripe/stripe-js";
-import { createCheckoutSession } from "./checkoutFunctions";
+import { createCheckoutSession } from "./checkoutFunctions.ts";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 if (!STRIPE_KEY) {console.error("No VITE_STRIPE_KEY!")}

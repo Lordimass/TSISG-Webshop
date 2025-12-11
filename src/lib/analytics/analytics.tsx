@@ -1,5 +1,5 @@
 import ReactGA from "react-ga4"
-import { Basket, ProductData, ProductInBasket } from "@shared/types/types.ts"
+import { ProductsInBasket, ProductData, ProductInBasket } from "@shared/types/types.ts"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
@@ -68,7 +68,7 @@ async function getBasketAsGA4Products(
     if (!("basket" in basketObj)) {
         console.error("localStorage Basket Malformed"); return {items: [], value: 0};
     }
-    const basket: Basket = basketObj.basket
+    const basket: ProductsInBasket = basketObj.basket
     const itemPromises = basket.map(p => convertToGA4Product(p, currency))
     const items = await Promise.all(itemPromises)
     let value = 0; 

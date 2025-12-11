@@ -1,10 +1,12 @@
 import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
-import { Basket } from "@shared/types/types"
+import {ProductsInBasket, StockDiscrepency} from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
 import {getPath} from "../../lib/paths.ts";
+import {getBasket, getBasketProducts} from "../../lib/lib.tsx";
+import {supabase} from "../../lib/supabaseRPC.tsx";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -58,7 +60,7 @@ export async function createCheckoutSession(): Promise<string> {
 }
 
 export async function fetchStripePrices(): Promise<Array<Object>> {
-    const oldBasket: Basket = JSON.parse(localStorage.getItem("basket")!).basket
+    const oldBasket: ProductsInBasket = JSON.parse(localStorage.getItem("basket")!).basket
     const {stripePrices, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",
         headers: {
@@ -79,4 +81,46 @@ export async function validateEmail(email: string, checkout: any) {
     const updateResult = await checkout.updateEmail(email);
     const isValid = updateResult.type !== "error";
     return { isValid, message: !isValid ? updateResult.error.message : null};
+}
+
+/**
+ * Find discrepencies between the basket quantities and fresh stock numbers from the database.
+ */
+export async function checkStock() {
+    const prods = getBasketProducts();
+
+    // Fetch up-to-date data from Supabase.
+    const {data, error} = await supabase
+        .from("products")
+        .select("sku, stock")
+        .in("sku", prods.map(prod => prod.sku))
+    if (error) {
+        throw error;
+    } else if (!data) {
+        throw Error("No data returned when checking product stock")
+    } else if (data.length != prods.length) {
+        throw Error("Unable to find some products on the database when checking product stock")
+    }
+
+    // Find discrepencies
+    const discrepencies: StockDiscrepency[] = []
+    data.forEach((supaProd) => {
+        // Find matching productInBasket.
+        // Using `foreach` instead of `filter` here since there should only be one match.
+        prods.forEach(prod => {
+            if (prod.sku != supaProd.sku) return
+
+            // Calculate stock diff, if there is some, report it
+            const diff = prod.basketQuantity - supaProd.stock
+            if (diff > 0) {
+                discrepencies.push({
+                    sku: prod.sku,
+                    stock: supaProd.stock,
+                    basketQuantity: prod.basketQuantity,
+                    name: prod.name
+                })
+            }
+        })
+    })
+    return discrepencies
 }

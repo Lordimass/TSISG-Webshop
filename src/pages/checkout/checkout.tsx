@@ -11,9 +11,9 @@ import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import { redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
+import {checkStock, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
 import { page_title } from "../../lib/consts";
-import { Basket } from "@shared/types/types";
+import { ProductsInBasket } from "@shared/types/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
@@ -25,7 +25,7 @@ import {
     useCheckout
 } from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
+import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts.ts";
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
@@ -69,57 +69,30 @@ function CheckoutAux({onReady}: {onReady: Function}) {
      * Checks whether all the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.
      */
-    async function checkStock() {
-        // Can assume basket string exists given context
-        const basket: Basket = JSON
-            .parse(localStorage.getItem("basket") as string)
-            .basket
-        
-        const response = await fetch("/.netlify/functions/checkStock", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(basket.map((prod) => {return {
-                sku: prod.sku,
-                basketQuantity: prod.basketQuantity,
-                name: prod.name
-            }}))
-        })
-        const body = await new Response(response.body).text()
+    async function checkProductStock() {
+        const discrepencies = await checkStock();
 
-        if (!response.ok) {
-            console.error(body)
-            setError(<p className="checkout-error">{body}</p>)
-            return false
-        } else {
-            // If there were no discrepencies
-            if (response.status == 204) {
-                setError(<p></p>)
-                return true
-            }
-            const discrepencies: {
-                sku: number, 
-                name: string,
-                stock: number,
-                basketQuantity: number,
-            }[] = JSON.parse(body)
-
-            const err = <><p className="checkout-error">
-                <i>Too slow!</i><br/>Part of your order is now out of stock, head
-                back to the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to
-                change your order, then come back:<br/><br/></p>
-                {
-                    discrepencies.map((discrep) => <p 
-                    className="checkout-error" 
-                    key={discrep.sku}>
-                    We have {discrep.stock} "{discrep.name}" left, you
-                    tried to order {discrep.basketQuantity}
-                    </p>)
-                }
-                </>
-            
-            setError(err)
-            return false
+        // If there were no discrepencies
+        if (discrepencies.length === 0) {
+            setError(<p></p>)
+            return true
         }
+
+        const err = <><p className="checkout-error">
+            <i>Too slow!</i><br/>Part of your order is now out of stock, head back to
+            the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to change your order, then come
+            back:<br/><br/></p>
+            {
+                discrepencies.map((discrep) =>
+                    <p className="checkout-error" key={discrep.sku}>
+                        We have {discrep.stock} "{discrep.name}" left, you
+                        tried to order {discrep.basketQuantity}
+                    </p>)
+            }
+            </>
+
+        setError(err)
+        return false
     }
 
     async function handleSubmit(e: FormEvent) {
@@ -246,7 +219,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
             // Check stock if it's not already been checked
             else if (!hasCheckedStock) {
-                const inStock = await checkStock();
+                const inStock = await checkProductStock();
                 if (!inStock) {
                     ready = false
                 }
@@ -391,7 +364,7 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
         async function getPreFeeTotal() {
             const basketString = localStorage.getItem("basket");
             if (!basketString) {throw ("No basket string available when calculating checkout total")}
-            const basket = JSON.parse(basketString).basket as Basket
+            const basket = JSON.parse(basketString).basket as ProductsInBasket
             let basketTotal = 0;
             for (const p of basket) {
                 const din = DineroFactory({amount: Math.round(p.price * p.basketQuantity * 100), currency: DEFAULT_CURRENCY});

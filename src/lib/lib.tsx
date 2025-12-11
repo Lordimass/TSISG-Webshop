@@ -1,4 +1,4 @@
-import {Basket, ProductData, ProductInBasket} from "@shared/types/types"
+import {ProductsInBasket, ProductData, ProductInBasket, Basket} from "@shared/types/types"
 import {supabase} from "./supabaseRPC"
 import {compareProducts} from "./sortMethods"
 import {daysOfWeek, monthsOfYear} from "./consts"
@@ -6,6 +6,7 @@ import {triggerAddToCart} from "./analytics/analytics"
 import {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../localeHandler.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
+import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale
@@ -14,13 +15,13 @@ export async function refreshBasket() {
   // Fetch Current Basket
   const basketObj = localStorage.getItem("basket")
   if (!basketObj) return
-  const basket: Basket = JSON.parse(basketObj).basket
+  const basket: ProductsInBasket = JSON.parse(basketObj).basket
 
   // Fetch new data on products
   const skusToFetch: number[] = basket.map((prod: ProductInBasket) => prod.sku)
   const newProducts = await getProducts(supabase, skusToFetch, false, false)
   // Save new data
-  const newBasket: Basket = []
+  const newBasket: ProductsInBasket = []
   basket.forEach((basketProd: ProductInBasket) => {
     newProducts.forEach((newProduct: ProductData) => {
       if (newProduct.sku === basketProd.sku) {
@@ -98,7 +99,7 @@ export async function setBasketStringQuantity(
     freshBasket = true
   }
   const basketObj = JSON.parse(basketString)
-  let basket: Basket = basketObj.basket;
+  let basket: ProductsInBasket = basketObj.basket;
 
   // Find product and set quantity
   let found: boolean = false
@@ -191,3 +192,28 @@ export function durationToDurationString(duration: number): string {
   const seconds = Math.floor(duration / 1000)
   return `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}:${seconds.toString().padStart(2,"0")}`
 }
+
+/**
+ * Fetch and return the basket from localStorage, including type validation.
+ * @returns A {@link Basket} object. This will contain an empty list of products and a {@link Basket.lastUpdated} date of the Unix Epoch
+ * if no basket was found in localStorage.
+ */
+export function getBasket(): Basket {
+    // Fetch from localStorage
+    const basketString = localStorage.getItem("basket");
+    if (!basketString) return {basket: [], lastUpdated: new Date(0)}
+    const basketObj = JSON.parse(basketString);
+
+    // Validate shape
+    if (VALIDATORS.Basket(basketObj)) return basketObj as Basket;
+    console.warn(`Basket not in expected shape\n${JSON.stringify(basketObj, undefined, 2)}`)
+    logValidationErrors("Basket")
+    return basketObj as Basket;
+}
+
+/**
+ * Wrapper function for {@link getBasket}
+ * Fetch and return the products in the basket from localStorage, including type validation.
+ * @returns An array of {@link ProductInBasket}s. This will be an empty array if no basket was found in localStorage.
+ */
+export function getBasketProducts(): ProductInBasket[] {return getBasket().basket}

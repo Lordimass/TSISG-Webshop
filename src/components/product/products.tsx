@@ -4,7 +4,7 @@ import {JSX, useContext, useEffect, useState} from "react";
 import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import { Basket, ProductData } from "@shared/types/types";
+import { ProductsInBasket, ProductData } from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
@@ -88,7 +88,7 @@ export default function Products() {
 export function CheckoutProducts({currency}: {currency?: Currency}) {
   const basketString: string | null = localStorage.getItem("basket")
   if (!basketString) {return (<></>)}
-  const basket: Basket = JSON.parse(basketString).basket
+  const basket: ProductsInBasket = JSON.parse(basketString).basket
   return (<div className="checkout-products">{basket.map(
       prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}</div>
   )

@@ -9,7 +9,17 @@ export * from './clockifyTypes.ts'
 
 // ProductInBasket is a small augmentation of ProductData used on the frontend
 export type ProductInBasket = ProductData & { basketQuantity: number }
-export type Basket = ProductInBasket[]
+export type ProductsInBasket = ProductInBasket[]
+/** The shape of the data in `localStorage.basket` */
+export interface Basket {
+    /** The products in the basket and their quantities */
+    basket: ProductInBasket[]
+    /** The date-time at which this version of the basket was last updated with information from the database */
+    lastUpdated: Date
+}
+
+/** Represents a discrepency between the stock available for a product, and the quantity in the customer's basket. */
+export type StockDiscrepency = Pick<ProductInBasket, "sku" | "name" | "stock" | "basketQuantity">
 
 // Site-wide settings fetched from the backend
 export const SiteSettingsContext = createContext<SiteSettings>({})
