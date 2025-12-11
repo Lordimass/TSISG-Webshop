@@ -690,11 +690,11 @@
       }
     }
   },
-  "OrdersFromPageable": {
-    "$ref": "#/definitions/OrdersFromPageable",
+  "RmOrder": {
+    "$ref": "#/definitions/RmOrder",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-      "OrderFromPageable": {
+      "RmOrder": {
         "properties": {
           "createdOn": {
             "description": "ISO Date String",
@@ -729,64 +729,41 @@
         "required": [
           "orderIdentifier",
           "createdOn"
-        ],
-        "type": "object"
-      },
-      "OrdersFromPageable": {
-        "properties": {
-          "orders": {
-            "items": {
-              "$ref": "#/definitions/OrderFromPageable"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "orders"
         ],
         "type": "object"
       }
     }
   },
-  "OrderFromPageable": {
-    "$ref": "#/definitions/OrderFromPageable",
+  "ShippingOptionGroups": {
+    "$ref": "#/definitions/ShippingOptionGroups",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-      "OrderFromPageable": {
+      "ShippingOptionGroups": {
+        "description": "Required shape of environment variable for VITE_SHIPPING_OPTION_GROUPS.",
         "properties": {
-          "createdOn": {
-            "description": "ISO Date String",
-            "type": "string"
+          "eu": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
-          "manifestedOn": {
-            "description": "ISO Date String",
-            "type": "string"
+          "uk": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
-          "orderDate": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "orderIdentifier": {
-            "type": "number"
-          },
-          "orderReference": {
-            "type": "string"
-          },
-          "printedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "shippedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "trackingNumber": {
-            "type": "string"
+          "world": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "required": [
-          "orderIdentifier",
-          "createdOn"
+          "uk",
+          "eu",
+          "world"
         ],
         "type": "object"
       }
@@ -1113,6 +1090,141 @@
       }
     }
   },
+  "RawProductData": {
+    "$ref": "#/definitions/RawProductData",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "RawProductData": {
+        "description": "A product data record directly from Supabase, with no modifications made to it",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "sku",
+          "name",
+          "price",
+          "stock",
+          "active",
+          "weight",
+          "metadata",
+          "group_name",
+          "sort_order",
+          "category_id",
+          "description",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "customs_description",
+          "origin_country_code",
+          "package_type_override",
+          "extended_customs_description"
+        ],
+        "type": "object"
+      }
+    }
+  },
   "ImageData": {
     "$ref": "#/definitions/ImageData",
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -1301,6 +1413,35 @@
           "created_at",
           "name",
           "description"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "OrderProduct": {
+    "$ref": "#/definitions/OrderProduct",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "OrderProduct": {
+        "description": "A product from the order_products table",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          },
+          "product_sku": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "product_sku",
+          "quantity",
+          "value"
         ],
         "type": "object"
       }
@@ -1513,240 +1654,11 @@
       }
     }
   },
-  "OrderProduct": {
-    "$ref": "#/definitions/OrderProduct",
+  "MergedOrder": {
+    "$ref": "#/definitions/MergedOrder",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-      "OrderProduct": {
-        "description": "A product from the order_products table",
-        "properties": {
-          "order_id": {
-            "type": "string"
-          },
-          "product_sku": {
-            "type": "number"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "value": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "product_sku",
-          "quantity",
-          "value"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "Order": {
-    "$ref": "#/definitions/Order",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "Order": {
-        "properties": {
-          "city": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "fulfilled": {
-            "type": "boolean"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "placed_at": {
-            "type": "string"
-          },
-          "postal_code": {
-            "type": "string"
-          },
-          "products": {
-            "items": {
-              "$ref": "#/definitions/OrderProdCompressed"
-            },
-            "type": "array"
-          },
-          "street_address": {
-            "type": "string"
-          },
-          "total_value": {
-            "type": "number"
-          },
-          "value": {
-            "properties": {
-              "currency": {
-                "type": "string"
-              },
-              "shipping": {
-                "type": "number"
-              },
-              "total": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "total",
-              "shipping",
-              "currency"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "id",
-          "placed_at",
-          "email",
-          "street_address",
-          "name",
-          "country",
-          "fulfilled",
-          "total_value",
-          "postal_code",
-          "products",
-          "city",
-          "value"
-        ],
-        "type": "object"
-      },
-      "OrderProdCompressed": {
-        "description": "A product from the orders_compressed table",
-        "properties": {
-          "category": {
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name"
-            ],
-            "type": "object"
-          },
-          "customs_description": {
-            "type": "string"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "line_value": {
-            "type": "number"
-          },
-          "origin_country_code": {
-            "type": "string"
-          },
-          "package_type_override": {
-            "type": "string"
-          },
-          "product_name": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "sku": {
-            "type": "number"
-          },
-          "weight": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "sku",
-          "product_name",
-          "weight",
-          "quantity",
-          "customs_description",
-          "origin_country_code",
-          "package_type_override",
-          "category",
-          "line_value",
-          "image_url"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "OrderReturned": {
-    "$ref": "#/definitions/OrderReturned",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "OrderProdCompressed": {
-        "description": "A product from the orders_compressed table",
-        "properties": {
-          "category": {
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name"
-            ],
-            "type": "object"
-          },
-          "customs_description": {
-            "type": "string"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "line_value": {
-            "type": "number"
-          },
-          "origin_country_code": {
-            "type": "string"
-          },
-          "package_type_override": {
-            "type": "string"
-          },
-          "product_name": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "sku": {
-            "type": "number"
-          },
-          "weight": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "sku",
-          "product_name",
-          "weight",
-          "quantity",
-          "customs_description",
-          "origin_country_code",
-          "package_type_override",
-          "category",
-          "line_value",
-          "image_url"
-        ],
-        "type": "object"
-      },
-      "OrderReturned": {
+      "MergedOrder": {
         "description": "An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order.",
         "properties": {
           "city": {
@@ -1754,9 +1666,6 @@
           },
           "country": {
             "type": "string"
-          },
-          "delivery_cost": {
-            "type": "number"
           },
           "dispatched": {
             "description": "Whether the order has been passed over to Royal Mail",
@@ -1787,38 +1696,8 @@
             "type": "array"
           },
           "royalMailData": {
-            "description": "Data from the Royal Mail API about this order.",
-            "properties": {
-              "createdOn": {
-                "type": "string"
-              },
-              "manifestedOn": {
-                "type": "string"
-              },
-              "orderDate": {
-                "type": "string"
-              },
-              "orderIdentifier": {
-                "type": "number"
-              },
-              "orderReference": {
-                "type": "string"
-              },
-              "printedOn": {
-                "type": "string"
-              },
-              "shippedOn": {
-                "type": "string"
-              },
-              "trackingNumber": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "orderIdentifier",
-              "createdOn"
-            ],
-            "type": "object"
+            "$ref": "#/definitions/RmOrder",
+            "description": "Data from the Royal Mail API about this order."
           },
           "street_address": {
             "type": "string"
@@ -1857,10 +1736,107 @@
           "placed_at",
           "postal_code",
           "products",
-          "royalMailData",
           "street_address",
           "total_value",
           "value"
+        ],
+        "type": "object"
+      },
+      "OrderProdCompressed": {
+        "description": "A product from the orders_compressed table",
+        "properties": {
+          "category": {
+            "properties": {
+              "id": {
+                "type": "number"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "type": "object"
+          },
+          "customs_description": {
+            "type": "string"
+          },
+          "image_url": {
+            "type": "string"
+          },
+          "line_value": {
+            "type": "number"
+          },
+          "origin_country_code": {
+            "type": "string"
+          },
+          "package_type_override": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "sku",
+          "product_name",
+          "weight",
+          "quantity",
+          "customs_description",
+          "origin_country_code",
+          "package_type_override",
+          "category",
+          "line_value",
+          "image_url"
+        ],
+        "type": "object"
+      },
+      "RmOrder": {
+        "properties": {
+          "createdOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "manifestedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderDate": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "orderIdentifier": {
+            "type": "number"
+          },
+          "orderReference": {
+            "type": "string"
+          },
+          "printedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "shippedOn": {
+            "description": "ISO Date String",
+            "type": "string"
+          },
+          "trackingNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderIdentifier",
+          "createdOn"
         ],
         "type": "object"
       }
@@ -2597,46 +2573,11 @@
       }
     }
   },
-  "ShippingOptionGroups": {
-    "$ref": "#/definitions/ShippingOptionGroups",
+  "StatusedError": {
+    "$ref": "#/definitions/StatusedError",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-      "ShippingOptionGroups": {
-        "description": "Required shape of environment variable for VITE_SHIPPING_OPTION_GROUPS.",
-        "properties": {
-          "eu": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "uk": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "world": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "uk",
-          "eu",
-          "world"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "NetlifyFunctionError": {
-    "$ref": "#/definitions/NetlifyFunctionError",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "NetlifyFunctionError": {
+      "StatusedError": {
         "description": "Interface should only be used for type validation with `VALIDATORS`",
         "properties": {
           "message": {
@@ -2648,373 +2589,6 @@
         },
         "required": [
           "message"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "RawProductData": {
-    "$ref": "#/definitions/RawProductData",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "RawProductData": {
-        "description": "A product data record directly from Supabase, with no modifications made to it",
-        "properties": {
-          "active": {
-            "type": "boolean"
-          },
-          "category_id": {
-            "description": "The ID of the category this product is in",
-            "type": "number"
-          },
-          "customs_description": {
-            "description": "Short description for customs forms",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "description": {
-            "description": "The customer facing description of the product",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "extended_customs_description": {
-            "description": "An extended description for customs forms applicable to higher value orders.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "group_name": {
-            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "inserted_at": {
-            "description": "Time at which the product was added to the database as an ISO date string",
-            "type": "string"
-          },
-          "last_edited": {
-            "description": "The time which this data was last edited as an ISO date string.",
-            "type": "string"
-          },
-          "last_edited_by": {
-            "description": "The last person to edit this product",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "metadata": {
-            "additionalProperties": {},
-            "description": "Additional information on the product",
-            "properties": {
-              "seo_priority": {
-                "description": "The priority of this product to search engines, used in sitemaps",
-                "type": "number"
-              },
-              "variant_name": {
-                "description": "The name of this specific variant, if `group_name != undefined`",
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "name": {
-            "description": "Customer facing name of the product",
-            "type": "string"
-          },
-          "origin_country_code": {
-            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "package_type_override": {
-            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "price": {
-            "description": "Price of product in GBP inc. Tax",
-            "type": "number"
-          },
-          "sku": {
-            "type": "number"
-          },
-          "sort_order": {
-            "type": "number"
-          },
-          "stock": {
-            "type": "number"
-          },
-          "weight": {
-            "description": "Weight of the product in grams.",
-            "type": [
-              "number",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "sku",
-          "name",
-          "price",
-          "stock",
-          "active",
-          "weight",
-          "metadata",
-          "group_name",
-          "sort_order",
-          "category_id",
-          "description",
-          "inserted_at",
-          "last_edited",
-          "last_edited_by",
-          "customs_description",
-          "origin_country_code",
-          "package_type_override",
-          "extended_customs_description"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "RmOrder": {
-    "$ref": "#/definitions/RmOrder",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "RmOrder": {
-        "properties": {
-          "createdOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "manifestedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "orderDate": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "orderIdentifier": {
-            "type": "number"
-          },
-          "orderReference": {
-            "type": "string"
-          },
-          "printedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "shippedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "trackingNumber": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "orderIdentifier",
-          "createdOn"
-        ],
-        "type": "object"
-      }
-    }
-  },
-  "MergedOrder": {
-    "$ref": "#/definitions/MergedOrder",
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "definitions": {
-      "MergedOrder": {
-        "description": "An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order.",
-        "properties": {
-          "city": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
-          "dispatched": {
-            "description": "Whether the order has been passed over to Royal Mail",
-            "type": "boolean"
-          },
-          "email": {
-            "type": "string"
-          },
-          "fulfilled": {
-            "type": "boolean"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "placed_at": {
-            "type": "string"
-          },
-          "postal_code": {
-            "type": "string"
-          },
-          "products": {
-            "items": {
-              "$ref": "#/definitions/OrderProdCompressed"
-            },
-            "type": "array"
-          },
-          "royalMailData": {
-            "$ref": "#/definitions/RmOrder",
-            "description": "Data from the Royal Mail API about this order."
-          },
-          "street_address": {
-            "type": "string"
-          },
-          "total_value": {
-            "type": "number"
-          },
-          "value": {
-            "properties": {
-              "currency": {
-                "type": "string"
-              },
-              "shipping": {
-                "type": "number"
-              },
-              "total": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "total",
-              "shipping",
-              "currency"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "city",
-          "country",
-          "dispatched",
-          "email",
-          "fulfilled",
-          "id",
-          "name",
-          "placed_at",
-          "postal_code",
-          "products",
-          "street_address",
-          "total_value",
-          "value"
-        ],
-        "type": "object"
-      },
-      "OrderProdCompressed": {
-        "description": "A product from the orders_compressed table",
-        "properties": {
-          "category": {
-            "properties": {
-              "id": {
-                "type": "number"
-              },
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "name"
-            ],
-            "type": "object"
-          },
-          "customs_description": {
-            "type": "string"
-          },
-          "image_url": {
-            "type": "string"
-          },
-          "line_value": {
-            "type": "number"
-          },
-          "origin_country_code": {
-            "type": "string"
-          },
-          "package_type_override": {
-            "type": "string"
-          },
-          "product_name": {
-            "type": "string"
-          },
-          "quantity": {
-            "type": "number"
-          },
-          "sku": {
-            "type": "number"
-          },
-          "weight": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "sku",
-          "product_name",
-          "weight",
-          "quantity",
-          "customs_description",
-          "origin_country_code",
-          "package_type_override",
-          "category",
-          "line_value",
-          "image_url"
-        ],
-        "type": "object"
-      },
-      "RmOrder": {
-        "properties": {
-          "createdOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "manifestedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "orderDate": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "orderIdentifier": {
-            "type": "number"
-          },
-          "orderReference": {
-            "type": "string"
-          },
-          "printedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "shippedOn": {
-            "description": "ISO Date String",
-            "type": "string"
-          },
-          "trackingNumber": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "orderIdentifier",
-          "createdOn"
         ],
         "type": "object"
       }
