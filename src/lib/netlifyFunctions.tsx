@@ -122,14 +122,6 @@ export function useGetOrderList(): any {
 }
 
 /**
- * Creates a new product category if it doesn't already exist and returns the ID
- */
-export async function getCategoryID(name: string): Promise<number> {
-    const {data} = await fetchFromNetlifyFunction("getCategoryID", name, getJWTToken())
-    return data.id
-}
-
-/**
  * Updates the product data in the database, uploading any new images first.
  * @param product The product data to update
  * @param imageMap A map of image local URLs to File objects for any new images to upload

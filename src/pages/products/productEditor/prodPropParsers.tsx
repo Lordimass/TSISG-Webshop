@@ -1,5 +1,6 @@
-import { getCategoryID } from "../../../lib/netlifyFunctions";
 import { ProductData } from "@shared/types/types";
+import {getCategoryID} from "@shared/functions/supabase.ts";
+import {supabase} from "../../../lib/supabaseRPC.tsx";
 
 // Mapping of keys for the product type to parsers to convert from strings to the respective type for that key
 //
@@ -53,7 +54,7 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
     // Convert category name to ID
     category_id: async (val) => {
         console.log(val)
-        const ID = await getCategoryID(val)
+        const ID = await getCategoryID(supabase, val)
         if (isNaN(ID)) {throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)}
         return ID
     },
