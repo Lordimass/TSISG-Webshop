@@ -197,9 +197,17 @@ export function getBasket(): Basket {
 
     // Validate shape
     if (VALIDATORS.Basket(basketObj)) return basketObj as Basket;
-    console.warn(`Basket not in expected shape\n${JSON.stringify(basketObj, undefined, 2)}`)
+    console.warn(`
+        Basket was not in expected shape, resetting basket. Old basket:
+        ${JSON.stringify(basketObj, undefined, 2)}`
+    )
     logValidationErrors("Basket")
-    return basketObj as Basket;
+
+    // Reset basket if validation failed, clearing any old or mismatched basket representations
+    localStorage.removeItem("basket")
+    window.dispatchEvent(new CustomEvent("basketUpdate"))
+
+    return {products: [], lastUpdated: 0};
 }
 
 /**
