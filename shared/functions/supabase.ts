@@ -1,7 +1,21 @@
 import {SupabaseClient} from "@supabase/supabase-js";
-import {StatusedError} from "@shared/errors.ts";
 import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
 import {CompressedOrder} from "@shared/types/supabaseTypes.ts";
+
+/**
+ * Wrapper method for {@link SupabaseClient.from.select}
+ * @param supabase The Supabase client to use to fetch this data.
+ * @param tableName The name of the table to draw data from
+ * @param columns The columns to retrieve, separated by commas. Columns can be renamed when returned with
+ * `customName:columnName`
+ */
+export async function fetchColumnsFromTable(supabase: SupabaseClient, tableName: string, columns: string): Promise<any[]> {
+    const {data, error} = await supabase
+        .from(tableName)
+        .select(columns)
+    if (error) throw error;
+    return data
+}
 
 /**
  * Fetch all orders from the `compressed_orders` view table on Supabase.

@@ -36,6 +36,7 @@ import {convertDinero} from "@shared/functions/price.ts";
 import {getPath} from "../../lib/paths.ts";
 import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
+import {stripe} from "../../../netlify/lib/stripe.ts";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)

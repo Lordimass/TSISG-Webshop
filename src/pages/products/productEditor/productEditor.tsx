@@ -1,6 +1,6 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react"
 import { ProductData } from "@shared/types/types"
-import { cleanseUnsubmittedProduct } from "../lib"
+import {cleanseUnsubmittedProduct, fetchPropAutofillData} from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
@@ -15,17 +15,16 @@ import { ProductContext } from "../lib"
 import { NotificationsContext } from "../../../components/notification/lib"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
 
 export default function ProductEditor() {
+    /**
+     * Fetch new data from the remote, updating the page with the most up-to-date information.
+     */
     async function fetchNewData() {
         const response = await getProducts(supabase, [product.sku])
-        if (setProduct) {
-            setProduct(response[0])
-        }
-        const tagsResp = await fetchFromNetlifyFunction("getPropertyLists")
-        if (!tagsResp.error && tagsResp.data && setProduct) {
-            propLists = tagsResp.data
-        }
+        if (setProduct) setProduct(response[0])
+        propLists = await fetchPropAutofillData();
     }
 
     const {product, setProduct, originalProd} = useContext(ProductContext)
@@ -33,9 +32,13 @@ export default function ProductEditor() {
 
     // Fetch prop lists
     let propLists: {
-        tags: {id: number, name: string}[], 
+        tags: {name: string}[],
         categories: {id: number, name: string}[]
-    } | undefined = useFetchFromNetlifyFunction("getPropertyLists").data
+    } | undefined = undefined
+    useEffect(() => {
+        async function fetch() {propLists = await fetchPropAutofillData();}
+        fetch()
+    }, [])
 
     // Compile HTMLOptionElements to use in datalists for autocomplete fields.
     const [catOpts, setCatOpts] = useState<ReactElement[]>([])
