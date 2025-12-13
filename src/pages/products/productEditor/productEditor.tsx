@@ -1,4 +1,4 @@
-import { ReactElement, useContext, useEffect, useRef, useState } from "react"
+import React, { ReactElement, useContext, useEffect, useRef, useState } from "react"
 import { ProductData } from "@shared/types/types"
 import {cleanseUnsubmittedProduct, fetchPropAutofillData} from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
@@ -6,7 +6,7 @@ import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
 import { ProductImageEditor } from "./imageEditor"
 import { category_prod_prop, EditableProductPropContext, editableProductProps, tags_prod_prop } from "./editableProductProps"
-import MultiAutocomplete from "../../../components/commaSeparatedAutocomplete/commaSeparatedAutocomplete"
+import MultiAutocomplete, {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx"
 
 import "./productEditor.css"
 import { prodPropParsers } from "./prodPropParsers"
@@ -24,50 +24,38 @@ export default function ProductEditor() {
     async function fetchNewData() {
         const response = await getProducts(supabase, [product.sku])
         if (setProduct) setProduct(response[0])
-        propLists = await fetchPropAutofillData();
+        setPropLists(await fetchPropAutofillData());
     }
 
     const {product, setProduct, originalProd} = useContext(ProductContext)
     if (!product) return <></>
 
     // Fetch prop lists
-    let propLists: {
-        tags: {name: string}[],
-        categories: {id: number, name: string}[]
-    } | undefined = undefined
+    const [propLists, setPropLists] = useState<Awaited<ReturnType<typeof fetchPropAutofillData>>>()
     useEffect(() => {
-        async function fetch() {propLists = await fetchPropAutofillData();}
+        async function fetch() {
+            setPropLists(await fetchPropAutofillData());
+        }
         fetch()
     }, [])
-
-    // Compile HTMLOptionElements to use in datalists for autocomplete fields.
-    const [catOpts, setCatOpts] = useState<ReactElement[]>([])
-    const [tagOpts, setTagOpts] = useState<string[]>([])
-    useEffect(() => {
-        if (propLists && propLists.categories) {
-            setCatOpts(propLists.categories.map((cat) => <option value={cat.name} key={cat.id}>{cat.name}</option>))
-            setTagOpts(propLists.tags.map((tag) => tag.name))
-        } else {
-            setCatOpts([])
-            setTagOpts([])
-        }
-    }, [propLists])
 
     // Prep input fields to be updated on new data
     const [categoryInput, setCategoryInput] = useState<React.JSX.Element | undefined>()
     const [tagsInput, setTagsInput] = useState<React.JSX.Element | undefined>()
     useEffect(() => {
-        setCategoryInput(<>
-            <input list="category-options" id={String(category_prod_prop.propName)+"-editor-input"} placeholder={product.category.name} ref={inputBox}/>
-            <datalist id="category-options" defaultValue={product.category.name}>{catOpts}</datalist>
-        </>)
-        setTagsInput(<MultiAutocomplete
-            values={tagOpts}
-            defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
-        />)
-    }, [product, catOpts, tagOpts])
-
-    const inputBox = useRef<HTMLInputElement>(null);
+        setCategoryInput(
+            <AutocompleteInput
+                values={propLists ? propLists.categories.map(cat => cat.name) : []}
+                defaultValue={product.category.name}
+                id="category_id-editor-input"
+            />)
+        setTagsInput(
+            <MultiAutocomplete
+                values={propLists ? propLists.tags.map(tag => tag.name) : []}
+                defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
+                id="tags-editor-input"
+            />)
+    }, [product, propLists])
 
     return (<><div className="product-editor">
         <h2> Basic Product Data </h2>
@@ -83,7 +71,12 @@ export default function ProductEditor() {
             </EditableProductPropContext.Provider>)}
             
             {/* Category field editor */}
-            <EditableProductPropContext.Provider value={{product, setProduct, productProp: category_prod_prop, originalProd}}>
+            <EditableProductPropContext.Provider value={{
+                product,
+                setProduct,
+                productProp: category_prod_prop,
+                originalProd
+            }}>
                 <EditableProdPropBox fetchNewData={fetchNewData} inputField={categoryInput}/>
             </EditableProductPropContext.Provider>
 
@@ -153,11 +146,10 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         // In this case we have to find the input box from the context.
         if (!value) {
             const unvalidatedInputField = document.getElementById(String(category_prod_prop.propName) + "-editor-input")
-            if (unvalidatedInputField && unvalidatedInputField.tagName == "INPUT") {
+            if (unvalidatedInputField && ["INPUT", "TEXTAREA"].includes(unvalidatedInputField.tagName)) {
                 const inputField = unvalidatedInputField as HTMLInputElement
                 value = inputField.value
                 inputField.value = ""
-                inputField.placeholder = value
             }
         }
 

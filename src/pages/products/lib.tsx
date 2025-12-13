@@ -63,6 +63,5 @@ export async function fetchPropAutofillData() {
     ) as {id: number, name: string}[]
 
     const groupNames = await callRPC("toggle_order_fulfilment", supabase) as string[]
-
     return {tags, categories, groupNames}
 }

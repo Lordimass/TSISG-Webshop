@@ -15,13 +15,13 @@ import { prodPropParsers } from "./prodPropParsers";
  * @param constraint A function to validate the new value.
  */
 export async function updateTagsOverride(
-    key: keyof ProductData, 
-    value: string, 
+    key: keyof ProductData,
+    value: string,
     originalProd: ProductData,
     fetchNewData: () => Promise<void>,
     constraint: (value: string) => boolean): Promise<void> {
     if (key !== "tags") {
-    throw new Error(`Tags override called on non-tags property: ${String(key)}`);
+        throw new Error(`Tags override called on non-tags property: ${String(key)}`);
     }
 
     // Validate the value using the constraint function

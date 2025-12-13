@@ -53,7 +53,6 @@ export const prodPropParsers: Partial<Record<keyof ProductData, (val: string) =>
 
     // Convert category name to ID
     category_id: async (val) => {
-        console.log(val)
         const ID = await getCategoryID(supabase, val)
         if (isNaN(ID)) {throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)}
         return ID

@@ -12,7 +12,7 @@
 }
 
 /* Ghost input (suggestion layer) */
-#ghost-input {
+.ghost-input {
     position: absolute;
     color: var(--jamie-grey); /* ghost text color */
     pointer-events: none; /* don't capture clicks */
@@ -21,7 +21,7 @@
 }
 
 /* Real input (user typing layer) */
-#real-input {
+.real-input {
     position: relative;
     background-color: transparent; /* lets ghost text show */
     color: #000; /* normal text color */
