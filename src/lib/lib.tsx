@@ -84,7 +84,7 @@ export async function getGroup(name: string | null): Promise<ProductData[]> {
  * Given a new quantity and relevant information on a product to associate it with,
  * update the local storage basket to contain that new quantity
  */
-export async function setBasketStringQuantity(
+export function setBasketStringQuantity(
     prod: ProductData | ProductInBasket,
     quant: number,
     currency: Currency = DEFAULT_CURRENCY
@@ -125,7 +125,7 @@ export async function setBasketStringQuantity(
     window.dispatchEvent(new CustomEvent("basketUpdate"))
 
     // Trigger GA4 Event
-    await triggerAddToCart(prod, diff, currency)
+    triggerAddToCart(prod, diff, currency).then()
 }
 
 /**
