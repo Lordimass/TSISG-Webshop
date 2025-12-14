@@ -2,9 +2,10 @@ import {useEffect, useRef, useState} from "react";
 import {User, UserResponse} from "@supabase/supabase-js";
 import {supabase} from "./lib/supabaseRPC";
 import {Notif} from "./components/notification/lib";
-import {useFetchFromNetlifyFunction} from "./lib/netlifyFunctions";
 import {refreshBasket} from "./lib/lib";
 import ReactGA from "react-ga4";
+import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
+import {SiteSettings} from "@shared/types/types.ts";
 
 /**
  * Keeps track of the current login state of the user
@@ -82,34 +83,47 @@ export function useNotifs() {
  */
 export function useSiteSettings(notify: (msg: string, duration?: number) => void) {
     // Fetching Site Settings
-    let siteSettings = useFetchFromNetlifyFunction("getSiteSettings").data ?? {};
-
-    // Notify if kill switch enabled, ONLY on start of session
-    // Also notify session_notif if in time range
+    const [siteSettings, setSiteSettings] = useState<SiteSettings>({})
     useEffect(() => {
-        const killSwitchNotified = sessionStorage.getItem('killSwitchNotified')
-        if (
-            siteSettings.kill_switch
-            && siteSettings.kill_switch.enabled
-            && !killSwitchNotified
-        ) {
-            sessionStorage.setItem("killSwitchNotified", "true")
-            console.log("== KILL SWITCH ENABLED ==")
-            notify(siteSettings.kill_switch.message)
+        async function fetch() {
+            // Use a locally defined variable to allow for immediate manipulation. If we used the siteSettings in state
+            // it would still be `{}` until the next render loop.
+            const siteSettingsList: {id: string, display_name: string, value: string}[] = await fetchColumnsFromTable(
+                supabase,
+                "site_settings",
+                "*"
+            )
+            // Settings are not returned as an object, but as an array of table rows. Convert it to an object.
+            const siteSettings: SiteSettings = {}
+            siteSettingsList.forEach(
+                setting => {siteSettings[setting.id] = setting.value}
+            )
+            setSiteSettings(siteSettings)
+
+            // Enable kill switch and notify user if not already notified this session
+            const killSwitchNotified = sessionStorage.getItem('killSwitchNotified')
+            if (siteSettings.kill_switch?.enabled && !killSwitchNotified) {
+                sessionStorage.setItem("killSwitchNotified", "true")
+                console.log("== KILL SWITCH ENABLED ==")
+                notify(siteSettings.kill_switch.message)
+            }
+
+            // Show current session notification if not already shown this session
+            const sessionNotifNotified = sessionStorage.getItem("sessionNotifNotified")
+            const sessionNotif = siteSettings.session_notif
+            const now = new Date()
+            if (
+                !sessionNotifNotified
+                && sessionNotif
+                && +(new Date(sessionNotif.endTime)) > +now // Coerce dates to numbers
+                && +(new Date(sessionNotif.startTime)) < +now
+            ) {
+                sessionStorage.setItem("sessionNotifNotified", "true")
+                notify(sessionNotif.message, sessionNotif.duration ?? undefined)
+            }
         }
-        const sessionNotifNotified = sessionStorage.getItem("sessionNotifNotified")
-        const sessionNotif = siteSettings.session_notif
-        const now = new Date()
-        if (
-            !sessionNotifNotified
-            && sessionNotif
-            && +(new Date(sessionNotif.endTime)) > +now // Coerce dates to numbers
-            && +(new Date(sessionNotif.startTime)) < +now
-        ) {
-            sessionStorage.setItem("sessionNotifNotified", "true")
-            notify(sessionNotif.message, sessionNotif.duration ?? undefined)
-        }
-    }, [siteSettings])
+        fetch()
+    }, []);
 
     return siteSettings
 }

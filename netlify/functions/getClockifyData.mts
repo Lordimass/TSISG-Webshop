@@ -53,6 +53,7 @@ export default async function handler(request: Request, _context: Context) {try{
             throw await response.json()
         }
     }
+    // Convert the list of time entries into an object containing a total duration for each day of the period.
     return new Response(JSON.stringify(convertToDailyHours(responses, start, end)))
 
 } catch(e: any) {console.error(e); return new Response(e.message, {status: e.status ?? 500})}}
