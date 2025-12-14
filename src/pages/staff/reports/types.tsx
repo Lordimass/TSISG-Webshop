@@ -23,5 +23,7 @@ export type ReportDataMeta = {
     activityPostGitText?: string
     publishedGitCommits?: string[]
     unpublishedGitCommits?: string[]
+    /** IDs of Clockify Users to track time for */
+    clockifyUserIDs?: string[]
     [key: string]: any
 }
