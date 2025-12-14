@@ -4,18 +4,18 @@ import {cleanseUnsubmittedProduct, fetchPropAutofillData} from "../lib"
 import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
-import { ProductImageEditor } from "./imageEditor"
+import { ProductImageEditor } from "../imageEditor/imageEditor.tsx"
 import {
-    category_prod_prop,
+    category_prod_prop, EditableProductProp,
     EditableProductPropContext,
     editableProductProps,
     group_name_prod_prop,
     tags_prod_prop
-} from "./editableProductProps"
+} from "./editableProductProps.ts"
 import MultiAutocomplete, {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx"
 
 import "./productEditor.css"
-import { prodPropParsers } from "./prodPropParsers"
+import { prodPropParsers } from "./prodPropParsers.ts"
 import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
 import { ProductContext } from "../lib"
 import { NotificationsContext } from "../../../components/notification/lib"
@@ -46,75 +46,58 @@ export default function ProductEditor() {
     }, [])
 
     // Prep input fields to be updated on new data
-    const [categoryInput, setCategoryInput] = useState<React.JSX.Element | undefined>()
-    const [tagsInput, setTagsInput] = useState<React.JSX.Element | undefined>()
-    const [groupNameInput, setGroupNameInput] = useState<React.JSX.Element | undefined>()
-    useEffect(() => {
-        setCategoryInput(
-            <AutocompleteInput
-                values={propLists ? propLists.categories.map(cat => cat.name) : []}
-                defaultValue={product.category.name}
-                id="category_id-editor-input"
-            />)
-        setTagsInput(
-            <MultiAutocomplete
-                values={propLists ? propLists.tags.map(tag => tag.name) : []}
-                defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
-                id="tags-editor-input"
-            />)
-        setGroupNameInput(
-            <AutocompleteInput
-                values={propLists?.groupNames ?? []}
-                defaultValue={product.group_name ?? undefined}
-                id="group_name-editor-input"
-            />
-        )
-    }, [product, propLists])
+    const categoryInput = <AutocompleteInput
+        values={propLists ? propLists.categories.map(cat => cat.name) : []}
+        defaultValue={product.category.name}
+        id="category_id-editor-input"
+    />
+    const tagsInput = <MultiAutocomplete
+        values={propLists ? propLists.tags.map(tag => tag.name) : []}
+        defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
+        id="tags-editor-input"
+    />
+    const groupNameInput = <AutocompleteInput
+        values={propLists?.groupNames ?? []}
+        defaultValue={product.group_name ?? undefined}
+        id="group_name-editor-input"
+    />
 
     return (<><div className="product-editor">
         <h2> Basic Product Data </h2>
         {/******************** Main property editors ********************/}
+        <EditableProductPropContext.Provider value={{product, setProduct, originalProd}}>
         <div className="product-editor-grid">
             {/* All standard text field properties */}
-            {editableProductProps.map((productProp) => 
-            <EditableProductPropContext.Provider 
-                value={{product, setProduct, productProp, originalProd}} 
-                key={String(productProp.propName)}
-            >
-                <EditableProdPropBox fetchNewData={fetchNewData}/>
-            </EditableProductPropContext.Provider>)}
+            {editableProductProps.map((productProp) =>
+                <EditableProdPropBox
+                    fetchNewData={fetchNewData}
+                    productProp={productProp}
+                />)
+            }
             
             {/* Category field editor */}
-            <EditableProductPropContext.Provider value={{
-                product,
-                setProduct,
-                productProp: category_prod_prop,
-                originalProd
-            }}>
-                <EditableProdPropBox fetchNewData={fetchNewData} inputField={categoryInput}/>
-            </EditableProductPropContext.Provider>
+            <EditableProdPropBox
+                fetchNewData={fetchNewData}
+                inputField={categoryInput}
+                productProp={category_prod_prop}
+            />
 
             {/* Tag field editor */}
-            <EditableProductPropContext.Provider value={{
-                product,  
-                productProp: tags_prod_prop, 
-                originalProd, 
-                setProduct,
-                updateProductOverride: updateTagsOverride
-            }}>
-                <EditableProdPropBox fetchNewData={fetchNewData} inputField={tagsInput}/>
-            </EditableProductPropContext.Provider>
+            <EditableProdPropBox
+                fetchNewData={fetchNewData}
+                inputField={tagsInput}
+                productProp={tags_prod_prop}
+                updateProductOverride={updateTagsOverride}
+            />
 
             {/* Group Name field editor */}
-            <EditableProductPropContext.Provider value={{
-                product,
-                setProduct,
-                productProp: group_name_prod_prop,
-                originalProd
-            }}>
-                <EditableProdPropBox fetchNewData={fetchNewData} inputField={groupNameInput}/>
-            </EditableProductPropContext.Provider>
+            <EditableProdPropBox
+                fetchNewData={fetchNewData}
+                inputField={groupNameInput}
+                productProp={group_name_prod_prop}
+            />
         </div>
+        </EditableProductPropContext.Provider>
 
         {/*********** Submission Buttons ***********/}
         <button 
@@ -138,7 +121,24 @@ export default function ProductEditor() {
     </>)
 }
 
-function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Promise<void>, inputField?: ReactElement}) {
+function EditableProdPropBox(
+    {
+        fetchNewData,
+        inputField,
+        productProp,
+        updateProductOverride
+    } : {
+        fetchNewData: () => Promise<void>,
+        inputField?: ReactElement,
+        productProp: EditableProductProp
+        updateProductOverride?: (
+            key: keyof ProductData,
+            value: any,
+            originalProd: ProductData,
+            fetchNewData: () => Promise<void>,
+            constraint: (value: string) => boolean) => Promise<void>
+    }
+) {
     /**
      * Updates the given product live on screen and internally within Supabase.
      * @param key A keyof the product type as a string. The key of the value to change
@@ -198,7 +198,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
     const {notify} = useContext(NotificationsContext)
 
     const inputBox = useRef<HTMLTextAreaElement>(null);
-    const {product, productProp, setProduct, originalProd, updateProductOverride} = useContext(EditableProductPropContext)
+    const {product, setProduct, originalProd} = useContext(EditableProductPropContext)
     const [editable, setEditable] = useState(false);
 
     if (!productProp) {

@@ -1,5 +1,5 @@
 import {ImageData, OrderProdCompressed, ProductData} from "@shared/types/supabaseTypes.ts";
-import {UnsubmittedImageData, UnsubmittedProductData} from "../../src/pages/products/productEditor/types.tsx";
+import {UnsubmittedImageData, UnsubmittedProductData} from "../../src/pages/products/productEditor/types.ts";
 import {supabase} from "../../src/lib/supabaseRPC.tsx";
 import {ProductInBasket} from "@shared/types/types.ts";
 import {useState} from "react";

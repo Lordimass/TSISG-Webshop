@@ -1,4 +1,4 @@
-import { UnsubmittedImageData } from "../pages/products/productEditor/types"
+import { UnsubmittedImageData } from "../pages/products/productEditor/types.ts"
 import { ImageData, ProductData } from "@shared/types/types"
 import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 

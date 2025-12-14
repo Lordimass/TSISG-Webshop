@@ -4,7 +4,7 @@
 
 import { getJWTToken } from "../../../lib/auth";
 import { ProductData } from "@shared/types/types";
-import { prodPropParsers } from "./prodPropParsers";
+import { prodPropParsers } from "./prodPropParsers.ts";
 
 /**
  * Updates the tags property of a product.

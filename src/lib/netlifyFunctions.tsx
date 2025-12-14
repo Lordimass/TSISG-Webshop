@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import {ImageData, ProductData} from "@shared/types/types"
-import {UnsubmittedImageData, UnsubmittedProductData} from "../pages/products/productEditor/types"
+import {UnsubmittedImageData, UnsubmittedProductData} from "../pages/products/productEditor/types.ts"
 import {UUID} from "crypto"
 import {compareImages} from "./sortMethods"
 import {getJWTToken} from "./auth"

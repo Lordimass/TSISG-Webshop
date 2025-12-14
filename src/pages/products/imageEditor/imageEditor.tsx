@@ -1,15 +1,15 @@
 import { useContext, useRef, ChangeEvent, useState } from "react";
-import { ImageData } from "@shared/types/types";
-import { getFilenameExtension, openObjectInNewTab } from "../../../lib/lib";
+import { ImageData } from "@shared/types/types.ts";
+import { getFilenameExtension, openObjectInNewTab } from "../../../lib/lib.tsx";
 
 import "./imageEditor.css"
-import { UnsubmittedImageData } from "./types";
-import { compareImages } from "../../../lib/sortMethods";
-import { updateProductData } from "../../../lib/netlifyFunctions";
-import { ProductContext } from "../lib";
-import { removeImage, shiftImage } from "./lib";
-import SquareImageBox from "../../../components/squareImageBox/squareImageBox";
-import { NotificationsContext } from "../../../components/notification/lib";
+import { UnsubmittedImageData } from "../productEditor/types.ts";
+import { compareImages } from "../../../lib/sortMethods.tsx";
+import { updateProductData } from "../../../lib/netlifyFunctions.tsx";
+import { ProductContext } from "../lib.tsx";
+import { removeImage, shiftImage } from "../productEditor/lib.ts";
+import SquareImageBox from "../../../components/squareImageBox/squareImageBox.tsx";
+import { NotificationsContext } from "../../../components/notification/lib.tsx";
 import {AssociationMetadata} from "@shared/types/supabaseTypes.ts";
 
 import {getImageURL} from "@shared/functions/images.ts";

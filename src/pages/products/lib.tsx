@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types";
+import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types.ts";
 import { ImageData, ProductData } from "@shared/types/types";
 import { blank_product } from "../../lib/consts";
 import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";

@@ -1,5 +1,5 @@
 import { ImageData, ProductData } from "@shared/types/types";
-import { UnsubmittedImageData, UnsubmittedProductData } from "./types";
+import { UnsubmittedImageData, UnsubmittedProductData } from "./types.ts";
 
 /**
  * Shifts an image left or right in the product image array

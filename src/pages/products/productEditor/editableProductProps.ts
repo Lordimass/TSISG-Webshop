@@ -1,6 +1,6 @@
 import { createContext } from "react"
 import { ProductData } from "@shared/types/types"
-import { UnsubmittedProductData } from "./types"
+import { UnsubmittedProductData } from "./types.ts"
 import { blank_product } from "../../../lib/consts"
 import { isNumeric } from "../../../lib/lib"
 import {Pie} from "recharts";
@@ -149,12 +149,5 @@ export const EditableProductPropContext = createContext<{
     originalProd: ProductData
     product: ProductData | UnsubmittedProductData,
     setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
-    productProp?: EditableProductProp
-    updateProductOverride?: (
-        key: keyof ProductData, 
-        value: any, 
-        originalProd: ProductData,
-        fetchNewData: () => Promise<void>,
-        constraint: (value: string) => boolean) => Promise<void>
     resetOverride?: () => void
 }>({product: blank_product, originalProd: blank_product})
