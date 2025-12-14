@@ -1,4 +1,4 @@
-import { createContext } from "react"
+import React, { createContext } from "react"
 import { ProductData } from "@shared/types/types"
 import { UnsubmittedProductData } from "./types.ts"
 import { blank_product } from "../../../lib/consts"
@@ -7,6 +7,11 @@ import {Pie} from "recharts";
 import displayName = Pie.displayName;
 
 // Editable Product Properties
+// Editable Product Properties
+export type EditableProductProps = {
+    [key in keyof ProductData]?: EditableProductProp
+}
+
 export type EditableProductProp = {
     propName: keyof ProductData
     displayName: string
@@ -16,7 +21,7 @@ export type EditableProductProp = {
     prefix?: string
     /** String to display next to display name as a hint for what should go in the box */
     tooltip?: string
-    /** 
+    /**
      * The permission required to edit this prop.
      *
      * By default, all props are only editable under the `edit_products` permission, key allows specification of a
@@ -30,28 +35,28 @@ export type EditableProductProp = {
 }
 
 // When updating this, don't forget to also provide a parser in prodPage.tsx to allow conversion to the right type for the prop.
-export const editableProductProps: EditableProductProp[] = [
-    {
+export const editableProductProps: EditableProductProps = {
+    sku: {
         propName: "sku",
         displayName: "SKU",
         tooltip: "The ID of this product.",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false // Never editable
     },
-    {
+    inserted_at: {
         propName: "inserted_at",
         displayName: "Created At",
         tooltip: "Timestamp at which this product was created",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false // Never editable
     },
-    {
+    name: {
         propName: "name",
         displayName: "Name",
         tooltip: "User facing name of the product. Max 50 characters.",
         constraint: (value: string) => value.length <= 50
     },
-    {
+    price: {
         propName: "price",
         displayName: "Price",
         tooltip: "The price of the product in GBP",
@@ -59,90 +64,87 @@ export const editableProductProps: EditableProductProp[] = [
         permission: "edit_price",
         constraint: (value: string) => isNumeric(value)
     },
-    {
+    stock: {
         propName: "stock",
         displayName: "Stock",
         tooltip: "The number of this product left in stock",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
     },
-    {
+    active: {
         propName: "active",
         displayName: "Active",
         tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
         constraint: (value: string) => value.toLowerCase() === "true" || value.toLowerCase() === "false"
     },
-    {
+    weight: {
         propName: "weight",
         displayName: "Weight",
         postfix: "grams",
         tooltip: "The weight of a single product in grams.",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
     },
-    {
+    customs_description: {
         propName: "customs_description",
         displayName: "Customs Description",
         tooltip: "A short description of the product for customs forms. Max length: 50 characters.",
         constraint: (value: string) => value.length < 50
     },
-    {
+    extended_customs_description: {
         propName: "extended_customs_description",
         displayName: "Extended Customs Description",
         tooltip: "An extended description for customs forms applicable to higher value orders. Max length: 300 characters.",
         constraint: (value: string) => value.length < 300
     },
-    {
+    origin_country_code: {
         propName: "origin_country_code",
         displayName: "Origin Country Code",
         tooltip: "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
         constraint: (value: string) => value.length === 3
     },
-    {
+    sort_order: {
         propName: "sort_order",
         displayName: "Sort Order",
         tooltip: "The order in which products are primarily sorted in, lower values appear sooner in the list.",
         constraint: (value: string) => isNumeric(value)
     },
-    {
+    description: {
         propName: "description",
         displayName: "Description",
         tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
         constraint: (_value: string) => true
     },
-    {
+    last_edited: {
         propName: "last_edited",
         displayName: "Last Edited",
         tooltip: "Timestamp at which this product was last edited",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false // Never editable
     },
-    {
+    last_edited_by: {
         propName: "last_edited_by",
         displayName: "Last Edited By",
         tooltip: "The ID of the last person to edit this product",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false // Never editable
+    },
+    category_id: {
+        propName: "category_id",
+        displayName: "Category",
+        tooltip: "The name of the category to place this product in, can be used to create new categories if one with the given name doesn't already exist",
+        constraint: (_value: string) => true
+    },
+    tags: {
+        propName: "tags",
+        displayName: "Tags",
+        tooltip: "A comma separated list of tags associated with this product",
+        constraint: (_value: string) => true
+    },
+    group_name: {
+        propName: "group_name",
+        displayName: "Group Name",
+        tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
+        constraint: (_value: string) => true
     }
-]
-
-export const category_prod_prop: EditableProductProp = {
-    propName: "category_id",
-    displayName: "Category",
-    tooltip: "The name of the category to place this product in, can be used to create new categories if one with the given name doesn't already exist",
-    constraint: (_value: string) => true
-}
-
-export const tags_prod_prop: EditableProductProp = {
-    propName: "tags",
-    displayName: "Tags",
-    tooltip: "A comma separated list of tags associated with this product",
-    constraint: (_value: string) => true
-}
-
-export const group_name_prod_prop: EditableProductProp = {
-    propName: "group_name",
-    displayName: "Group Name",
-    tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
-    constraint: (_value: string) => true
 }
 
 export const EditableProductPropContext = createContext<{

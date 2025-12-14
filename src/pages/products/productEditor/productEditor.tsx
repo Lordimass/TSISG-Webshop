@@ -5,23 +5,16 @@ import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
 import { ProductImageEditor } from "../imageEditor/imageEditor.tsx"
-import {
-    category_prod_prop, EditableProductProp,
-    EditableProductPropContext,
-    editableProductProps,
-    group_name_prod_prop,
-    tags_prod_prop
-} from "./editableProductProps.ts"
 import MultiAutocomplete, {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx"
 
 import "./productEditor.css"
 import { prodPropParsers } from "./prodPropParsers.ts"
-import { fetchFromNetlifyFunction, updateProductData, useFetchFromNetlifyFunction } from "../../../lib/netlifyFunctions"
+import { updateProductData } from "../../../lib/netlifyFunctions"
 import { ProductContext } from "../lib"
 import { NotificationsContext } from "../../../components/notification/lib"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
+import {EditableProductProp, EditableProductPropContext, editableProductProps} from "./editableProductProps.ts";
 
 export default function ProductEditor() {
     /**
@@ -68,25 +61,27 @@ export default function ProductEditor() {
         <EditableProductPropContext.Provider value={{product, setProduct, originalProd}}>
         <div className="product-editor-grid">
             {/* All standard text field properties */}
-            {editableProductProps.map((productProp) =>
-                <EditableProdPropBox
+            {Object.keys(editableProductProps).map((key) => {
+                const productProp = editableProductProps[key as keyof typeof editableProductProps]!;
+                return <EditableProdPropBox
                     fetchNewData={fetchNewData}
                     productProp={productProp}
-                />)
-            }
+                    key={productProp.propName}
+                />
+            })}
             
             {/* Category field editor */}
             <EditableProdPropBox
                 fetchNewData={fetchNewData}
                 inputField={categoryInput}
-                productProp={category_prod_prop}
+                productProp={editableProductProps.category_id!}
             />
 
             {/* Tag field editor */}
             <EditableProdPropBox
                 fetchNewData={fetchNewData}
                 inputField={tagsInput}
-                productProp={tags_prod_prop}
+                productProp={editableProductProps.tags!}
                 updateProductOverride={updateTagsOverride}
             />
 
@@ -94,7 +89,7 @@ export default function ProductEditor() {
             <EditableProdPropBox
                 fetchNewData={fetchNewData}
                 inputField={groupNameInput}
-                productProp={group_name_prod_prop}
+                productProp={editableProductProps.group_name!}
             />
         </div>
         </EditableProductPropContext.Provider>
