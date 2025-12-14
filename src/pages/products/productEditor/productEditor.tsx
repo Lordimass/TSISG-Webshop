@@ -5,7 +5,13 @@ import { openObjectInNewTab } from "../../../lib/lib"
 import { LoginContext } from "../../../app"
 import { updateTagsOverride } from "./updateProductOverrides"
 import { ProductImageEditor } from "./imageEditor"
-import { category_prod_prop, EditableProductPropContext, editableProductProps, tags_prod_prop } from "./editableProductProps"
+import {
+    category_prod_prop,
+    EditableProductPropContext,
+    editableProductProps,
+    group_name_prod_prop,
+    tags_prod_prop
+} from "./editableProductProps"
 import MultiAutocomplete, {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx"
 
 import "./productEditor.css"
@@ -42,6 +48,7 @@ export default function ProductEditor() {
     // Prep input fields to be updated on new data
     const [categoryInput, setCategoryInput] = useState<React.JSX.Element | undefined>()
     const [tagsInput, setTagsInput] = useState<React.JSX.Element | undefined>()
+    const [groupNameInput, setGroupNameInput] = useState<React.JSX.Element | undefined>()
     useEffect(() => {
         setCategoryInput(
             <AutocompleteInput
@@ -55,6 +62,13 @@ export default function ProductEditor() {
                 defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
                 id="tags-editor-input"
             />)
+        setGroupNameInput(
+            <AutocompleteInput
+                values={propLists?.groupNames ?? []}
+                defaultValue={product.group_name ?? undefined}
+                id="group_name-editor-input"
+            />
+        )
     }, [product, propLists])
 
     return (<><div className="product-editor">
@@ -89,6 +103,16 @@ export default function ProductEditor() {
                 updateProductOverride: updateTagsOverride
             }}>
                 <EditableProdPropBox fetchNewData={fetchNewData} inputField={tagsInput}/>
+            </EditableProductPropContext.Provider>
+
+            {/* Group Name field editor */}
+            <EditableProductPropContext.Provider value={{
+                product,
+                setProduct,
+                productProp: group_name_prod_prop,
+                originalProd
+            }}>
+                <EditableProdPropBox fetchNewData={fetchNewData} inputField={groupNameInput}/>
             </EditableProductPropContext.Provider>
         </div>
 
@@ -145,7 +169,7 @@ function EditableProdPropBox({fetchNewData, inputField}: {fetchNewData: () => Pr
         // When the inputField is specified, the value of `value` will be undefined since the ref cannot point to it.
         // In this case we have to find the input box from the context.
         if (!value) {
-            const unvalidatedInputField = document.getElementById(String(category_prod_prop.propName) + "-editor-input")
+            const unvalidatedInputField = document.getElementById(productProp!.propName + "-editor-input")
             if (unvalidatedInputField && ["INPUT", "TEXTAREA"].includes(unvalidatedInputField.tagName)) {
                 const inputField = unvalidatedInputField as HTMLInputElement
                 value = inputField.value

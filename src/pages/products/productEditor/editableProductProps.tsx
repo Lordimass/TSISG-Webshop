@@ -3,6 +3,8 @@ import { ProductData } from "@shared/types/types"
 import { UnsubmittedProductData } from "./types"
 import { blank_product } from "../../../lib/consts"
 import { isNumeric } from "../../../lib/lib"
+import {Pie} from "recharts";
+import displayName = Pie.displayName;
 
 // Editable Product Properties
 export type EditableProductProp = {
@@ -107,12 +109,6 @@ export const editableProductProps: EditableProductProp[] = [
         constraint: (_value: string) => true
     },
     {
-        propName: "group_name",
-        displayName: "Group Name",
-        tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
-        constraint: (_value: string) => true
-    },
-    {
         propName: "last_edited",
         displayName: "Last Edited",
         tooltip: "Timestamp at which this product was last edited",
@@ -139,6 +135,13 @@ export const tags_prod_prop: EditableProductProp = {
     propName: "tags",
     displayName: "Tags",
     tooltip: "A comma separated list of tags associated with this product",
+    constraint: (_value: string) => true
+}
+
+export const group_name_prod_prop: EditableProductProp = {
+    propName: "group_name",
+    displayName: "Group Name",
+    tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
     constraint: (_value: string) => true
 }
 
