@@ -27,7 +27,9 @@ export const ReportContext = createContext<{
 async function fetchReport(notify: (msg: string) => void): Promise<ReportData | undefined> {
     const path = window.location.pathname.split("/")
     const id = path[path.length-1]
-    const fetchResp = await supabase.from("reports").select("*").eq("id", id)
+    const fetchResp = await supabase.from("reports")
+        .select("*")
+        .eq("id", id)
     if (fetchResp.error) {
         notify(fetchResp.error.message)
         return

@@ -33,8 +33,13 @@ export default async function handler(request: Request, _context: Context) {try{
     for (let i=0; i<clockifyUsers.length; i++) {
         // Construct endpoint with query string parameters
         const userID = clockifyUsers[i]
-        let endpoint = `
-            https://api.clockify.me/api/v1/workspaces/${process.env.CLOCKIFY_WORKSPACE_ID}/user/${userID}/time-entries?start=${start}&end=${end}&page-size=${days*5}`
+        let endpoint = new URL(
+            `https://api.clockify.me/api/v1/workspaces/${process.env.CLOCKIFY_WORKSPACE_ID}/user/${userID}/time-entries`
+        )
+        endpoint.searchParams.set("start", start)
+        endpoint.searchParams.set("end", end)
+        endpoint.searchParams.set("page-size", ""+days*5)
+
         // Set API Key Header
         const headers: HeadersInit = new Headers();
         headers.set("x-api-key", process.env.CLOCKIFY_KEY!);

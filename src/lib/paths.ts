@@ -88,6 +88,6 @@ export function getReportPagePath(
     maintainQueryString = true
 ) {
     const url = new URL(window.location.href)
-    url.pathname = `/reports/${id}`
+    url.pathname = `/staff/reports/${id}`
     return url.pathname+(maintainQueryString ? url.search : "")
 }
