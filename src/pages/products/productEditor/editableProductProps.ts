@@ -8,6 +8,8 @@ import displayName = Pie.displayName;
 import {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx";
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
 import {fetchPropAutofillData} from "../lib.tsx";
+import {getCategoryID} from "@shared/functions/supabase.ts";
+import {supabase} from "../../../lib/supabaseRPC.tsx";
 
 // Editable Product Properties
 export type EditableProductProps = {[K in keyof ProductData]?: EditableProductProp<K>}
@@ -57,8 +59,7 @@ function getDefaultProductProps<T extends keyof ProductData>(key: T) {
     } satisfies Partial<EditableProductProp<T>>
 }
 
-// When updating this, don't forget to also provide a parser in prodPage.tsx to allow conversion to the right type for the prop.
-export const editableProductProps: EditableProductProps = {
+export const editableProductProps = {
     sku: { ...getDefaultProductProps("sku"),
         displayName: "SKU",
         tooltip: "The ID of this product.",
@@ -73,20 +74,28 @@ export const editableProductProps: EditableProductProps = {
         tooltip: "The price of the product in GBP",
         postfix: "GBP",
         permission: "edit_price",
-        constraint: (value: string) => isNumeric(value)
+        constraint: (value: string) => isNumeric(value) && parseFloat(value) >= 0,
+        fromStringParser: val => parseFloat(val)
     },
     stock: { ...getDefaultProductProps("stock"),
         tooltip: "The number of this product left in stock",
-        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
+        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
+        fromStringParser: val => parseInt(val, 10)
     },
     active: {...getDefaultProductProps("active"),
         tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
-        constraint: (value: string) => value.toLowerCase() === "true" || value.toLowerCase() === "false"
+        constraint: (value: string) => value.toLowerCase() === "true" || value.toLowerCase() === "false",
+        fromStringParser: val => {
+            if (val === "true") return true;
+            if (val === "false") return false;
+            else throw new Error(`Invalid boolean ${val} wasn't caught by prop constraint.`)
+        }
     },
     weight: { ...getDefaultProductProps("weight"),
         postfix: "grams",
         tooltip: "The weight of a single product in grams.",
-        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0
+        constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
+        fromStringParser: val => parseFloat(val)
     },
     customs_description: { ...getDefaultProductProps("customs_description"),
         tooltip: "A short description of the product for customs forms. Max length: 50 characters.",
@@ -102,7 +111,8 @@ export const editableProductProps: EditableProductProps = {
     },
     sort_order: { ...getDefaultProductProps("sort_order"),
         tooltip: "The order in which products are primarily sorted in, lower values appear sooner in the list.",
-        constraint: (value: string) => isNumeric(value)
+        constraint: (value: string) => isNumeric(value),
+        fromStringParser: val => parseInt(val)
     },
     description: { ...getDefaultProductProps("description"),
         tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
@@ -114,6 +124,11 @@ export const editableProductProps: EditableProductProps = {
         constraint: (_value: string) => true,
         toStringParser: (product: ProductData | UnsubmittedProductData) => product.category.name,
         autocompleteMode: "SINGLE",
+        fromStringParser: async (val) => {
+            const ID: number = await getCategoryID(supabase, val)
+            if (isNaN(ID)) {throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)}
+            return ID
+        }
     },
     tags: { ...getDefaultProductProps("tags"),
         tooltip: "A comma separated list of tags associated with this product",
@@ -123,9 +138,22 @@ export const editableProductProps: EditableProductProps = {
             const tagNames = product.tags.map(tag => tag.name)
             return tagNames.toString()
                 .replace(/[\[\]]/g, "") // Remove square brackets.
-                .replace(",", ", ") // Add spaces between commas.
+                .replace(/,/g, ", ") // Add spaces between commas.
         },
-        autocompleteMode: "MULTI"
+        autocompleteMode: "MULTI",
+        fromStringParser: async (val) => {
+            if (!val) throw new Error("Tags string is empty");
+            // Split string by commas andr remove trailing white space
+            let tags = val.split(",").map(tag => {
+                return tag
+                    .trim() // Remove trailing spaces
+                    .replace(" ", "-") // Spaces to dashes
+                    .replace(/-+/g, "-") // Collapse repeated dashes into 1
+                    .toLowerCase() // Lower case the whole string
+                    .replace(/[^a-z0-9-]+/g, "") // Cleanse characters down to just a-z | A-Z
+            }).filter(tag => tag != "") // Filter out blank tags
+            return tags.map(tag => {return {name: tag, created_at: ""}})
+        }
     },
     group_name: { ...getDefaultProductProps("group_name"),
         tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
@@ -148,7 +176,7 @@ export const editableProductProps: EditableProductProps = {
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false, // Never editable
     }
-}
+} satisfies EditableProductProps
 
 export const ProductEditorContext = createContext<{
     originalProd: ProductData

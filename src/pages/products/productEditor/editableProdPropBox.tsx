@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
-import {editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
+import {EditableProductProp, editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
-import {prodPropParsers} from "./prodPropParsers.ts";
 import {cleanseUnsubmittedProduct} from "../lib.tsx";
 import {updateProductData} from "../../../lib/netlifyFunctions.tsx";
 import {LoginContext} from "../../../lib/auth.tsx";
@@ -37,7 +36,7 @@ export function ProdPropEditor() {
             val: string,
             target: ProductData
         ) {
-            const parser = prodPropParsers[key];
+            const parser = params?.fromStringParser as (val: string) => ProductData[K] | Promise<ProductData[K]>;
             if (parser) {
                 target[key] = await parser(val);
             } else {
@@ -80,7 +79,7 @@ export function ProdPropEditor() {
     const {propName} = useContext(SingleProdPropContext)
     const editorContext = useContext(ProductEditorContext)
     const prod = editorContext.product
-    const params = editableProductProps[propName];
+    const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
 
     // Fetch the input box by ID, since in some cases the box isn't defined in this component so we aren't able to set

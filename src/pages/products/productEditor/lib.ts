@@ -1,6 +1,7 @@
 import { ImageData, ProductData } from "@shared/types/types";
 import { UnsubmittedImageData, UnsubmittedProductData } from "./types.ts";
 import {createContext} from "react";
+import {editableProductProps} from "./editableProductProps.ts";
 
 /**
  * Context required for a single product property editor
@@ -10,7 +11,7 @@ import {createContext} from "react";
  * @see Multi
  */
 export const SingleProdPropContext = createContext<{
-    propName: keyof ProductData
+    propName: keyof typeof editableProductProps
 }>({
     propName: "sku",
 })

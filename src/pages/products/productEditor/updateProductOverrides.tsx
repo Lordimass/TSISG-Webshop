@@ -4,7 +4,7 @@
 
 import { getJWTToken } from "../../../lib/auth";
 import { ProductData } from "@shared/types/types";
-import { prodPropParsers } from "./prodPropParsers.ts";
+import {editableProductProps} from "./editableProductProps.ts";
 
 /**
  * Updates the tags property of a product.
@@ -24,9 +24,7 @@ export async function updateTagsOverride(
         throw new Error(`Invalid value for tags: ${value}`);
     }
 
-    const parser = prodPropParsers["tags"];
-    if (!parser) throw new Error(`No parser found for tags property`);
-    const tags = await parser(value);
+    const tags = await editableProductProps.tags?.fromStringParser(value);
 
     await fetch("/.netlify/functions/setProductTags", {
         method: "POST",
@@ -36,7 +34,7 @@ export async function updateTagsOverride(
         },
         body: JSON.stringify({
             sku: originalProd.sku,
-            tags
+            tags: tags.map(tag => tag.name),
         })
     });
 
