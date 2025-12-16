@@ -34,12 +34,7 @@ export type EditableProductProp<T extends keyof ProductData> = {
     /** Mode of any autocompletion applied to the input field */
     autocompleteMode: "NONE" | "SINGLE" | "MULTI"
     /** A function to run to update this property on the remote, instead of the default functionality */
-    updateProductOverride?: (
-        value: string,
-        originalProd: ProductData,
-        fetchNewData: () => Promise<void>,
-        constraint: (value: string) => boolean,
-    ) => Promise<void>
+    updateProductOverride?: (value: string, editorContext: ProductEditorContextType) => Promise<void> | void
     /** Function to extract a display string for this property from the product. */
     toStringParser: (product: ProductData | UnsubmittedProductData) => string
     /** A function to parse a display string for this property back to a value that can be used to update the product */
@@ -178,11 +173,14 @@ export const editableProductProps = {
     }
 } satisfies EditableProductProps
 
-export const ProductEditorContext = createContext<{
+export interface ProductEditorContextType {
     originalProd: ProductData
     product: ProductData | UnsubmittedProductData,
     setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
     resetOverride?: () => void,
     fetchNewData?: () => Promise<void>,
     propLists?: Awaited<ReturnType<typeof fetchPropAutofillData>>
-}>({product: blank_product, originalProd: blank_product})
+}
+export const ProductEditorContext = createContext<ProductEditorContextType>(
+    {product: blank_product, originalProd: blank_product}
+)

@@ -1,6 +1,7 @@
 import {SupabaseClient} from "@supabase/supabase-js";
 import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
-import {CompressedOrder} from "@shared/types/supabaseTypes.ts";
+import {CompressedOrder, TagData} from "@shared/types/supabaseTypes.ts";
+import getSupabaseClient from "../../netlify/lib/getSupabaseClient.ts";
 
 /**
  * Wrapper method for {@link SupabaseClient.from.select}
@@ -58,4 +59,33 @@ export async function getCategoryID(supabase: SupabaseClient, categoryName: stri
         .select()
     if (createError) throw createError;
     return createData[0].id;
+}
+
+/**
+ * Set the tags associated with a product on Supabase.
+ * @param supabase Supabase client to use to perform this operation.
+ * @param productSku
+ * @param tags
+ */
+export async function setProductTags(supabase: SupabaseClient, productSku: number, tags: TagData[]) {
+    // Create tags if they don't already exist
+    const minimalTags = tags.map(tag => {return {name: tag.name}})
+    const {error: insertError} = await supabase!
+        .from("tags")
+        .upsert(minimalTags, { onConflict: "name", ignoreDuplicates: true })
+    if (insertError) throw insertError
+
+    // Remove existing product_tags entries for the SKU
+    const {error: deleteError} = await supabase!
+        .from("product_tags")
+        .delete()
+        .eq("sku", productSku);
+    if (deleteError) throw deleteError;
+
+    // Map tags to product_tags entries
+    const mapping = tags.map(tag => ({sku: productSku, tag: tag.name}));
+    const {error: mappingError} = await supabase!
+        .from("product_tags")
+        .upsert(mapping, { onConflict: "sku, tag", ignoreDuplicates: true });
+    if (mappingError) throw mappingError;
 }

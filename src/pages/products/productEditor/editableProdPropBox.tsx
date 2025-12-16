@@ -55,7 +55,7 @@ export function ProdPropEditor() {
 
         // Run override if it exists
         if (params.updateProductOverride) {
-            await params.updateProductOverride(value, editorContext.originalProd, editorContext.fetchNewData, constraint);
+            await params.updateProductOverride(value, editorContext);
             return;
         }
 
