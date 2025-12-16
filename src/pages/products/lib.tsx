@@ -5,6 +5,7 @@ import { blank_product } from "../../lib/consts";
 import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {EditableProductProp} from "./productEditor/editableProductProps.ts";
 
 export const ProductContext = createContext<{
     basketQuant?: number, 
@@ -42,26 +43,32 @@ export function cleanseUnsubmittedProduct(product: UnsubmittedProductData): Prod
 
 /**
  * Fetches data for autofill, such as the list of tags and categories currently available.
- * @returns An object with keys corresponding to the type of autofill data, and values as lists of objects containing data on each item.
+ * @returns An object with keys from ProductData corresponding to the type of autofill data, and values as lists of
+ * strings to use as autofill data for each key.
  * @example
   {
-      categories: [{id: 1, name: "Magnets"}, {id: 2, name: "Pin Badges"}, ...],
-      tags: [{name: "bisexual"}, {name: "lesbian"}, {name: "lgbt"}, ...]
+      category_id: [{id: 1, name: "Magnets"}, {id: 2, name: "Pin Badges"}, ...],
+      tags: [{name: "bisexual"}, {name: "lesbian"}, {name: "lgbt"}, ...],
+      ...
   }
  */
-export async function fetchPropAutofillData() {
-    const tags = await fetchColumnsFromTable(
+export async function fetchPropAutofillData(): Promise<Partial<Record<keyof ProductData, string[]>>> {
+    // Fetch tags
+    const tagsRaw = await fetchColumnsFromTable(
         supabase,
         "tags",
         "name"
     ) as {name: string}[]
+    const tags = tagsRaw.map((tag) => tag.name)
 
-    const categories = await fetchColumnsFromTable(
+    const categoriesRaw = await fetchColumnsFromTable(
         supabase,
         "product_categories",
         "id, name"
     ) as {id: number, name: string}[]
+    const categories = categoriesRaw.map((category) => category.name)
 
-    const groupNames = await callRPC("toggle_order_fulfilment", supabase) as string[]
-    return {tags, categories, groupNames}
+    const groupNames = await callRPC("fetch_group_names", supabase) as string[]
+
+    return {tags, category_id: categories, group_name: groupNames}
 }

@@ -1,20 +1,14 @@
-import React, { ReactElement, useContext, useEffect, useRef, useState } from "react"
-import { ProductData } from "@shared/types/types"
-import {cleanseUnsubmittedProduct, fetchPropAutofillData} from "../lib"
-import { openObjectInNewTab } from "../../../lib/lib"
-import { LoginContext } from "../../../app"
-import { updateTagsOverride } from "./updateProductOverrides"
-import { ProductImageEditor } from "../imageEditor/imageEditor.tsx"
-import MultiAutocomplete, {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx"
+import React, {useContext, useEffect, useState} from "react"
+import {fetchPropAutofillData, ProductContext} from "../lib"
+import {openObjectInNewTab} from "../../../lib/lib"
+import {ProductImageEditor} from "../imageEditor/imageEditor.tsx"
 
 import "./productEditor.css"
-import { prodPropParsers } from "./prodPropParsers.ts"
-import { updateProductData } from "../../../lib/netlifyFunctions"
-import { ProductContext } from "../lib"
-import { NotificationsContext } from "../../../components/notification/lib"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {EditableProductProp, EditableProductPropContext, editableProductProps} from "./editableProductProps.ts";
+import {ProductEditorContext, editableProductProps} from "./editableProductProps.ts";
+import {ProdPropEditor} from "./editableProdPropBox.tsx";
+import { SingleProdPropContext } from "./lib.ts"
 
 export default function ProductEditor() {
     /**
@@ -38,61 +32,22 @@ export default function ProductEditor() {
         fetch()
     }, [])
 
-    // Prep input fields to be updated on new data
-    const categoryInput = <AutocompleteInput
-        values={propLists ? propLists.categories.map(cat => cat.name) : []}
-        defaultValue={product.category.name}
-        id="category_id-editor-input"
-    />
-    const tagsInput = <MultiAutocomplete
-        values={propLists ? propLists.tags.map(tag => tag.name) : []}
-        defaultValue={product.tags.map((tag: any) => tag.name).join(", ")}
-        id="tags-editor-input"
-    />
-    const groupNameInput = <AutocompleteInput
-        values={propLists?.groupNames ?? []}
-        defaultValue={product.group_name ?? undefined}
-        id="group_name-editor-input"
-    />
-
     return (<><div className="product-editor">
         <h2> Basic Product Data </h2>
         {/******************** Main property editors ********************/}
-        <EditableProductPropContext.Provider value={{product, setProduct, originalProd}}>
+        <ProductEditorContext.Provider value={{product, setProduct, originalProd, fetchNewData, propLists}}>
         <div className="product-editor-grid">
             {/* All standard text field properties */}
             {Object.keys(editableProductProps).map((key) => {
-                const productProp = editableProductProps[key as keyof typeof editableProductProps]!;
-                return <EditableProdPropBox
-                    fetchNewData={fetchNewData}
-                    productProp={productProp}
-                    key={productProp.propName}
-                />
+                return <SingleProdPropContext.Provider
+                    value={{propName: key as keyof typeof editableProductProps}}
+                    key={key as keyof typeof editableProductProps}
+                >
+                    <ProdPropEditor/>
+                </SingleProdPropContext.Provider>
             })}
-            
-            {/* Category field editor */}
-            <EditableProdPropBox
-                fetchNewData={fetchNewData}
-                inputField={categoryInput}
-                productProp={editableProductProps.category_id!}
-            />
-
-            {/* Tag field editor */}
-            <EditableProdPropBox
-                fetchNewData={fetchNewData}
-                inputField={tagsInput}
-                productProp={editableProductProps.tags!}
-                updateProductOverride={updateTagsOverride}
-            />
-
-            {/* Group Name field editor */}
-            <EditableProdPropBox
-                fetchNewData={fetchNewData}
-                inputField={groupNameInput}
-                productProp={editableProductProps.group_name!}
-            />
         </div>
-        </EditableProductPropContext.Provider>
+        </ProductEditorContext.Provider>
 
         {/*********** Submission Buttons ***********/}
         <button 
@@ -116,142 +71,3 @@ export default function ProductEditor() {
     </>)
 }
 
-function EditableProdPropBox(
-    {
-        fetchNewData,
-        inputField,
-        productProp,
-        updateProductOverride
-    } : {
-        fetchNewData: () => Promise<void>,
-        inputField?: ReactElement,
-        productProp: EditableProductProp
-        updateProductOverride?: (
-            key: keyof ProductData,
-            value: any,
-            originalProd: ProductData,
-            fetchNewData: () => Promise<void>,
-            constraint: (value: string) => boolean) => Promise<void>
-    }
-) {
-    /**
-     * Updates the given product live on screen and internally within Supabase.
-     * @param key A keyof the product type as a string. The key of the value to change
-     * @param value The new value to map the key to. Automatically parsed to the right type for the given key
-     * @param constraint A boolean method which returns true if the value is valid, false if not.
-     */
-    async function updateProduct(key: keyof ProductData, value: any, constraint: (value: string) => boolean) {
-        // Run override if it exists
-        if (updateProductOverride) {
-            await updateProductOverride(key, value, originalProd, fetchNewData, constraint);
-            return;
-        }
-
-        async function assignTypedValue<K extends keyof ProductData>( // Parse string to right type using mapped parser from productTypeMap
-            key: K,
-            val: string,
-            target: Partial<ProductData>
-        ) {
-            const parser = prodPropParsers[key];
-            if (parser) {
-                target[key] = await parser(val);
-            } else { // Fallback to raw string if no parser provided
-                target[key] = val as ProductData[K]
-            }
-            return target
-        }
-
-        // When the inputField is specified, the value of `value` will be undefined since the ref cannot point to it.
-        // In this case we have to find the input box from the context.
-        if (!value) {
-            const unvalidatedInputField = document.getElementById(productProp!.propName + "-editor-input")
-            if (unvalidatedInputField && ["INPUT", "TEXTAREA"].includes(unvalidatedInputField.tagName)) {
-                const inputField = unvalidatedInputField as HTMLInputElement
-                value = inputField.value
-                inputField.value = ""
-            }
-        }
-
-        const valid = constraint(value)
-        if (!valid) {
-            notify(`Value for ${String(key)} is invalid.`)
-            return
-        }
-        if (!setProduct) {return}
-
-        const newProduct: ProductData = cleanseUnsubmittedProduct({...product})
-        // Assign the changed value
-        await assignTypedValue(key, value, newProduct)
-        console.log(newProduct)
-        // Update on Supabase
-        await updateProductData(newProduct) 
-        // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
-        fetchNewData()
-    }
-
-    const loginContext = useContext(LoginContext)
-    const {notify} = useContext(NotificationsContext)
-
-    const inputBox = useRef<HTMLTextAreaElement>(null);
-    const {product, setProduct, originalProd} = useContext(EditableProductPropContext)
-    const [editable, setEditable] = useState(false);
-
-    if (!productProp) {
-        return
-    }
-
-    // Set edit permissions
-    useEffect(()=>{
-        productProp.permission ? 
-        setEditable(loginContext.permissions.includes(productProp.permission)) :
-        setEditable(loginContext.permissions.includes("edit_products"))
-    }, [loginContext])
-
-    // Auto-resize text field when value changes
-    useEffect(() => {
-        if (inputBox.current && productProp) {
-            const newVal = product[productProp?.propName]
-            inputBox.current.value = newVal ? newVal.toString() : ""
-            autoResizeTextarea(inputBox.current)
-        }
-    }, [product])
-
-    return <div className="editable-prop" id={productProp.propName.toString()+"-editable-prop"}>
-        <div className="editable-prop-title">
-            {productProp.displayName}
-            {productProp.tooltip ? <span className="superscript tooltipable">[?]<span className="tooltip">{productProp.tooltip}</span></span> : <></>}
-        </div>
-        <div className="editable-prop-input-box">
-            {productProp.prefix ? <p>{productProp.prefix}</p> : <></>}
-            {inputField ? inputField : 
-            <textarea 
-                className="prop-editor-input"
-                id={productProp.propName.toString()+"-editor-input"}
-                defaultValue={product[productProp.propName] == null ? product[productProp.propName]?.toString() : "Error: Invalid Key Value"}
-                onInput={(e) => autoResizeTextarea(e.currentTarget)}
-                ref={(el) => {autoResizeTextarea(el); inputBox.current = el}}
-                disabled={!editable}
-            />}
-            {productProp.postfix ? <p>{productProp.postfix}</p> : <></>}
-        </div>
-        <div className="prop-buttons">
-            <button 
-                className="update-prop-button" 
-                onClick={() => {updateProduct(productProp.propName, inputBox.current?.value, productProp.constraint)}}
-                disabled={!editable}
-            >Update</button>
-            <button 
-                className="reset-prop-button" 
-                onClick={() => {updateProduct(productProp.propName, originalProd[productProp.propName], () => true)}}
-                disabled={!editable}
-            >Reset</button>
-        </div>
-    </div>
-}
-
-function autoResizeTextarea(el: HTMLTextAreaElement | null) {
-  if (el) {
-    el.style.height = 'auto'; // Reset
-    el.style.height = `${el.scrollHeight + 10}px`; // Set to scroll height
-  }
-}

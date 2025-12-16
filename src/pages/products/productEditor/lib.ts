@@ -1,5 +1,19 @@
 import { ImageData, ProductData } from "@shared/types/types";
 import { UnsubmittedImageData, UnsubmittedProductData } from "./types.ts";
+import {createContext} from "react";
+
+/**
+ * Context required for a single product property editor
+ *
+ * @see ProdPropEditor
+ * @see AutocompleteProdPropEditor
+ * @see Multi
+ */
+export const SingleProdPropContext = createContext<{
+    propName: keyof ProductData
+}>({
+    propName: "sku",
+})
 
 /**
  * Shifts an image left or right in the product image array

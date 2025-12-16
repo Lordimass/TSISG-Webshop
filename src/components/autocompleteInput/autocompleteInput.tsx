@@ -9,10 +9,12 @@ import {AutocompleteProps} from "./lib.ts";
  * @param placeholder TextArea placeholder text.
  * @param defaultValue Default value for the TextArea.
  * @param onChange A callback function. Called when the text in the textArea changes.
- * @param id Props to be passed to the real textArea only
+ * @param ref A reference object to apply to the real textArea only
+ * @param id ID to be passed to the real textArea only
  */
-export function AutocompleteInput({values, placeholder, defaultValue, onChange, id}: AutocompleteProps) {
+export function AutocompleteInput({values, placeholder, defaultValue, onChange, id, ref}: AutocompleteProps) {
     const a = useAutocomplete(defaultValue)
+    if (ref) ref.current = a.inputRef.current
 
     function updateGhost(value: string) {
         const match = values.find((v) =>
@@ -66,11 +68,13 @@ export function AutocompleteInput({values, placeholder, defaultValue, onChange, 
  * @param placeholder TextArea placeholder text.
  * @param defaultValue Default value for the TextArea.
  * @param onChange A callback function. Called when the text in the textArea changes.
- * @param id Props to be passed to the real textArea only
+ * @param ref A reference object to apply to the real textArea only
+ * @param id ID to be passed to the real textArea only
  */
-export default function MultiAutocomplete({values, placeholder, defaultValue, onChange, id}:
+export function MultiAutocomplete({values, placeholder, defaultValue, onChange, id, ref}:
     AutocompleteProps & { onChange?: (value: string[]) => void }) {
     const a = useAutocomplete(defaultValue);
+    if (ref) ref.current = a.inputRef.current
 
     function updateGhost(value: string) {
         const parts = value.split(",").map((s) => s.trim());

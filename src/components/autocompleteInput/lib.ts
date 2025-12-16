@@ -1,4 +1,4 @@
-import {TextareaHTMLAttributes} from "react";
+import React from "react";
 
 export type AutocompleteProps = {
     values: string[];
@@ -6,4 +6,5 @@ export type AutocompleteProps = {
     defaultValue?: string;
     onChange?: (values: string) => void;
     id?: string
+    ref?: React.RefObject<HTMLTextAreaElement | null>;
 }
