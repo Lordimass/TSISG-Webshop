@@ -1,9 +1,9 @@
 .throbber {
-    border: 0.5em solid #f3f3f3; /* Light grey */
-    border-top: 0.5em solid var(--purple);
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top-color: var(--purple);
     border-radius: 50%;
-    width: 3em;
-    height: 3em;
+    width: 48px;
+    height: 48px;
     animation: spin 2s linear infinite;
 }
   

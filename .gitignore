@@ -31,3 +31,6 @@ commits.csv
 shared/schemas/schemas.json
 /.env.netlify
 /.env.production
+
+*storybook.log
+storybook-static
