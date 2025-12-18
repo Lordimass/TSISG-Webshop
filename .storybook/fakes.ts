@@ -1,4 +1,5 @@
 import {CategoryData, ImageData, ProductData, TagData} from "@shared/types/supabaseTypes.ts";
+import {ProductInBasket} from "@shared/types/types.ts";
 
 export const fakeImageData: ImageData = {
     "id": "f66e3193-327a-48c2-a149-63db1edcc2b8",
@@ -136,6 +137,11 @@ export const fakeProductData: ProductData = {
     "origin_country_code": "CHN",
     "package_type_override": null,
     "extended_customs_description": ""
+}
+
+export const fakeProductInBasket: ProductInBasket = {
+    ...fakeProductData,
+    basketQuantity: 3
 }
 
 export const fakeProductGroup: ProductData[] = [

@@ -262,11 +262,19 @@ function GroupBasketModifier() {
     )
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export function BasketProduct({product}: { product: ProductInBasket }) {
+/**
+ * Displays a product from the customer's basket with a basket ticker. Visually, this component is more suited to be
+ * shown in the basket than the default {@link Product} component.
+ */
+export function BasketProduct({product}: {
+    /** The product in the customer's basket to display */
+    product: ProductInBasket
+}
+) {
     const {sku, name, price, images, stock} = product
     const {currency} = useContext(LocaleContext)
 
@@ -394,25 +402,27 @@ export function BasketProduct({product}: { product: ProductInBasket }) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @param product The product to display
- * @param admin Whether the product should be rendered in admin mode or not
- * @param checkbox Whether to display a checkbox alongside the product, for ticking off lists etc.
- * @param linked Whether the product should be clickable to go to its product page
- * @param currency Override currency to display. Only use to display a currency other than the user's local currency.
+ * Display a product without a basket ticker. Primarily used for recapping the customer basket on the checkout page.
  */
 export function CheckoutProduct({
-                                    product,
-                                    admin,
-                                    checkbox,
-                                    linked,
-                                    currency
-                                }: {
+    product,
+    admin = false,
+    checkbox = false,
+    linked = false,
+    currency
+} : {
+    /** The product to display */
     product: ProductData | ProductInBasket | OrderProdCompressed
+    /** Whether the product should be rendered in admin mode or not */
     admin?: boolean
+    /** Whether to display a checkbox alongside the product, for ticking off lists etc. */
     checkbox?: boolean
+    /** Whether the product should be clickable to go to its product page */
     linked?: boolean
+    /** Override currency to display. Only use to display a currency other than the user's local currency. */
     currency?: Currency
-}) {
+}
+) {
     // In some cases an undefined value may accidentally be passed
     // to the component, in which case we should escape it and
     // render nothing, it will likely become defined once the page

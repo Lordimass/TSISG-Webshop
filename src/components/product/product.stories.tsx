@@ -23,8 +23,5 @@ export const SingleProduct: Product = {
 export const Group: Product = {
     args: {
         prod: fakeProductGroup
-    },
-    globals: {
-        viewport: {value: "mobile", isRotated: false}
     }
 };
