@@ -35,7 +35,7 @@ type SquareImageBoxProps = {
  * When multiple images are supplied, a reactive image carousel
  * is displayed in this same square box.
  */
-export default function SquareImageBox({
+export function SquareImageBox({
    image,
    alt,
    size = "200px",

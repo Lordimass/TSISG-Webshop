@@ -1,8 +1,8 @@
 import {useState, useEffect, useContext} from 'react';
 
 import "./product.css"
-import {blank_product, max_product_order} from '../../lib/consts';
-import SquareImageBox from '../squareImageBox/squareImageBox';
+import {blank_product, max_product_order} from '../../lib/consts.ts';
+import {SquareImageBox} from '../squareImageBox/squareImageBox';
 import {getBasket, getBasketProducts, setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";

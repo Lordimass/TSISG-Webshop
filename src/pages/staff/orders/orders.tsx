@@ -6,7 +6,7 @@ import Throbber from "../../../components/throbber/throbber";
 import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
 import { compareOrders } from "../../../lib/sortMethods";
-import { overdue_threshold } from "../../../lib/consts";
+import { overdue_threshold } from "../../../lib/consts.ts";
 import { getColourClass, OrderDropdownContext, OrdersContext } from "./lib";
 import { getJWTToken } from "../../../lib/auth";
 import { dateToDateString, dateToTimeString } from "../../../lib/lib";

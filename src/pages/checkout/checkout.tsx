@@ -12,7 +12,7 @@ import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
 import {checkStock, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
-import { page_title } from "../../lib/consts";
+import { page_title } from "../../lib/consts.ts";
 import { ProductsInBasket } from "@shared/types/types";
 
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";

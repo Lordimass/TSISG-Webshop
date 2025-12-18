@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { page_title } from '../../lib/consts';
+import { page_title } from '../../lib/consts.ts';
 
 import React from 'react';
 import Products from '../../components/product/products';

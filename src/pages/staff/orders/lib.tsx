@@ -1,5 +1,5 @@
 import { createContext, Dispatch, SetStateAction } from "react";
-import { overdue_threshold } from "../../../lib/consts";
+import { overdue_threshold } from "../../../lib/consts.ts";
 import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 
 export const OrdersContext = createContext<{

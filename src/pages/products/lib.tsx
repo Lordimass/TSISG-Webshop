@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types.ts";
 import { ImageData, ProductData } from "@shared/types/types";
-import { blank_product } from "../../lib/consts";
+import { blank_product } from "../../lib/consts.ts";
 import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {callRPC} from "@shared/functions/supabaseRPC.ts";

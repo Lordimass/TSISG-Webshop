@@ -2,16 +2,13 @@ import type {StorybookConfig} from '@storybook/react-vite';
 import dotenv from 'dotenv';
 
 // Load environment variables (only gives acesss to `VITE_...` and `STORYBOOK_...`)
-dotenv.config({path: ".env.netlify"});
-dotenv.config({path: ".env"});
-
-dotenv.config()
-
+dotenv.config({path: ".env.netlify", override: true});
+dotenv.config({path: ".env", override: true});
 
 const config: StorybookConfig = {
     "stories": [
         "../src/**/*.mdx",
-        "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+        "../src/**/*.stories.@(ts|tsx)"
     ],
     "addons": [
         "@chromatic-com/storybook",
@@ -25,6 +22,7 @@ const config: StorybookConfig = {
         reactDocgen: 'react-docgen-typescript',
         reactDocgenTypescriptOptions: {
             shouldExtractLiteralValuesFromEnum: true,
+            shouldExtractValuesFromUnion: true,
         },
     },
 };

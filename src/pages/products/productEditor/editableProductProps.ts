@@ -1,7 +1,7 @@
 import React, {ComponentType, createContext, FunctionComponent} from "react"
 import { ProductData } from "@shared/types/types"
 import { UnsubmittedProductData } from "./types.ts"
-import { blank_product } from "../../../lib/consts"
+import { blank_product } from "../../../lib/consts.ts"
 import { isNumeric } from "../../../lib/lib"
 import {Pie} from "recharts";
 import displayName = Pie.displayName;

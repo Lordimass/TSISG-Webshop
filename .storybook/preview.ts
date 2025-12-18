@@ -1,21 +1,11 @@
 import type {Preview} from '@storybook/react-vite'
+
 import '../src/common.css'
+import '@flaticon/flaticon-uicons/css/all/all.css';
+import '@mdxeditor/editor/style.css'
 
 const preview: Preview = {
     parameters: {
-        docs: {
-            source: {
-                state: 'open',
-            },
-        },
-
-        controls: {
-            matchers: {
-                color: /(background|color)$/i,
-                date: /Date$/i,
-            },
-        },
-
         a11y: {
             // 'todo' - show a11y violations in the test UI only
             // 'error' - fail CI on a11y violations

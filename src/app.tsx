@@ -19,7 +19,6 @@ import {SiteSettingsContext} from "@shared/types/types";
 import {useConditionalBasketUpdate, useLogin, useNotifs, useSiteSettings} from "./appHooks";
 import {Report} from "./pages/staff/reports/report/report";
 import useLocale, {LocaleContext} from "./localeHandler.ts";
-import {VALIDATORS} from "@shared/schemas/schemas.ts";
 import {getRoute} from "./lib/paths.ts";
 
 

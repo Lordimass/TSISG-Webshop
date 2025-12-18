@@ -8,7 +8,6 @@ const app = express();
 app.use(express.static('public'));
 
 type bodyParams = {
-    shipping_options: Array<{shipping_rate: string}>,
     stripe_line_items: Array<Object>,
     basket: {basket:basketItem[]}
     origin: string,
@@ -41,7 +40,7 @@ export default async function handler(request: Request, _context: Context) {
         mode: "payment",
         // TODO: Replace body origin with the origin of actual request.
         return_url: body.origin + "/thankyou?session_id={CHECKOUT_SESSION_ID}", 
-        shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES}, // Update this once we add shipping support for more countries
+        shipping_address_collection: { allowed_countries: SHIPPING_COUNTRIES},
         metadata: {
             "gaClientID": body.gaClientID,
             "gaSessionID": body.gaSessionID

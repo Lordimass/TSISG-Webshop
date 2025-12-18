@@ -1,11 +1,10 @@
-import {shipping_options } from "../../lib/consts"
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
-import {ProductInBasket, ProductsInBasket, StockDiscrepency} from "@shared/types/types"
+import {ProductInBasket, StockDiscrepency} from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
 import {getPath} from "../../lib/paths.ts";
-import {getBasket, getBasketProducts} from "../../lib/lib.tsx";
+import {getBasketProducts} from "../../lib/lib.tsx";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 
 export function redirectIfEmptyBasket() {
@@ -42,7 +41,6 @@ export async function createCheckoutSession(): Promise<string> {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            shipping_options: shipping_options,
             stripe_line_items: prices,
             basket: JSON.parse(basketString ? basketString : "{basket:[]}"),
             origin: window.location.origin,

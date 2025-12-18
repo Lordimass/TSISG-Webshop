@@ -1,7 +1,7 @@
 import {ProductsInBasket, ProductData, ProductInBasket, Basket} from "@shared/types/types"
 import {supabase} from "./supabaseRPC"
 import {compareProducts} from "./sortMethods"
-import {daysOfWeek, monthsOfYear} from "./consts"
+import {daysOfWeek, monthsOfYear} from "./consts.ts"
 import {triggerAddToCart} from "./analytics/analytics"
 import {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../localeHandler.ts";

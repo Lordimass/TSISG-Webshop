@@ -6,7 +6,7 @@ import Product from "./product";
 import { CheckoutProduct } from "./product"
 import {ProductsInBasket, ProductData, ProductInBasket} from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
-import { productLoadChunks } from "../../lib/consts";
+import { productLoadChunks } from "../../lib/consts.ts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 import { triggerViewItemList } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";

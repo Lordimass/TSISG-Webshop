@@ -1,6 +1,7 @@
 import {Meta, StoryObj} from "@storybook/react-vite";
-import SquareImageBox from "./squareImageBox.tsx";
-import {fakeProductData} from "@shared/consts/fakes.ts";
+import {SquareImageBox} from "./squareImageBox.tsx";
+import {fakeProductData} from "../../../.storybook/fakes.ts";
+import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 
 const meta = {
     title: 'components/SquareImageBox',
@@ -10,7 +11,7 @@ const meta = {
     },
     argTypes: {
         loading: { control: 'radio', options: ['eager', 'lazy'] },
-    }
+    },
 } satisfies Meta<typeof SquareImageBox>;
 
 export default meta;

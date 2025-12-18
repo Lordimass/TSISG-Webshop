@@ -8,7 +8,7 @@ import { compareImages } from "../../../lib/sortMethods.tsx";
 import { updateProductData } from "../../../lib/netlifyFunctions.tsx";
 import { ProductContext } from "../lib.tsx";
 import { removeImage, shiftImage } from "../productEditor/lib.ts";
-import SquareImageBox from "../../../components/squareImageBox/squareImageBox.tsx";
+import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
 import { NotificationsContext } from "../../../components/notification/lib.tsx";
 import {AssociationMetadata} from "@shared/types/supabaseTypes.ts";
 

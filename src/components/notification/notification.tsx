@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import "./notification.css";
-import { reading_speed_cps } from "../../lib/consts";
+import { reading_speed_cps } from "../../lib/consts.ts";
 import { Notif, NotificationsContext } from "./lib";
 
 export default function Notifications() {

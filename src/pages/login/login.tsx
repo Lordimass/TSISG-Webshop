@@ -1,7 +1,7 @@
 import "./login.css"
 
 import { FormEvent, useContext, useState } from "react";
-import { page_title } from "../../lib/consts";
+import { page_title } from "../../lib/consts.ts";
 import { LoginContext } from "../../app";
 import { forgotPassword, login, logout } from "../../lib/auth";
 import { NotificationsContext } from "../../components/notification/lib";
