@@ -67,6 +67,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/browser-playwright": "^4.0.16",
     "@vitest/coverage-v8": "^4.0.16",
+    "baseline-browser-mapping": "^2.9.9",
     "chokidar-cli": "^3.0.0",
     "cli-progress": "^3.12.0",
     "eslint": "^9.21.0",

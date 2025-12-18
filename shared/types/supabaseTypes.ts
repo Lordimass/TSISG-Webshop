@@ -63,7 +63,7 @@ export type ImageData = {
     /** The identifier of the image object */
     id: UUID
     /** DEPRECATED: Use `id` instead. The direct access url of the image */
-    image_url: string
+    image_url?: string
     /** ISO timestamp of when the association was made between the image and the product */
     inserted_at: string
     /** The filename of the image */
