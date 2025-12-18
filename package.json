@@ -13,7 +13,8 @@
     "generate-schemas": "node --loader ts-node/esm scripts/generateSchemas.ts",
     "watch:generate-schemas": "chokidar \"shared/types/*.ts\" -c \"npm run generate-schemas -- {path}\"",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "storybook-docs": "storybook dev --docs"
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^3.3.1",

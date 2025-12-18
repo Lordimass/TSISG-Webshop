@@ -14,9 +14,13 @@ import {CategoryData, ProductData, ImageData, OrderProduct, OrderProdCompressed}
 import {ProductInBasket} from "@shared/types/types.ts";
 
 /**
- * I apologise sincerely for the following code.
+ * Displays a product or product group with a basket ticker.
  */
-export default function Product({prod}: { prod: ProductData | ProductData[] }) {
+export default function Product({prod}: {
+    /** The product or product group to display. */
+    prod: ProductData | ProductData[]
+})
+{
     const {currency} = useContext(LocaleContext);
 
     // Redefining variables after changing parameter to accept

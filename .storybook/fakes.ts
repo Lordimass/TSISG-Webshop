@@ -137,3 +137,239 @@ export const fakeProductData: ProductData = {
     "package_type_override": null,
     "extended_customs_description": ""
 }
+
+export const fakeProductGroup: ProductData[] = [
+    {
+        "sku": 373,
+        "name": "This Bag is so Gay Tote",
+        "tags": [],
+        "price": 9.99,
+        "stock": 5,
+        "active": true,
+        "images": [
+            {
+                "id": "799e6403-1b63-4545-bbef-fb7a9f97c9ca",
+                "alt": null,
+                "name": "5994105+DSC_0053.jpg",
+                "metadata": {
+                    "eTag": "\"3e1fbf68c732fc0a61bbe97652fe115d\"",
+                    "size": 296024,
+                    "mimetype": "image/webp",
+                    "cacheControl": "max-age=3600",
+                    "lastModified": "2025-12-03T21:06:35.000Z",
+                    "contentLength": 296024,
+                    "httpStatusCode": 200
+                },
+                "bucket_id": "product-images",
+                "image_url": "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/product-images/5994105+DSC_0053.jpg",
+                "inserted_at": "2025-12-05T08:41:30.657+00:00",
+                "path_tokens": [
+                    "5994105+DSC_0053.jpg"
+                ],
+                "product_sku": 373,
+                "display_order": 1,
+                "association_metadata": {}
+            },
+            {
+                "id": "d5db91d0-ae83-4c38-a6e7-b8597212f14d",
+                "alt": "",
+                "name": "4089841+this-bag-is-so-gay.webp",
+                "metadata": {
+                    "eTag": "\"f494f6b47d5da59a042ddacbcae86c14\"",
+                    "size": 290522,
+                    "mimetype": "image/webp",
+                    "cacheControl": "max-age=3600",
+                    "lastModified": "2025-12-05T08:41:30.000Z",
+                    "contentLength": 290522,
+                    "httpStatusCode": 200
+                },
+                "bucket_id": "product-images",
+                "image_url": "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/product-images/4089841+this-bag-is-so-gay.webp",
+                "inserted_at": "2025-12-05T08:41:30.657+00:00",
+                "path_tokens": [
+                    "4089841+this-bag-is-so-gay.webp"
+                ],
+                "product_sku": 373,
+                "display_order": 2,
+                "association_metadata": {
+                    "group_representative": true
+                }
+            }
+        ],
+        "weight": 169,
+        "category": {
+            "id": 3,
+            "name": "Bags",
+            "created_at": "2025-04-14T15:04:57.630436+00:00",
+            "description": null
+        },
+        "metadata": {},
+        "group_name": "Pride Tote Bag",
+        "sort_order": 0,
+        "category_id": 3,
+        "description": "What more of a convenient bag could there be? This bag features the pride flag and our shop slogan on a super sturdy and stylish canvas bag. This bag is perfect for anyone looking for some pride merch that is both loud with its pride, and also useful!",
+        "inserted_at": "2025-12-03T20:49:46.429253+00:00",
+        "last_edited": "2025-12-05T08:41:30.327578+00:00",
+        "last_edited_by": "auth:9f76379b-8c04-47c6-b950-b7e159e7859b",
+        "customs_description": "multicoloured canvas tote bag",
+        "origin_country_code": "CHN",
+        "package_type_override": null,
+        "extended_customs_description": null
+    },
+    {
+        "sku": 372,
+        "name": "Bisexual Tote Bag",
+        "tags": [],
+        "price": 9.99,
+        "stock": 5,
+        "active": true,
+        "images": [
+            {
+                "id": "28df33c0-b590-4983-9727-91e27b921229",
+                "alt": null,
+                "name": "6192423+DSC_0068.jpg",
+                "metadata": {
+                    "eTag": "\"9f5fdf690103690b21aa6dd3388e4bbf\"",
+                    "size": 337882,
+                    "mimetype": "image/webp",
+                    "cacheControl": "max-age=3600",
+                    "lastModified": "2025-12-03T21:09:54.000Z",
+                    "contentLength": 337882,
+                    "httpStatusCode": 200
+                },
+                "bucket_id": "product-images",
+                "image_url": "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/product-images/6192423+DSC_0068.jpg",
+                "inserted_at": "2025-12-05T07:45:51.834+00:00",
+                "path_tokens": [
+                    "6192423+DSC_0068.jpg"
+                ],
+                "product_sku": 372,
+                "display_order": 1,
+                "association_metadata": {}
+            }
+        ],
+        "weight": 169,
+        "category": {
+            "id": 3,
+            "name": "Bags",
+            "created_at": "2025-04-14T15:04:57.630436+00:00",
+            "description": null
+        },
+        "metadata": {},
+        "group_name": "Pride Tote Bag",
+        "sort_order": 0,
+        "category_id": 3,
+        "description": "What more of a convenient bag could there be? This bag features the bisexual flag on a super sturdy and stylish canvas bag, . This bag is perfect for anyone looking for some pride merch that shouts out your pride and your type, but is also useful!",
+        "inserted_at": "2025-12-03T20:47:51.439012+00:00",
+        "last_edited": "2025-12-05T07:45:51.776267+00:00",
+        "last_edited_by": "auth:9f76379b-8c04-47c6-b950-b7e159e7859b",
+        "customs_description": "pink purple blue tote bag",
+        "origin_country_code": "CHN",
+        "package_type_override": null,
+        "extended_customs_description": null
+    },
+    {
+        "sku": 371,
+        "name": "Gay Tote",
+        "tags": [],
+        "price": 9.99,
+        "stock": 5,
+        "active": true,
+        "images": [
+            {
+                "id": "8f5c9b9e-af12-45e3-bb60-9506cbc73983",
+                "alt": null,
+                "name": "5958041+DSC_0062.jpg",
+                "metadata": {
+                    "eTag": "\"b5757500cbd62b9b2a830ad4974c0a57\"",
+                    "size": 265378,
+                    "mimetype": "image/webp",
+                    "cacheControl": "max-age=3600",
+                    "lastModified": "2025-12-03T21:05:59.000Z",
+                    "contentLength": 265378,
+                    "httpStatusCode": 200
+                },
+                "bucket_id": "product-images",
+                "image_url": "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/product-images/5958041+DSC_0062.jpg",
+                "inserted_at": "2025-12-05T07:45:46.397+00:00",
+                "path_tokens": [
+                    "5958041+DSC_0062.jpg"
+                ],
+                "product_sku": 371,
+                "display_order": 4,
+                "association_metadata": {}
+            }
+        ],
+        "weight": 169,
+        "category": {
+            "id": 3,
+            "name": "Bags",
+            "created_at": "2025-04-14T15:04:57.630436+00:00",
+            "description": null
+        },
+        "metadata": {},
+        "group_name": "Pride Tote Bag",
+        "sort_order": 0,
+        "category_id": 3,
+        "description": "What more of a convenient bag could there be? This bag features the gay flag and our shop slogan on a super sturdy and stylish canvas bag. This bag is perfect for anyone looking for some pride merch that is both loud with its pride, and also useful!",
+        "inserted_at": "2025-12-03T20:44:20+00:00",
+        "last_edited": "2025-12-05T07:45:46.332693+00:00",
+        "last_edited_by": "auth:9f76379b-8c04-47c6-b950-b7e159e7859b",
+        "customs_description": "green white blue canvas tote bag",
+        "origin_country_code": "CHN",
+        "package_type_override": null,
+        "extended_customs_description": null
+    },
+    {
+        "sku": 370,
+        "name": "Live Laugh Lesbian Tote",
+        "tags": [],
+        "price": 9.99,
+        "stock": 5,
+        "active": true,
+        "images": [
+            {
+                "id": "8843e000-1f73-496f-9c19-287b231f79f3",
+                "alt": null,
+                "name": "6046096+DSC_0057.jpg",
+                "metadata": {
+                    "eTag": "\"89bf130a133058c51b7cd89641d88dec\"",
+                    "size": 273428,
+                    "mimetype": "image/webp",
+                    "cacheControl": "max-age=3600",
+                    "lastModified": "2025-12-03T21:07:27.000Z",
+                    "contentLength": 273428,
+                    "httpStatusCode": 200
+                },
+                "bucket_id": "product-images",
+                "image_url": "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/product-images/6046096+DSC_0057.jpg",
+                "inserted_at": "2025-12-05T07:45:40.573+00:00",
+                "path_tokens": [
+                    "6046096+DSC_0057.jpg"
+                ],
+                "product_sku": 370,
+                "display_order": 1,
+                "association_metadata": {}
+            }
+        ],
+        "weight": 169,
+        "category": {
+            "id": 3,
+            "name": "Bags",
+            "created_at": "2025-04-14T15:04:57.630436+00:00",
+            "description": null
+        },
+        "metadata": {},
+        "group_name": "Pride Tote Bag",
+        "sort_order": 0,
+        "category_id": 3,
+        "description": "What more of a convenient bag could there be? This bag features the lesbian flag on a super sturdy and stylish canvas bag, . This bag is perfect for anyone looking for some pride merch that shouts out your identity with it's \"live laugh lesbian\" slogan, but is also useful!",
+        "inserted_at": "2025-12-03T20:41:28+00:00",
+        "last_edited": "2025-12-05T07:45:40.5047+00:00",
+        "last_edited_by": "auth:9f76379b-8c04-47c6-b950-b7e159e7859b",
+        "customs_description": "pink white purple canvas tote bag",
+        "origin_country_code": "CHN",
+        "package_type_override": null,
+        "extended_customs_description": null
+    }
+]

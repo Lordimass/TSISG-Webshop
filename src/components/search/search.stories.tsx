@@ -5,9 +5,6 @@ import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 const meta = {
     title: 'components/ProductSearch',
     component: ProductSearch,
-    parameters: {
-        layout: 'centered',
-    },
     argTypes: {
         search_delay: {type: "number"},
     },

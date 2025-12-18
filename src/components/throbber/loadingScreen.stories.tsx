@@ -4,9 +4,6 @@ import {LoadingScreen} from "./throbber.tsx";
 const meta = {
     title: 'components/throbber/LoadingScreen',
     component: LoadingScreen,
-    parameters: {
-        layout: 'centered',
-    },
 } satisfies Meta<typeof LoadingScreen>;
 
 export default meta;

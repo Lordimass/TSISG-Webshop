@@ -6,9 +6,6 @@ import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 const meta = {
     title: 'components/SquareImageBox',
     component: SquareImageBox,
-    parameters: {
-        layout: 'centered',
-    },
     argTypes: {
         loading: { control: 'radio', options: ['eager', 'lazy'] },
     },

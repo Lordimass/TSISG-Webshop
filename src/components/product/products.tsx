@@ -33,7 +33,6 @@ export default function Products() {
         });
         activeProductData.sort(compareProductGroups)
         activeProductData.forEach((group) => {group.sort(compareProducts)})
-
         // Create product elements if there are any products to display
         if (activeProductData.length<0) {
             setProducts([])
