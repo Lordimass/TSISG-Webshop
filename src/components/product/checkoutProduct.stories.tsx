@@ -1,6 +1,7 @@
 import {Meta, StoryObj} from "@storybook/react-vite";
 import {CheckoutProduct} from "./product.tsx";
 import {fakeProductData} from "../../../.storybook/fakes.ts";
+import "../../pages/checkout/checkout.css"
 
 const meta = {
     title: 'components/product/single/CheckoutProduct',

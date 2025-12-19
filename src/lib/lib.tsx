@@ -31,7 +31,7 @@ export async function refreshBasket() {
     if (newBasket.length > 0) {
         localStorage.setItem("basket", JSON.stringify({
             products: newBasket,
-            lastUpdated: (new Date()).toISOString()
+            lastUpdated: Date.now()
         }))
     }
 }

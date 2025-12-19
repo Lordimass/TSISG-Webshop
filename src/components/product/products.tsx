@@ -4,18 +4,16 @@ import {JSX, useContext, useEffect, useState} from "react";
 import PageSelector from "../pageSelector/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
-import {ProductsInBasket, ProductData, ProductInBasket} from "@shared/types/types";
+import {ProductData} from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
 import { productLoadChunks } from "../../lib/consts.ts";
 import { useGetGroupedProducts } from "../../lib/supabaseRPC";
 import { triggerViewItemList } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {Currency} from "dinero.js";
-import {getBasket, getBasketProducts} from "../../lib/lib.tsx";
+import {getBasketProducts} from "../../lib/lib.tsx";
 
-/**
- * Display all available products from Supabase
- */
+/** Display all available products from Supabase */
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
     function decrementPage() {setPage(page - 1)}
@@ -84,11 +82,11 @@ export default function Products() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * An ordered list of products from the user's basket
- * @param currency Override currency to display. Only use to display a currency other than the user's local currency.
- */
-export function CheckoutProducts({currency}: {currency?: Currency}) {
+/** An ordered list of products from the user's basket without quantity tickers */
+export function CheckoutProducts({currency}: {
+    /** Override currency to display. Only use to display a currency other than the user's local currency. */
+    currency?: Currency
+}) {
   const basket = getBasketProducts();
   return (<div className="checkout-products">{basket.map(
       prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}</div>

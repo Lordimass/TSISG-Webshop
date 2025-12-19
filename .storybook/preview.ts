@@ -17,7 +17,8 @@ const preview: Preview = {
             options: {
                 dark: { name: 'Dark', value: '#333'},
                 light: { name: 'Light', value: '#F7F9F2' },
-                beige: { name: 'Beige', value: '#d7cfb5'}
+                beige: { name: 'Beige', value: '#d7cfb5'},
+                darkRed: {name: 'Dark Red', value: '#501212'}
             },
             grid: {
                 opacity: 0.2

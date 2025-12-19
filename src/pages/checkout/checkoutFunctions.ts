@@ -71,7 +71,7 @@ export async function fetchStripePrices(): Promise<Array<Object>> {
         function(error) {throw error}
     )
     console.log("Updated prices from remote")
-    localStorage.setItem("basket", JSON.stringify({products: basket, "lastUpdated": (new Date()).toISOString()}))
+    localStorage.setItem("basket", JSON.stringify({products: basket, "lastUpdated": Date.now()}))
     
     return stripePrices;
 }

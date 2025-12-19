@@ -1,5 +1,5 @@
 import {CategoryData, ImageData, ProductData, TagData} from "@shared/types/supabaseTypes.ts";
-import {ProductInBasket} from "@shared/types/types.ts";
+import {Basket, ProductInBasket} from "@shared/types/types.ts";
 
 export const fakeImageData: ImageData = {
     "id": "f66e3193-327a-48c2-a149-63db1edcc2b8",
@@ -379,3 +379,10 @@ export const fakeProductGroup: ProductData[] = [
         "extended_customs_description": null
     }
 ]
+
+export const fakeBasket: Basket = {
+    "products": fakeProductGroup.map(
+        (prod, i) => {return {...prod, basketQuantity: i+1}}
+    ),
+    "lastUpdated": 1766143629869
+}
