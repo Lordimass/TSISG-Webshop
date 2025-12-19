@@ -26,7 +26,6 @@ const preview: Preview = {
     },
     initialGlobals: {
         backgrounds: {value: 'dark', grid: true},
-        viewport: { value: 'desktop', isRotated: false}
     },
 
     // Components will have automatically generated Autodocs entries: https://storybook.js.org/docs/writing-docs/autodocs

@@ -2,7 +2,6 @@ import {Meta, StoryObj} from "@storybook/react-vite";
 import Price from "./price.tsx";
 import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 import DineroFactory from "dinero.js";
-import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 
 const meta = {
     title: 'components/Price',
