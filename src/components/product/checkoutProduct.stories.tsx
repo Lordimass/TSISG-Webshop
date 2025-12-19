@@ -3,7 +3,7 @@ import {CheckoutProduct} from "./product.tsx";
 import {fakeProductData} from "../../../.storybook/fakes.ts";
 
 const meta = {
-    title: 'components/product/CheckoutProduct',
+    title: 'components/product/single/CheckoutProduct',
     component: CheckoutProduct,
     argTypes: {
         product: {control: "object"},

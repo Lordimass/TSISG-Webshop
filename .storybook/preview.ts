@@ -15,9 +15,13 @@ const preview: Preview = {
         },
         backgrounds: {
             options: {
-                dark: { name: 'Dark', value: '#333', grid: true },
+                dark: { name: 'Dark', value: '#333'},
                 light: { name: 'Light', value: '#F7F9F2' },
+                beige: { name: 'Beige', value: '#d7cfb5'}
             },
+            grid: {
+                opacity: 0.2
+            }
         },
         viewport: {
             options: {...INITIAL_VIEWPORTS, ...MINIMAL_VIEWPORTS},

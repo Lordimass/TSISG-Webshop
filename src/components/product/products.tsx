@@ -13,6 +13,9 @@ import {LocaleContext} from "../../localeHandler.ts";
 import {Currency} from "dinero.js";
 import {getBasket, getBasketProducts} from "../../lib/lib.tsx";
 
+/**
+ * Display all available products from Supabase
+ */
 export default function Products() {
     function incrementPage() {setPage(page + 1)}
     function decrementPage() {setPage(page - 1)}

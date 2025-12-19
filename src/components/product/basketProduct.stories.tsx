@@ -3,7 +3,7 @@ import {BasketProduct} from "./product.tsx";
 import {fakeProductInBasket} from "../../../.storybook/fakes.ts";
 
 const meta = {
-    title: 'components/product/BasketProduct',
+    title: 'components/product/single/BasketProduct',
     component: BasketProduct,
 } satisfies Meta<typeof BasketProduct>;
 
