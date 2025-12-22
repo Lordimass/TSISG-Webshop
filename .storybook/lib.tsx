@@ -1,6 +1,7 @@
 import {NotificationsContext} from "../src/components/notification/lib.tsx";
 import {ReactNode} from "react";
 import {DEFAULT_COUNTRY, DEFAULT_CURRENCY, DEFAULT_LOCALE, LocaleContext} from "../src/localeHandler.ts";
+import {useNotifs} from "../src/appHooks.tsx";
 
 export function DefaultContextWrapper({children}: {children: ReactNode}) {
     return (

@@ -74,15 +74,26 @@ export default function Notifications() {
 
   if (!visibleNotif) return null;
 
-  return (
-    <div className={`notification ${isVisible ? "visible" : "exiting"}`}>
-      <div className="notif-head">
-        <i className="fi fi-rr-info info-icon"/>
-        <h2>Just to let you know...</h2>
-        <div className="spacer" />
-        <div className="close-notif" onClick={pop}>x</div>
-      </div>
-      <p>{visibleNotif.message}</p>
-    </div>
-  );
+  return <Notification isVisible={isVisible} pop={pop} visibleNotif={visibleNotif}/>
+}
+
+export function Notification({isVisible, pop, visibleNotif}: {
+    /** Whether the notification is currently visible. */
+    isVisible: boolean,
+    /** Function to call when the notification is to be closed */
+    pop: () => void,
+    /** The currently visible notification to display */
+    visibleNotif: Notif
+}) {
+    return (
+        <div className={`notification ${isVisible ? "visible" : "exiting"}`}>
+            <div className="notif-head">
+                <i className="fi fi-rr-info info-icon"/>
+                <h2>Just to let you know...</h2>
+                <div className="spacer" />
+                <div className="close-notif" onClick={pop}>x</div>
+            </div>
+            <p>{visibleNotif.message}</p>
+        </div>
+    )
 }
