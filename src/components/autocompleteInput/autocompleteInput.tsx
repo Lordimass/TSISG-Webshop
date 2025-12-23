@@ -5,12 +5,6 @@ import {AutocompleteProps} from "./lib.ts";
 /**
  * Overlays a ghost text area on top of a real text area to show "ghost" suggestion text. Also supports entering
  * multiple values, so once one value is entered it comma separates and will provide new suggestions for the next item.
- * @param values Possible suggestion fill values.
- * @param placeholder TextArea placeholder text.
- * @param defaultValue Default value for the TextArea.
- * @param onChange A callback function. Called when the text in the textArea changes.
- * @param ref A reference object to apply to the real textArea only
- * @param id ID to be passed to the real textArea only
  */
 export function AutocompleteInput({values, placeholder, defaultValue, onChange, id, ref}: AutocompleteProps) {
     const a = useAutocomplete(defaultValue)
@@ -64,15 +58,14 @@ export function AutocompleteInput({values, placeholder, defaultValue, onChange, 
 /**
  * Overlays a ghost text area on top of a real text area to show "ghost" suggestion text. Also supports entering
  * multiple values, so once one value is entered it comma separates and will provide new suggestions for the next item.
- * @param values Possible suggestion fill values.
- * @param placeholder TextArea placeholder text.
- * @param defaultValue Default value for the TextArea.
- * @param onChange A callback function. Called when the text in the textArea changes.
- * @param ref A reference object to apply to the real textArea only
- * @param id ID to be passed to the real textArea only
  */
-export function MultiAutocomplete({values, placeholder, defaultValue, onChange, id, ref}:
-    AutocompleteProps & { onChange?: (value: string[]) => void }) {
+export function MultiAutocomplete(
+    {values, placeholder, defaultValue, onChange, id, ref}:
+        AutocompleteProps & {
+        /** A callback function. Called when the text in the textArea changes. */
+        onChange?: (value: string[]) => void
+    }
+) {
     const a = useAutocomplete(defaultValue);
     if (ref) ref.current = a.inputRef.current
 
@@ -178,24 +171,24 @@ function useAutocomplete(defaultValue?: string) {
  * Helper component to actually construct the autocomplete component.
  */
 function AutoCompleteField({
-        ghostRef,
-        ghostText,
-        inputRef,
-        inputValue,
-        placeholder,
-        handleChange,
-        handleKeyDown,
-        id
-    }: {
-        ghostRef:  React.RefObject<HTMLTextAreaElement | null>
-        ghostText: string
-        inputRef: React.RefObject<HTMLTextAreaElement | null>
-        inputValue: string
-        placeholder?: string
-        handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
-        handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void,
-        id?: string
-    }) {
+                               ghostRef,
+                               ghostText,
+                               inputRef,
+                               inputValue,
+                               placeholder,
+                               handleChange,
+                               handleKeyDown,
+                               id
+                           }: {
+    ghostRef: React.RefObject<HTMLTextAreaElement | null>
+    ghostText: string
+    inputRef: React.RefObject<HTMLTextAreaElement | null>
+    inputValue: string
+    placeholder?: string
+    handleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+    handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void,
+    id?: string
+}) {
     return (
         <div className="csa-container">
             {/* ghost input */}
