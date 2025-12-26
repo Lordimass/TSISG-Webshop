@@ -20,13 +20,13 @@ export default function LoginPage() {
     </Page>)
 }
 
-function Login() {
+export function Login() {
     async function handleFormSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
         try {await login(email, password)}
-        catch (e: any) {setError(e.message); return};
+        catch (e: any) {setError(e.message); return}
 
-        // At this stage, login was successful and we go back to
+        // At this stage, login was successful, and we go back to
         // whatever the user was doing that needed logging in.
         // history.back()
     }
@@ -80,7 +80,7 @@ function Login() {
     )
 }
 
-function LoggedIn() {
+export function LoggedIn() {
     const {user} = useContext(LoginContext)
     if (!user) throw new Error("No user found, are you logged in?")
     const email = user.email;
