@@ -13,8 +13,6 @@ import { CheckoutProducts } from "../../components/product/products";
 import { LoginContext, SiteSettingsContext } from "../../app";
 import {checkStock, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
 import { page_title } from "../../lib/consts.ts";
-import { ProductsInBasket } from "@shared/types/types";
-
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {
@@ -30,13 +28,12 @@ import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
 import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
-import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
+import DineroFactory, {Currency, Dinero} from "dinero.js";
 import Price from "../../components/price/price.tsx";
 import {convertDinero} from "@shared/functions/price.ts";
 import {getPath} from "../../lib/paths.ts";
 import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
-import {stripe} from "../../../netlify/lib/stripe.ts";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
