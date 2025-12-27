@@ -1,0 +1,85 @@
+.ticker {
+    width: min-content;
+    height: 60px;
+
+    display: flex;
+    align-self: center;
+    font-family: "Perfect Penmanship", sans-serif;
+    user-select: none;
+    margin: 0.5em;
+    border-radius: 1em;
+}
+
+.ticker-text {
+    width: min-content;
+    height: 100%;
+
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+
+    padding-left: 1em;
+    padding-right: 1em;
+
+    background-color: white;
+}
+
+.ticker-text p {
+    height: min-content;
+}
+
+.ticker-input {
+    font-family: "Perfect Penmanship", sans-serif;
+    padding: 0;
+    height: 100%;
+    border: none;
+    font-size: 1em;
+    text-align: right;
+}
+
+.ticker-input.hidden-max-value {
+    text-align: center;
+}
+
+.ticker-text:has(.hidden-max-value) {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.ticker-input:focus-visible {
+    outline: none;
+}
+
+.ticker-decrementer, .ticker-incrementer {
+    padding-right: 20px;
+    padding-left: 20px;
+
+    transition: font-size 200ms;
+    user-select: none;
+    border: none;
+    font-family: "Perfect Penmanship", sans-serif;
+    font-size: 1.5em;
+
+    color: white;
+    background-color: var(--dark-purple);
+}
+
+.ticker-decrementer {
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+}
+
+.ticker-incrementer {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.ticker-decrementer:hover, .ticker-incrementer:hover {
+    font-size: 2em
+}
+
+.ticker-slash {
+    color: var(--jamie-grey);
+    margin-left: 3px;
+    margin-right: 3px;
+}

@@ -1,7 +1,7 @@
 import "./products.css"
 
 import {JSX, useContext, useEffect, useState} from "react";
-import PageSelector from "../pageSelector/pageSelector";
+import PageSelector from "../ticker/pageSelector";
 import Product from "./product";
 import { CheckoutProduct } from "./product"
 import {ProductData} from "@shared/types/types";
