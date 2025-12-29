@@ -44,7 +44,6 @@ export default function Home() {
       it straight to your door :D`
         }
     >
-        <Ticker inputId={"test"} showMaxValue={false} ariaLabel={"test"}/>
         <div className="title-section">
             <div className='title-text'>
                 <h1>This Shop Is So</h1>

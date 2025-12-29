@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 
-import Ticker from './ticker';
+import Ticker from './ticker.tsx';
 import {fn} from "storybook/test";
 
 const meta = {

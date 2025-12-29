@@ -189,7 +189,7 @@ export default function ProdPage(
                 <div className="desc">
                     <Markdown>{product.description}</Markdown>
                 </div>
-                <div className="ticker">
+                <div className="prod-ticker">
                     <ProductGroup/>
                     <QuantityTicker/>
                 </div>

@@ -86,7 +86,7 @@
     height: 60px;
 }
 
-.ticker {
+.prod-ticker {
     grid-area: ticker;
     width: 100%;
     max-width: 100%;

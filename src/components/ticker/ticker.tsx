@@ -1,10 +1,7 @@
 import React, {DetailedHTMLProps, HTMLAttributes, useRef, useState} from 'react';
 import "./ticker.css"
 
-// TODO: Combine this with the basket ticker in some way to create a generic ticker component?
-/**
- * Extensible and generic ticker component with increase & decrease buttons, as well as a text field.
- */
+/** Extensible and generic ticker component with increase & decrease buttons, as well as a text field. */
 export default function Ticker(
     {min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, ...divProps}: {
         /** Function to call when the value of the ticker is changed */
@@ -21,7 +18,7 @@ export default function Ticker(
         showMaxValue: boolean
         /** `aria-label` property for input field, required for accessibility */
         ariaLabel: string
-    } & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
+    } & Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "onChange">) {
 
     async function decrement() {await updateValue(value - 1)}
     async function increment() {await updateValue(value + 1)}
