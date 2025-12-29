@@ -1,6 +1,6 @@
 .ticker {
     width: min-content;
-    height: 60px;
+    height: 50px;
 
     display: flex;
     align-self: center;
@@ -39,6 +39,9 @@
 
 .ticker-input.hidden-max-value {
     text-align: center;
+    padding-left: 3ch;
+    padding-right: 3ch;
+    overflow-x: visible;
 }
 
 .ticker-text:has(.hidden-max-value) {
@@ -51,17 +54,28 @@
 }
 
 .ticker-decrementer, .ticker-incrementer {
-    padding-right: 20px;
-    padding-left: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
 
-    transition: font-size 200ms;
-    user-select: none;
+    width: 30px;
+    box-sizing: content-box;
+
     border: none;
+    background-color: var(--dark-purple);
+}
+
+.ticker-decrementer span, .ticker-incrementer span {
+    position: relative;
+    font-size: 30px;
+    line-height: 30px;
     font-family: "Perfect Penmanship", sans-serif;
-    font-size: 1.5em;
+
+
+    user-select: none;
+    transition-duration: 100ms, 200ms;
+    transition-property: font-size, background-color;
 
     color: white;
-    background-color: var(--dark-purple);
 }
 
 .ticker-decrementer {
@@ -75,7 +89,11 @@
 }
 
 .ticker-decrementer:hover, .ticker-incrementer:hover {
-    font-size: 2em
+    background-color: var(--purple);
+}
+
+.ticker-decrementer:hover span, .ticker-incrementer:hover span {
+    font-size: 38px;
 }
 
 .ticker-slash {

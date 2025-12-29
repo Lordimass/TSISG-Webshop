@@ -24,6 +24,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         inputId: "default-ticker-story",
-        ariaLabel: "Default Ticker"
+        ariaLabel: "Default Ticker",
+    }
+};
+
+export const MaxValue: Story = {
+    args: {
+        inputId: "default-ticker-story",
+        ariaLabel: "Default Ticker",
+        showMaxValue: true,
+        max: 10
     }
 };

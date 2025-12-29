@@ -1,23 +1,12 @@
 import React, {DetailedHTMLProps, HTMLAttributes, useRef, useState} from 'react';
 import "./ticker.css"
-import {format} from "logform";
-import label = format.label;
 
 // TODO: Combine this with the basket ticker in some way to create a generic ticker component?
 /**
  * Extensible and generic ticker component with increase & decrease buttons, as well as a text field.
  */
 export default function Ticker(
-    {
-        min = 0,
-        max,
-        onChange,
-        defaultValue,
-        inputId,
-        showMaxValue = false,
-        ariaLabel,
-        ...divProps
-    }: {
+    {min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, ...divProps}: {
         /** Function to call when the value of the ticker is changed */
         onChange?: (value: number) => void | Promise<void>
         /** The minimum possible ticker value, defaults to 0 */
@@ -52,6 +41,20 @@ export default function Ticker(
 
         if (inputField.current) inputField.current.value = newValue.toString(10)
         setValue(newValue)
+        setInProgressValue("" + newValue)
+    }
+
+    /**
+     * Update inProgressValue based on a newly typed value.
+     * @param newValue
+     */
+    function updateInProgressValue(newValue: string) {
+        // Remove invalid characters
+        setInProgressValue(newValue
+            // Remove `-` characters that aren't at the start of the string.
+            // Remove non-numeric characters
+            .replace(/(?<=.)-|[^0-9|-]/g, "")
+        )
     }
 
     // Default value is either provided, or the minimum value.
@@ -59,41 +62,39 @@ export default function Ticker(
 
     const inputField = useRef<HTMLInputElement>(null)
     const [value, setValue] = useState(defaultValue)
+    const [inProgressValue, setInProgressValue] = useState("" + defaultValue)
 
     // Construct input props.
     const inputProps = {
-        type: 'text', inputMode: 'numeric',
-        id: inputId, ref: inputField, "aria-label": ariaLabel, defaultValue,
+        type: 'text', inputMode: 'numeric', value: inProgressValue,
+        id: inputId, ref: inputField, "aria-label": ariaLabel,
         className: 'ticker-input' + (showMaxValue ? "" : " hidden-max-value"),
         // Run update function when input blurred (unselected)
-        onBlur: async (e) => {await updateValue(Number(e.target.value))},
-        // Set width of the text box based on whether max value is shown and the width required to fit nums in.
-        style: {
-            minWidth: showMaxValue && max
-                ? max.toString(10).length + "ch"
-                : `${value?.toString(10).length + 5}ch`
-        }
+        onBlur: async e => {await updateValue(Number(e.target.value))},
+        // Update the value currently being typed.
+        onChange: async e => {updateInProgressValue(e.target.value)},
+        // Set width of the text box based on the current value.
+        style: {width: `${inProgressValue.length}ch`}
     } satisfies  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 
     return (
         <div {...divProps} className={'ticker' + (divProps.className ? " " + divProps.className : "")}>
-            <button className='ticker-decrementer' onClick={decrement}>-</button>
+            <button className='ticker-decrementer' onClick={decrement}><span>-</span></button>
 
             <span className='ticker-text'>
                 <input {...inputProps} />
-                <MaxValue showMaxValue={showMaxValue} max={max} />
+                <MaxValue showMaxValue={showMaxValue} max={max}/>
             </span>
 
-            <button className='ticker-incrementer' onClick={increment}>+</button>
+            <button className='ticker-incrementer' onClick={increment}><span>+</span></button>
         </div>
     )
 }
 
-function MaxValue({showMaxValue, max}: {showMaxValue: boolean, max?: number}) {
+function MaxValue({showMaxValue, max}: { showMaxValue: boolean, max?: number }) {
     if (!showMaxValue) return null
     return <>
         <p className='ticker-slash'>/</p>
         <p>{max ?? "?"}</p>
     </>
 }
-
