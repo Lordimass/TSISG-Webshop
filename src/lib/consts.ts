@@ -10,7 +10,7 @@ export const overdue_threshold: number = 2;
 export const reading_speed_cps = 16;
 
 /** The maximum number of one product that can be ordered at a time, regardless of stock. This is a hard cap. */
-export const max_product_order: number = 10
+export const MAX_PRODUCT_ORDER: number = 10
 /** The number of products per page */
 export const productLoadChunks: number = 20;
 

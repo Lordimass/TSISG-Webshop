@@ -7,7 +7,6 @@
 
     font-family: "Perfect Penmanship", sans-serif;
     user-select: none;
-    margin: 0.5em;
     border-radius: 1em;
 }
 
@@ -62,7 +61,7 @@
     box-sizing: content-box;
 
     border: none;
-    background-color: var(--dark-purple);
+    background-color: var(--purple);
 }
 
 .ticker-decrementer span, .ticker-incrementer span {
@@ -90,7 +89,7 @@
 }
 
 .ticker-decrementer:hover, .ticker-incrementer:hover {
-    background-color: var(--purple);
+    background-color: var(--light-purple);
 }
 
 .ticker-decrementer:hover span, .ticker-incrementer:hover span {

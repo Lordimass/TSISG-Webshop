@@ -1,5 +1,5 @@
 import {useContext, useEffect, useRef, useState} from "react"
-import {blank_product, max_product_order} from "../../lib/consts.ts"
+import {blank_product, MAX_PRODUCT_ORDER} from "../../lib/consts.ts"
 import "./prodPage.css"
 import Markdown from "react-markdown"
 import {LoginContext, SiteSettingsContext} from "../../app"
@@ -277,7 +277,7 @@ function QuantityTicker() {
 
     const inputField = useRef<HTMLInputElement>(null)
     const {basketQuant, setBasketQuant, product} = useContext(ProductContext)
-    const max_order = Math.min(max_product_order, product.stock)
+    const max_order = Math.min(MAX_PRODUCT_ORDER, product.stock)
     const [disabled, setDisabled] = useState(true)
     useEffect(() => {
         const disabled = product.stock <= 0

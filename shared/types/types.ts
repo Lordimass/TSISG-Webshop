@@ -29,7 +29,7 @@ export const SiteSettingsContext = createContext<SiteSettings>({})
 export type SiteSettings = {
     kill_switch?: { enabled: boolean; message: string }
     session_notif?: { enabled: boolean; message: string; startTime: string; endTime: string, duration: number }
-    product_disabled_messages?: { disabled: string; out_of_stock: string; [key: string]: string }
+    disabled_product_messages?: { disabled: string; out_of_stock: string; [key: string]: string }
     clockify_users?: { userID: string; name: string }[]
     [key: string]: any
 }
