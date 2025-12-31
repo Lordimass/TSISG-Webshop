@@ -1,0 +1,58 @@
+.zero-quantity-basket-modifier {
+    border: none;
+    height: 50px;
+    width: 100%;
+    min-width: 175px;
+    box-sizing: border-box;
+
+    button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+
+        color: white;
+        text-decoration: none;
+
+        width: 100%;
+        height: 100%;
+
+        background-color: var(--purple);
+        border-radius: 20px;
+        border: none;
+
+        transition-duration: 100ms, 200ms;
+        transition-property: font-size, background-color;
+
+        font-size: 26px;
+        font-family: "Backso", sans-serif;
+        gap: 3px;
+        font-weight: bold;
+
+        i {
+            height: 1em;
+            font-size: 30px;
+            transition: font-size 100ms;
+        }
+    }
+
+    button:hover:not(:disabled) {
+        font-size: 30px;
+        background-color: var(--light-purple);
+
+        i {
+            font-size: 37px
+        }
+    }
+
+    button:disabled {
+        cursor: not-allowed;
+        background-color: var(--jamie-grey);
+    }
+}
+
+/*.zero-quantity-basket-modifier .basket-icon {*/
+/*    font-size: larger;*/
+/*    line-height: 1em;*/
+/*    height: 1em*/
+/*}*/

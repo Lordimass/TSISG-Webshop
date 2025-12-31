@@ -1,7 +1,7 @@
 import {useState, useEffect, useContext} from 'react';
 
 import "./product.css"
-import {blank_product, max_product_order} from '../../lib/consts.ts';
+import {blank_product, MAX_PRODUCT_ORDER} from '../../lib/consts.ts';
 import {SquareImageBox} from '../squareImageBox/squareImageBox';
 import {getBasket, getBasketProducts, setBasketStringQuantity} from '../../lib/lib';
 import {ProductContext} from '../../pages/products/lib';
@@ -197,7 +197,7 @@ export default function Product({prod}: {
 
     const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
     const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-    const max_order = stock ? Math.min(max_product_order, stock) : undefined; // Maximum possible product order
+    const max_order = stock ? Math.min(MAX_PRODUCT_ORDER, stock) : undefined; // Maximum possible product order
     const imageURL = getRepresentativeImageURL(prod)
 
     window.addEventListener("basketUpdate", resetInputToBasket)
@@ -351,7 +351,7 @@ export function BasketProduct({product}: {
     const [quantity, setQuantityButActually] = useState(0);
     const imageURL = getImageURL(images[0])
     const link = getProductPagePath(sku)
-    let max_order: number = Math.min(max_product_order, stock);
+    let max_order: number = Math.min(MAX_PRODUCT_ORDER, stock);
     window.addEventListener("basketUpdate", syncWithBasket)
     useEffect(() => {
         syncWithBasket()

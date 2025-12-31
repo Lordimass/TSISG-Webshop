@@ -1,9 +1,9 @@
-import React, {DetailedHTMLProps, HTMLAttributes, useRef, useState} from 'react';
+import React, {DetailedHTMLProps, HTMLAttributes, RefObject, useRef, useState} from 'react';
 import "./ticker.css"
 
 /** Extensible and generic ticker component with increase & decrease buttons, as well as a text field. */
 export default function Ticker(
-    {min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, ...divProps}: {
+    {min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, updateValueRef, ...divProps}: {
         /** Function to call when the value of the ticker is changed */
         onChange?: (value: number) => void | Promise<void>
         /** The minimum possible ticker value, defaults to 0 */
@@ -15,9 +15,14 @@ export default function Ticker(
         /** ID attribute to assign to the input field, required for accessibility */
         inputId: string
         /** Whether to display the maximum value of the ticker. */
-        showMaxValue: boolean
+        showMaxValue?: boolean
         /** `aria-label` property for input field, required for accessibility */
         ariaLabel: string
+        /**
+         * Ref to be set by this component to a function that can be used to update the ticker value externally
+         * to the component
+         */
+        updateValueRef?: RefObject<((newValue: number) => Promise<void>) | null>
     } & Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "onChange">) {
 
     async function decrement() {await updateValue(value - 1)}
@@ -35,7 +40,15 @@ export default function Ticker(
 
         // Run the callback if the value actually changed
         if (newValue !== value && onChange) await onChange(newValue)
+        await unsafeUpdateValue(newValue)
+    }
 
+    /**
+     * Update the value of the ticker to a new, provided value.
+     * SKIPS RANGE CHECKS AND onChange CALLBACK.
+     * @param newValue The new value.
+     */
+    async function unsafeUpdateValue(newValue: number) {
         if (inputField.current) inputField.current.value = newValue.toString(10)
         setValue(newValue)
         setInProgressValue("" + newValue)
@@ -53,6 +66,9 @@ export default function Ticker(
             .replace(/(?<=.)-|[^0-9|-]/g, "")
         )
     }
+
+    // Set updateValueRef to the method to set the value of the ticker if prop provided.
+    if (updateValueRef) updateValueRef.current = unsafeUpdateValue
 
     // Default value is either provided, or the minimum value.
     defaultValue = defaultValue ?? min
