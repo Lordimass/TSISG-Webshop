@@ -12,7 +12,7 @@ import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.t
 import {getProductPagePath} from "../../lib/paths.ts";
 import {CategoryData, ProductData, ImageData, OrderProduct, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
 import {ProductInBasket} from "@shared/types/types.ts";
-import BasketModifier from "../ticker/basketModifier/basketModifier.tsx";
+import BasketModifier, {ProductGroupBasketModifier} from "../ticker/basketModifier/basketModifier.tsx";
 
 /**
  * Displays a product or product group with a basket ticker.
@@ -71,20 +71,12 @@ export default function Product({prod}: {
                 <div className='spacer'/>
                 <div className='basket-modifier'>
                     {!group
-                        ? <BasketModifier product={singleProd!} inputId={`${singleProd.sku}-product-basket-modifier`}/>
-                        : <GroupBasketModifier sku={sku}/>
+                        ? <BasketModifier product={singleProd!} inputId={`${singleProd!.sku}-product-basket-modifier`} height={"100%"}/>
+                        : <ProductGroupBasketModifier products={product as ProductData[]} height={"100%"}/>
                     }
                 </div>
             </div>
         </div>
-    )
-}
-
-function GroupBasketModifier({sku}: {sku: number}) {
-    return (
-        <a className="basket-button" href={getProductPagePath(sku)}>
-            <p>View Options <i className="fi fi-rr-angle-right"></i></p>
-        </a>
     )
 }
 
@@ -102,7 +94,6 @@ export function BasketProduct({product}: {
 }
 ) {
     const {sku, name, price, images, stock} = product
-    const {currency} = useContext(LocaleContext)
 
     const imageURL = getImageURL(images[0])
     const link = getProductPagePath(sku)
@@ -125,7 +116,6 @@ export function BasketProduct({product}: {
                 </div>
 
                 <BasketModifier inputId={`${product.sku}-basket-basket-modifier`} product={product} />
-
             </div>
         </div>
     )

@@ -10,7 +10,6 @@ const meta = {
     args: {
         onChange: fn(),
         product: fakeProductData,
-        ariaLabel: "Basket Quantity"
     },
     argTypes: {
         product: {control: {disable: true}, table: {defaultValue: {summary: fakeProductData.name}}},

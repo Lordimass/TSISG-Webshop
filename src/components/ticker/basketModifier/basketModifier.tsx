@@ -9,6 +9,7 @@ import {useGetDisabledStatus} from "./lib.tsx";
 import {getBasketProducts, setBasketStringQuantity} from "../../../lib/lib.tsx";
 import {cleanseUnsubmittedProduct} from "../../../pages/products/lib.tsx";
 import {LocaleContext} from "../../../localeHandler.ts";
+import {getProductPagePath} from "../../../lib/paths.ts";
 
 export default function BasketModifier(
     {product, ...args}: Omit<ArgumentsType<typeof Ticker>[0], "ariaLabel"> & {
@@ -32,16 +33,15 @@ export default function BasketModifier(
      * product updates from some other source, like the basket editor in the site header.
      */
     async function syncWithBasket() {
-        // Find the product in the basket
+        // Find the new quantity of the product in the basket
         const basket = getBasketProducts()
         const item = basket.find(item => item.sku === product.sku)
         const newQuantity = item?.basketQuantity ?? 0
-        if (newQuantity !== basketQuantity) {
-            setBasketQuantity(newQuantity)
-            if (updateTickerRef.current) {
-                console.log(`${args.inputId} updated to ${newQuantity} from ${basketQuantity}`)
-                await updateTickerRef.current(newQuantity)
-            }
+
+        // Update state and ticker value if it exists.
+        setBasketQuantity(newQuantity)
+        if (updateTickerRef.current) {
+            await updateTickerRef.current(newQuantity)
         }
     }
 
@@ -67,15 +67,18 @@ export default function BasketModifier(
     }, [disabled])
 
     useEffect(() => {
-        syncWithBasket().then()
-        window.addEventListener("basketUpdate", syncWithBasket)
-        return () => {console.log("Unmounted"); window.removeEventListener("basketUpdate", syncWithBasket)}
+        if (!disabled.isDisabled) { // Adding listener is pointless if the product is disabled.
+            syncWithBasket().then()
+            window.addEventListener("basketUpdate", syncWithBasket)
+            return () => {window.removeEventListener("basketUpdate", syncWithBasket)}
+        }
     }, [])
 
     if (basketQuantity === 0) {
         return <ZeroQuantityBasketModifier
             disabled={disabled}
             onTickerChange={onTickerChange}
+            height={args.height}
         />
     } else {
         return <Ticker
@@ -90,17 +93,42 @@ export default function BasketModifier(
     }
 }
 
+export function ProductGroupBasketModifier({products, height = "50px"}: {
+    /** The products that this basket modifier represents */
+    products: (ProductData | UnsubmittedProductData)[]
+    /** The height of the element */
+    height?: string
+}) {
+    // If there are no products in the group, button is disabled
+    const disabled = products.length == 0
+    // The first product is the representative for the group
+    const representative = disabled ? undefined : products[0]
+
+    return (
+        <a
+            className="product-group-basket-modifier"
+            href={representative ? getProductPagePath(representative.sku) : undefined}
+            aria-disabled={disabled}
+            style={{height}}
+        >
+            <p>View Options <i className="fi fi-rr-angle-right"></i></p>
+        </a>
+    )
+}
+
 function ZeroQuantityBasketModifier(
-    {disabled, onTickerChange}: {
+    {disabled, onTickerChange, height = "50px"}: {
         /** Whether the basket modifier should be disabled, and an optional message to explain why it's disabled */
         disabled?: {isDisabled: boolean, message?: string}
         /** Function to call when the ticker value changes, used when this component changes quantity from 0 to 1 */
         onTickerChange: (val: number) => void
+        /** Height of the element */
+        height?: string
     }
 ) {
     const isDisabled = disabled?.isDisabled
 
-    return (<div className="zero-quantity-basket-modifier">
+    return (<div className="zero-quantity-basket-modifier" style={{height}}>
         {isDisabled && disabled.message ? <p>{disabled.message}</p> : null}
         <button
             onClick={() => onTickerChange(1)}

@@ -51,8 +51,19 @@
     }
 }
 
-/*.zero-quantity-basket-modifier .basket-icon {*/
-/*    font-size: larger;*/
-/*    line-height: 1em;*/
-/*    height: 1em*/
-/*}*/
+.product-group-basket-modifier {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 0 10px 0 10px;
+
+    width: 100%;
+    background-color: var(--purple);
+    border-radius: 20px;
+}
+
+.product-group-basket-modifier:hover {
+    text-decoration: underline;
+}

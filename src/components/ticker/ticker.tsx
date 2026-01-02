@@ -3,7 +3,10 @@ import "./ticker.css"
 
 /** Extensible and generic ticker component with increase & decrease buttons, as well as a text field. */
 export default function Ticker(
-    {min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, updateValueRef, ...divProps}: {
+    {
+        min = 0, max, onChange, defaultValue, inputId, showMaxValue = false, ariaLabel, updateValueRef,
+        height = "50px", ...divProps
+    }: {
         /** Function to call when the value of the ticker is changed */
         onChange?: (value: number) => void | Promise<void>
         /** The minimum possible ticker value, defaults to 0 */
@@ -23,6 +26,8 @@ export default function Ticker(
          * to the component
          */
         updateValueRef?: RefObject<((newValue: number) => Promise<void>) | null>
+        /** Height of the element */
+        height?: string
     } & Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "onChange">) {
 
     async function decrement() {await updateValue(value - 1)}
@@ -91,7 +96,11 @@ export default function Ticker(
     } satisfies  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>
 
     return (
-        <div {...divProps} className={'ticker' + (divProps.className ? " " + divProps.className : "")}>
+        <div
+            {...divProps}
+            className={'ticker' + (divProps.className ? " " + divProps.className : "")}
+            style={{height}}
+        >
             <button className='ticker-decrementer' onClick={decrement}><span>-</span></button>
 
             <span className='ticker-text'>
@@ -108,6 +117,6 @@ function MaxValue({showMaxValue, max}: { showMaxValue: boolean, max?: number }) 
     if (!showMaxValue) return null
     return <>
         <p className='ticker-slash'>/</p>
-        <p>{max ?? "?"}</p>
+        <p>{max && max>0 ? max : "?"}</p>
     </>
 }

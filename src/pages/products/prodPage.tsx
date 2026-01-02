@@ -20,6 +20,7 @@ import Price from "../../components/price/price.tsx";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {ProductGroup} from "./productGroup.tsx";
+import BasketModifier from "../../components/ticker/basketModifier/basketModifier.tsx";
 
 /** Dedicated page for a product, including an editor for admins. */
 export default function ProdPage(
@@ -182,7 +183,6 @@ export default function ProdPage(
                     <Price baseDinero={dinero}/>
                 </div>
 
-
                 <div className="tags">{product.tags.map((tag: any) => (
                     <div className="tag" key={tag.name}>{tag.name}</div>
                 ))}</div>
@@ -191,160 +191,15 @@ export default function ProdPage(
                 </div>
                 <div className="prod-ticker">
                     <ProductGroup/>
-                    <QuantityTicker/>
+                    {prod
+                        ? <BasketModifier inputId={"prod-page-basket-modifier"} product={prod!} height={"50px"}/>
+                        : null
+                    }
+
                 </div>
             </div>
 
             {isEditMode ? <ProductEditor/> : <></>}
 
         </ProductContext.Provider></Page>)
-}
-
-function QuantityTicker() {
-    const {currency} = useContext(LocaleContext)
-
-    async function increment() {
-        if (basketQuant == undefined) {
-            return
-        }
-        await updateQuantity(basketQuant + 1)
-    }
-
-    async function decrement() {
-        if (basketQuant == undefined) {
-            return
-        }
-        await updateQuantity(basketQuant - 1)
-    }
-
-    async function updateQuantity(newQuantity?: number) {
-        if (basketQuant == undefined || !setBasketQuant || !product) {
-            return
-        }
-
-        // No quantity supplied, will pull from text box
-        if (newQuantity == null) {
-            const basketElement: HTMLElement | null = document.getElementById("basket-input-" + product.sku)
-            if (basketElement != null) {
-                const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                const contents: number = +basketInput.value
-                newQuantity = Number.isNaN(contents) ? basketQuant : contents
-            } else {
-                newQuantity = 0
-            }
-        }
-
-        // Validate new quantity is in range
-        newQuantity = Math.max(0, newQuantity) // Lower Bounding
-        newQuantity = Math.min(max_order, newQuantity) // Upper Bounding
-
-        // Update Input Text Field if it exists
-        // It may not exist if, e.g. basketQuant is 0
-        setInputValue(newQuantity)
-        setBasketStringQuantity(
-            cleanseUnsubmittedProduct(product), newQuantity, currency
-        )
-        setBasketQuant(newQuantity)
-    }
-
-    /**
-     * Resets the value in the HTMLInput to the value from the basket.
-     * Run when the quantity of this product updates from some other source, like the basket.
-     */
-    function syncWithBasket() {
-        if (basketQuant == null || !setBasketQuant || product.sku === 0) return
-        const basket = getBasketProducts()
-        const item: ProductInBasket | undefined = basket.find(item => item.sku === product.sku);
-        // If it doesn't find the product, it must not be in the basket anymore, so set the quant to 0
-        if (!item) {
-            setBasketQuant(0);
-            return;
-        }
-
-        // Set the basket quantity state for the product
-        setBasketQuant(item.basketQuantity);
-
-        // Update product input to be correct
-        setInputValue(item.basketQuantity)
-
-    }
-
-    function setInputValue(value: number) {
-        if (inputField.current) {
-            inputField.current.value = value.toString()
-        }
-    }
-
-    const inputField = useRef<HTMLInputElement>(null)
-    const {basketQuant, setBasketQuant, product} = useContext(ProductContext)
-    const max_order = Math.min(MAX_PRODUCT_ORDER, product.stock)
-    const [disabled, setDisabled] = useState(true)
-    useEffect(() => {
-        const disabled = product.stock <= 0
-            || !product.active
-            || (siteSettings.kill_switch?.enabled ?? false)
-        setDisabled(disabled)
-        // If the product is disabled, ensure the basket quantity is 0
-        if (disabled && product.sku != 0) {
-            console.log("Product disabled, setting basket quantity to 0")
-            setBasketStringQuantity(cleanseUnsubmittedProduct(product), 0, currency)
-            setBasketQuant?.(0)
-        }
-    }, [product])
-    const siteSettings = useContext(SiteSettingsContext)
-
-    // Figure out whether the product is disabled, and set a message to show if so.
-    let disabledMessage
-    if (disabled && product.name != "...") {
-        const msgs = siteSettings.disabled_product_messages
-        if (msgs && msgs.out_of_stock && msgs.disabled) {
-            // Set message to display to user.
-            disabledMessage = !product.active
-                ? msgs.disabled
-                : product.stock <= 0
-                    ? msgs.out_of_stock
-                    : (siteSettings.kill_switch) && siteSettings.kill_switch.enabled
-                        ? siteSettings.kill_switch.message
-                        : "This product is unavailable" // Fallback, should never be seen
-        }
-    }
-
-    useEffect(() => {
-        syncWithBasket()
-        window.addEventListener("basketUpdate", syncWithBasket)
-        return () => window.removeEventListener("basketUpdate", syncWithBasket)
-    }, [product])
-
-    if (basketQuant == 0) { // Quant0Modifier
-        return (<div>
-            <p>{disabledMessage}</p>
-            <button
-                className="basket-button prod-page-basket-button"
-                onClick={() => updateQuantity(1)}
-                disabled={disabled}
-            >
-                <h1><i className="fi fi-sr-shopping-basket basket-icon"/>+</h1>
-            </button>
-        </div>)
-    } else { // Standard Basket Modifier
-        return (<div className='basket-modifier prod-page-modifier'>
-            <div className='decrement-basket-quantity-button' onClick={decrement}>
-                <h1>-</h1>
-            </div>
-            <input
-                id={'basket-input-' + product.sku}
-                ref={inputField}
-                className='basket-input'
-                type='text'
-                inputMode='numeric'
-                onBlur={async () => {
-                    await updateQuantity()
-                }}
-                defaultValue={basketQuant}
-            />
-            <div className='increment-basket-quantity-button' onClick={increment}>
-                <h1>+</h1>
-            </div>
-        </div>)
-    }
 }
