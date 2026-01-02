@@ -1,18 +1,13 @@
-import {useState, useEffect, useContext} from 'react';
-
 import "./product.css"
-import {blank_product, MAX_PRODUCT_ORDER} from '../../lib/consts.ts';
 import {SquareImageBox} from '../squareImageBox/squareImageBox';
-import {getBasket, getBasketProducts, setBasketStringQuantity} from '../../lib/lib';
-import {ProductContext} from '../../pages/products/lib';
 import Price from "../price/price.tsx";
 import DineroFactory, {Currency} from "dinero.js";
-import {LocaleContext} from "../../localeHandler.ts";
 import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.ts";
 import {getProductPagePath} from "../../lib/paths.ts";
-import {CategoryData, ProductData, ImageData, OrderProduct, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
+import {ProductData, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
 import {ProductInBasket} from "@shared/types/types.ts";
 import BasketModifier, {ProductGroupBasketModifier} from "../ticker/basketModifier/basketModifier.tsx";
+import PriceRange from "../price/priceRange/priceRange.tsx";
 
 /**
  * Displays a product or product group with a basket ticker.
@@ -22,8 +17,6 @@ export default function Product({prod}: {
     prod: ProductData | ProductData[]
 })
 {
-    const {currency} = useContext(LocaleContext);
-
     // Redefining variables after changing parameter to accept
     // full product instead of just select information. Done to
     // avoid refactoring the whole component to use product.???
@@ -74,6 +67,48 @@ export default function Product({prod}: {
                         ? <BasketModifier product={singleProd!} inputId={`${singleProd!.sku}-product-basket-modifier`} height={"100%"}/>
                         : <ProductGroupBasketModifier products={product as ProductData[]} height={"100%"}/>
                     }
+                </div>
+            </div>
+        </div>
+    )
+}
+
+
+/**
+ * Displays a product group with a group product basket ticker.
+ */
+export function ProductGroup({prods}: {
+    /** The product group to display */
+    prods: ProductData[]
+})
+{
+    if (!prods || prods.length == 0) return null;
+
+    // Pick the first product as the representative of the group.
+    const repr = prods[0]
+
+    // Get the image to represent the group
+    const imageURL = getRepresentativeImageURL(prods)
+
+    return (
+        <div className="product" id={"product-" + repr.sku}>
+            {/* Product Image + Link to dedicated product page*/}
+            <a className="product-image-link" href={getProductPagePath(repr.sku)}>
+                <SquareImageBox image={imageURL} size='100%'/>
+            </a>
+
+            {/* Bottom half of the product display */}
+            <div className="prod-footer">
+                <div className="product-text">
+                    {/* Product Name + Link to dedicated product page */}
+                    <a className="product-name" href={getProductPagePath(repr.sku)}>
+                        {repr.group_name}
+                    </a>
+                    <PriceRange prods={prods}/>
+                </div>
+                <div className='spacer'/>
+                <div className='basket-modifier'>
+                    <ProductGroupBasketModifier products={prods} height={"100%"}/>
                 </div>
             </div>
         </div>

@@ -330,7 +330,7 @@ export const fakeProductGroup: ProductData[] = [
         "sku": 370,
         "name": "Live Laugh Lesbian Tote",
         "tags": [],
-        "price": 9.99,
+        "price": 19.99,
         "stock": 5,
         "active": true,
         "images": [

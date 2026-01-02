@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import {createContext, Dispatch, SetStateAction} from "react";
 import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types.ts";
 import { ImageData, ProductData } from "@shared/types/types";
 import { blank_product } from "../../lib/consts.ts";
@@ -9,13 +9,13 @@ import {EditableProductProp} from "./productEditor/editableProductProps.ts";
 
 export const ProductContext = createContext<{
     basketQuant?: number, 
-    setBasketQuant?: React.Dispatch<React.SetStateAction<number>>,
-    setProduct?: React.Dispatch<React.SetStateAction<UnsubmittedProductData>>
+    setBasketQuant?: Dispatch<SetStateAction<number>>,
+    setProduct?: Dispatch<SetStateAction<UnsubmittedProductData>>
     product: UnsubmittedProductData
     group: UnsubmittedProductData[]
     originalProd: ProductData
     hoveredVariant: UnsubmittedProductData | undefined
-    setHoveredVariant?: React.Dispatch<React.SetStateAction<UnsubmittedProductData | undefined>>
+    setHoveredVariant?: Dispatch<SetStateAction<UnsubmittedProductData | undefined>>
 }>({product: blank_product, originalProd: blank_product, group: [], hoveredVariant: blank_product});
 
 /**
