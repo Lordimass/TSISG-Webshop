@@ -12,6 +12,7 @@ import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.t
 import {getProductPagePath} from "../../lib/paths.ts";
 import {CategoryData, ProductData, ImageData, OrderProduct, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
 import {ProductInBasket} from "@shared/types/types.ts";
+import BasketModifier from "../ticker/basketModifier/basketModifier.tsx";
 
 /**
  * Displays a product or product group with a basket ticker.
@@ -26,10 +27,9 @@ export default function Product({prod}: {
     // Redefining variables after changing parameter to accept
     // full product instead of just select information. Done to
     // avoid refactoring the whole component to use product.???
-    let sku: number, name: string, price: number, images: ImageData[], stock: number | undefined,
-        category: CategoryData;
+    let sku: number, name: string, price: number
     let group = false
-    let product: ProductData[] | ProductData = blank_product
+    let product: ProductData[] | ProductData
     if ("length" in prod && prod.length === 1) product = prod[0]
     else product = prod
 
@@ -37,192 +37,22 @@ export default function Product({prod}: {
         sku = product.sku
         name = product.name
         price = product.price
-        images = product.images
-        category = product.category
-        stock = product.stock
     } else { // Product is in a group
         product = product as unknown as ProductData[]
         sku = product[0].sku
         name = product[0].group_name!
         price = product[0].price
-        images = product[0].images
-        category = product[0].category
         group = true
     }
-
-    if (stock && stock < 0) {
-        stock = 0
-    }
-
-    function BasketModifier0Quant() { // Simple Add To Basket Button
-        return (
-            <div className="basket-button" onClick={increment}>
-                <i className="fi fi-sr-shopping-basket basket-icon"/>
-                <h1>+</h1>
-            </div>
-        )
-    }
-
-    function BasketModifier() { // Text field and increment/decrement buttons
-        return (<>
-            <div className='decrement-basket-quantity-button' onClick={decrement}>
-                <h1>-</h1>
-            </div>
-            <input
-                id={'basket-input-' + sku}
-                className='basket-input'
-                type='text'
-                inputMode='numeric'
-                onBlur={updateQuantityFromInputBox}
-                defaultValue={quantity}
-                aria-label='Quantity'
-            />
-            <div className='increment-basket-quantity-button' onClick={increment}>
-                <h1>+</h1>
-            </div>
-        </>)
-    }
-
-    function increment() { // Increase quantity of this product
-        if (!max_order || quantity >= max_order) {
-            return
-        }
-        updateQuantity(quantity + 1)
-        setShowModifer(true)
-        updateQuantityToInputBox()
-    }
-
-    function decrement() {
-        if (quantity > 0) {
-            updateQuantity(quantity - 1)
-        }
-
-        if (quantity <= 1) {
-            setShowModifer(false)
-        }
-    }
-
-    function updateQuantityToInputBox() {
-        // Updating the value displayed in the quantity box
-        let basketInput = document.getElementById("basket-input-" + sku);
-        if (basketInput == null) {
-            return
-        }
-        (basketInput as HTMLInputElement).value = quantity.toString()
-    }
-
-    function updateQuantityFromInputBox() {
-        if (group) {
-            return
-        }
-        // Fetch HTMLElement
-        const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
-        if (basketElement == null) {
-            console.error("Couldn't find input box for product-" + sku)
-            return
-        }
-
-        // Cast to HTMLInputElement
-        const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-
-        // Convert value to an integer
-        const value: number = parseInt(basketInput.value)
-
-        // Check input valid
-        if (Number.isNaN(+value)) {
-            basketInput.value = quantity as unknown as string
-            return
-        }
-        // Check number in range
-        if (+value > max_order!) {
-            basketInput.value = max_order as unknown as string
-            updateQuantity(max_order!)
-            return
-        } else if (+value <= 0) {
-            basketInput.value = 0 as unknown as string
-            updateQuantity(0)
-            setShowModifer(false)
-            return
-        }
-        basketInput.value = +value as unknown as string
-
-        // Actually change the variable value
-        updateQuantity(+value)
-    }
-
-    async function updateQuantity(quant: number) {
-        if (group) {
-            return
-        }
-
-        // Typecast safe since modifier only active for non-grouped products
-        await setBasketStringQuantity(product as ProductData, quant, currency)
-        setQuantityButActually(quant)
-    }
-
-    function resetInputToBasket() {
-        // Resets the value in the HTMLInput to the value from the basket
-        // Called whenever the basket gets updated.
-
-        // Iterating through basket to find product
-        const basket = getBasketProducts()
-        for (let i = 0; i < basket.length; i++) {
-            let p: ProductInBasket = basket[i];
-            if (p.sku == sku) {
-                // Set quantity variable to match basket
-                setQuantityButActually(p.basketQuantity);
-
-                if (p.basketQuantity > 0) setShowModifer(true)
-                else setShowModifer(false)
-
-                // Update HTMLInput if it exists
-                const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
-                if (basketElement != null) {
-                    const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                    basketInput.value = p.basketQuantity as unknown as string
-                }
-                return // Don't check any further, we've found what we're looking for.
-            }
-        }
-        // If we don't find it, it must have been removed from the basket
-        // Update HTMLInput to 0 if it exists
-        const basketElement: HTMLElement | null = document.getElementById("basket-input-" + sku)
-        if (basketElement != null) {
-            const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-            basketInput.value = "0"
-        }
-        setShowModifer(false)
-        setQuantityButActually(0)
-    }
-
-    const [quantity, setQuantityButActually] = useState(0); // Current quantity of product order
-    const [showModifier, setShowModifer] = useState(quantity > 0); // Current display mode
-    const max_order = stock ? Math.min(MAX_PRODUCT_ORDER, stock) : undefined; // Maximum possible product order
-    const imageURL = getRepresentativeImageURL(prod)
-
-    window.addEventListener("basketUpdate", resetInputToBasket)
-
-    // Format Price
-    const string_price: string = "£" + price.toFixed(2)
+    const singleProd = !group ? product as ProductData : undefined
+    const imageURL = getRepresentativeImageURL(product)
 
     // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
     // to convert it to the users locale later.
     const priceUnits = Math.round(price*100)
     const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
 
-    // Check if item already in basket
-    useEffect(() => {
-        resetInputToBasket()
-    }, [])
-
-    return (<ProductContext.Provider value={{
-        basketQuant: quantity, setBasketQuant: setQuantityButActually,
-        product: "length" in product ? product[0] : product, setProduct: undefined,
-        group: "length" in product ? product : [],
-        originalProd: "length" in product ? product[0] : product,
-        hoveredVariant: undefined,
-        setHoveredVariant: undefined
-    }}>
+    return (
         <div className="product" id={"product-" + sku}>
             {/* Product Image + Link to dedicated product page*/}
             <a className="product-image-link" href={getProductPagePath(sku)}>
@@ -241,22 +71,18 @@ export default function Product({prod}: {
                 <div className='spacer'/>
                 <div className='basket-modifier'>
                     {!group
-                        ? showModifier
-                            ? <BasketModifier/>
-                            : <BasketModifier0Quant/>
-                        : <GroupBasketModifier/>
+                        ? <BasketModifier product={singleProd!} inputId={`${singleProd.sku}-product-basket-modifier`}/>
+                        : <GroupBasketModifier sku={sku}/>
                     }
                 </div>
             </div>
         </div>
-
-    </ProductContext.Provider>)
+    )
 }
 
-function GroupBasketModifier() {
-    const {product} = useContext(ProductContext)
+function GroupBasketModifier({sku}: {sku: number}) {
     return (
-        <a className="basket-button" href={getProductPagePath(product.sku)}>
+        <a className="basket-button" href={getProductPagePath(sku)}>
             <p>View Options <i className="fi fi-rr-angle-right"></i></p>
         </a>
     )
@@ -278,84 +104,8 @@ export function BasketProduct({product}: {
     const {sku, name, price, images, stock} = product
     const {currency} = useContext(LocaleContext)
 
-    async function increment() { // Increase quantity of this product
-        if (quantity >= max_order) {
-            return
-        }
-        await setBasketStringQuantity(product, quantity + 1, currency)
-        setQuantityButActually(quantity + 1)
-    }
-
-    async function decrement() {
-        if (quantity > 0) {
-            await setBasketStringQuantity(product, quantity - 1, currency)
-            setQuantityButActually(quantity - 1)
-        }
-    }
-
-    async function updateQuantity() {
-        // Updating quantity based on the contents of the HTMLInput
-
-        // Fetch HTMLElement
-        const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
-        if (basketElement == null) {
-            console.error("Couldn't find input box for basket-product-" + sku)
-            return
-        }
-        const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-
-        // Convert value to an integer
-        const value: number = parseInt(basketInput.value)
-
-        // Check input valid
-        if (Number.isNaN(value)) {
-            console.log("Invalid input, resetting to " + quantity)
-            basketInput.value = quantity as unknown as string
-            return
-        }
-        // Check number in range
-        if (value > max_order) {
-            await setBasketStringQuantity(product, max_order, currency)
-            setQuantityButActually(max_order)
-            return
-        } else if (value <= 0) {
-            await setBasketStringQuantity(product, 0, currency)
-            setQuantityButActually(0)
-            return
-        }
-
-        // Actually change the variable value
-        await setBasketStringQuantity(product, value, currency)
-        setQuantityButActually(value)
-    }
-
-    function syncWithBasket() {
-        // Resets the value in the HTMLInput to the value from the basket
-        // Called whenever the basket gets updated from a different source
-        const basket = getBasketProducts()
-        for (let i = 0; i < basket.length; i++) {
-            let item: ProductInBasket = basket[i];
-            if (item.sku == sku) {
-                setQuantityButActually(item.basketQuantity);
-                const basketElement: HTMLElement | null = document.getElementById("basket-basket-input-" + sku)
-                if (basketElement == null) {
-                    return
-                }
-                const basketInput: HTMLInputElement = basketElement as HTMLInputElement;
-                basketInput.value = item.basketQuantity as unknown as string
-                return
-            }
-        }
-    }
-
-    const [quantity, setQuantityButActually] = useState(0);
     const imageURL = getImageURL(images[0])
     const link = getProductPagePath(sku)
-    let max_order: number = Math.min(MAX_PRODUCT_ORDER, stock);
-    window.addEventListener("basketUpdate", syncWithBasket)
-    useEffect(() => {
-        syncWithBasket()
-    }, [])
 
     // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
     // to convert it to the users locale later.
@@ -374,23 +124,7 @@ export function BasketProduct({product}: {
                     <Price baseDinero={dinero}/>
                 </div>
 
-                <div className='basket-modifier'>
-                    <div className='decrement-basket-quantity-button' onClick={decrement}>
-                        <h1>-</h1>
-                    </div>
-                    <input
-                        id={'basket-basket-input-' + sku}
-                        className='basket-input'
-                        type='text'
-                        inputMode='numeric'
-                        onBlur={updateQuantity}
-                        defaultValue={quantity}
-                        aria-label='Quantity'
-                    />
-                    <div className='increment-basket-quantity-button' onClick={increment}>
-                        <h1>+</h1>
-                    </div>
-                </div>
+                <BasketModifier inputId={`${product.sku}-basket-basket-modifier`} product={product} />
 
             </div>
         </div>

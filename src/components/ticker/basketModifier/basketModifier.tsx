@@ -11,7 +11,7 @@ import {cleanseUnsubmittedProduct} from "../../../pages/products/lib.tsx";
 import {LocaleContext} from "../../../localeHandler.ts";
 
 export default function BasketModifier(
-    {product, ...args}: ArgumentsType<typeof Ticker>[0] & {
+    {product, ...args}: Omit<ArgumentsType<typeof Ticker>[0], "ariaLabel"> & {
         /** The product for which to control the basket quantity of */
         product: ProductData | UnsubmittedProductData
     }
@@ -23,7 +23,7 @@ export default function BasketModifier(
      */
     async function onTickerChange(val: number) {
         setBasketQuantity(val)
-        setBasketStringQuantity(cleanseUnsubmittedProduct(product), val, currency)
+        setBasketStringQuantity(cleanProduct, val, currency)
         if (args.onChange) await args.onChange(val)
     }
 
@@ -37,9 +37,11 @@ export default function BasketModifier(
         const item = basket.find(item => item.sku === product.sku)
         const newQuantity = item?.basketQuantity ?? 0
         if (newQuantity !== basketQuantity) {
-            console.log(`${args.inputId} updated to ${newQuantity} from ${basketQuantity}`)
             setBasketQuantity(newQuantity)
-            await updateTickerRef.current!(newQuantity)
+            if (updateTickerRef.current) {
+                console.log(`${args.inputId} updated to ${newQuantity} from ${basketQuantity}`)
+                await updateTickerRef.current(newQuantity)
+            }
         }
     }
 
@@ -53,14 +55,21 @@ export default function BasketModifier(
     const disabled = useGetDisabledStatus(product)
     // A ref to a method that can be called to update the ticker value.
     const updateTickerRef = useRef<(newValue: number) => Promise<void>>(null)
+    // A clean product to avoid having to reclean it every time it needs to be used in a clean situation
+    const cleanProduct = cleanseUnsubmittedProduct(product)
 
-    // TODO: Handle strange bug with other tickers on page not updating properly on 1 and 2 sometimes?
-    // TODO: Get disabled tickers to set basket quantity to 0. But keep in mind that this will screw with storybook. Maybe have different products for each story?
+    // If the product is disabled, it cannot be in the cart
+    useEffect(() => {
+        if (disabled.isDisabled) {
+            console.log("Product disabled")
+            onTickerChange(0).then()
+        }
+    }, [disabled])
 
     useEffect(() => {
         syncWithBasket().then()
         window.addEventListener("basketUpdate", syncWithBasket)
-        return () => window.removeEventListener("basketUpdate", syncWithBasket)
+        return () => {console.log("Unmounted"); window.removeEventListener("basketUpdate", syncWithBasket)}
     }, [])
 
     if (basketQuantity === 0) {
@@ -71,9 +80,11 @@ export default function BasketModifier(
     } else {
         return <Ticker
             {...args}
+            ariaLabel={"Basket quantity"}
             defaultValue={basketQuantity}
             onChange={onTickerChange}
             max={max}
+            min={0}
             updateValueRef={updateTickerRef}
         />
     }

@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 
 import BasketModifier from './basketModifier';
 import {fn} from "storybook/test";
-import {fakeProductData} from "../../../../.storybook/fakes.ts";
+import {fakeProductData, fakeProductGroup} from "../../../../.storybook/fakes.ts";
 import {DefaultContextWrapper} from "../../../../.storybook/lib.tsx";
 
 const meta = {
@@ -30,6 +30,10 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         inputId: "default-basket-modifier-story",
+        product: fakeProductGroup[1]
+    },
+    argTypes: {
+        product: {control: {disable: true}, table: {defaultValue: {summary: fakeProductGroup[1].name}}}
     }
 };
 
