@@ -6,8 +6,8 @@ import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.t
 import {getProductPagePath} from "../../lib/paths.ts";
 import {ProductData, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
 import {ProductInBasket} from "@shared/types/types.ts";
-import BasketModifier, {ProductGroupBasketModifier} from "../ticker/basketModifier/basketModifier.tsx";
-import PriceRange from "../price/priceRange/priceRange.tsx";
+import BasketModifier from "../ticker/basketModifier/basketModifier.tsx";
+import {ProductPrice} from "../price/productPrice/productPrice.tsx";
 
 /**
  * Displays a product or product group with a basket ticker.
@@ -17,98 +17,42 @@ export default function Product({prod}: {
     prod: ProductData | ProductData[]
 })
 {
-    // Redefining variables after changing parameter to accept
-    // full product instead of just select information. Done to
-    // avoid refactoring the whole component to use product.???
-    let sku: number, name: string, price: number
-    let group = false
-    let product: ProductData[] | ProductData
-    if ("length" in prod && prod.length === 1) product = prod[0]
-    else product = prod
-
-    if (!("length" in product)) { // Product is not in a group
-        sku = product.sku
-        name = product.name
-        price = product.price
-    } else { // Product is in a group
-        product = product as unknown as ProductData[]
-        sku = product[0].sku
-        name = product[0].group_name!
-        price = product[0].price
-        group = true
+    // Check whether product is a group or single product, and extract a representative product needed for some things.
+    let representativeProduct: ProductData
+    // prod is a group.
+    if (Array.isArray(prod) && prod.length > 1) {
+        prod = prod as ProductData[];
+        representativeProduct = prod[0];
     }
-    const singleProd = !group ? product as ProductData : undefined
-    const imageURL = getRepresentativeImageURL(product)
+    // prod is a group with a single element, or not a group
+    else {
+        // prod is a group with a single element
+        if (Array.isArray(prod)) prod = prod[0];
+        representativeProduct = prod;
+    }
 
-    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
-    // to convert it to the users locale later.
-    const priceUnits = Math.round(price*100)
-    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+    const prodPagePath = getProductPagePath(representativeProduct.sku)
+    const reprImageUrl = getRepresentativeImageURL(prod)
 
     return (
-        <div className="product" id={"product-" + sku}>
+        <div className="product" id={"product-" + representativeProduct.sku}>
             {/* Product Image + Link to dedicated product page*/}
-            <a className="product-image-link" href={getProductPagePath(sku)}>
-                <SquareImageBox image={imageURL} size='100%'/>
+            <a className="product-image-link" href={prodPagePath}>
+                <SquareImageBox image={reprImageUrl} size='100%'/>
             </a>
 
             {/* Bottom half of the product display */}
             <div className="prod-footer">
                 <div className="product-text">
                     {/* Product Name + Link to dedicated product page */}
-                    <a className="product-name" href={getProductPagePath(sku)}>
-                        {name}
+                    <a className="product-name" href={prodPagePath}>
+                        {representativeProduct.name}
                     </a>
-                    <Price baseDinero={dinero}/>
+                    <ProductPrice prod={prod}/>
                 </div>
                 <div className='spacer'/>
                 <div className='basket-modifier'>
-                    {!group
-                        ? <BasketModifier product={singleProd!} inputId={`${singleProd!.sku}-product-basket-modifier`} height={"100%"}/>
-                        : <ProductGroupBasketModifier products={product as ProductData[]} height={"100%"}/>
-                    }
-                </div>
-            </div>
-        </div>
-    )
-}
-
-
-/**
- * Displays a product group with a group product basket ticker.
- */
-export function ProductGroup({prods}: {
-    /** The product group to display */
-    prods: ProductData[]
-})
-{
-    if (!prods || prods.length == 0) return null;
-
-    // Pick the first product as the representative of the group.
-    const repr = prods[0]
-
-    // Get the image to represent the group
-    const imageURL = getRepresentativeImageURL(prods)
-
-    return (
-        <div className="product" id={"product-" + repr.sku}>
-            {/* Product Image + Link to dedicated product page*/}
-            <a className="product-image-link" href={getProductPagePath(repr.sku)}>
-                <SquareImageBox image={imageURL} size='100%'/>
-            </a>
-
-            {/* Bottom half of the product display */}
-            <div className="prod-footer">
-                <div className="product-text">
-                    {/* Product Name + Link to dedicated product page */}
-                    <a className="product-name" href={getProductPagePath(repr.sku)}>
-                        {repr.group_name}
-                    </a>
-                    <PriceRange prods={prods}/>
-                </div>
-                <div className='spacer'/>
-                <div className='basket-modifier'>
-                    <ProductGroupBasketModifier products={prods} height={"100%"}/>
+                    <BasketModifier product={prod} inputId={`${representativeProduct.sku}-product-basket-modifier`}/>
                 </div>
             </div>
         </div>

@@ -5,6 +5,7 @@ import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
 import {CURRENCY_SYMBOLS, TAX_EXCLUSIVE_COUNTRIES} from "@shared/consts/currencySymbols.ts";
+import {ProductData} from "@shared/types/supabaseTypes.ts";
 
 /**
  * Price display in user's local currency, or any custom currency supplied through the `currency` property.
@@ -70,5 +71,4 @@ export default function Price({baseDinero, currency, simple}: {
             )
         }</p>
     }
-
 }

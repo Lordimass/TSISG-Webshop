@@ -1,7 +1,7 @@
 import "./products.css"
 
 import {JSX, ReactNode, useContext, useEffect, useState} from "react";
-import Product, {ProductGroup} from "./product";
+import Product from "./product";
 import { CheckoutProduct } from "./product"
 import {ProductData} from "@shared/types/types";
 import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
@@ -48,14 +48,7 @@ export default function Products() {
             let group: ProductData[] | null = activeProductData[i]
             if (!group || group.length === 0) continue;
 
-            let newProductComponent: ReactNode
-            if (group.length === 1) {
-                newProductComponent = <Product prod={group[0]} key={group[0].sku}/>
-            } else {
-                newProductComponent = <ProductGroup prods={group} key={group[0].group_name}/>
-            }
-
-            productComponents.push(newProductComponent)
+            productComponents.push(<Product prod={group} key={group[0].sku}/>)
             displayedProducts.push(...group)
         }
         setProducts(productComponents)

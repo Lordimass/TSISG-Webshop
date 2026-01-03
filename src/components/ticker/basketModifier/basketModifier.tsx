@@ -14,7 +14,7 @@ import {getProductPagePath} from "../../../lib/paths.ts";
 export default function BasketModifier(
     {product, ...args}: Omit<ArgumentsType<typeof Ticker>[0], "ariaLabel"> & {
         /** The product for which to control the basket quantity of */
-        product: ProductData | UnsubmittedProductData
+        product: ProductData | UnsubmittedProductData | ProductData[] | UnsubmittedProductData[]
     }
 ) {
     /**
@@ -35,7 +35,7 @@ export default function BasketModifier(
     async function syncWithBasket() {
         // Find the new quantity of the product in the basket
         const basket = getBasketProducts()
-        const item = basket.find(item => item.sku === product.sku)
+        const item = basket.find(item => item.sku === reprProd.sku)
         const newQuantity = item?.basketQuantity ?? 0
 
         // Update state and ticker value if it exists.
@@ -45,18 +45,29 @@ export default function BasketModifier(
         }
     }
 
+    // Check if product is a group and return a different component if so
+    let altReturnComponent
+    let reprProd: ProductData | UnsubmittedProductData
+    if (Array.isArray(product) && product.length > 1) {
+        // Cannot return straight away because of hooks.
+        altReturnComponent = <ProductGroupBasketModifier products={product}/>
+        reprProd = product[0]
+    }
+    else if (Array.isArray(product)) reprProd = product[0]
+    else reprProd = product
+
     // Get currency for updating the basket string
     const {currency} = useContext(LocaleContext)
     // The value of the ticker. In theory, this is always in sync with the basket through `syncWithBasket`
     const [basketQuantity, setBasketQuantity] = useState<number>(0)
     // The maximum value of the ticker
-    const max = Math.min(MAX_PRODUCT_ORDER, product.stock)
+    const max = Math.min(MAX_PRODUCT_ORDER, reprProd.stock)
     // The disabled status of this ticker, as well as an explanatory message if it is disabled.
-    const disabled = useGetDisabledStatus(product)
+    const disabled = useGetDisabledStatus(reprProd)
     // A ref to a method that can be called to update the ticker value.
     const updateTickerRef = useRef<(newValue: number) => Promise<void>>(null)
     // A clean product to avoid having to reclean it every time it needs to be used in a clean situation
-    const cleanProduct = cleanseUnsubmittedProduct(product)
+    const cleanProduct = cleanseUnsubmittedProduct(reprProd)
 
     // If the product is disabled, it cannot be in the cart
     useEffect(() => {
@@ -74,7 +85,8 @@ export default function BasketModifier(
         }
     }, [])
 
-    if (basketQuantity === 0) {
+    if (altReturnComponent) return altReturnComponent;
+    else if (basketQuantity === 0) {
         return <ZeroQuantityBasketModifier
             disabled={disabled}
             onTickerChange={onTickerChange}
@@ -93,15 +105,15 @@ export default function BasketModifier(
     }
 }
 
-export function ProductGroupBasketModifier({products, height = "50px"}: {
+function ProductGroupBasketModifier({products, height = "50px"}: {
     /** The products that this basket modifier represents */
     products: (ProductData | UnsubmittedProductData)[]
     /** The height of the element */
     height?: string
 }) {
-    // If there are no products in the group, button is disabled
+    // If there are no products in the group, button is disabled.
     const disabled = products.length == 0
-    // The first product is the representative for the group
+    // The first product is the representative for the group.
     const representative = disabled ? undefined : products[0]
 
     return (
