@@ -67,34 +67,27 @@ export default function Product({prod}: {
  * Displays a product from the customer's basket with a basket ticker. Visually, this component is more suited to be
  * shown in the basket than the default {@link Product} component.
  */
-export function BasketProduct({product}: {
+export function BasketProduct({prod}: {
     /** The product in the customer's basket to display */
-    product: ProductInBasket
+    prod: ProductInBasket
 }
 ) {
-    const {sku, name, price, images, stock} = product
-
-    const imageURL = getImageURL(images[0])
-    const link = getProductPagePath(sku)
-
-    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
-    // to convert it to the users locale later.
-    const priceUnits = Math.round(price*100)
-    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
+    const imageURL = getRepresentativeImageURL(prod)
+    const prodPagePath = getProductPagePath(prod.sku)
 
     return (
-        <div className="basket-product" id={"product-" + sku}>
-            <a className="basket-prod-header" href={link}>
+        <div className="basket-product" id={"product-" + prod.sku}>
+            <a className="basket-prod-header" href={prodPagePath}>
                 <SquareImageBox image={imageURL} size='100%' loading='eager'/>
             </a>
 
             <div className="basket-prod-footer">
                 <div className="basket-product-text">
-                    <a className="product-name" href={link}>{name}</a>
-                    <Price baseDinero={dinero}/>
+                    <a className="product-name" href={prodPagePath}>{prod.name}</a>
+                    <ProductPrice prod={prod}/>
                 </div>
 
-                <BasketModifier inputId={`${product.sku}-basket-basket-modifier`} product={product} />
+                <BasketModifier inputId={`${prod.sku}-basket-basket-modifier`} product={prod} />
             </div>
         </div>
     )
@@ -126,46 +119,29 @@ export function CheckoutProduct({
     currency?: Currency
 }
 ) {
-    // In some cases an undefined value may accidentally be passed
-    // to the component, in which case we should escape it and
-    // render nothing, it will likely become defined once the page
-    // fully loads.
-    if (!product) return <></>
-    const sku = product.sku
+    if (!product) return null;
+
     const name = "name" in product ? product.name : product.product_name
     const quantity = "basketQuantity" in product
         ? product.basketQuantity
         : "quantity" in product
             ? product.quantity
             : undefined
-    const total = "line_value" in product
-        ? product.line_value
-        : quantity
-            ? product.price * quantity
-            : product.price
 
-    let image = "image_url" in product
-        ? product.image_url
-        : getImageURL(product.images?.[0]);
+    let image = product && "images" in product
+        ? getRepresentativeImageURL(product) : undefined;
 
     let href = linked
-        ? getProductPagePath(sku)
+        ? getProductPagePath(product.sku)
         : undefined;
-
-    if (image == "") image = undefined
-
-    // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
-    // to convert it to the users locale later.
-    const priceUnits = Math.round(total*100)
-    const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
 
     return (<a className="checkout-product" href={href}>
         <SquareImageBox image={image} size='100%' loading='eager'/>
         <div className="checkout-product-text">
             {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> :
                 <p className='checkout-product-name'>{name}</p>}
-            <Price baseDinero={dinero} currency={currency} />
-            {admin ? <p>SKU: {sku}</p> : <></>}
+            <ProductPrice prod={product} currency={currency}/>
+            {admin ? <p>SKU: {product.sku}</p> : <></>}
         </div>
         {checkbox ? <>
             <div className='product-filler'/>

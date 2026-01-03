@@ -130,7 +130,7 @@ export default function Basket() {
     const basket = getBasketProducts()
     for (let i = 0; i < basket.length; i++) {
         let prod : ProductInBasket = basket[i]
-        basketComponents.push(<BasketProduct product={prod} key={prod.sku}/>)
+        basketComponents.push(<BasketProduct prod={prod} key={prod.sku}/>)
     }
     
     return (<>
