@@ -11,7 +11,7 @@ import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import {checkStock, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
+import {checkStock, isSessionExpired, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
 import { page_title } from "../../lib/consts.ts";
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
@@ -49,7 +49,7 @@ export default function Checkout() {
         noindex={true}
         canonical="https://thisshopissogay.com/checkout"
         title={title}
-        loadCondition={!preparing}
+        loadCondition={true}
         loadingText="We're loading your basket..."
     >
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
@@ -106,34 +106,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         setIsLoading(false);
     }
 
-    /**
-     * Checks if the session is still active, since they expire after a set time,
-     * if it's not, warn the user that they should reload the page
-     * @returns <code>false</code> if the session is expired, 
-     * <code>true</code> if it is not
-     */
-    async function checkSessionStatus() {
-        const response = await fetch("/.netlify/functions/getCheckoutSession", {
-            method: "POST",
-            body: checkout.id
-        })
-        const body = await new Response(response.body).text()
-        if (!response.ok) {
-            console.error(body)
-            setError(<p className="checkout-error">{body}</p>)
-        }
-        const session: StripeNS.Checkout.Session = JSON.parse(body)
-        if (session.status != "open") {
-            setError(<p className="checkout-error">
-                This session has expired! Reload the page to fix it
-            </p>)
-            return false;
-        } else {
-            setError(<p></p>)
-            return true;
-        }
-    }
-
     const checkout = useCheckout();
 
     const [readyToCheckout, setReadyToCheckout] = useState(false)
@@ -177,7 +149,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
         const rates: string[] = await resp.json()
         if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
-        
+
         // TODO: Give customers multiple shipping options
         countryChanged.current = false;
         await checkout.updateShippingOption(rates[0])
@@ -191,7 +163,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             paymentInfoComplete.current = true
             await triggerAddPaymentInfo(currency)
         }
-        
+
     })
 
     // To prevent overloading the database / exploitation, only check stock once.
@@ -211,7 +183,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         console.log("Ready to checkout: ", ready);
         if (ready) {
             // Check that the session is still active
-            if (!await checkSessionStatus()) {
+            if (await isSessionExpired(checkout)) {
                 ready = false
                 setError(<p>"Checkout Expired! Please reload the page"</p>)
             }
@@ -223,11 +195,14 @@ function CheckoutAux({onReady}: {onReady: Function}) {
                     ready = false
                 }
                 setHasCheckedStock(true);
+                setError(<p></p>)
+            } else {
+                setError(<p></p>)
             }
         }
         setReadyToCheckout(ready);
 
-    } checkReadyToCheckout()}, [isEmailValid, addressComplete])
+    } checkReadyToCheckout().then()}, [isEmailValid, addressComplete])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)

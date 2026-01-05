@@ -6,6 +6,8 @@ import {Currency} from "dinero.js";
 import {getPath} from "../../lib/paths.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
 import {supabase} from "../../lib/supabaseRPC.tsx";
+import {Stripe as StripeNS} from "stripe";
+import {CheckoutContextValue} from "@stripe/react-stripe-js";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -35,7 +37,7 @@ export async function createCheckoutSession(): Promise<string> {
     const gaClientID = getGAClientId();
     const gaSessionID = await getGASessionId();
 
-    const result = await fetch(".netlify/functions/createCheckoutSession", {
+    const response = await fetch(".netlify/functions/createCheckoutSession", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -50,11 +52,8 @@ export async function createCheckoutSession(): Promise<string> {
             currency
         })
     })
-    .then (
-        function(value) {return value.json()},
-        function(error) {return error}    
-    )
-    return result.client_secret
+    const body = await response.json()
+    return body.client_secret
 }
 
 export async function fetchStripePrices(): Promise<Array<Object>> {
@@ -122,4 +121,23 @@ export async function checkStock() {
         })
     })
     return discrepencies
+}
+
+/**
+ * Gets the current status of the session. (i.e. whether it's currently expired.)
+ * @returns <code>true</code> if the session is expired,
+ * <code>false</code> if it is not
+ */
+export async function isSessionExpired(checkout: CheckoutContextValue) {
+    const response = await fetch("/.netlify/functions/getCheckoutSession", {
+        method: "POST",
+        body: checkout.id
+    })
+    const body = await new Response(response.body).text()
+    if (!response.ok) {
+        console.error(body)
+        return true;
+    }
+    const session: StripeNS.Checkout.Session = JSON.parse(body)
+    return session.status != "open";
 }

@@ -1,10 +1,9 @@
-import ReactGA from "react-ga4"
-import { ProductsInBasket, ProductData, ProductInBasket } from "@shared/types/types.ts"
+import { ProductData, ProductInBasket } from "@shared/types/types.ts"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {convertDinero} from "@shared/functions/price.ts";
-import {getBasket, getBasketProducts} from "../lib.tsx";
+import {getBasketProducts} from "../lib.tsx";
 
 /**
  * Get the Google Analytics client ID from the cookie.
@@ -33,10 +32,26 @@ export function getGAClientId(): string | null {
  * @returns The GA session ID or null if not found.
  */
 export async function getGASessionId(): Promise<string | null> {
-    return new Promise((resolve) => {
-        ReactGA.gtag("get", import.meta.env.VITE_GA4_MEASUREMENT_ID, "session_id", (id: any) => {
-            resolve(id);
-        });
+    // Timeout if it doesn't resolve fast, like if anti-tracker software is blocking calls to GA
+    const timeoutMs = 300
+
+    return new Promise((resolve, error) => {
+
+        const timeout = window.setTimeout(() => {
+            console.warn("Gtag timed out, likely blocked by anti-tracker software. Fine. You win.")
+            resolve(null)
+        }, timeoutMs);
+
+        gtag(
+            "get",
+            import.meta.env.VITE_GA4_MEASUREMENT_ID,
+            "session_id",
+            (id: any) => {
+                console.log(`Got ID: ${id}`);
+                clearTimeout(timeout);
+                resolve(id);
+            }
+        );
     });
 }
 
