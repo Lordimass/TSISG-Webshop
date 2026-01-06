@@ -49,7 +49,7 @@ export default function Checkout() {
         noindex={true}
         canonical="https://thisshopissogay.com/checkout"
         title={title}
-        loadCondition={true}
+        loadCondition={!preparing}
         loadingText="We're loading your basket..."
     >
         <CheckoutProvider stripe={stripePromise} options={checkoutProviderOpts}>
@@ -64,6 +64,7 @@ export default function Checkout() {
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
     const {currency} = useContext(LocaleContext)
+
     /**
      * Checks whether all the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.

@@ -1,5 +1,6 @@
 import {UUID} from "crypto"
 import type {RmOrder} from "@shared/types/royalMailTypes.ts";
+import {OrderProdCompressed} from "@shared/types/productTypes.ts";
 
 export interface ProductData extends RawProductData {
     /** DEPRECATED: Please use `category.id` instead */
@@ -144,25 +145,6 @@ export interface CompressedOrder {
     products: OrderProdCompressed[],
     city: string
     value: { total: number, shipping: number, currency: string },
-}
-
-/**
- * A product from the orders_compressed table
- */
-export interface OrderProdCompressed {
-    sku: number
-    product_name: string
-    weight: number
-    quantity: number
-    customs_description: string
-    origin_country_code: string
-    package_type_override: string
-    category: {
-        id: number
-        name: string
-    }
-    line_value: number
-    image_url: string
 }
 
 /** An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order. */

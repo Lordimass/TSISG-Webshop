@@ -1,13 +1,12 @@
 import "./product.css"
 import {SquareImageBox} from '../squareImageBox/squareImageBox';
-import Price from "../price/price.tsx";
-import DineroFactory, {Currency} from "dinero.js";
-import {getImageURL, getRepresentativeImageURL} from "@shared/functions/images.ts";
+import {Currency} from "dinero.js";
+import {getRepresentativeImageURL} from "@shared/functions/images.ts";
 import {getProductPagePath} from "../../lib/paths.ts";
-import {ProductData, OrderProdCompressed} from "@shared/types/supabaseTypes.ts";
-import {ProductInBasket} from "@shared/types/types.ts";
+import {ProductData} from "@shared/types/supabaseTypes.ts";
 import BasketModifier from "../ticker/basketModifier/basketModifier.tsx";
 import {ProductPrice} from "../price/productPrice/productPrice.tsx";
+import {OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
 
 /**
  * Displays a product or product group with a basket ticker.
@@ -121,7 +120,6 @@ export function CheckoutProduct({
 ) {
     if (!product) return null;
 
-    const name = "name" in product ? product.name : product.product_name
     const quantity = "basketQuantity" in product
         ? product.basketQuantity
         : "quantity" in product
@@ -138,8 +136,8 @@ export function CheckoutProduct({
     return (<a className="checkout-product" href={href}>
         <SquareImageBox image={image} size='100%' loading='eager'/>
         <div className="checkout-product-text">
-            {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> :
-                <p className='checkout-product-name'>{name}</p>}
+            {quantity ? <p className='checkout-product-name'>{product.name} (x{quantity})</p> :
+                <p className='checkout-product-name'>{product.name}</p>}
             <ProductPrice prod={product} currency={currency}/>
             {admin ? <p>SKU: {product.sku}</p> : <></>}
         </div>

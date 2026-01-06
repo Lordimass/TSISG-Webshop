@@ -1,10 +1,10 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 import {fetchStripeProduct, stripe} from "../lib/stripe.ts";
-import type { ProductInBasket } from "@shared/types/types.ts";
 import { supabaseAnon } from "../lib/getSupabaseClient.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {StatusedError} from "@shared/errors.ts";
+import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 type LineItem = (Stripe.LineItem | {price: string})
 

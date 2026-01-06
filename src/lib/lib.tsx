@@ -1,4 +1,4 @@
-import {ProductsInBasket, ProductData, ProductInBasket, Basket} from "@shared/types/types"
+import {ProductData} from "@shared/types/types"
 import {supabase} from "./supabaseRPC"
 import {compareProducts} from "./sortMethods"
 import {daysOfWeek, monthsOfYear} from "./consts.ts"
@@ -7,6 +7,7 @@ import {Currency} from "dinero.js";
 import {DEFAULT_CURRENCY} from "../localeHandler.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
+import {Basket, ProductInBasket} from "@shared/types/productTypes.ts";
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale

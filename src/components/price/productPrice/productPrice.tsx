@@ -1,9 +1,10 @@
 import DineroFactory, {Currency} from "dinero.js";
 import Price from "../price.tsx";
-import {OrderProdCompressed, ProductData} from "@shared/types/supabaseTypes.ts";
+import {ProductData} from "@shared/types/supabaseTypes.ts";
 import "./productPrice.css"
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
-import {ProductInBasket} from "@shared/types/types.ts";
+
+import {OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
 
 /** Displays a price (or price range) for a given product or product group. */
 export function ProductPrice({prod, currency}: {

@@ -1,5 +1,5 @@
 import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
-import {ProductInBasket, StockDiscrepency} from "@shared/types/types"
+import {StockDiscrepency} from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
 import {Currency} from "dinero.js";
@@ -8,6 +8,7 @@ import {getBasketProducts} from "../../lib/lib.tsx";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {Stripe as StripeNS} from "stripe";
 import {CheckoutContextValue} from "@stripe/react-stripe-js";
+import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")

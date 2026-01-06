@@ -13,6 +13,6 @@ type BasketProduct = StoryObj<typeof BasketProduct>;
 
 export const Default: BasketProduct = {
     args: {
-        product: fakeProductInBasket
+        prod: fakeProductInBasket
     },
 };

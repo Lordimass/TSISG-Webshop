@@ -1,5 +1,5 @@
 import {CategoryData, ImageData, ProductData, TagData} from "@shared/types/supabaseTypes.ts";
-import {Basket, ProductInBasket} from "@shared/types/types.ts";
+import {Basket, ProductInBasket} from "@shared/types/productTypes.ts";
 
 export const fakeImageData: ImageData = {
     "id": "f66e3193-327a-48c2-a149-63db1edcc2b8",

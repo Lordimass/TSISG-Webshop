@@ -1,13 +1,13 @@
 import { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import "./basket.css"
 import { BasketProduct } from "../product/product";
-import { ProductInBasket } from "@shared/types/types";
 import { SiteSettingsContext } from "../../app";
 import { NotificationsContext } from "../notification/lib";
 import { triggerViewCart } from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
+import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 export default function Basket() {
     async function redirectToCheckout() {

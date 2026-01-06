@@ -1,9 +1,10 @@
-import { ProductData, ProductInBasket } from "@shared/types/types.ts"
+import { ProductData } from "@shared/types/types.ts"
 import { GA4Product } from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {convertDinero} from "@shared/functions/price.ts";
 import {getBasketProducts} from "../lib.tsx";
+import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 /**
  * Get the Google Analytics client ID from the cookie.
