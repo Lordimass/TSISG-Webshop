@@ -207,7 +207,7 @@ async function createRMOrder(order: Order) {
                         weightInGrams: orderWeight,
                         packageFormatIdentifier: packageFormat,
                         contents: order.products.map((prod) => {return {
-                            name: prod.product_name,
+                            name: prod.name,
                             SKU: prod.sku,
                             quantity: prod.quantity,
                             unitValue: prod.line_value/(prod.quantity*1.2), // Excluding tax for customs

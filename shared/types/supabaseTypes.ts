@@ -137,7 +137,7 @@ export interface CompressedOrder {
  */
 export interface OrderProdCompressed {
     sku: number
-    product_name: string
+    name: string
     weight: number
     quantity: number
     customs_description: string

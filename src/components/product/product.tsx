@@ -437,7 +437,6 @@ export function CheckoutProduct({
     // fully loads.
     if (!product) return <></>
     const sku = product.sku
-    const name = "name" in product ? product.name : product.product_name
     const quantity = "basketQuantity" in product
         ? product.basketQuantity
         : "quantity" in product
@@ -467,8 +466,8 @@ export function CheckoutProduct({
     return (<a className="checkout-product" href={href}>
         <SquareImageBox image={image} size='100%' loading='eager'/>
         <div className="checkout-product-text">
-            {quantity ? <p className='checkout-product-name'>{name} (x{quantity})</p> :
-                <p className='checkout-product-name'>{name}</p>}
+            {quantity ? <p className='checkout-product-name'>{product.name} (x{quantity})</p> :
+                <p className='checkout-product-name'>{product.name}</p>}
             <Price baseDinero={dinero} currency={currency} />
             {admin ? <p>SKU: {sku}</p> : <></>}
         </div>
