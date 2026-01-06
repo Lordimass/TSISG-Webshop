@@ -1,8 +1,4 @@
-export type OrdersFromPageable = {
-    orders: OrderFromPageable[]
-}
-
-export type OrderFromPageable = {
+export interface RmOrder {
     orderIdentifier: number
     orderReference?: string
     /** ISO Date String */

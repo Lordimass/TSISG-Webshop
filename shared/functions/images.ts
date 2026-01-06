@@ -1,8 +1,8 @@
-import {ImageData, OrderProdCompressed, ProductData} from "@shared/types/supabaseTypes.ts";
-import {UnsubmittedImageData, UnsubmittedProductData} from "../../src/pages/products/productEditor/types.tsx";
+import {ImageData, ProductData} from "@shared/types/supabaseTypes.ts";
+import {UnsubmittedImageData, UnsubmittedProductData} from "../../src/pages/products/productEditor/types.ts";
 import {supabase} from "../../src/lib/supabaseRPC.tsx";
-import {ProductInBasket} from "@shared/types/types.ts";
 import {useState} from "react";
+import {OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
 
 /**
  * Gets the public URL of a product image

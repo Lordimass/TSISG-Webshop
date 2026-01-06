@@ -1,10 +1,10 @@
 import { Context } from "@netlify/functions";
 import Stripe from 'stripe'
 import {fetchStripeProduct, stripe} from "../lib/stripe.ts";
-import type { ProductInBasket } from "@shared/types/types.ts";
 import { supabaseAnon } from "../lib/getSupabaseClient.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
-import {NetlifyFunctionError} from "@shared/errors.ts";
+import {StatusedError} from "@shared/errors.ts";
+import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 type LineItem = (Stripe.LineItem | {price: string})
 
@@ -32,12 +32,12 @@ export default async function handler(request: Request, context: Context) {
             async prod => {
                 // Fetch matching Stripe Product
                 const stripeProd = await fetchStripeProduct(prod.sku, allStripeProducts)
-                if (!stripeProd) {throw new NetlifyFunctionError(
+                if (!stripeProd) {throw new StatusedError(
                         `Couldn't find a Stripe product matching product: ${prod.sku} ${prod.name}`,
                         500
                 )}
                 // Extract price ID
-                if (!stripeProd.default_price) {throw new NetlifyFunctionError(
+                if (!stripeProd.default_price) {throw new StatusedError(
                         `No default price found on product: ${prod.sku} ${prod.name}`,
                         500
                 )}

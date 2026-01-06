@@ -1,7 +1,7 @@
 import {Context} from "@netlify/functions";
 import type {ProductData, RawProductData, WebhookPayload} from "@shared/types/supabaseTypes.ts";
 import {VALIDATORS} from "@shared/schemas/schemas.ts";
-import {NetlifyFunctionError} from "@shared/errors.ts";
+import {StatusedError} from "@shared/errors.ts";
 import {supabaseAnon} from "../lib/getSupabaseClient.ts";
 import {fetchStripeProduct, stripe as testModeStripe} from "../lib/stripe.ts";
 import Stripe from "stripe";
@@ -110,8 +110,8 @@ export default async function handler(request: Request, context: Context): Promi
     return new Response(undefined)
 
 } catch(error: unknown) {
-    if (VALIDATORS.NetlifyFunctionError(error)) {
-        const netlifyFunctionError = error as NetlifyFunctionError;
+    if (VALIDATORS.StatusedError(error)) {
+        const netlifyFunctionError = error as StatusedError;
         return new Response(netlifyFunctionError.message, {status: netlifyFunctionError.status});
     } else {
         console.error(error)
@@ -124,7 +124,7 @@ export default async function handler(request: Request, context: Context): Promi
  */
 async function processBody(body: any): Promise<WebhookPayload> {
     if (!VALIDATORS.WebhookPayload(body)) {
-        throw new NetlifyFunctionError("Request body malformed", 400);
+        throw new StatusedError("Request body malformed", 400);
     }
     return body as WebhookPayload;
 }

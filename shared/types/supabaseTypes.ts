@@ -1,4 +1,6 @@
 import {UUID} from "crypto"
+import type {RmOrder} from "@shared/types/royalMailTypes.ts";
+import {OrderProdCompressed} from "@shared/types/productTypes.ts";
 
 export interface ProductData extends RawProductData {
     /** DEPRECATED: Please use `category.id` instead */
@@ -62,7 +64,7 @@ export type ImageData = {
     /** The identifier of the image object */
     id: UUID
     /** DEPRECATED: Use `id` instead. The direct access url of the image */
-    image_url: string
+    image_url?: string
     /** ISO timestamp of when the association was made between the image and the product */
     inserted_at: string
     /** The filename of the image */
@@ -112,45 +114,6 @@ export type CategoryData = {
     description: string | null,
 }
 
-
-/**
- * An order from the orders_compressed table
- */
-export interface CompressedOrder {
-    placed_at: string
-    email: string
-    street_address: string
-    country: string
-    name: string
-    fulfilled: boolean
-    total_value: number
-    postal_code: string
-    id: string
-    city: string
-    delivery_cost: number | null
-    products: OrderProdCompressed[]
-    value: { total: number, shipping: number, currency: string },
-}
-
-/**
- * A product from the orders_compressed table
- */
-export interface OrderProdCompressed {
-    sku: number
-    name: string
-    weight: number
-    quantity: number
-    customs_description: string
-    origin_country_code: string
-    package_type_override: string
-    category: {
-        id: number
-        name: string
-    }
-    line_value: number
-    image_url: string
-}
-
 /**
  * A product from the order_products table
  */
@@ -161,7 +124,10 @@ export interface OrderProduct {
     value: number
 }
 
-export interface Order {
+/**
+ * An order from the `orders_compressed` table
+ */
+export interface CompressedOrder {
     /**
      * @example cs_live_a1amiEmM5s3bJ9nDqlMoOivEyY49iWgu8J6dCREnaitD9SEelsAMBiT5rH
      * @example cs_test_a17gEfh6yFOOZrYfPOH4NDXWUUfNoUMh1RjJfvwPrWqaB8WQifa3QDnBhP
@@ -182,22 +148,11 @@ export interface Order {
 }
 
 /** An order returned by the `getAllOrders` Netlify function. Includes Royal Mail data on the order. */
-export interface OrderReturned extends Order {
+export interface MergedOrder extends CompressedOrder {
     /** Whether the order has been passed over to Royal Mail*/
     dispatched: boolean
-    delivery_cost?: number
-    products: OrderProdCompressed[]
     /** Data from the Royal Mail API about this order. */
-    royalMailData: {
-        orderIdentifier: number
-        orderReference?: string
-        createdOn: string
-        orderDate?: string
-        printedOn?: string
-        manifestedOn?: string
-        shippedOn?: string
-        trackingNumber?: string
-    }
+    royalMailData?: RmOrder
 }
 
 /**

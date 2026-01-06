@@ -1,0 +1,111 @@
+.ticker {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-self: center;
+
+    font-family: "Perfect Penmanship", sans-serif;
+    user-select: none;
+}
+
+.ticker-text {
+    width: 100%;
+    min-height: 100%;
+
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-left: 1em;
+    padding-right: 1em;
+
+    background-color: white;
+    border-color: var(--jamie-grey);
+    border-width: 1px;
+    border-style: solid;
+    border-left: none;
+    border-right: none;
+}
+
+.ticker-text p {
+    height: min-content;
+}
+
+.ticker-input {
+    height: 100%;
+    padding: 0;
+    border: none;
+
+    font-family: "Perfect Penmanship", sans-serif;
+    font-size: 1em;
+    text-align: right;
+}
+
+.ticker-input.hidden-max-value {
+    text-align: center;
+    padding-left: 3ch;
+    padding-right: 3ch;
+    overflow-x: visible;
+}
+
+.ticker-text:has(.hidden-max-value) {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.ticker-input:focus-visible {
+    outline: none;
+}
+
+.ticker-decrementer, .ticker-incrementer {
+    padding-right: 10px;
+    padding-left: 10px;
+
+    width: 20%;
+    box-sizing: content-box;
+    font-family: "Backso", sans-serif;
+
+    border: none;
+    background-color: var(--purple);
+    transition: background-color 100ms;
+}
+
+.ticker-decrementer span, .ticker-incrementer span {
+    position: relative;
+    font-size: 35px;
+    line-height: 35px;
+    font-family: "Perfect Penmanship", sans-serif;
+
+    user-select: none;
+    transition-duration: 100ms;
+    transition-property: font-size, line-height;
+
+    color: white;
+}
+
+.ticker-decrementer {
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+}
+
+.ticker-incrementer {
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.ticker-decrementer:hover, .ticker-incrementer:hover {
+    background-color: var(--light-purple);
+}
+
+.ticker-decrementer:hover span, .ticker-incrementer:hover span {
+    font-size: 43px;
+    line-height: 43px;
+}
+
+.ticker-slash {
+    color: var(--jamie-grey);
+    margin-left: 3px;
+    margin-right: 3px;
+}

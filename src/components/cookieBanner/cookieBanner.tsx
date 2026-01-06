@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 
 import "./cookieBanner.css"
 
+/**
+ * GA4 Consent Mode cookie consent banner.
+ * @constructor
+ */
 export function CookieBanner() {
   function acceptCookies() {
     // Update consent (Advanced mode)
@@ -16,12 +20,12 @@ export function CookieBanner() {
 
     localStorage.setItem("consentModeAnswer", "accept")
     setExiting(true)
-  };
+  }
 
   function declineCookies() {
     localStorage.setItem("consentModeAnswer", "decline")
     setExiting(true)
-  };
+  }
   
   // Only show popup if it's not already been answered
   useEffect(() => {

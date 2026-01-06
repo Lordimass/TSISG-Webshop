@@ -1,5 +1,5 @@
 import Page from "../../components/page/page";
-import { page_title } from "../../lib/consts";
+import { page_title } from "../../lib/consts.ts";
 
 import "./404.css"
 

@@ -5,15 +5,20 @@ import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
 import {CURRENCY_SYMBOLS, TAX_EXCLUSIVE_COUNTRIES} from "@shared/consts/currencySymbols.ts";
+import {ProductData} from "@shared/types/supabaseTypes.ts";
 
 /**
- * Price display in user's local currency.
- * @param baseDinero Dinero object representing the price to display to the user.
- * @param currency Override currency to display.
- * @param simple Display currency in a simpler format, with a constant font size and no currency code indicator
- * only use if you want this currency to show instead of the user's local currency.
+ * Price display in user's local currency, or any custom currency supplied through the `currency` property.
  */
-export default function Price({baseDinero, currency, simple}: {baseDinero: Dinero, currency?: Currency, simple?: boolean}) {
+export default function Price({baseDinero, currency, simple}: {
+    /** Dinero object representing the price to display to the user. */
+    baseDinero: Dinero,
+    /** Choose a currency to display other than that of the user's local currency. */
+    currency?: Currency,
+    /** Display currency in a simpler format, with a constant font size and no currency code indicator */
+    simple?: boolean
+}
+) {
     const {currency: defaultCurrency, locale, country} = useContext(LocaleContext);
     const curr = currency ?? defaultCurrency;
 
@@ -26,7 +31,7 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
                 setDinero(convertedDinero)
             }
         }
-        convert()
+        convert().then()
     }, [curr, baseDinero]);
 
     const [dinero, setDinero] = useState<Dinero>(baseDinero);
@@ -66,5 +71,4 @@ export default function Price({baseDinero, currency, simple}: {baseDinero: Diner
             )
         }</p>
     }
-
 }

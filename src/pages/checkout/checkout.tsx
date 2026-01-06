@@ -11,10 +11,8 @@ import Throbber from "../../components/throbber/throbber";
 import { CheckoutProducts } from "../../components/product/products";
 
 import { LoginContext, SiteSettingsContext } from "../../app";
-import { redirectIfEmptyBasket, validateEmail } from "./checkoutFunctions";
-import { page_title } from "../../lib/consts";
-import { Basket } from "@shared/types/types";
-
+import {checkStock, isSessionExpired, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
+import { page_title } from "../../lib/consts.ts";
 import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {
@@ -25,16 +23,17 @@ import {
     useCheckout
 } from '@stripe/react-stripe-js';
 import {Stripe as StripeNS} from "stripe";
-import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts";
+import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts.ts";
 import { NotificationsContext } from "../../components/notification/lib";
 import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
 import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
-import DineroFactory, {Currency, defaultCurrency, Dinero} from "dinero.js";
+import DineroFactory, {Currency, Dinero} from "dinero.js";
 import Price from "../../components/price/price.tsx";
 import {convertDinero} from "@shared/functions/price.ts";
 import {getPath} from "../../lib/paths.ts";
 import {CURRENCY_SYMBOLS} from "@shared/consts/currencySymbols.ts";
+import {getBasketProducts} from "../../lib/lib.tsx";
 
 export default function Checkout() {
     const {currency} = useContext(LocaleContext)
@@ -65,61 +64,35 @@ export default function Checkout() {
 function CheckoutAux({onReady}: {onReady: Function}) {
     const {notify} = useContext(NotificationsContext)
     const {currency} = useContext(LocaleContext)
+
     /**
      * Checks whether all the items in the basket are still in stock
      * @returns true if stock is OK, false if it is not.
      */
-    async function checkStock() {
-        // Can assume basket string exists given context
-        const basket: Basket = JSON
-            .parse(localStorage.getItem("basket") as string)
-            .basket
-        
-        const response = await fetch("/.netlify/functions/checkStock", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(basket.map((prod) => {return {
-                sku: prod.sku,
-                basketQuantity: prod.basketQuantity,
-                name: prod.name
-            }}))
-        })
-        const body = await new Response(response.body).text()
+    async function checkProductStock() {
+        const discrepencies = await checkStock();
 
-        if (!response.ok) {
-            console.error(body)
-            setError(<p className="checkout-error">{body}</p>)
-            return false
-        } else {
-            // If there were no discrepencies
-            if (response.status == 204) {
-                setError(<p></p>)
-                return true
-            }
-            const discrepencies: {
-                sku: number, 
-                name: string,
-                stock: number,
-                basketQuantity: number,
-            }[] = JSON.parse(body)
-
-            const err = <><p className="checkout-error">
-                <i>Too slow!</i><br/>Part of your order is now out of stock, head
-                back to the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to
-                change your order, then come back:<br/><br/></p>
-                {
-                    discrepencies.map((discrep) => <p 
-                    className="checkout-error" 
-                    key={discrep.sku}>
-                    We have {discrep.stock} "{discrep.name}" left, you
-                    tried to order {discrep.basketQuantity}
-                    </p>)
-                }
-                </>
-            
-            setError(err)
-            return false
+        // If there were no discrepencies
+        if (discrepencies.length === 0) {
+            setError(<p></p>)
+            return true
         }
+
+        const err = <><p className="checkout-error">
+            <i>Too slow!</i><br/>Part of your order is now out of stock, head back to
+            the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to change your order, then come
+            back:<br/><br/></p>
+            {
+                discrepencies.map((discrep) =>
+                    <p className="checkout-error" key={discrep.sku}>
+                        We have {discrep.stock} "{discrep.name}" left, you
+                        tried to order {discrep.basketQuantity}
+                    </p>)
+            }
+            </>
+
+        setError(err)
+        return false
     }
 
     async function handleSubmit(e: FormEvent) {
@@ -132,34 +105,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             notify(error.error.message)
         }
         setIsLoading(false);
-    }
-
-    /**
-     * Checks if the session is still active, since they expire after a set time,
-     * if it's not, warn the user that they should reload the page
-     * @returns <code>false</code> if the session is expired, 
-     * <code>true</code> if it is not
-     */
-    async function checkSessionStatus() {
-        const response = await fetch("/.netlify/functions/getCheckoutSession", {
-            method: "POST",
-            body: checkout.id
-        })
-        const body = await new Response(response.body).text()
-        if (!response.ok) {
-            console.error(body)
-            setError(<p className="checkout-error">{body}</p>)
-        }
-        const session: StripeNS.Checkout.Session = JSON.parse(body)
-        if (session.status != "open") {
-            setError(<p className="checkout-error">
-                This session has expired! Reload the page to fix it
-            </p>)
-            return false;
-        } else {
-            setError(<p></p>)
-            return true;
-        }
     }
 
     const checkout = useCheckout();
@@ -205,7 +150,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
         const rates: string[] = await resp.json()
         if (!rates || !rates.length) {setError(<p className="msg">We couldn't find any shipping rates for your address, sorry!</p>); return}
-        
+
         // TODO: Give customers multiple shipping options
         countryChanged.current = false;
         await checkout.updateShippingOption(rates[0])
@@ -219,7 +164,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             paymentInfoComplete.current = true
             await triggerAddPaymentInfo(currency)
         }
-        
+
     })
 
     // To prevent overloading the database / exploitation, only check stock once.
@@ -239,23 +184,26 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         console.log("Ready to checkout: ", ready);
         if (ready) {
             // Check that the session is still active
-            if (!await checkSessionStatus()) {
+            if (await isSessionExpired(checkout)) {
                 ready = false
                 setError(<p>"Checkout Expired! Please reload the page"</p>)
             }
 
             // Check stock if it's not already been checked
             else if (!hasCheckedStock) {
-                const inStock = await checkStock();
+                const inStock = await checkProductStock();
                 if (!inStock) {
                     ready = false
                 }
                 setHasCheckedStock(true);
+                setError(<p></p>)
+            } else {
+                setError(<p></p>)
             }
         }
         setReadyToCheckout(ready);
 
-    } checkReadyToCheckout()}, [isEmailValid, addressComplete])
+    } checkReadyToCheckout().then()}, [isEmailValid, addressComplete])
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
@@ -389,11 +337,8 @@ function CheckoutTotals({checkoutTotal, currency}: {checkoutTotal: StripeCheckou
     const precision = CURRENCY_SYMBOLS[currency.toUpperCase() as keyof typeof CURRENCY_SYMBOLS].precision;
     useEffect(() => {
         async function getPreFeeTotal() {
-            const basketString = localStorage.getItem("basket");
-            if (!basketString) {throw ("No basket string available when calculating checkout total")}
-            const basket = JSON.parse(basketString).basket as Basket
             let basketTotal = 0;
-            for (const p of basket) {
+            for (const p of getBasketProducts()) {
                 const din = DineroFactory({amount: Math.round(p.price * p.basketQuantity * 100), currency: DEFAULT_CURRENCY});
                 const convDin = await convertDinero(din, currency);
                 basketTotal += convDin.getAmount();

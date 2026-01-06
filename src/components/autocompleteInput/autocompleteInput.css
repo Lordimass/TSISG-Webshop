@@ -1,0 +1,29 @@
+.csa-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Weird styling stuff here because the box is weirdly not sizing to what I want. Bodge job */
+.csa-input {
+    width: calc(100% - 4px);
+    border: 0;
+    margin-bottom: -5px;
+    resize: none;
+}
+
+/* Ghost input (suggestion layer) */
+.ghost-input {
+    position: absolute;
+    color: var(--jamie-grey); /* ghost text color */
+    pointer-events: none; /* don't capture clicks */
+    z-index: 0;
+    background-color: transparent;
+}
+
+/* Real input (user typing layer) */
+.real-input {
+    position: relative;
+    background-color: transparent; /* lets ghost text show */
+    color: #000; /* normal text color */
+    z-index: 1;
+}

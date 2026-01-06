@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react"
 import {ImageData, ProductData} from "@shared/types/types"
-import {UnsubmittedImageData, UnsubmittedProductData} from "../pages/products/productEditor/types"
+import {UnsubmittedImageData, UnsubmittedProductData} from "../pages/products/productEditor/types.ts"
 import {UUID} from "crypto"
 import {compareImages} from "./sortMethods"
 import {getJWTToken} from "./auth"
@@ -119,14 +119,6 @@ export async function fetchFromNetlifyFunction(
 export function useGetOrderList(): any {
     const {data} = useFetchFromNetlifyFunction("getAllOrders", undefined, getJWTToken())
     return data
-}
-
-/**
- * Creates a new product category if it doesn't already exist and returns the ID
- */
-export async function getCategoryID(name: string): Promise<number> {
-    const {data} = await fetchFromNetlifyFunction("getCategoryID", name, getJWTToken())
-    return data.id
 }
 
 /**

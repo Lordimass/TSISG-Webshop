@@ -74,5 +74,5 @@ The SHY-Webshop is a full-stack application with a React frontend and Netlify Fu
 -   `netlify/lib/getSupabaseClient.ts`: Standardized way to get a Supabase client in Netlify Functions.
 -   `netlify/lib/stripe.ts`: Utility for Stripe API interactions on the backend.
 -   `netlify/lib/types/`: Shared TypeScript type definitions for backend services.
--   `src/lib/types.tsx`: Shared TypeScript type definitions for frontend components.
+-   `src/lib/types.ts`: Shared TypeScript type definitions for frontend components.
 -   `launch-dev-server.ps1`: Script for setting up the local development environment.

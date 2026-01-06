@@ -12,10 +12,13 @@
 
     margin: 1em;
     padding: 1em;
-    width: calc(100% - 2em);
     background-color: white;
+
     /* Mostly so that it doesn't disappear while testing/developing */
     min-height: 25vh;
+    height: max-content;
+    width: calc(100% - 2em);
+
     box-sizing: border-box;
     overflow-x: hidden;
 
@@ -81,44 +84,11 @@
     margin-left: 1em;
 }
 
-.prod-page-basket-button {
-    border: none;
-    height: 60px;
-}
-
-.ticker {
+.prod-ticker {
     grid-area: ticker;
     width: 100%;
     max-width: 100%;
-}
-
-.prod-page-basket-button h1 {
-    display: flex;
-    gap: 3px;
-}
-
-.prod-page-basket-button:hover {
-    transform: scale(102%);
-}
-
-.prod-page-basket-button:disabled {
-    cursor: not-allowed;
-    background-color: var(--jamie-grey);
-    transform: none;
-}
-
-.prod-page-basket-button .basket-icon {
-    font-size: larger;
-    line-height: 1em;
-    height: 1em
-}
-
-.prod-page-modifier {
-    grid-area: ticker;
-    width: 100%;
-    height: 60px;
-    margin: 0;
-    box-sizing: border-box;
+    height: 100%
 }
 
 .title .sku {
@@ -141,7 +111,7 @@
     padding: 5px;
     border-radius: 10px;
     color: white;
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     font-size: 0.8em;
     user-select: none;
 }
@@ -217,7 +187,6 @@
     }
 
     .product-variant:hover {
-        background-color: default;
         border: 2px solid black;
     }
 
@@ -253,11 +222,5 @@
 
     .product-box .desc {
         min-height: 150px;
-    }
-
-    .prod-page-modifier {
-        height: 4em;
-        width: 100%;
-        margin: 0;
     }
 }

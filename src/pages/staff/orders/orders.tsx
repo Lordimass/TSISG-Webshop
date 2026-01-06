@@ -6,7 +6,7 @@ import Throbber from "../../../components/throbber/throbber";
 import { LoginContext } from "../../../app";
 import { useGetOrderList } from "../../../lib/netlifyFunctions";
 import { compareOrders } from "../../../lib/sortMethods";
-import { overdue_threshold } from "../../../lib/consts";
+import { overdue_threshold } from "../../../lib/consts.ts";
 import { getColourClass, OrderDropdownContext, OrdersContext } from "./lib";
 import { getJWTToken } from "../../../lib/auth";
 import { dateToDateString, dateToTimeString } from "../../../lib/lib";
@@ -15,15 +15,15 @@ import { NotificationsContext } from "../../../components/notification/lib";
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
-import {OrderReturned} from "@shared/types/supabaseTypes.ts";
+import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 import DineroFactory, {Currency} from "dinero.js";
-import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {callRPC, toggleOrderFulfilment} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
 export function OrderManager() { 
-    const unsetOrders: OrderReturned[] = useGetOrderList() || []
-    const [orders, setOrders] = useState<OrderReturned[]>([])
+    const unsetOrders: MergedOrder[] = useGetOrderList() || []
+    const [orders, setOrders] = useState<MergedOrder[]>([])
     useEffect(() => {
         if (unsetOrders.length > 0) setOrders(unsetOrders)
     }, [unsetOrders])
@@ -54,7 +54,7 @@ export function OrderManager() {
 )
 }
 
-function OrderDisplay({order}:{order:OrderReturned}) {
+function OrderDisplay({order}:{order:MergedOrder}) {
     const date = new Date(order.placed_at)
     const today = new Date()
     const timeDifference = Math.floor((today.getTime() - date.getTime())/(86400000));
@@ -83,24 +83,14 @@ function OrderDropdown() {
     async function toggleFulfilment() {
         if (toggleInProgress || !order || !setColourClass) return
         setToggleInProgress(true);
-    
-        const response = await fetch("../.netlify/functions/toggleOrderFulfilment", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${await getJWTToken()}`
-            },
-            body: JSON.stringify({id: order.id})
-        })
 
-        if (response.ok) {
-            order.fulfilled = !order.fulfilled
-            setColourClass(getColourClass(order))
-        } else {
-            const respText = await response.text()
-            console.error(respText)
-            notify(respText)
-        }
+        try { // Toggle order fulfilment
+            const new_order = await toggleOrderFulfilment(supabase, order.id)
+            order.fulfilled = new_order.fulfilled
+        } catch (e: unknown) {notify(`Something went wrong toggling order fulfilment! ${JSON.stringify(e)}`)}
+
+        // Update colour of the display.
+        setColourClass(getColourClass(order))
         setToggleInProgress(false);  
     }
 
@@ -113,7 +103,7 @@ function OrderDropdown() {
         if (+val <= 0) {notify("Cost must be a valid number greater than 0!"); return}
         try {
             await callRPC("update_delivery_cost", supabase, {order_id: order.id, new_cost: val}, notify)
-        } catch {return}
+        } catch (e) {notify(`Something went wrong setting delivery cost! ${JSON.stringify(e)}`)}
 
         // Update the order state
         const newOrders = orders.map(o => {
@@ -131,7 +121,7 @@ function OrderDropdown() {
     const [toggleInProgress, setToggleInProgress] = useState(false)
 
     const date = new Date(order.placed_at)
-    const shippedOn = order.dispatched ? new Date(order.royalMailData.shippedOn!) : new Date()
+    const shippedOn = order.dispatched ? new Date(order.royalMailData!.shippedOn!) : new Date()
     const dateString = dateToDateString(date)
     const timeString = dateToTimeString(date)
     const deliveryCostInput = useRef<HTMLInputElement | null>(null)
@@ -139,8 +129,8 @@ function OrderDropdown() {
         amount: Math.round((order.value.total || order.total_value)*100),
         currency: (order.value.currency || DEFAULT_CURRENCY) as Currency
     })
-    const shippingDinero = (order.value.shipping || order.delivery_cost) ? DineroFactory({
-        amount: Math.round((order.value.shipping || order.delivery_cost || 0)*100),
+    const shippingDinero = (order.value.shipping) ? DineroFactory({
+        amount: Math.round((order.value.shipping || 0)*100),
         currency: DEFAULT_CURRENCY
     }) : undefined
     return (<>
