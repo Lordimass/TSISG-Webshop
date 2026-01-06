@@ -2055,6 +2055,10 @@
             "description": "Price of product in GBP inc. Tax",
             "type": "number"
           },
+          "quantity": {
+            "description": "The number of this product that was ordered",
+            "type": "number"
+          },
           "sku": {
             "type": "number"
           },
@@ -2097,6 +2101,7 @@
           "origin_country_code",
           "package_type_override",
           "price",
+          "quantity",
           "sku",
           "sort_order",
           "stock",
@@ -2711,7 +2716,6 @@
           "bucket_id",
           "display_order",
           "id",
-          "image_url",
           "inserted_at",
           "name",
           "path_tokens",
@@ -2722,11 +2726,13 @@
         "type": "object"
       },
       "ProductInBasket": {
+        "description": "A product in the user's basket, with a quantity",
         "properties": {
           "active": {
             "type": "boolean"
           },
           "basketQuantity": {
+            "description": "The quantity of this product in the user's basket",
             "type": "number"
           },
           "category": {
@@ -3031,7 +3037,6 @@
           "bucket_id",
           "display_order",
           "id",
-          "image_url",
           "inserted_at",
           "name",
           "path_tokens",
@@ -3042,11 +3047,13 @@
         "type": "object"
       },
       "ProductInBasket": {
+        "description": "A product in the user's basket, with a quantity",
         "properties": {
           "active": {
             "type": "boolean"
           },
           "basketQuantity": {
+            "description": "The quantity of this product in the user's basket",
             "type": "number"
           },
           "category": {

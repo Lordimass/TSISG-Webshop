@@ -1,6 +1,4 @@
-import {ProductData} from "@shared/types/supabaseTypes.ts";
-
-export {ProductData} from "./supabaseTypes.ts";
+import {ProductData} from "./supabaseTypes.ts";
 
 /** A product in the user's basket, with a quantity */
 export type ProductInBasket = ProductData & {

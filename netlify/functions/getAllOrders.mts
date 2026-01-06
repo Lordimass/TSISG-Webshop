@@ -6,6 +6,7 @@ import {StatusedError} from "@shared/errors.ts";
 import {VALIDATORS} from "@shared/schemas/schemas.ts";
 import {fetchCompressedOrders} from "@shared/functions/supabase.ts";
 import {fetchRoyalMailOrders, mergeOrders} from "@shared/functions/royalMail.ts";
+import {RmOrder} from "@shared/types/royalMailTypes.ts";
 
 /**
  * Compiles and returns merged order objects containing data from both Supabase and Royal Mail.
@@ -38,7 +39,10 @@ export default async function handler(request: Request, _context: Context) {
         // We want to fetch all orders placed between today and the
         // date of the oldest unfulfilled Supabase Order.
         const startDate = getEarliestUnfulfilledOrderDate(supabaseOrders)
-        const rmOrders = await fetchRoyalMailOrders(startDate)
+        let rmOrders: RmOrder[] = []
+        if (startDate) {
+            rmOrders = await fetchRoyalMailOrders(startDate)
+        }
 
         // Merge Supabase and RM orders together to create objects which contain both sets of data.
         const mergedOrders: MergedOrder[] = mergeOrders(supabaseOrders, rmOrders)
@@ -64,7 +68,7 @@ export default async function handler(request: Request, _context: Context) {
  * @param supabseOrders An array of `CompressedOrder`s
  * @returns A date object representing the date of the oldest unfulfilled order in `supabseOrders`
  */
-function getEarliestUnfulfilledOrderDate(supabseOrders: CompressedOrder[]): Date {
+function getEarliestUnfulfilledOrderDate(supabseOrders: CompressedOrder[]): Date | null {
     let earliestTime = Number.POSITIVE_INFINITY
     supabseOrders.forEach(order => {
         if (order.fulfilled) {
@@ -73,5 +77,5 @@ function getEarliestUnfulfilledOrderDate(supabseOrders: CompressedOrder[]): Date
         const placed_at = new Date(order.placed_at)
         earliestTime = Math.min(placed_at.getTime(), earliestTime)
     })
-    return new Date(earliestTime)
+    return earliestTime == Number.POSITIVE_INFINITY ? null : new Date(earliestTime)
 }

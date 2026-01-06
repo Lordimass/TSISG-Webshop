@@ -6,6 +6,7 @@ export * from './supabaseTypes.ts'
 export * from './stripeTypes.ts'
 export * from './royalMailTypes.ts'
 export * from './clockifyTypes.ts'
+export * from './productTypes.ts'
 
 /** Represents a discrepency between the stock available for a product, and the quantity in the customer's basket. */
 export type StockDiscrepency = Pick<ProductInBasket, "sku" | "name" | "stock" | "basketQuantity">
@@ -28,5 +29,3 @@ export interface StatusedError {
     message: string
     status?: number
 }
-
-export {OrderProdCompressed} from "@shared/types/productTypes.ts";
