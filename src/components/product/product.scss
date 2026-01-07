@@ -1,8 +1,10 @@
 .product {
   display: flex;
   flex-direction: column;
+
   width: 320px;
   height: 530px;
+
   background-color: white;
   overflow: hidden;
   border-radius: 15px;
@@ -51,40 +53,15 @@
 checkout-product css is in checkout.css because at time of writing this file is very long and that one is very short,
 either would make sense so I went with that.
 */
-.product.horizontal-product {
+
+@mixin horizontal-product {
   flex-direction: row;
   width: 100%;
   min-width: 310px;
   height: min-content;
   box-sizing: border-box;
-}
-.product.horizontal-product .prod-footer {
-  display: flex;
-  flex-direction: column;
-  width: 250%;
-  max-height: 100%;
-  box-sizing: border-box;
-  padding: 7px;
-}
-.product.horizontal-product .product-text {
-  font-size: smaller;
-  margin: 3px 0 0 0;
-}
-.product.horizontal-product .basket-modifier-container {
-  height: 40px;
-  padding: 0;
-  margin-top: 5px;
-}
 
-@media screen and (max-width: 1100px) {
-  .product {
-    flex-direction: row;
-    width: 100%;
-    min-width: 310px;
-    height: min-content;
-    box-sizing: border-box;
-  }
-  .product .prod-footer {
+  .prod-footer {
     display: flex;
     flex-direction: column;
     width: 250%;
@@ -92,21 +69,33 @@ either would make sense so I went with that.
     box-sizing: border-box;
     padding: 7px;
   }
-  .product .product-text {
+
+  .product-text {
     font-size: smaller;
     margin: 3px 0 0 0;
   }
-  .product .basket-modifier-container {
+
+  .basket-modifier-container {
     height: 40px;
     padding: 0;
     margin-top: 5px;
   }
-  .product .prod-footer {
-    width: 160%;
-  }
-  .product .product-name {
-    font-size: 14px;
-  }
 }
 
-/*# sourceMappingURL=product.css.map */
+.product.horizontal-product {
+  @include horizontal-product;
+}
+
+@media screen and (max-width: 1100px) {
+  .product {
+    @include horizontal-product;
+
+    .prod-footer {
+      width: 160%;
+    }
+
+    .product-name {
+      font-size: 14px;
+    }
+  }
+}

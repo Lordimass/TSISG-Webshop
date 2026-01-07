@@ -6,18 +6,23 @@ import {getProductPagePath} from "../../lib/paths.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import BasketModifier from "../ticker/basketModifier/basketModifier.tsx";
 import {ProductPrice} from "../price/productPrice/productPrice.tsx";
-import {OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
+import {
+    GenericProduct,
+    GenericSingleProduct,
+    OrderProdCompressed,
+    ProductInBasket
+} from "@shared/types/productTypes.ts";
 
-/**
- * Displays a product or product group with a basket ticker.
- */
-export default function Product({prod}: {
+/** Displays a product or product group with a basket ticker. */
+export default function Product({prod, horizontal=false}: {
     /** The product or product group to display. */
-    prod: ProductData | ProductData[]
+    prod: GenericProduct;
+    /** Whether the product should order content horizontally rather than vertically. Defaults to `false`. */
+    horizontal?: boolean
 })
 {
     // Check whether product is a group or single product, and extract a representative product needed for some things.
-    let representativeProduct: ProductData
+    let representativeProduct: GenericProduct
     // prod is a group.
     if (Array.isArray(prod) && prod.length > 1) {
         prod = prod as ProductData[];
@@ -30,15 +35,12 @@ export default function Product({prod}: {
         representativeProduct = prod;
     }
 
+    /** Relative link to the dedicated product page. */
     const prodPagePath = getProductPagePath(representativeProduct.sku)
-    const reprImageUrl = getRepresentativeImageURL(prod)
 
     return (
-        <div className="product" id={"product-" + representativeProduct.sku}>
-            {/* Product Image + Link to dedicated product page*/}
-            <a className="product-image-link" href={prodPagePath}>
-                <SquareImageBox image={reprImageUrl} size='100%'/>
-            </a>
+        <div className={"product"+(horizontal?" horizontal-product":"")}>
+            <HyperlinkedProductImage href={prodPagePath} prod={representativeProduct} />
 
             {/* Bottom half of the product display */}
             <div className="prod-footer">
@@ -49,47 +51,25 @@ export default function Product({prod}: {
                     </a>
                     <ProductPrice prod={prod}/>
                 </div>
-                <div className='spacer'/>
-                <div className='basket-modifier'>
-                    <BasketModifier product={prod} inputId={`${representativeProduct.sku}-product-basket-modifier`}/>
+                <div className='basket-modifier-container'>
+                    <BasketModifier
+                        product={prod}
+                        inputId={`${representativeProduct.sku}-product-component-basket-modifier`}
+                    />
                 </div>
             </div>
         </div>
     )
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * Displays a product from the customer's basket with a basket ticker. Visually, this component is more suited to be
- * shown in the basket than the default {@link Product} component.
- */
-export function BasketProduct({prod}: {
-    /** The product in the customer's basket to display */
-    prod: ProductInBasket
-}
-) {
-    const imageURL = getRepresentativeImageURL(prod)
-    const prodPagePath = getProductPagePath(prod.sku)
-
-    return (
-        <div className="basket-product" id={"product-" + prod.sku}>
-            <a className="basket-prod-header" href={prodPagePath}>
-                <SquareImageBox image={imageURL} size='100%' loading='eager'/>
+/** Product Image + Link to dedicated product page **/
+function HyperlinkedProductImage({href, prod}: {href: string, prod: GenericSingleProduct}) {
+    const reprImageUrl = getRepresentativeImageURL(prod)
+        return (
+            <a className="product-image-link" href={href}>
+                <SquareImageBox image={reprImageUrl} size='100%'/>
             </a>
-
-            <div className="basket-prod-footer">
-                <div className="basket-product-text">
-                    <a className="product-name" href={prodPagePath}>{prod.name}</a>
-                    <ProductPrice prod={prod}/>
-                </div>
-
-                <BasketModifier inputId={`${prod.sku}-basket-basket-modifier`} product={prod} />
-            </div>
-        </div>
-    )
+        )
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

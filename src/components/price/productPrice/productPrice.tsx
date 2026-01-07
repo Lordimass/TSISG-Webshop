@@ -4,12 +4,12 @@ import {ProductData} from "@shared/types/supabaseTypes.ts";
 import "./productPrice.css"
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
-import {OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
+import {GenericProduct, GenericProductGroup, OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
 
 /** Displays a price (or price range) for a given product or product group. */
 export function ProductPrice({prod, currency}: {
     /** The product or product group to display a price for */
-    prod: ProductData | ProductInBasket | OrderProdCompressed | ProductData[]
+    prod: GenericProduct;
     /** Override currency to display. Only use to display a currency other than the user's local currency. */
     currency?: Currency
 }) {
@@ -30,7 +30,7 @@ export function ProductPrice({prod, currency}: {
 /** Display a price range for a group of products, or a single price if all the products have the same price. */
 function ProductPriceRange({prods, currency}: {
     /** Product group to display a price range for. */
-    prods: ProductData[]
+    prods: GenericProductGroup
     /** Override currency to display. Only use to display a currency other than the user's local currency. */
     currency?: Currency
 }) {

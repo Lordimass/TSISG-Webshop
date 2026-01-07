@@ -1,9 +1,9 @@
-import { ReactElement, useContext, useEffect, useRef, useState } from "react";
+import {ReactElement, useContext, useEffect, useRef, useState} from "react";
 import "./basket.css"
-import { BasketProduct } from "../product/product";
-import { SiteSettingsContext } from "../../app";
-import { NotificationsContext } from "../notification/lib";
-import { triggerViewCart } from "../../lib/analytics/analytics";
+import Product from "../product/product";
+import {SiteSettingsContext} from "../../app";
+import {NotificationsContext} from "../notification/lib";
+import {triggerViewCart} from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
@@ -130,7 +130,7 @@ export default function Basket() {
     const basket = getBasketProducts()
     for (let i = 0; i < basket.length; i++) {
         let prod : ProductInBasket = basket[i]
-        basketComponents.push(<BasketProduct prod={prod} key={prod.sku}/>)
+        basketComponents.push(<Product prod={prod} key={prod.sku} horizontal/>)
     }
     
     return (<>

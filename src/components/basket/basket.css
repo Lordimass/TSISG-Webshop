@@ -34,7 +34,6 @@
     background-color: var(--dark-purple);
     border-radius: 100%;
     min-width: 28px;
-    min-width: 28px;
     right: 42px;
     top: 40px;
 
@@ -67,55 +66,24 @@
     color: white;
 }
 
-.basket-product {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-
-    gap: 10px;
-    background-color: white;
-    color: black;
-    text-decoration: none;
-    border-radius: 1em;
-    margin: 0.3em;
-    
-    overflow: hidden;
-    width: 98%;
-    min-height: 10em;
-}
-
-.basket-product-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.basket-prod-header {
-    min-width: 29%;
-}
-
-.basket-prod-footer {
-    display: flex;
-    flex-direction: column;
-    width: 250%;
-    height: 100%;
-    box-sizing: border-box;
-    justify-content: space-between;
-    padding: 10px 5px 5px 0;
-}
-
-.basket-left-blurrer {
-    border-top-left-radius: 1em;
-    border-bottom-left-radius: 1em;
-}
-
 .basketItems {
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
     overflow-y: scroll;
     margin-bottom: 1em;
+}
+
+.basketItems > .product {
+    margin: 0;
+}
+
+@media screen and (max-width: 1100px) {
+    .basketItems > .product.horizontal-product .basket-modifier-container {
+        height: 35px;
+    }
 }
 
 .checkout {

@@ -50,7 +50,7 @@ export default function BasketModifier(
     let reprProd: ProductData | UnsubmittedProductData
     if (Array.isArray(product) && product.length > 1) {
         // Cannot return straight away because of hooks.
-        altReturnComponent = <ProductGroupBasketModifier products={product}/>
+        altReturnComponent = <ProductGroupBasketModifier products={product} height={args.height}/>
         reprProd = product[0]
     }
     else if (Array.isArray(product)) reprProd = product[0]

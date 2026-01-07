@@ -1,6 +1,7 @@
 .zero-quantity-basket-modifier {
     border: none;
     height: 50px;
+    max-height: 100%;
     width: 100%;
     min-width: 175px;
     box-sizing: border-box;
@@ -31,7 +32,8 @@
 
         i {
             height: 1em;
-            font-size: 30px;
+            font-size: 26px;
+            margin-bottom: 3px;
             transition: font-size 100ms;
         }
     }
@@ -59,7 +61,11 @@
     text-decoration: none;
     padding: 0 10px 0 10px;
 
+    height: 50px;
+    max-height: 100%;
     width: 100%;
+    min-width: 175px;
+    box-sizing: border-box;
     background-color: var(--purple);
     border-radius: 20px;
 }

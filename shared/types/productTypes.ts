@@ -7,8 +7,11 @@ export type GenericSingleProduct = ProductData
     | ProductInBasket
     | OrderProdCompressed
 
+/** A collection of product variants */
+export type GenericProductGroup = GenericSingleProduct[];
+
 /** A product of any form, including product groups */
-export type GenericProduct = GenericSingleProduct | GenericSingleProduct[]
+export type GenericProduct = GenericSingleProduct | GenericProductGroup
 
 /** A product with data that does not yet exist in the database. It is yet to be saved/submitted */
 export type UnsubmittedProductData = Omit<ProductData, "images"> & {
@@ -19,8 +22,18 @@ export type UnsubmittedProductData = Omit<ProductData, "images"> & {
     images: (ImageData | UnsubmittedImageData)[]
 }
 
+/**
+ * A product from the orders_compressed table
+ */
+export interface OrderProdCompressed extends ProductData {
+    /** The value for these products, with quantity taken into account. */
+    line_value: number
+    /** The number of this product that was ordered */
+    quantity: number
+}
+
 /** A product in the user's basket, with a quantity */
-export type ProductInBasket = ProductData & {
+export interface ProductInBasket extends ProductData {
     /** The quantity of this product in the user's basket */
     basketQuantity: number
 }
@@ -34,14 +47,4 @@ export interface Basket {
      * information from the database
      */
     lastUpdated: number
-}
-
-/**
- * A product from the orders_compressed table
- */
-export type OrderProdCompressed = ProductData & {
-    /** The value for these products, with quantity taken into account. */
-    line_value: number
-    /** The number of this product that was ordered */
-    quantity: number
 }
