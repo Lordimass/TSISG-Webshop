@@ -1,6 +1,5 @@
 import {ProductData} from "@shared/types/supabaseTypes.ts";
-import {UnsubmittedProductData} from "../../../pages/products/productEditor/types.ts";
-import {SiteSettingsContext} from "@shared/types/types.ts";
+import {SiteSettingsContext, UnsubmittedProductData} from "@shared/types/types.ts";
 import {useContext} from "react";
 
 /**

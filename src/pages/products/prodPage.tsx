@@ -1,12 +1,11 @@
 import {useContext, useEffect, useRef, useState} from "react"
-import {blank_product, MAX_PRODUCT_ORDER} from "../../lib/consts.ts"
+import {blank_product} from "../../lib/consts.ts"
 import "./prodPage.css"
 import Markdown from "react-markdown"
-import {LoginContext, SiteSettingsContext} from "../../app"
-import {ProductData} from "@shared/types/types"
+import {LoginContext} from "../../app"
+import {ProductData, UnsubmittedProductData} from "@shared/types/types"
 import ProductEditor from "./productEditor/productEditor"
-import {UnsubmittedProductData} from "./productEditor/types.ts"
-import {getBasketProducts, getGroup, setBasketStringQuantity} from "../../lib/lib"
+import {getGroup} from "../../lib/lib"
 import {cleanseUnsubmittedProduct, extractSKU, ProductContext} from "./lib"
 import {useGetProducts} from "../../lib/supabaseRPC"
 import {compareImages} from "../../lib/sortMethods"
@@ -21,7 +20,6 @@ import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {ProductGroup} from "./productGroup.tsx";
 import BasketModifier from "../../components/ticker/basketModifier/basketModifier.tsx";
-import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 /** Dedicated page for a product, including an editor for admins. */
 export default function ProdPage(

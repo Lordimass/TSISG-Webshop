@@ -1,4 +1,4 @@
-import {UnsubmittedImageData, UnsubmittedProductData} from "./productEditor/types.ts";
+import {UnsubmittedImageData} from "./productEditor/types.ts";
 import {useContext, useEffect, useRef} from "react";
 import {LocaleContext} from "../../localeHandler.ts";
 import {getProductPagePath} from "../../lib/paths.ts";
@@ -9,6 +9,7 @@ import {getImageURL} from "@shared/functions/images.ts";
 import DineroFactory from "dinero.js";
 import {SquareImageBox} from "../../components/squareImageBox/squareImageBox.tsx";
 import Price from "../../components/price/price.tsx";
+import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 
 export function ProductGroup() {
     const {product, group, hoveredVariant, setHoveredVariant} = useContext(ProductContext)

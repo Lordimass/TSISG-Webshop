@@ -1,11 +1,7 @@
-import React, {ComponentType, createContext, FunctionComponent} from "react"
-import { ProductData } from "@shared/types/types"
-import { UnsubmittedProductData } from "./types.ts"
+import React, {createContext} from "react"
+import {ProductData, UnsubmittedProductData} from "@shared/types/types"
 import { blank_product } from "../../../lib/consts.ts"
 import { isNumeric } from "../../../lib/lib"
-import {Pie} from "recharts";
-import displayName = Pie.displayName;
-import {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx";
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
 import {fetchPropAutofillData} from "../lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";

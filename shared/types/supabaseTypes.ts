@@ -3,10 +3,11 @@ import type {RmOrder} from "@shared/types/royalMailTypes.ts";
 import {OrderProdCompressed} from "@shared/types/productTypes.ts";
 
 export interface ProductData extends RawProductData {
-    /** DEPRECATED: Please use `category.id` instead */
+    /** @DEPRECATED Please use `category.id` instead */
     category_id: number
     /** The category the product belongs to */
     category: CategoryData
+    /** All images associated with this product */
     images: ImageData[]
     /** The tags attached to the product */
     tags: TagData[]

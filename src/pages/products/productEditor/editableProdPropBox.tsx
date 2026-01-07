@@ -5,9 +5,9 @@ import {cleanseUnsubmittedProduct} from "../lib.tsx";
 import {updateProductData} from "../../../lib/netlifyFunctions.tsx";
 import {LoginContext} from "../../../lib/auth.tsx";
 import {NotificationsContext} from "../../../components/notification/lib.tsx";
-import {UnsubmittedProductData} from "./types.ts";
 import {SingleProdPropContext} from "./lib.ts";
 import {AutocompleteInput, MultiAutocomplete} from "../../../components/autocompleteInput/autocompleteInput.tsx";
+import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 
 export function ProdPropEditor() {
     /**

@@ -931,7 +931,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -1657,7 +1657,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -1962,7 +1962,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -2351,7 +2351,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -2740,7 +2740,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -3061,7 +3061,7 @@
             "description": "The category the product belongs to"
           },
           "category_id": {
-            "description": "DEPRECATED: Please use `category.id` instead",
+            "description": "The ID of the category this product is in",
             "type": "number"
           },
           "customs_description": {
@@ -3655,6 +3655,1729 @@
           "name",
           "stock",
           "basketQuantity"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "GenericProduct": {
+    "$ref": "#/definitions/GenericProduct",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "AssociationMetadata": {
+        "additionalProperties": {},
+        "description": "Additional information on the association between an image and its product.",
+        "properties": {
+          "global": {
+            "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_product_icon": {
+            "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_representative": {
+            "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CategoryData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "GenericProduct": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/GenericSingleProduct"
+          },
+          {
+            "items": {
+              "$ref": "#/definitions/GenericSingleProduct"
+            },
+            "type": "array"
+          }
+        ],
+        "description": "A product of any form, including product groups"
+      },
+      "GenericSingleProduct": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ProductData"
+          },
+          {
+            "$ref": "#/definitions/UnsubmittedProductData"
+          },
+          {
+            "$ref": "#/definitions/ProductInBasket"
+          },
+          {
+            "$ref": "#/definitions/OrderProdCompressed"
+          }
+        ],
+        "description": "A product of any form, so long as there is only one of them (i.e. no product groups)"
+      },
+      "ImageData": {
+        "properties": {
+          "alt": {
+            "description": "Alt text for the image",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata",
+            "description": "Additional information on the association between the image and its product."
+          },
+          "bucket_id": {
+            "description": "The identifier of the bucket that the image object belongs to",
+            "type": "string"
+          },
+          "display_order": {
+            "description": "The order to display this image in when in a list, higher numbers come later",
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/definitions/UUID",
+            "description": "The identifier of the image object"
+          },
+          "image_url": {
+            "description": "DEPRECATED: Use `id` instead. The direct access url of the image",
+            "type": "string"
+          },
+          "inserted_at": {
+            "description": "ISO timestamp of when the association was made between the image and the product",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the image object itself",
+            "type": "object"
+          },
+          "name": {
+            "description": "The filename of the image",
+            "type": "string"
+          },
+          "path_tokens": {
+            "description": "String tokens representing the path through the bucket to obtain the image",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "product_sku": {
+            "description": "The SKU of the product this image is related to",
+            "type": "number"
+          }
+        },
+        "required": [
+          "alt",
+          "bucket_id",
+          "display_order",
+          "id",
+          "inserted_at",
+          "name",
+          "path_tokens",
+          "product_sku",
+          "metadata",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "OrderProdCompressed": {
+        "description": "A product from the orders_compressed table",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line_value": {
+            "description": "The value for these products, with quantity taken into account.",
+            "type": "number"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "quantity": {
+            "description": "The number of this product that was ordered",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "line_value",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "quantity",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "ProductData": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "ProductInBasket": {
+        "description": "A product in the user's basket, with a quantity",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "basketQuantity": {
+            "description": "The quantity of this product in the user's basket",
+            "type": "number"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "basketQuantity",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "TagData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "UUID": {
+        "type": "string"
+      },
+      "UnsubmittedImageData": {
+        "properties": {
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata"
+          },
+          "display_order": {
+            "type": "number"
+          },
+          "local_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "local_url",
+          "alt",
+          "display_order",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "UnsubmittedProductData": {
+        "description": "A product with data that does not yet exist in the database. It is yet to be saved/submitted",
+        "properties": {
+          "active": {},
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {},
+          "description": {},
+          "extended_customs_description": {},
+          "group_name": {},
+          "images": {
+            "description": "All images associated with this product, both those that are uploaded already, and those that are still local, unsaved changes.",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ImageData"
+                },
+                {
+                  "$ref": "#/definitions/UnsubmittedImageData"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "inserted_at": {},
+          "last_edited": {},
+          "last_edited_by": {},
+          "metadata": {},
+          "name": {},
+          "origin_country_code": {},
+          "package_type_override": {},
+          "price": {},
+          "sku": {},
+          "sort_order": {},
+          "stock": {},
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {}
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "GenericSingleProduct": {
+    "$ref": "#/definitions/GenericSingleProduct",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "AssociationMetadata": {
+        "additionalProperties": {},
+        "description": "Additional information on the association between an image and its product.",
+        "properties": {
+          "global": {
+            "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_product_icon": {
+            "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_representative": {
+            "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CategoryData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "GenericSingleProduct": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ProductData"
+          },
+          {
+            "$ref": "#/definitions/UnsubmittedProductData"
+          },
+          {
+            "$ref": "#/definitions/ProductInBasket"
+          },
+          {
+            "$ref": "#/definitions/OrderProdCompressed"
+          }
+        ],
+        "description": "A product of any form, so long as there is only one of them (i.e. no product groups)"
+      },
+      "ImageData": {
+        "properties": {
+          "alt": {
+            "description": "Alt text for the image",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata",
+            "description": "Additional information on the association between the image and its product."
+          },
+          "bucket_id": {
+            "description": "The identifier of the bucket that the image object belongs to",
+            "type": "string"
+          },
+          "display_order": {
+            "description": "The order to display this image in when in a list, higher numbers come later",
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/definitions/UUID",
+            "description": "The identifier of the image object"
+          },
+          "image_url": {
+            "description": "DEPRECATED: Use `id` instead. The direct access url of the image",
+            "type": "string"
+          },
+          "inserted_at": {
+            "description": "ISO timestamp of when the association was made between the image and the product",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the image object itself",
+            "type": "object"
+          },
+          "name": {
+            "description": "The filename of the image",
+            "type": "string"
+          },
+          "path_tokens": {
+            "description": "String tokens representing the path through the bucket to obtain the image",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "product_sku": {
+            "description": "The SKU of the product this image is related to",
+            "type": "number"
+          }
+        },
+        "required": [
+          "alt",
+          "bucket_id",
+          "display_order",
+          "id",
+          "inserted_at",
+          "name",
+          "path_tokens",
+          "product_sku",
+          "metadata",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "OrderProdCompressed": {
+        "description": "A product from the orders_compressed table",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "line_value": {
+            "description": "The value for these products, with quantity taken into account.",
+            "type": "number"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "quantity": {
+            "description": "The number of this product that was ordered",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "line_value",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "quantity",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "ProductData": {
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "ProductInBasket": {
+        "description": "A product in the user's basket, with a quantity",
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "basketQuantity": {
+            "description": "The quantity of this product in the user's basket",
+            "type": "number"
+          },
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {
+            "description": "Short description for customs forms",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "The customer facing description of the product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "extended_customs_description": {
+            "description": "An extended description for customs forms applicable to higher value orders.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_name": {
+            "description": "Products with the same group name are displayed as one product with variants, instead of each as unique products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "images": {
+            "items": {
+              "$ref": "#/definitions/ImageData"
+            },
+            "type": "array"
+          },
+          "inserted_at": {
+            "description": "Time at which the product was added to the database as an ISO date string",
+            "type": "string"
+          },
+          "last_edited": {
+            "description": "The time which this data was last edited as an ISO date string.",
+            "type": "string"
+          },
+          "last_edited_by": {
+            "description": "The last person to edit this product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the product",
+            "properties": {
+              "seo_priority": {
+                "description": "The priority of this product to search engines, used in sitemaps",
+                "type": "number"
+              },
+              "variant_name": {
+                "description": "The name of this specific variant, if `group_name != undefined`",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "name": {
+            "description": "Customer facing name of the product",
+            "type": "string"
+          },
+          "origin_country_code": {
+            "description": "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "package_type_override": {
+            "description": "For products which are too large to fit in smaller boxes, so require a specific minimum box size to send.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Price of product in GBP inc. Tax",
+            "type": "number"
+          },
+          "sku": {
+            "type": "number"
+          },
+          "sort_order": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "number"
+          },
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {
+            "description": "Weight of the product in grams.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "active",
+          "basketQuantity",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "TagData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "UUID": {
+        "type": "string"
+      },
+      "UnsubmittedImageData": {
+        "properties": {
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata"
+          },
+          "display_order": {
+            "type": "number"
+          },
+          "local_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "local_url",
+          "alt",
+          "display_order",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "UnsubmittedProductData": {
+        "description": "A product with data that does not yet exist in the database. It is yet to be saved/submitted",
+        "properties": {
+          "active": {},
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {},
+          "description": {},
+          "extended_customs_description": {},
+          "group_name": {},
+          "images": {
+            "description": "All images associated with this product, both those that are uploaded already, and those that are still local, unsaved changes.",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ImageData"
+                },
+                {
+                  "$ref": "#/definitions/UnsubmittedImageData"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "inserted_at": {},
+          "last_edited": {},
+          "last_edited_by": {},
+          "metadata": {},
+          "name": {},
+          "origin_country_code": {},
+          "package_type_override": {},
+          "price": {},
+          "sku": {},
+          "sort_order": {},
+          "stock": {},
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {}
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "UnsubmittedProductData": {
+    "$ref": "#/definitions/UnsubmittedProductData",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "AssociationMetadata": {
+        "additionalProperties": {},
+        "description": "Additional information on the association between an image and its product.",
+        "properties": {
+          "global": {
+            "description": "Whether this image is relevant to all products in the product group (if it exists), rather than just the SKU it's assigned to",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_product_icon": {
+            "description": "Whether this image is to be used as an icon for the product when  in a group, rather than as a standard product image",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "group_representative": {
+            "description": "Whether this image is used to represent the group as a whole, rather than an individual variant.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "CategoryData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "name",
+          "description"
+        ],
+        "type": "object"
+      },
+      "ImageData": {
+        "properties": {
+          "alt": {
+            "description": "Alt text for the image",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata",
+            "description": "Additional information on the association between the image and its product."
+          },
+          "bucket_id": {
+            "description": "The identifier of the bucket that the image object belongs to",
+            "type": "string"
+          },
+          "display_order": {
+            "description": "The order to display this image in when in a list, higher numbers come later",
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/definitions/UUID",
+            "description": "The identifier of the image object"
+          },
+          "image_url": {
+            "description": "DEPRECATED: Use `id` instead. The direct access url of the image",
+            "type": "string"
+          },
+          "inserted_at": {
+            "description": "ISO timestamp of when the association was made between the image and the product",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Additional information on the image object itself",
+            "type": "object"
+          },
+          "name": {
+            "description": "The filename of the image",
+            "type": "string"
+          },
+          "path_tokens": {
+            "description": "String tokens representing the path through the bucket to obtain the image",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "product_sku": {
+            "description": "The SKU of the product this image is related to",
+            "type": "number"
+          }
+        },
+        "required": [
+          "alt",
+          "bucket_id",
+          "display_order",
+          "id",
+          "inserted_at",
+          "name",
+          "path_tokens",
+          "product_sku",
+          "metadata",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "TagData": {
+        "properties": {
+          "created_at": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "UUID": {
+        "type": "string"
+      },
+      "UnsubmittedImageData": {
+        "properties": {
+          "alt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "association_metadata": {
+            "$ref": "#/definitions/AssociationMetadata"
+          },
+          "display_order": {
+            "type": "number"
+          },
+          "local_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "local_url",
+          "alt",
+          "display_order",
+          "association_metadata"
+        ],
+        "type": "object"
+      },
+      "UnsubmittedProductData": {
+        "description": "A product with data that does not yet exist in the database. It is yet to be saved/submitted",
+        "properties": {
+          "active": {},
+          "category": {
+            "$ref": "#/definitions/CategoryData",
+            "description": "The category the product belongs to"
+          },
+          "category_id": {
+            "description": "The ID of the category this product is in",
+            "type": "number"
+          },
+          "customs_description": {},
+          "description": {},
+          "extended_customs_description": {},
+          "group_name": {},
+          "images": {
+            "description": "All images associated with this product, both those that are uploaded already, and those that are still local, unsaved changes.",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/ImageData"
+                },
+                {
+                  "$ref": "#/definitions/UnsubmittedImageData"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "inserted_at": {},
+          "last_edited": {},
+          "last_edited_by": {},
+          "metadata": {},
+          "name": {},
+          "origin_country_code": {},
+          "package_type_override": {},
+          "price": {},
+          "sku": {},
+          "sort_order": {},
+          "stock": {},
+          "tags": {
+            "description": "The tags attached to the product",
+            "items": {
+              "$ref": "#/definitions/TagData"
+            },
+            "type": "array"
+          },
+          "weight": {}
+        },
+        "required": [
+          "active",
+          "category",
+          "category_id",
+          "customs_description",
+          "description",
+          "extended_customs_description",
+          "group_name",
+          "images",
+          "inserted_at",
+          "last_edited",
+          "last_edited_by",
+          "metadata",
+          "name",
+          "origin_country_code",
+          "package_type_override",
+          "price",
+          "sku",
+          "sort_order",
+          "stock",
+          "tags",
+          "weight"
         ],
         "type": "object"
       }

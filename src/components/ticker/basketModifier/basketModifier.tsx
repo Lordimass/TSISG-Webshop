@@ -2,7 +2,6 @@ import Ticker from "../ticker.tsx";
 import {ArgumentsType} from "@vitest/utils";
 import {useContext, useEffect, useRef, useState} from "react";
 import "./basketModifier.css"
-import {UnsubmittedProductData} from "../../../pages/products/productEditor/types.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import {MAX_PRODUCT_ORDER} from "../../../lib/consts.ts";
 import {useGetDisabledStatus} from "./lib.tsx";
@@ -10,6 +9,7 @@ import {getBasketProducts, setBasketStringQuantity} from "../../../lib/lib.tsx";
 import {cleanseUnsubmittedProduct} from "../../../pages/products/lib.tsx";
 import {LocaleContext} from "../../../localeHandler.ts";
 import {getProductPagePath} from "../../../lib/paths.ts";
+import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 
 export default function BasketModifier(
     {product, ...args}: Omit<ArgumentsType<typeof Ticker>[0], "ariaLabel"> & {

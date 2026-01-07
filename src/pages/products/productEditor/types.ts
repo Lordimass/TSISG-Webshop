@@ -1,4 +1,3 @@
-import { ImageData, ProductData } from "@shared/types/types";
 import {AssociationMetadata} from "@shared/types/supabaseTypes.ts";
 
 export type UnsubmittedImageData = {
@@ -8,5 +7,3 @@ export type UnsubmittedImageData = {
     display_order: number
     association_metadata: AssociationMetadata
 }
-
-export type UnsubmittedProductData = Omit<ProductData, "images"> & {images: (ImageData | UnsubmittedImageData)[]}
