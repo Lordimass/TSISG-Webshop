@@ -26,6 +26,7 @@ export const blank_product: ProductData = {
     sku: 0,
     inserted_at: new Date().toISOString(),
     last_edited: new Date().toISOString(),
+    last_edited_by: "",
     name: "...",
     price: 0,
     stock: 0,
@@ -48,5 +49,4 @@ export const blank_product: ProductData = {
     group_name: null,
     customs_description: null,
     extended_customs_description: null,
-    last_edited_by: null,
 }

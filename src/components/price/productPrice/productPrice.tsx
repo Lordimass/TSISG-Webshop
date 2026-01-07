@@ -18,7 +18,7 @@ export function ProductPrice({prod, currency}: {
     // Single product in a group
     else if (Array.isArray(prod)) prod = prod[0];
 
-    const price = "price" in prod ? prod.price : prod.line_value
+    const price = "line_value" in prod ? prod.line_value : prod.price
     const dinero = DineroFactory({
         amount: Math.round(price*100),
         currency: DEFAULT_CURRENCY,

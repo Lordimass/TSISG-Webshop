@@ -121,7 +121,7 @@ function OrderDropdown() {
     const [toggleInProgress, setToggleInProgress] = useState(false)
 
     const date = new Date(order.placed_at)
-    const shippedOn = order.dispatched ? new Date(order.royalMailData.shippedOn!) : new Date()
+    const shippedOn = order.dispatched ? new Date(order.royalMailData!.shippedOn!) : new Date()
     const dateString = dateToDateString(date)
     const timeString = dateToTimeString(date)
     const deliveryCostInput = useRef<HTMLInputElement | null>(null)
@@ -129,8 +129,8 @@ function OrderDropdown() {
         amount: Math.round((order.value.total || order.total_value)*100),
         currency: (order.value.currency || DEFAULT_CURRENCY) as Currency
     })
-    const shippingDinero = (order.value.shipping || order.delivery_cost) ? DineroFactory({
-        amount: Math.round((order.value.shipping || order.delivery_cost || 0)*100),
+    const shippingDinero = (order.value.shipping) ? DineroFactory({
+        amount: Math.round((order.value.shipping || 0)*100),
         currency: DEFAULT_CURRENCY
     }) : undefined
     return (<>
