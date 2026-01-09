@@ -15,7 +15,7 @@
     flex-direction: column;
     background-color: var(--dark-purple);
     box-shadow:
-        -0.5em 0em 2em rgba(0,0,0,0.3);
+        -0.5em 0 2em rgba(0,0,0,0.3);
 }
 
 .loading-screen {
@@ -31,13 +31,13 @@
 }
 
 #payment-form label {
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     color: #30313d;
     font-size: 14px;
 }
 
 #payment-form input, #payment-form select {
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
     width: 100%;
     border-radius: 1em;
     box-sizing: border-box;
@@ -50,7 +50,7 @@
 
 .required-input input:focus {
     box-shadow: 0 0 0 3px hsla(211, 100%, 50%, 25%), 0 0 0 1px #007aff;
-    outline: 0px;
+    outline: 0;
 }
 
 .invalid-required-input input {
@@ -87,7 +87,6 @@
 
 .checkout-product-text {
     align-self: center;
-    margin-top: 1em;
     width: 350%;
     margin: 20px;
 }
@@ -113,7 +112,7 @@
 
 .checkout-totals .right .total {
     display: flex;
-    font-family: "Perfect Penmanship";
+    font-family: "Perfect Penmanship", sans-serif;
 }
 
 .total .currency {
@@ -147,7 +146,7 @@
 #submit #button-text {
     position:relative;
     top: 0.1em;
-    font-family: "Backso";
+    font-family: "Backso", sans-serif;
     font-weight: 600;
     font-size: xx-large;
 }
@@ -161,7 +160,7 @@
     color: white
 }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 900px) {
     .checkout-product-text {
         width: 200%;
     }

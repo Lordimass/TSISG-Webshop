@@ -125,21 +125,3 @@
     margin-top: 0.4em;
     margin-right: 0.5em;
 }
-
-.basket-product .basket-modifier {
-    margin: 0 0 0.5em;
-}
-
-@media screen and (max-width: 1100px) {
-    .basket-product {
-        min-height: 100px;
-    }
-
-    .basket-product-text {
-        font-size: smaller;
-    }
-
-    .basket-product-text p {
-        margin-top: 0.2em
-    }
-}

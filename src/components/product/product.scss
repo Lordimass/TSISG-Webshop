@@ -8,7 +8,6 @@
   background-color: white;
   overflow: hidden;
   border-radius: 15px;
-  margin: 10px;
 }
 
 .product-image-link {
@@ -49,41 +48,29 @@
   padding: 10px;
 }
 
-/*
-checkout-product css is in checkout.css because at time of writing this file is very long and that one is very short,
-either would make sense so I went with that.
-*/
-
 @mixin horizontal-product {
   flex-direction: row;
   width: 100%;
-  min-width: 410px;
   height: min-content;
   box-sizing: border-box;
 
   .product-image-link {
-    width: 1fr;
-    min-width: 1fr;
+    display: flex;
+    align-items: center;
+    height: auto;
+    background-color: var(--jamie-grey);
+    border-radius: 10px;
   }
 
   .prod-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 
     width: 250%;
-    min-width: 2fr;
     max-height: 100%;
 
     box-sizing: border-box;
     padding: 7px;
-  }
-
-  .prod-footer:has(.prod-footer-right) {
-    flex-direction: row;
-
-    .prod-footer-text {
-      flex-grow: 0;
-    }
   }
 
   .prod-footer-right {
@@ -93,12 +80,19 @@ either would make sense so I went with that.
     font-family: "Perfect Penmanship", sans-serif;
   }
 
+  :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+  }
+
   .prod-locked-quantity span:last-of-type {
     font-size: 24px;
   }
 
   .product-text {
-    margin: 3px 0 0 0;
+    margin: 0;
+    a {font-size: 20px}
   }
 
   .basket-modifier-container {
@@ -125,8 +119,8 @@ either would make sense so I went with that.
       width: 160%;
     }
 
-    .product-text {
-      font-size: 14px;
+    .product-text > a.product-name {
+      font-size: 15px;
     }
   }
 }

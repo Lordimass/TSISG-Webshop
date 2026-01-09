@@ -6,7 +6,6 @@
   background-color: white;
   overflow: hidden;
   border-radius: 15px;
-  margin: 10px;
 }
 
 .product-image-link {
@@ -47,35 +46,26 @@
   padding: 10px;
 }
 
-/*
-checkout-product css is in checkout.css because at time of writing this file is very long and that one is very short,
-either would make sense so I went with that.
-*/
 .product.horizontal-product {
   flex-direction: row;
   width: 100%;
-  min-width: 410px;
   height: min-content;
   box-sizing: border-box;
 }
 .product.horizontal-product .product-image-link {
-  width: 1fr;
-  min-width: 1fr;
+  display: flex;
+  align-items: center;
+  height: auto;
+  background-color: var(--jamie-grey);
+  border-radius: 10px;
 }
 .product.horizontal-product .prod-footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 250%;
-  min-width: 2fr;
   max-height: 100%;
   box-sizing: border-box;
   padding: 7px;
-}
-.product.horizontal-product .prod-footer:has(.prod-footer-right) {
-  flex-direction: row;
-}
-.product.horizontal-product .prod-footer:has(.prod-footer-right) .prod-footer-text {
-  flex-grow: 0;
 }
 .product.horizontal-product .prod-footer-right {
   display: flex;
@@ -83,11 +73,19 @@ either would make sense so I went with that.
   align-items: center;
   font-family: "Perfect Penmanship", sans-serif;
 }
+.product.horizontal-product :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+  display: flex;
+  justify-content: center;
+  margin-left: 10px;
+}
 .product.horizontal-product .prod-locked-quantity span:last-of-type {
   font-size: 24px;
 }
 .product.horizontal-product .product-text {
-  margin: 3px 0 0 0;
+  margin: 0;
+}
+.product.horizontal-product .product-text a {
+  font-size: 20px;
 }
 .product.horizontal-product .basket-modifier-container {
   height: 40px;
@@ -99,28 +97,23 @@ either would make sense so I went with that.
   .product {
     flex-direction: row;
     width: 100%;
-    min-width: 410px;
     height: min-content;
     box-sizing: border-box;
   }
   .product .product-image-link {
-    width: 1fr;
-    min-width: 1fr;
+    display: flex;
+    align-items: center;
+    height: auto;
+    background-color: var(--jamie-grey);
+    border-radius: 10px;
   }
   .product .prod-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     width: 250%;
-    min-width: 2fr;
     max-height: 100%;
     box-sizing: border-box;
     padding: 7px;
-  }
-  .product .prod-footer:has(.prod-footer-right) {
-    flex-direction: row;
-  }
-  .product .prod-footer:has(.prod-footer-right) .prod-footer-text {
-    flex-grow: 0;
   }
   .product .prod-footer-right {
     display: flex;
@@ -128,11 +121,19 @@ either would make sense so I went with that.
     align-items: center;
     font-family: "Perfect Penmanship", sans-serif;
   }
+  .product :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+  }
   .product .prod-locked-quantity span:last-of-type {
     font-size: 24px;
   }
   .product .product-text {
-    margin: 3px 0 0 0;
+    margin: 0;
+  }
+  .product .product-text a {
+    font-size: 20px;
   }
   .product .basket-modifier-container {
     height: 40px;
@@ -148,8 +149,8 @@ either would make sense so I went with that.
   .product .prod-footer {
     width: 160%;
   }
-  .product .product-text {
-    font-size: 14px;
+  .product .product-text > a.product-name {
+    font-size: 15px;
   }
 }
 
