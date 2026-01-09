@@ -1,16 +1,14 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { CheckoutProduct } from "../../../components/product/product";
+import {useContext, useEffect, useRef, useState} from "react";
 
 import Throbber from "../../../components/throbber/throbber";
 
-import { LoginContext } from "../../../app";
-import { useGetOrderList } from "../../../lib/netlifyFunctions";
-import { compareOrders } from "../../../lib/sortMethods";
-import { overdue_threshold } from "../../../lib/consts.ts";
-import { getColourClass, OrderDropdownContext, OrdersContext } from "./lib";
-import { getJWTToken } from "../../../lib/auth";
-import { dateToDateString, dateToTimeString } from "../../../lib/lib";
-import { NotificationsContext } from "../../../components/notification/lib";
+import {LoginContext} from "../../../app";
+import {useGetOrderList} from "../../../lib/netlifyFunctions";
+import {compareOrders} from "../../../lib/sortMethods";
+import {overdue_threshold} from "../../../lib/consts.ts";
+import {getColourClass, OrderDropdownContext, OrdersContext} from "./lib";
+import {dateToDateString, dateToTimeString} from "../../../lib/lib";
+import {NotificationsContext} from "../../../components/notification/lib";
 
 import "./orders.css"
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
@@ -20,6 +18,7 @@ import DineroFactory, {Currency} from "dinero.js";
 import {callRPC, toggleOrderFulfilment} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
+import Product from "../../../components/product/product.tsx";
 
 export function OrderManager() { 
     const unsetOrders: MergedOrder[] = useGetOrderList() || []
@@ -149,12 +148,12 @@ function OrderDropdown() {
         </div>
 
         <div className="order-products">
-            {order.products ? order.products.map((prod: any) => {return <CheckoutProduct 
-                product={prod} 
+            {order.products ? order.products.map((prod: any) => {return <Product
+                prod={prod}
                 key={prod.sku} 
-                admin={true} 
-                checkbox={true}
+                admin={true}
                 currency={order.value.currency as Currency}
+                quantityLocked={true}
             />}
             ) : <p>You don't have permission to see the products attached to this order! This is likely a mistake, contact support for help.</p>}
         </div>

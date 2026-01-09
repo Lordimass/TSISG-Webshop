@@ -36,7 +36,7 @@
   cursor: pointer;
 }
 
-.prod-footer {
+.prod-footer, .prod-footer-main {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -54,20 +54,39 @@ either would make sense so I went with that.
 .product.horizontal-product {
   flex-direction: row;
   width: 100%;
-  min-width: 310px;
+  min-width: 410px;
   height: min-content;
   box-sizing: border-box;
+}
+.product.horizontal-product .product-image-link {
+  width: 1fr;
+  min-width: 1fr;
 }
 .product.horizontal-product .prod-footer {
   display: flex;
   flex-direction: column;
   width: 250%;
+  min-width: 2fr;
   max-height: 100%;
   box-sizing: border-box;
   padding: 7px;
 }
+.product.horizontal-product .prod-footer:has(.prod-footer-right) {
+  flex-direction: row;
+}
+.product.horizontal-product .prod-footer:has(.prod-footer-right) .prod-footer-text {
+  flex-grow: 0;
+}
+.product.horizontal-product .prod-footer-right {
+  display: flex;
+  width: 10%;
+  align-items: center;
+  font-family: "Perfect Penmanship", sans-serif;
+}
+.product.horizontal-product .prod-locked-quantity span:last-of-type {
+  font-size: 24px;
+}
 .product.horizontal-product .product-text {
-  font-size: smaller;
   margin: 3px 0 0 0;
 }
 .product.horizontal-product .basket-modifier-container {
@@ -80,20 +99,39 @@ either would make sense so I went with that.
   .product {
     flex-direction: row;
     width: 100%;
-    min-width: 310px;
+    min-width: 410px;
     height: min-content;
     box-sizing: border-box;
+  }
+  .product .product-image-link {
+    width: 1fr;
+    min-width: 1fr;
   }
   .product .prod-footer {
     display: flex;
     flex-direction: column;
     width: 250%;
+    min-width: 2fr;
     max-height: 100%;
     box-sizing: border-box;
     padding: 7px;
   }
+  .product .prod-footer:has(.prod-footer-right) {
+    flex-direction: row;
+  }
+  .product .prod-footer:has(.prod-footer-right) .prod-footer-text {
+    flex-grow: 0;
+  }
+  .product .prod-footer-right {
+    display: flex;
+    width: 10%;
+    align-items: center;
+    font-family: "Perfect Penmanship", sans-serif;
+  }
+  .product .prod-locked-quantity span:last-of-type {
+    font-size: 24px;
+  }
   .product .product-text {
-    font-size: smaller;
     margin: 3px 0 0 0;
   }
   .product .basket-modifier-container {
@@ -101,10 +139,16 @@ either would make sense so I went with that.
     padding: 0;
     margin-top: 5px;
   }
+  .product {
+    min-width: 310px;
+  }
+  .product .product-name {
+    font-size: 14px;
+  }
   .product .prod-footer {
     width: 160%;
   }
-  .product .product-name {
+  .product .product-text {
     font-size: 14px;
   }
 }

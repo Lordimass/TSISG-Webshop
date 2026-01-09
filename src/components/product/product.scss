@@ -38,7 +38,7 @@
   cursor: pointer;
 }
 
-.prod-footer {
+.prod-footer, .prod-footer-main {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -57,21 +57,47 @@ either would make sense so I went with that.
 @mixin horizontal-product {
   flex-direction: row;
   width: 100%;
-  min-width: 310px;
+  min-width: 410px;
   height: min-content;
   box-sizing: border-box;
+
+  .product-image-link {
+    width: 1fr;
+    min-width: 1fr;
+  }
 
   .prod-footer {
     display: flex;
     flex-direction: column;
+
     width: 250%;
+    min-width: 2fr;
     max-height: 100%;
+
     box-sizing: border-box;
     padding: 7px;
   }
 
+  .prod-footer:has(.prod-footer-right) {
+    flex-direction: row;
+
+    .prod-footer-text {
+      flex-grow: 0;
+    }
+  }
+
+  .prod-footer-right {
+    display: flex;
+    width: 10%;
+    align-items: center;
+    font-family: "Perfect Penmanship", sans-serif;
+  }
+
+  .prod-locked-quantity span:last-of-type {
+    font-size: 24px;
+  }
+
   .product-text {
-    font-size: smaller;
     margin: 3px 0 0 0;
   }
 
@@ -89,12 +115,17 @@ either would make sense so I went with that.
 @media screen and (max-width: 1100px) {
   .product {
     @include horizontal-product;
+    min-width: 310px;
+
+    .product-name {
+      font-size: 14px;
+    }
 
     .prod-footer {
       width: 160%;
     }
 
-    .product-name {
+    .product-text {
       font-size: 14px;
     }
   }

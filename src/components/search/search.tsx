@@ -2,7 +2,7 @@ import {ChangeEvent, useContext, useEffect, useRef, useState} from "react";
 import {searchProducts} from "./lib";
 
 import "./search.css"
-import {CheckoutProduct} from "../product/product";
+import Product from "../product/product";
 import {ProductData} from "@shared/types/types";
 import {NotificationsContext} from "../notification/lib";
 import {triggerSearch, triggerViewItemList} from "../../lib/analytics/analytics";
@@ -114,10 +114,10 @@ export function ProductSearch({search_delay = 200}: {
                 <div className="inner-results">
 
                     {results.map((p) => (
-                        <CheckoutProduct
-                            product={p}
+                        <Product
+                            prod={p}
                             key={p.sku}
-                            linked={true}
+                            quantityLocked={true}
                         />
                     ))}
 

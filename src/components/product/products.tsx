@@ -1,13 +1,12 @@
 import "./products.css"
 
-import {JSX, ReactNode, useContext, useEffect, useState} from "react";
+import {JSX, useContext, useEffect, useState} from "react";
 import Product from "./product";
-import { CheckoutProduct } from "./product"
 import {ProductData} from "@shared/types/types";
-import { compareProductGroups, compareProducts } from "../../lib/sortMethods";
-import { productLoadChunks } from "../../lib/consts.ts";
-import { useGetGroupedProducts } from "../../lib/supabaseRPC";
-import { triggerViewItemList } from "../../lib/analytics/analytics";
+import {compareProductGroups, compareProducts} from "../../lib/sortMethods";
+import {productLoadChunks} from "../../lib/consts.ts";
+import {useGetGroupedProducts} from "../../lib/supabaseRPC";
+import {triggerViewItemList} from "../../lib/analytics/analytics";
 import {LocaleContext} from "../../localeHandler.ts";
 import {Currency} from "dinero.js";
 import {getBasketProducts} from "../../lib/lib.tsx";
@@ -85,8 +84,10 @@ export function CheckoutProducts({currency}: {
     /** Override currency to display. Only use to display a currency other than the user's local currency. */
     currency?: Currency
 }) {
-  const basket = getBasketProducts();
-  return (<div className="checkout-products">{basket.map(
-      prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}</div>
-  )
+    const basket = getBasketProducts();
+    return (<div className="checkout-products">{basket.map(
+            // prod => <CheckoutProduct product={prod} key={prod.sku} currency={currency}/>)}
+            prod => <Product prod={prod} currency={currency} key={prod.sku} quantityLocked horizontal/>
+        )}</div>
+    )
 }
