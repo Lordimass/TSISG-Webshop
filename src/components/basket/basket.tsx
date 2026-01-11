@@ -10,6 +10,22 @@ import {getBasketProducts} from "../../lib/lib.tsx";
 import {ProductInBasket} from "@shared/types/productTypes.ts";
 
 export default function Basket() {
+    async function toggleBasket() {
+        // Don't open on checkout and thank you pages
+        const page = window.location.pathname
+        if (["/checkout", "/thankyou"].includes(page)) {
+            setIsOpen(false)
+            return
+        }
+
+        // Toggle display mode
+        const newIsOpen = !isOpen
+        setIsOpen(newIsOpen)
+
+        // Trigger GA4 Event if Basket Opened
+        if (newIsOpen) await triggerViewCart(currency)
+    }
+
     async function redirectToCheckout() {
         if (basketQuantity == 0) {
             notify("You can't checkout without anything in your cart, silly!")
@@ -46,30 +62,6 @@ export default function Basket() {
         changeBasketPrice("£" + basketPriceTemp.toFixed(2))
     }
 
-    async function toggleBasket() {
-        // Get the basket
-        const basket = menuRef.current
-        if (!basket) return
-        
-        // Don't open on checkout and thank you pages
-        const page = window.location.pathname
-        if (
-            page == "/checkout" ||
-            page == "/thankyou"
-        ) {
-            basket.style.display = "none"
-            return
-        }
-
-        // Toggle display mode
-        const newIsOpen = !isOpen
-        setIsOpen(newIsOpen)
-        basket.style.display = isOpen ? "none" : "flex"
-
-        // Trigger GA4 Event if Basket Opened
-        if (newIsOpen) await triggerViewCart(currency)
-    }
-
     const siteSettings = useContext(SiteSettingsContext)
     const {notify} = useContext(NotificationsContext)
     const {currency} = useContext(LocaleContext)
@@ -91,7 +83,8 @@ export default function Basket() {
     }, [siteSettings])
 
     // Update basket quantity on first render only
-    useEffect(updateBasketQuantity, []) 
+    useEffect(updateBasketQuantity, [])
+
     // Listen for basket updates
     useEffect(() => {
         window.addEventListener("basketUpdate", updateBasketQuantity);
@@ -141,11 +134,10 @@ export default function Basket() {
             </div>
         </div>
 
-        <div className="basket-display" id="basket-display" ref={menuRef}>
+        {isOpen ? <div className="basket-display-wrapper">
+            <div className="basket-display" id="basket-display" ref={menuRef}>
             <p> Basket ({basketQuantity} items)</p>
-            <div className="basketItems">
-                {basketComponents}
-            </div>
+            <div className="basketItems">{basketComponents}</div>
             <p> Subtotal: {basketPrice}</p>
             <p style={{color: "var(--jamie-grey)"}}> {killSwitchMessage} </p>
             <div 
@@ -157,7 +149,8 @@ export default function Basket() {
                     <i className="fi fi-sr-shopping-basket"/>
                 </div>
             </div>
-        </div>
+        </div></div> : null}
+
         </>)
 }
 

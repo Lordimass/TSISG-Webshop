@@ -93,36 +93,25 @@ export function ProductSearch({search_delay = 200}: {
         else setIsOpen(false);
     }, [results])
 
-    return (
-        <div className="search">
-            <div className="search-bar" ref={searchBarRef}>
-                <i className="search-icon fi fi-br-search"/>
-                <input
-                    name="search"
-                    className="search-input"
-                    type="text"
-                    onChange={handleChange}
-                    placeholder="Search products..."
-                />
-            </div>
-
-            <ul
-                className="search-results"
-                style={{display: isOpen ? "flex" : "none"}}
-                ref={menuRef}
-            >
+    return (<div className="search">
+        <div className="search-bar" ref={searchBarRef}>
+            <i className="search-icon fi fi-br-search"/>
+            <input
+                name="search"
+                className="search-input"
+                type="text"
+                onChange={handleChange}
+                placeholder="Search products..."
+            />
+        </div>
+        {isOpen ? <div className="search-results-wrapper">
+            <ul className="search-results" ref={menuRef}>
                 <div className="inner-results">
-
                     {results.map((p) => (
-                        <Product
-                            prod={p}
-                            key={p.sku}
-                            quantityLocked={true}
-                        />
+                        <Product prod={p} key={p.sku} quantityLocked={true}/>
                     ))}
-
                 </div>
             </ul>
-        </div>
-    );
+        </div> : null}
+    </div>);
 }
