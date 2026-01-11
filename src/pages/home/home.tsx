@@ -1,12 +1,9 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {page_title} from '../../lib/consts.ts';
-
-import React from 'react';
 import Products from '../../components/product/products';
 
 import "./home.css"
 import Page from '../../components/page/page';
-import Ticker from "../../components/ticker/ticker.tsx";
 
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
@@ -14,9 +11,7 @@ let spinTimeout = false
 
 export default function Home() {
     function changeWord() {
-        if (spinTimeout) {
-            return
-        }
+        if (spinTimeout) return
         spinTimeout = true
 
         rotate(document.getElementById("title-word"))
@@ -32,7 +27,6 @@ export default function Home() {
             spinTimeout = false
         }, 1100)
     }
-
     const [word, setWord] = useState("GAY");
 
     return (<Page

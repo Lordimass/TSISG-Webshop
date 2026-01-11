@@ -6,14 +6,12 @@
 // This is done automatically by launch-dev-server.ps1 ^
 
 import "./checkout.css"
+import {CheckoutProducts} from "../../components/product/products";
 
-import Throbber from "../../components/throbber/throbber";
-import { CheckoutProducts } from "../../components/product/products";
-
-import { LoginContext, SiteSettingsContext } from "../../app";
+import {SiteSettingsContext} from "../../app";
 import {checkStock, isSessionExpired, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
-import { page_title } from "../../lib/consts.ts";
-import React, { useState, useEffect, FormEvent, useRef, useContext } from "react";
+import {page_title} from "../../lib/consts.ts";
+import React, {FormEvent, useContext, useEffect, useRef, useState} from "react";
 import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {
     AddressElement,
@@ -22,10 +20,9 @@ import {
     PaymentElement,
     useCheckout
 } from '@stripe/react-stripe-js';
-import {Stripe as StripeNS} from "stripe";
-import { addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise } from "./consts.ts";
-import { NotificationsContext } from "../../components/notification/lib";
-import { triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout } from "../../lib/analytics/analytics";
+import {addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise} from "./consts.ts";
+import {NotificationsContext} from "../../components/notification/lib";
+import {triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout} from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
 import {DEFAULT_CURRENCY, LocaleContext} from "../../localeHandler.ts";
 import DineroFactory, {Currency, Dinero} from "dinero.js";
@@ -70,10 +67,10 @@ function CheckoutAux({onReady}: {onReady: Function}) {
      * @returns true if stock is OK, false if it is not.
      */
     async function checkProductStock() {
-        const discrepencies = await checkStock();
+        const discrepancies = await checkStock();
 
-        // If there were no discrepencies
-        if (discrepencies.length === 0) {
+        // If there were no discrepancies
+        if (discrepancies.length === 0) {
             setError(<p></p>)
             return true
         }
@@ -83,14 +80,13 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             the <a style={{color: "white"}} href={getPath("HOME")}>home page</a> to change your order, then come
             back:<br/><br/></p>
             {
-                discrepencies.map((discrep) =>
+                discrepancies.map((discrep) =>
                     <p className="checkout-error" key={discrep.sku}>
                         We have {discrep.stock} "{discrep.name}" left, you
                         tried to order {discrep.basketQuantity}
                     </p>)
             }
             </>
-
         setError(err)
         return false
     }
@@ -164,7 +160,6 @@ function CheckoutAux({onReady}: {onReady: Function}) {
             paymentInfoComplete.current = true
             await triggerAddPaymentInfo(currency)
         }
-
     })
 
     // To prevent overloading the database / exploitation, only check stock once.
