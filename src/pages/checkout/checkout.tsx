@@ -3,7 +3,7 @@
 
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
-// This is done automatically by launch-dev-server.ps1 ^
+// This is done automatically by launch-dev-server.ps1 
 
 import "./checkout.css"
 import {CheckoutProducts} from "../../components/product/products";
