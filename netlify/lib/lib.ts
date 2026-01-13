@@ -1,11 +1,10 @@
-import { supabaseAnon } from "./getSupabaseClient.ts";
-import type { ImageData } from "@shared/types/supabaseTypes.ts";
+import {supabaseAnon} from "./getSupabaseClient.ts";
+import type {ImageData} from "@shared/types/supabaseTypes.ts";
 import {Stripe} from "stripe";
-import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
-import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions
 import DineroFactory, {Currency} from "dinero.js";
-import {ExchangeRates, convertDinero} from "@shared/functions/price.ts";
-import {stripe} from "./stripe.ts";
+import {convertDinero, ExchangeRates} from "@shared/functions/price.ts";
+import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions;
+import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions;
 
 /**
  * Checks if two objects contain the same data
@@ -28,7 +27,6 @@ export function checkObjectsEqual(obj1: any, obj2: any) {
 /**
  * Sends a GA4 event.
  * @param payload - The event payload.
- * @param event - The event name.
  * @param debug - Whether to enable debug mode. Enabling this prevents events from
  * being ingested, meaning they won't show up in DebugView.
  */
