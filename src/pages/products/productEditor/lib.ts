@@ -1,6 +1,6 @@
-import { ImageData, ProductData } from "@shared/types/types";
-import { UnsubmittedImageData, UnsubmittedProductData } from "./types.ts";
-import {createContext} from "react";
+import {ImageData, ProductData, UnsubmittedProductData} from "@shared/types/types";
+import { UnsubmittedImageData } from "./types.ts";
+import {createContext, Dispatch, SetStateAction} from "react";
 import {editableProductProps} from "./editableProductProps.ts";
 
 /**
@@ -27,7 +27,7 @@ export const SingleProdPropContext = createContext<{
 export function shiftImage(
     image: ImageData | UnsubmittedImageData, 
     product: ProductData | UnsubmittedProductData, 
-    setProduct: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>> | undefined, 
+    setProduct: Dispatch<SetStateAction<ProductData | UnsubmittedProductData>> | undefined,
     left = true
 ) {
     if (!setProduct) return;

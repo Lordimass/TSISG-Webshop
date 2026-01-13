@@ -1,19 +1,20 @@
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
 import "./employeeHours.css"
-import { chartBlueMed } from "../../consts";
-import { useContext } from "react";
-import { ReportContext } from "../../report/lib";
-import { getPayRate, getTotalHours, getTotalPay, useGetClockifyHours, UserDailyHours } from "./lib";
-import { dateToDateString, durationToDurationString } from "../../../../../lib/lib";
-import { SiteSettingsContext } from "../../../../../app";
+import {chartBlueMed} from "../../consts";
+import {useContext} from "react";
+import {ReportContext} from "../../report/lib";
+import {getPayRate, getTotalHours, getTotalPay, useGetClockifyHours, UserDailyHours} from "./lib";
+import {dateToDateString, durationToDurationString} from "../../../../../lib/lib";
+import {SiteSettingsContext} from "../../../../../app";
 import ReportSubtitle from "../../components/reportSubtitle";
 
 export default function EmployeeHours() {
-    const {report} = useContext(ReportContext)
+    const {r} = useContext(ReportContext)
+    if (!r) return
 
     // TODO: Allow manage_reports to add or remove userIDs to display hours for.
-    const clockifyUsers = report?.metadata.clockifyUserIDs ?? ["687560d15adda104676f32d2", "67fe148f4c444a224b798195"]
-    const clockifyHours = useGetClockifyHours(report!, clockifyUsers)
+    const clockifyUsers = r.metadata.clockifyUserIDs ?? ["687560d15adda104676f32d2", "67fe148f4c444a224b798195"]
+    const clockifyHours = useGetClockifyHours(r, clockifyUsers)
 
     return <div id="report-employee-hours-page" className="report-page">
         <ReportSubtitle><h2>Employee Hours</h2></ReportSubtitle>
@@ -32,7 +33,6 @@ function HoursChart({userDailyHours}: {userDailyHours: UserDailyHours}) {
             (usr) => usr.userID === userDailyHours.userID
         )
         if (matchedUsers.length > 0) name = matchedUsers[0].name
-
     }
 
     return (<div className="report-employee-hours-graph">

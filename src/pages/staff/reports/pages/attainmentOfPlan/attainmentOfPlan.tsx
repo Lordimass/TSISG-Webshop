@@ -1,11 +1,12 @@
-import { useContext } from "react"
+import {useContext} from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
 import ReportSubtitle from "../../components/reportSubtitle"
-import { ReportContext } from "../../report/lib"
+import {ReportContext} from "../../report/lib"
 
 export default function AttainmentOfPlan() {
-    const {report: r, setReportMeta: setR} = useContext(ReportContext)
+    const {r, setReportMeta: setR} = useContext(ReportContext)
     if (!r) return null
+
     return (<div id="attainment-of-plan-page" className="report-page">
         <ReportSubtitle>
             <h2>Attainment of Month's Plan</h2>
@@ -16,14 +17,14 @@ export default function AttainmentOfPlan() {
              markdown={r.metadata.attainment ?? ""}
              background={true}
              toolbar={true}
-             onChange={(md) => {setR("attainment", md)}}
+             onChange={async (md) => {await setR("attainment", md)}}
          />
          <MDXEditorAuth
              id="attainment-box-2"
              markdown={r.metadata.attainmentBox2 ?? ""}
              background={true}
              toolbar={true}
-             onChange={(md) => {setR("attainmentBox2", md)}}
+             onChange={async (md) => {await setR("attainmentBox2", md)}}
          />
     </div>)
 }

@@ -1,10 +1,9 @@
 import Stripe from "stripe"
-import { getCheckoutSessionItems, StripeCompoundLineItem } from "../getCheckoutSessionItems.ts"
-import type { StripeProductMeta } from "@shared/types/stripeTypes.ts"
-import type { CompressedOrder, OrderProduct } from "@shared/types/supabaseTypes.ts"
-import { SupabaseClient } from "@supabase/supabase-js"
-import { supabaseService } from "../getSupabaseClient.ts"
-import { sendGA4Event } from "../lib.ts"
+import {getCheckoutSessionItems, StripeCompoundLineItem} from "../getCheckoutSessionItems.ts"
+import type {StripeProductMeta} from "@shared/types/stripeTypes.ts"
+import type {CompressedOrder, OrderProduct} from "@shared/types/supabaseTypes.ts"
+import {supabaseService} from "../getSupabaseClient.ts"
+import {sendGA4Event} from "../lib.ts"
 import {OrderProdCompressed} from "@shared/types/productTypes.ts";
 
 export default async function handleCheckoutSessionCompleted(
@@ -287,8 +286,8 @@ async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEve
     // Get the associated LineItems and Products compounded together.
     const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
 
-    // Extract client ID and session ID
-    const client_id = session.metadata?.gaClientID;
+    // Extract client ID and session ID, use null if no client ID provided
+    const client_id = (session.metadata?.gaClientID === "" || !session.metadata?.gaClientID) ? null : session.metadata?.gaClientID;
     const session_id = Number(session.metadata!.gaSessionID);
 
     // Compile payload for GA4.

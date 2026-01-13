@@ -1,10 +1,10 @@
 import "./login.css"
 
-import { FormEvent, useContext, useState } from "react";
-import { page_title } from "../../lib/consts.ts";
-import { LoginContext } from "../../app";
-import { forgotPassword, login, logout } from "../../lib/auth";
-import { NotificationsContext } from "../../components/notification/lib";
+import {FormEvent, useContext, useEffect, useRef, useState} from "react";
+import {page_title} from "../../lib/consts.ts";
+import {LoginContext} from "../../app";
+import {forgotPassword, login, logout} from "../../lib/auth";
+import {NotificationsContext} from "../../components/notification/lib";
 import Page from "../../components/page/page";
 
 export default function LoginPage() {
@@ -23,12 +23,16 @@ export default function LoginPage() {
 export function Login() {
     async function handleFormSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
-        try {await login(email, password)}
-        catch (e: any) {setError(e.message); return}
+        try {
+            await login(email, password)
+        } catch (e: any) {
+            setError(e.message);
+            return
+        }
 
         // At this stage, login was successful, and we go back to
         // whatever the user was doing that needed logging in.
-        // history.back()
+        history.back()
     }
 
     const [email, setEmail] = useState<string>("")
@@ -44,22 +48,21 @@ export function Login() {
                 <h1>Welcome!</h1> <br/>
                 <label>
                     Email
-                    <input 
-                        id="email" 
-                        type="text" 
-                        placeholder="you@are.gay" 
+                    <input
+                        id="email"
+                        type="text"
+                        placeholder="you@are.gay"
                         autoComplete="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
-                    />    
+                    />
                 </label><br/><br/>
-
                 <label>
                     Password
-                    <input 
-                        id="password" 
-                        autoComplete="current-password new-password" 
-                        type={showPassword ? "text" : "password"} 
+                    <input
+                        id="password"
+                        autoComplete="current-password new-password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="********"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
@@ -67,13 +70,22 @@ export function Login() {
                 </label>
 
                 <div className="under-password">
-                    <button className="show-password" onClick={(e)=>{e.preventDefault(); setShowPassword(!showPassword)}}>
+                    <button
+                        className="show-password"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setShowPassword(!showPassword)
+                        }}
+                        type="button"
+                    >
                         {showPassword ? <i className="fi fi-ss-eye"/> : <i className="fi fi-ss-eye-crossed"/>}
                     </button>
-                    <p onClick={() => {forgotPassword(notify)}} id="forgot-password">I forgot my password</p>
+                    <p onClick={() => {
+                        forgotPassword(notify)
+                    }} id="forgot-password">I forgot my password</p>
                 </div>
-                
-                <input type="submit" id="submit" value={"Sign Up / Sign In"}/>
+
+                <input type="submit" id="submit" value={"Sign Up / Sign In"} />
                 <p className="login-error">{error}</p>
             </form>
         </div>

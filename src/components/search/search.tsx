@@ -2,7 +2,7 @@ import {ChangeEvent, useContext, useEffect, useRef, useState} from "react";
 import {searchProducts} from "./lib";
 
 import "./search.css"
-import {CheckoutProduct} from "../product/product";
+import Product from "../product/product";
 import {ProductData} from "@shared/types/types";
 import {NotificationsContext} from "../notification/lib";
 import {triggerSearch, triggerViewItemList} from "../../lib/analytics/analytics";
@@ -93,36 +93,25 @@ export function ProductSearch({search_delay = 200}: {
         else setIsOpen(false);
     }, [results])
 
-    return (
-        <div className="search">
-            <div className="search-bar" ref={searchBarRef}>
-                <i className="search-icon fi fi-br-search"/>
-                <input
-                    name="search"
-                    className="search-input"
-                    type="text"
-                    onChange={handleChange}
-                    placeholder="Search products..."
-                />
-            </div>
-
-            <ul
-                className="search-results"
-                style={{display: isOpen ? "flex" : "none"}}
-                ref={menuRef}
-            >
+    return (<div className="search">
+        <div className="search-bar" ref={searchBarRef}>
+            <i className="search-icon fi fi-br-search"/>
+            <input
+                name="search"
+                className="search-input"
+                type="text"
+                onChange={handleChange}
+                placeholder="Search products..."
+            />
+        </div>
+        {isOpen ? <div className="search-results-wrapper">
+            <ul className="search-results" ref={menuRef}>
                 <div className="inner-results">
-
                     {results.map((p) => (
-                        <CheckoutProduct
-                            product={p}
-                            key={p.sku}
-                            linked={true}
-                        />
+                        <Product prod={p} key={p.sku} quantityLocked={true}/>
                     ))}
-
                 </div>
             </ul>
-        </div>
-    );
+        </div> : null}
+    </div>);
 }

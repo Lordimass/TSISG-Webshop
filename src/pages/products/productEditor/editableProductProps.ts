@@ -1,11 +1,7 @@
-import React, {ComponentType, createContext, FunctionComponent} from "react"
-import { ProductData } from "@shared/types/types"
-import { UnsubmittedProductData } from "./types.ts"
+import React, {createContext} from "react"
+import {ProductData, UnsubmittedProductData} from "@shared/types/types"
 import { blank_product } from "../../../lib/consts.ts"
 import { isNumeric } from "../../../lib/lib"
-import {Pie} from "recharts";
-import displayName = Pie.displayName;
-import {AutocompleteInput} from "../../../components/autocompleteInput/autocompleteInput.tsx";
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
 import {fetchPropAutofillData} from "../lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
@@ -38,7 +34,7 @@ export type EditableProductProp<T extends keyof ProductData> = {
     /** Function to extract a display string for this property from the product. */
     toStringParser: (product: ProductData | UnsubmittedProductData) => string
     /** A function to parse a display string for this property back to a value that can be used to update the product */
-    fromStringParser: ((val: string) => Promise<ProductData[T]>) | ((val: string) => ProductData[T])
+    fromStringParser: ((val: string) => Promise<ProductData[T] | null>) | ((val: string) => ProductData[T] | null)
 }
 
 function getDefaultProductProps<T extends keyof ProductData>(key: T) {
@@ -49,7 +45,7 @@ function getDefaultProductProps<T extends keyof ProductData>(key: T) {
             .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalise each word
         constraint: (_value: string) => true, // Always editable
         toStringParser: (product: ProductData | UnsubmittedProductData) => product[key]?.toString() || "",
-        fromStringParser: (val: string) => val as ProductData[T], // Parse to same string
+        fromStringParser: (val: string) => val ? val as ProductData[T] : null, // Parse to same string
         autocompleteMode: "NONE"
     } satisfies Partial<EditableProductProp<T>>
 }

@@ -2,11 +2,11 @@
  * Endpoint for Stripe webhooks. Authenticates requests and forwards the request
  * to the function it needs to be at
  */
-import { Context } from "@netlify/functions";
-import { stripe } from "../lib/stripe.ts";
+import {Context} from "@netlify/functions";
+import {stripe} from "../lib/stripe.ts";
 import Stripe from "stripe";
 import handleCheckoutSessionCompleted from "../lib/stripeEndpoints/checkout.session.completed.ts";
-import { handleRefundCreated } from "../lib/stripeEndpoints/refund.created.ts";
+import {handleRefundCreated} from "../lib/stripeEndpoints/refund.created.ts";
 
 export default async function handler(request: Request, _context: Context) {
     try {
@@ -23,9 +23,8 @@ export default async function handler(request: Request, _context: Context) {
         const body: Stripe.Event = JSON.parse(bodyString);
 
         // Authenticate Request
-        let stripeEvent: Stripe.Event
         try {
-            stripeEvent = stripe.webhooks.constructEvent(bodyString, sig, endpointSecret)
+            stripe.webhooks.constructEvent(bodyString, sig, endpointSecret)
         } catch (err) {
             console.error("Failed to verify webhook signature: ", err)
             return new Response(undefined, {status: 400, statusText: "Failed to verify webhook signature"})

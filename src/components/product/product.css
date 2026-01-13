@@ -1,153 +1,157 @@
 .product {
-    display: flex;
-    flex-direction: column;
-
-    width: min-content;
-    height: min-content;
-    min-width: 320px;
-    max-width: 20em;
-    min-height: 35em;
-
-    background-color: white;
-    overflow:hidden;
-    border-radius: 1em;
-    color: white;
-    margin: 1em;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 530px;
+  background-color: white;
+  overflow: hidden;
+  border-radius: 15px;
 }
 
 .product-image-link {
-    display: block;
-    width: 100%;
+  width: 100%;
 }
 
 .product-name {
-    text-decoration: none;
-    font-size: large;
+  text-decoration: none;
+  font-size: 18px;
 }
 
 .product-name:hover {
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.product .div:hover {
-    cursor: pointer;
-}
-
-.bg-blurrer {
-    width: 100%;
-    height: 100%;
-    backdrop-filter: blur(4px);
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .product-text {
-    display: flex;
-    flex-direction: column;
-    margin: 1em;
-    color: black;
-    flex-grow: 1;
-    margin-top: 2em;
-}
-
-.product-price {
-    margin-top: 1em;
-    font-weight: bold;
-    font-size: larger;
-}
-
-.basket-modifier {
-    display: flex;
-    align-self: center;
-
-    width: 90%;
-    margin: 10px;
-
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  color: black;
+  flex-grow: 1;
+  margin: 2em 1em 1em;
 }
 
 .basket-button:hover {
-    transform: scale(105%);
-    cursor: pointer;
+  transform: scale(105%);
+  cursor: pointer;
 }
 
-.basket-icon {
-    font-size: 2.5em;
-    height: 1.1em;
-    user-select: none;
+.prod-footer, .prod-footer-main {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-@media screen and (max-width: 1100px)  {
-   .basket-icon {
-        font-size: 1.5em;
-        height: 1.1em;
-        user-select: none;
-    } 
+.basket-modifier-container {
+  height: 50px;
+  padding: 10px;
 }
 
-.prod-footer {
+.product.horizontal-product {
+  flex-direction: row;
+  width: 100%;
+  height: min-content;
+  box-sizing: border-box;
+}
+.product.horizontal-product .product-image-link {
+  display: flex;
+  align-items: center;
+  height: auto;
+  background-color: var(--jamie-grey);
+  border-radius: 10px;
+}
+.product.horizontal-product .prod-footer {
+  display: flex;
+  flex-direction: row;
+  width: 250%;
+  max-height: 100%;
+  box-sizing: border-box;
+  padding: 7px;
+}
+.product.horizontal-product .prod-footer-right {
+  display: flex;
+  width: 10%;
+  align-items: center;
+  font-family: "Perfect Penmanship", sans-serif;
+}
+.product.horizontal-product :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+  display: flex;
+  justify-content: center;
+  margin-left: 10px;
+}
+.product.horizontal-product .prod-locked-quantity span:last-of-type {
+  font-size: 24px;
+}
+.product.horizontal-product .product-text {
+  margin: 0;
+}
+.product.horizontal-product .product-text a {
+  font-size: 20px;
+}
+.product.horizontal-product .basket-modifier-container {
+  height: 40px;
+  padding: 0;
+  margin-top: 5px;
+}
+
+@media screen and (max-width: 1100px) {
+  .product {
+    flex-direction: row;
+    width: 100%;
+    height: min-content;
+    box-sizing: border-box;
+  }
+  .product .product-image-link {
     display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.basket-input {
+    align-items: center;
+    height: auto;
+    background-color: var(--jamie-grey);
+    border-radius: 10px;
+  }
+  .product .prod-footer {
+    display: flex;
+    flex-direction: row;
+    width: 250%;
+    max-height: 100%;
+    box-sizing: border-box;
+    padding: 7px;
+  }
+  .product .prod-footer-right {
+    display: flex;
+    width: 10%;
+    align-items: center;
     font-family: "Perfect Penmanship", sans-serif;
-    text-align: center;
-    font-size: larger;
-    width: 200%;
-    border: none;
-    border-top: 1px solid var(--jamie-grey);
-    border-bottom: 1px solid var(--jamie-grey);
-    border-radius: 0;
+  }
+  .product :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+  }
+  .product .prod-locked-quantity span:last-of-type {
+    font-size: 24px;
+  }
+  .product .product-text {
+    margin: 0;
+  }
+  .product .product-text a {
+    font-size: 20px;
+  }
+  .product .basket-modifier-container {
+    height: 40px;
+    padding: 0;
+    margin-top: 5px;
+  }
+  .product {
+    min-width: 310px;
+  }
+  .product .product-name {
+    font-size: 14px;
+  }
+  .product .prod-footer {
+    width: 160%;
+  }
+  .product .product-text > a.product-name {
+    font-size: 15px;
+  }
 }
 
-.basket-modifier {
-    height: 3em;
-}
-
-/*
-checkout-product css is in checkout.css because at time of writing this file is very long and that one is very short,
-either would make sense so I went with that.
-*/
-
-@media screen and (max-width: 1100px)  {
-    .product {
-        flex-direction: row;
-        min-height: auto;
-        width: 100%;
-        max-width: 100%;
-        height: min-content;
-        margin: 0.5em;
-    }
-
-    .product-text {
-        font-size: smaller;
-        margin: 0.8em;
-    }
-
-    .product-name {
-        font-size: 1em;
-    }
-
-    .product-price {
-        margin-top: 0.5em;
-    }
-
-    .basket-modifier {
-        height: 2em;
-    }
-    
-    .spacer {
-        display: flex;
-        flex-grow: 1;
-    }
-
-    .prod-footer {
-        display: flex;
-        flex-direction: column;
-        width: 160%;
-        max-height: 100%;
-        justify-content: space-between;
-    }
-}
+/*# sourceMappingURL=product.css.map */

@@ -1,11 +1,10 @@
 import {createContext, Dispatch, SetStateAction} from "react";
-import { UnsubmittedProductData, UnsubmittedImageData } from "./productEditor/types.ts";
-import { ImageData, ProductData } from "@shared/types/types";
+import { UnsubmittedImageData } from "./productEditor/types.ts";
+import {ImageData, ProductData, UnsubmittedProductData} from "@shared/types/types";
 import { blank_product } from "../../lib/consts.ts";
 import {fetchColumnsFromTable} from "@shared/functions/supabase.ts";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {callRPC} from "@shared/functions/supabaseRPC.ts";
-import {EditableProductProp} from "./productEditor/editableProductProps.ts";
 
 export const ProductContext = createContext<{
     basketQuant?: number, 

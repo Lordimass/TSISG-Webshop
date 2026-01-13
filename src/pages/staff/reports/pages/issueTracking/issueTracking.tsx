@@ -1,12 +1,26 @@
-import { useContext } from "react"
+import {useContext} from "react"
 import ReportSubtitle from "../../components/reportSubtitle"
 import "./issueTracking.css"
-import { ReportContext } from "../../report/lib"
-import { InputAuth } from "../../components/MDXEditorAuth"
-import { dateToDateString } from "../../../../../lib/lib"
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { chartBlueDark, chartBlueLight, chartBlueMed, chartGreenDark, chartGreenLight, chartGreenMed, chartRedDark, chartRedLight, chartRedMed, chartYellowDark, chartYellowLight, chartYellowMed, managePermission } from "../../consts"
-import { LoginContext } from "../../../../../app"
+import {ReportContext} from "../../report/lib"
+import {InputAuth} from "../../components/MDXEditorAuth"
+import {dateToDateString} from "../../../../../lib/lib"
+import {Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts"
+import {
+    chartBlueDark,
+    chartBlueLight,
+    chartBlueMed,
+    chartGreenDark,
+    chartGreenLight,
+    chartGreenMed,
+    chartRedDark,
+    chartRedLight,
+    chartRedMed,
+    chartYellowDark,
+    chartYellowLight,
+    chartYellowMed,
+    managePermission
+} from "../../consts"
+import {LoginContext} from "../../../../../app"
 
 export default function IssueTracking() {
     return (<div id="issue-tracking-page" className="report-page">
@@ -34,9 +48,11 @@ export default function IssueTracking() {
 }
 
 function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
-    const {report: r} = useContext(ReportContext)
     const id = "issues_"+type
+
+    const {r} = useContext(ReportContext)
     if (!r) return null
+
     const lastVal = r.metadata[id+"_last"]
     const thisVal = r.metadata[id+"_this"]
     const percentageChange = ((thisVal-lastVal)/thisVal)*100
@@ -71,7 +87,7 @@ function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
 
 function IssueTrackingGraph({type}: {type: "PRIORITY" | "TYPE"}) {
     const {permissions} = useContext(LoginContext)
-    const {report: r, viewMode} = useContext(ReportContext)
+    const {r, viewMode} = useContext(ReportContext)
     if (!r) return null
     
     const id = "issue_tracking_"+type+"_"

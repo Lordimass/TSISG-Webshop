@@ -1,0 +1,126 @@
+.product {
+  display: flex;
+  flex-direction: column;
+
+  width: 320px;
+  height: 530px;
+
+  background-color: white;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.product-image-link {
+  width: 100%;
+}
+
+.product-name {
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.product-name:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.product-text {
+  display: flex;
+  flex-direction: column;
+  color: black;
+  flex-grow: 1;
+  margin: 2em 1em 1em;
+}
+
+.basket-button:hover {
+  transform: scale(105%);
+  cursor: pointer;
+}
+
+.prod-footer, .prod-footer-main {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.basket-modifier-container {
+  height: 50px;
+  padding: 10px;
+}
+
+@mixin horizontal-product {
+  flex-direction: row;
+  width: 100%;
+  height: min-content;
+  box-sizing: border-box;
+
+  .product-image-link {
+    display: flex;
+    align-items: center;
+    height: auto;
+    background-color: var(--jamie-grey);
+    border-radius: 10px;
+  }
+
+  .prod-footer {
+    display: flex;
+    flex-direction: row;
+
+    width: 250%;
+    max-height: 100%;
+
+    box-sizing: border-box;
+    padding: 7px;
+  }
+
+  .prod-footer-right {
+    display: flex;
+    width: 10%;
+    align-items: center;
+    font-family: "Perfect Penmanship", sans-serif;
+  }
+
+  :not(.prod-footer:has(.basket-modifier-container)) > .prod-footer-main > .product-text {
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+  }
+
+  .prod-locked-quantity span:last-of-type {
+    font-size: 24px;
+  }
+
+  .product-text {
+    margin: 0;
+    a {font-size: 20px}
+  }
+
+  .basket-modifier-container {
+    height: 40px;
+    padding: 0;
+    margin-top: 5px;
+  }
+}
+
+.product.horizontal-product {
+  @include horizontal-product;
+}
+
+@media screen and (max-width: 1100px) {
+  .product {
+    @include horizontal-product;
+    min-width: 310px;
+
+    .product-name {
+      font-size: 14px;
+    }
+
+    .prod-footer {
+      width: 160%;
+    }
+
+    .product-text > a.product-name {
+      font-size: 15px;
+    }
+  }
+}

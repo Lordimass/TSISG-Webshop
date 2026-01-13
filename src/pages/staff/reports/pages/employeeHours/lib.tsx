@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react"
-import { getJWTToken } from "../../../../../lib/auth"
-import { ReportData } from "../../types"
-import { dateToDateString } from "../../../../../lib/lib"
+import {useEffect, useState} from "react"
+import {getJWTToken} from "../../../../../lib/auth"
+import {ReportData} from "../../types"
 
 export type UserDailyHours = {
     /** ID of the user this datapoint refers to */

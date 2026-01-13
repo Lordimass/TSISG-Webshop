@@ -1,16 +1,16 @@
-import { useContext, useState } from "react";
+import {Fragment, useContext, useState} from "react";
 import AuthenticatedPage from "../../../../components/page/authenticatedPage";
-import { managePermission, viewPermission } from "../consts";
+import {managePermission, viewPermission} from "../consts";
 import BudgetUsage from "../pages/budgetUsage/budgetUsage";
-import { Title } from "../pages/title/title";
-import { ReportData, ReportDataMeta } from "../types";
-import { ReportContext, updateReport, useFetchReport } from "./lib";
+import {Title} from "../pages/title/title";
+import {ReportData, ReportDataMeta} from "../types";
+import {ReportContext, updateReport, useFetchReport} from "./lib";
 
 import "./report.css"
-import { NotificationsContext } from "../../../../components/notification/lib";
+import {NotificationsContext} from "../../../../components/notification/lib";
 import EmployeeHours from "../pages/employeeHours/employeeHours";
-import { Activity } from "../pages/activity/activity";
-import { LoginContext } from "../../../../app";
+import {Activity} from "../pages/activity/activity";
+import {LoginContext} from "../../../../app";
 import IssueTracking from "../pages/issueTracking/issueTracking";
 import SiteAnalytics from "../pages/siteAnalytics/siteAnalytics";
 import AttainmentOfPlan from "../pages/attainmentOfPlan/attainmentOfPlan";
@@ -25,20 +25,28 @@ export function Report() {
         key: K, 
         value: ReportDataMeta[K],
     ) {
-        const metadata = {...report!.metadata}
+        const metadata = {...reportRef.current!.metadata}
         metadata[key] = value !== "" ? value : undefined
-        await updateReportData({...report!, metadata})
+        await updateReportData({...reportRef.current!, metadata})
     }
 
     async function updateReportData(r: ReportData) {
-        await updateReport(r, setReport, notify)
+        await updateReport(r, reportRef, notify)
     }
 
     const {notify} = useContext(NotificationsContext)
     const {permissions} = useContext(LoginContext)
-    const {loading, report, setReport} = useFetchReport()
+    const {loading, reportRef} = useFetchReport()
+
+    // Allows the report to be rerendered automatically
+    const [forceRerenderVal, setForceRerenderVal] = useState<boolean>(false);
+    function forceRerender() {setForceRerenderVal(!forceRerenderVal)}
 
     const [viewMode, setViewMode] = useState(false)
+    const components = [
+        <Title/>, <BudgetUsage/>, <EmployeeHours/>, <Activity/>, <IssueTracking/>, <SiteAnalytics/>,
+        <AttainmentOfPlan/>, <Plan/>
+    ]
 
     return <AuthenticatedPage 
         id="report"
@@ -46,10 +54,10 @@ export function Report() {
         loadCondition={!loading} loadingText="Loading Report..."
     >{!loading ?
     <ReportContext.Provider value={{
-        report, 
+        r: reportRef.current,
         setReport: updateReportData, 
         setReportMeta: updateReportMetadata,
-        viewMode
+        viewMode, forceRerender
     }}>
         {/* Button to allow editors to view document as a viewer */}
         {permissions.includes(managePermission) ? 
@@ -60,21 +68,8 @@ export function Report() {
         </div> : null}
 
         {/* Report Body */}
-        <Title/>
-        <hr/>
-        <BudgetUsage/>
-        <hr/>
-        <EmployeeHours/>
-        <hr/>
-        <Activity/>
-        <hr/>
-        <IssueTracking/>
-        <hr/>
-        <SiteAnalytics/>
-        <hr/>
-        <AttainmentOfPlan/>
-        <hr/>
-        <Plan/>
+        {components.map((c, i) => {return <Fragment key={i}>{c}<br/></Fragment>})}
+
     </ReportContext.Provider>
     : <></>}</AuthenticatedPage>
 }
