@@ -1,15 +1,14 @@
-import {tablePlugin, thematicBreakPlugin } from "@mdxeditor/editor";
 import MDXEditorAuth from "../../components/MDXEditorAuth";
 import ReportSubtitle from "../../components/reportSubtitle";
-import { useContext } from "react";
-import { ReportContext } from "../../report/lib";
-import { DEFAULT_BUDGET_TABLE, DEFAULT_BUDGET_USAGE_TABLE, DEFAULT_TOTAL_BUDGET_TABLE } from "../../consts";
+import {useContext} from "react";
+import {ReportContext} from "../../report/lib";
+import {DEFAULT_BUDGET_TABLE, DEFAULT_BUDGET_USAGE_TABLE, DEFAULT_TOTAL_BUDGET_TABLE} from "../../consts";
 
 import "./budgetUsage.css"
-import { ReportDataMeta } from "../../types";
+import {ReportDataMeta} from "../../types";
 
 export default function BudgetUsage() {
-    const {report: r} = useContext(ReportContext)
+    const {r} = useContext(ReportContext)
     if (!r) return
     
     const usageTable = r.metadata.budgetUsageTable ?? DEFAULT_BUDGET_USAGE_TABLE

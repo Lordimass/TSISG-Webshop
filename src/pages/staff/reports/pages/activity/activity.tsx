@@ -1,22 +1,24 @@
-import { JSX, ReactElement, useContext, useEffect, useState } from "react";
+import {ChangeEvent, JSX, useContext, useEffect, useState} from "react";
 import MDXEditorAuth from "../../components/MDXEditorAuth";
 import ReportSubtitle from "../../components/reportSubtitle";
-import { ReportContext } from "../../report/lib";
+import {ReportContext} from "../../report/lib";
 
 import "./activity.css"
-import { Commit, getAllGithubCommits, getCommitMessage } from "./lib";
-import { LoginContext } from "../../../../../app";
-import { managePermission } from "../../consts";
+import {Commit, getAllGithubCommits, getCommitMessage} from "./lib";
+import {LoginContext} from "../../../../../app";
+import {managePermission} from "../../consts";
 
 export function Activity() {
-    const {report: r, setReportMeta: setR} = useContext(ReportContext)
+    const {r, setReportMeta: setR} = useContext(ReportContext)
+    if (!r) return
+
     const [commits, setCommits] = useState<Commit[]>()
     useEffect(() => {
         async function fetch() {
             const res = await getAllGithubCommits(r!.start_date, r!.end_date)
             setCommits(res)
         }
-        fetch()
+        fetch().then()
     }, [])
     
     if (!r) {return null}
@@ -74,14 +76,14 @@ function GitCommits({commits, published, title, subtitle}: {commits?: Commit[], 
 
 function GitCommit({c, published=false} : {c: Commit, published?: boolean}) {
     const {permissions} = useContext(LoginContext)
-    const {report, viewMode, setReportMeta} = useContext(ReportContext)
+    const {r, viewMode, setReportMeta} = useContext(ReportContext)
     const editMode = !viewMode && permissions.includes(managePermission)
     const selectedSHAs = published 
-        ? report?.metadata.publishedGitCommits 
-        : report?.metadata.unpublishedGitCommits
-    const checked = (selectedSHAs?.includes(c.sha) ?? false)
+        ? r?.metadata.publishedGitCommits
+        : r?.metadata.unpublishedGitCommits
+    const [checked, setChecked] = useState(selectedSHAs?.includes(c.sha) ?? false)
 
-    function handleCheck(e: React.ChangeEvent<HTMLInputElement>) {
+    async function handleCheck(e: ChangeEvent<HTMLInputElement>) {
         const newChecked = !checked
         let newSHAs
         if (newChecked) { // Show the commit
@@ -89,10 +91,11 @@ function GitCommit({c, published=false} : {c: Commit, published?: boolean}) {
         } else { // Hide the commit
             newSHAs = selectedSHAs!.filter((sha) => sha !== c.sha)
         }
-        setReportMeta(
+        await setReportMeta(
             published ? "publishedGitCommits" : "unpublishedGitCommits", 
             newSHAs
         )
+        setChecked(newChecked)
     }
 
     if (!editMode && !checked) return null

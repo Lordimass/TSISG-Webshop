@@ -1,11 +1,12 @@
-import { useContext } from "react"
+import {useContext} from "react"
 import MDXEditorAuth from "../../components/MDXEditorAuth"
 import ReportSubtitle from "../../components/reportSubtitle"
-import { ReportContext } from "../../report/lib"
+import {ReportContext} from "../../report/lib"
 
 export default function Plan() {
-    const {report: r, setReportMeta: setR} = useContext(ReportContext)
+    const {r, setReportMeta: setR} = useContext(ReportContext)
     if (!r) return null
+
     return (<div id="plan-page" className="report-page">
         <ReportSubtitle>
             <h2>Plan Moving Forward</h2>

@@ -14,7 +14,9 @@ import JSONTable from "../../components/JSONTable.tsx";
 import {NotificationsContext} from "../../../../../components/notification/lib.tsx";
 
 export default function SiteAnalytics() {
-    const {report: r, setReportMeta: setRMeta, setReport, viewMode} = useContext(ReportContext)
+    const {r, setReportMeta: setRMeta, setReport, viewMode, forceRerender} = useContext(ReportContext)
+    if (!r) return
+
     const {notify} = useContext(NotificationsContext)
     const {permissions} = useContext(LoginContext)
 
@@ -30,6 +32,7 @@ export default function SiteAnalytics() {
         if (error) {
             notify("An error occured while fetching fresh report data: error.message");
         } else {
+            forceRerender()
             await setReport({...r, ga4_saved_analytics: data});
         }
     }

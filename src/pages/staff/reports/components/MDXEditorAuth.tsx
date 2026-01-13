@@ -2,25 +2,30 @@ import {
     BlockTypeSelect,
     BoldItalicUnderlineToggles,
     CreateLink,
-    diffSourcePlugin, DiffSourceToggleWrapper,
+    diffSourcePlugin,
+    DiffSourceToggleWrapper,
     headingsPlugin,
     imagePlugin,
     InsertImage,
-    InsertTable, linkDialogPlugin,
+    InsertTable,
+    linkDialogPlugin,
     linkPlugin,
     listsPlugin,
     markdownShortcutPlugin,
     MDXEditor,
     MDXEditorMethods,
-    MDXEditorProps, tablePlugin, thematicBreakPlugin,
-    toolbarPlugin, UndoRedo
+    MDXEditorProps,
+    tablePlugin,
+    thematicBreakPlugin,
+    toolbarPlugin,
+    UndoRedo
 } from "@mdxeditor/editor";
-import React, { useContext, useEffect, useRef } from "react";
-import { LoginContext } from "../../../../app";
-import { managePermission } from "../consts";
-import { ReportContext } from "../report/lib";
-import { uploadImage } from "../../../../lib/netlifyFunctions";
-import { supabase } from "../../../../lib/supabaseRPC";
+import React, {useContext, useEffect, useRef} from "react";
+import {LoginContext} from "../../../../app";
+import {managePermission} from "../consts";
+import {ReportContext} from "../report/lib";
+import {uploadImage} from "../../../../lib/netlifyFunctions";
+import {supabase} from "../../../../lib/supabaseRPC";
 
 export default function MDXEditorAuth(
     {id, requiredPermission=managePermission, background=false, toolbar=false, ...props} 
@@ -95,7 +100,7 @@ export function InputAuth({
   numericOnly?: boolean;
   defaultValue?: string | number
 }) {
-  const { report: r, viewMode, setReportMeta: setR } = useContext(ReportContext);
+  const { r: r, viewMode, setReportMeta: setR } = useContext(ReportContext);
   const { permissions } = useContext(LoginContext);
   const inputRef = useRef<HTMLSpanElement>(null);
 
