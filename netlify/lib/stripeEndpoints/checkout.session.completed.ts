@@ -287,7 +287,7 @@ async function triggerGA4PurchaseEvent(event: Stripe.CheckoutSessionCompletedEve
     const lineItems: StripeCompoundLineItem[] = await getCheckoutSessionItems(session.id);
 
     // Extract client ID and session ID, use null if no client ID provided
-    const client_id = (session.metadata?.gaClientID === "" || !session.metadata?.gaClientID) ? null : session.metadata?.gaClientID;
+    const client_id = (session.metadata?.gaClientID === "" || !session.metadata?.gaClientID) ? "dummyID" : session.metadata?.gaClientID;
     const session_id = Number(session.metadata!.gaSessionID);
 
     // Compile payload for GA4.
@@ -320,12 +320,13 @@ export function stripeCompoundItemsToGA4Items(lineItems: StripeCompoundLineItem[
         // Verify that the metadata matches the expected format.
         if (!product.metadata) throw new Error("Product is missing metadata");
         const metadata: StripeProductMeta = product.metadata as unknown as StripeProductMeta
-        if (!metadata.sku) throw new Error("Product is missing required metadata, cannot send serverside GA4 event.");
+        if (!metadata.sku) throw new Error("Product is missing required SKU on metadata, cannot send serverside GA4 event.");
+        if (!lineItem.price?.unit_amount) throw new Error(`Missing price on lineItem ${metadata.sku}`);
         return {
             item_id: metadata.sku,
             item_name: product.name,
             item_category: metadata.category,
-            price: lineItem.amount_total / 100,
+            price: lineItem.price.unit_amount / 100,
             quantity: lineItem.quantity,
             currency: currency,
         }
