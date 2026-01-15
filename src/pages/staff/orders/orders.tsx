@@ -150,7 +150,7 @@ function OrderDropdown() {
         </div>
 
         <div className="order-products">
-            {order.products ? order.products.map((prod: any) => {
+            {order.products ? order.products.map((prod) => {
                     return <Product
                         prod={prod}
                         key={prod.sku}
