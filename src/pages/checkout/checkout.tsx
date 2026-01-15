@@ -3,7 +3,7 @@
 
 // Also need to enable forwarding webhooks for local dev, use the following:
 // stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
-// This is done automatically by launch-dev-server.ps1 
+// This is done automatically by launch-dev-server.ps1
 
 import "./checkout.css"
 import {CheckoutProducts} from "../../components/product/products";
@@ -120,6 +120,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     // Handle changes in address and update shipping options
     const addressElement = checkout.getShippingAddressElement()
+    const shippingAddressElement = checkout.getShippingAddressElement()
     addressElement?.once("change", async (e) => {
         countryChanged.current = (e.value.address.country !== country.current) || countryChanged.current
         country.current = e.value.address.country
@@ -216,17 +217,12 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" ref={formRef}>
-                <AddressElement 
-                    options={addressElementOpts}
-                />
-
-                <RequiredInput 
-                    label="Email" 
-                    id="email-input" 
+                <AddressElement options={addressElementOpts}/>
+                <EmailElement
                     setIsValid={setIsEmailValid} 
                     value={email} 
                     setValue={setEmail}
-                    constraint={async (value) => validateEmail(value, checkout)}
+                    validate={async (value) => validateEmail(value, checkout)}
                 />
 
                 <label>Payment</label>
@@ -259,29 +255,21 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     </>)
 }
 
-function RequiredInput({ 
+function EmailElement({
     setIsValid, 
     value,
     setValue,
-    label, 
-    id, 
     type, 
     placeholder, 
-    constraint
+    validate
 }: {
     setIsValid: (isValid: boolean) => void, 
     value?: string,
     setValue: (value: string) => void,
-    label?: string, 
-    id?: string, 
     type?: string, 
     placeholder?: string
-    constraint?: (value: string) => Promise<{isValid: boolean, message?: string}>
+    validate: (value: string) => Promise<{isValid: boolean, message?: string}>
 }) {
-    async function handleBlur() {
-        await update(value);
-    }
-
     async function handleChange(e: any) {
         setValue(e.target.value)
         await update(e.target.value);
@@ -292,15 +280,10 @@ function RequiredInput({
             setIsValid(false);
             setError("This field is required")
         } else {
-            if (constraint) {
-                const {isValid, message} = await constraint(value);
-                if (!isValid) {
-                    setIsValid(false);
-                    setError(message ?? null)
-                } else {
-                    setIsValid(true);
-                    setError(null)
-                }
+            const {isValid, message} = await validate(value);
+            if (!isValid) {
+                setIsValid(false);
+                setError(message ?? null)
             } else {
                 setIsValid(true);
                 setError(null)
@@ -312,13 +295,13 @@ function RequiredInput({
 
     return (<div className={"required-input"+(error ? " invalid-required-input" : "")}>
         <label>
-            {label ?? ""}<br/>
+            Email<br/>
             <input
                 value={value}
-                id={id}
+                id="email-input"
                 type={type ?? "text"}
                 placeholder={placeholder ?? ""}
-                onBlur={handleBlur}
+                onBlur={async () => {await update(value)}}
                 onChange={handleChange}
             />
         </label>

@@ -50,17 +50,17 @@ export const checkoutProviderOpts = {
 };
 
 export const paymentElementOpts: StripePaymentElementOptions = {
-    fields: {
-        billingDetails: {
-            name: "never",
-            address: {
-                country: "never",
-                line1: "never",
-                postalCode: "never",
-                city: "never"
-            }
-        }
-    }
+    // fields: {
+    //     billingDetails: {
+    //         name: "auto",
+    //         address: {
+    //             country: "auto",
+    //             line1: "auto",
+    //             postalCode: "auto",
+    //             city: "auto"
+    //         }
+    //     }
+    // }
 }
 
 export const addressElementOpts: StripeAddressElementOptions = {
