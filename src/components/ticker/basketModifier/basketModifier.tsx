@@ -83,7 +83,7 @@ export default function BasketModifier(
             window.addEventListener("basketUpdate", syncWithBasket)
             return () => {window.removeEventListener("basketUpdate", syncWithBasket)}
         }
-    }, [])
+    }, [product])
 
     if (altReturnComponent) return altReturnComponent;
     else if (basketQuantity === 0) {
