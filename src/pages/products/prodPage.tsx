@@ -64,7 +64,7 @@ export default function ProdPage(
                 setOriginalProd(structuredClone(prod))
                 originalProdSet.current = true;
             }
-            triggerViewItem(prod, currency)
+            triggerViewItem(prod, currency).then()
         } else if (!resp.loading && !prod) {
             return404.current = true;
         }
@@ -93,7 +93,7 @@ export default function ProdPage(
     // Set isEditMode based on loginContext permissions
     useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
 
-    // TODO: Implement this so that it displays the first image of the hovered product in place of the carousel if set.
+    // Displays the first image of the hovered product in place of the carousel if set.
     const [hoveredVariant, setHoveredVariant] = useState<UnsubmittedProductData | undefined>(undefined);
 
     // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
@@ -191,7 +191,7 @@ export default function ProdPage(
                 <div className="prod-ticker">
                     <ProductGroup/>
                     {prod
-                        ? <BasketModifier inputId={"prod-page-basket-modifier"} product={prod!} height={"50px"}/>
+                        ? <BasketModifier inputId={"prod-page-basket-modifier"} product={product} height={"50px"}/>
                         : null
                     }
 
