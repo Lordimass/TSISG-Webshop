@@ -5,16 +5,17 @@ import "./price.css"
 import {LocaleContext} from "../../localeHandler.ts";
 import {convertDinero} from "@shared/functions/price.ts";
 import {CURRENCY_SYMBOLS, TAX_EXCLUSIVE_COUNTRIES} from "@shared/consts/currencySymbols.ts";
-import {ProductData} from "@shared/types/supabaseTypes.ts";
 
 /**
  * Price display in user's local currency, or any custom currency supplied through the `currency` property.
  */
-export default function Price({baseDinero, currency, simple}: {
+export default function Price({baseDinero, currency, simple = false, noConversion = false}: {
     /** Dinero object representing the price to display to the user. */
     baseDinero: Dinero,
     /** Choose a currency to display other than that of the user's local currency. */
     currency?: Currency,
+    /** Display baseDinero as is, with no conversion */
+    noConversion?: boolean
     /** Display currency in a simpler format, with a constant font size and no currency code indicator */
     simple?: boolean
 }
@@ -24,7 +25,7 @@ export default function Price({baseDinero, currency, simple}: {
 
     useEffect(() => {
         async function convert() {
-            if (curr === baseDinero.getCurrency()) {
+            if (curr === baseDinero.getCurrency() || noConversion) {
                 setDinero(baseDinero);
             } else {
                 const convertedDinero = await convertDinero(baseDinero, curr)

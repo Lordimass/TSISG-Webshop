@@ -1,10 +1,9 @@
 import DineroFactory, {Currency} from "dinero.js";
 import Price from "../price.tsx";
-import {ProductData} from "@shared/types/supabaseTypes.ts";
 import "./productPrice.css"
 import {DEFAULT_CURRENCY} from "../../../localeHandler.ts";
 
-import {GenericProduct, GenericProductGroup, OrderProdCompressed, ProductInBasket} from "@shared/types/productTypes.ts";
+import {GenericProduct, GenericProductGroup} from "@shared/types/productTypes.ts";
 
 /** Displays a price (or price range) for a given product or product group. */
 export function ProductPrice({prod, currency}: {
@@ -24,7 +23,12 @@ export function ProductPrice({prod, currency}: {
         currency: DEFAULT_CURRENCY,
         precision: 2
     });
-    return <Price baseDinero={dinero} currency={currency}/>
+    return <Price
+        baseDinero={dinero}
+        currency={currency}
+        // Don't convert if line_value is in prod because this means it's for a product that's already been bought. We want to show the price that was paid in this case.
+        noConversion={"line_value" in prod}
+    />
 }
 
 /** Display a price range for a group of products, or a single price if all the products have the same price. */
