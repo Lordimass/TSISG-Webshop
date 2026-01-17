@@ -1,0 +1,19 @@
+#storybook-root {
+    width: 100%;
+}
+
+.product-carousel {
+    display: flex;
+    box-sizing: border-box;
+    overflow-x: auto;
+    width: 100%;
+}
+
+.product-carousel-inner {
+    display: inline-flex;
+    min-width: max-content;
+}
+
+.product-carousel-inner .product {
+    margin: 20px;
+}
