@@ -1,14 +1,15 @@
 import React, {createContext} from "react"
 import {ProductData, UnsubmittedProductData} from "@shared/types/types"
-import { blank_product } from "../../../lib/consts.ts"
-import { isNumeric } from "../../../lib/lib"
+import {blank_product} from "../../../lib/consts.ts"
+import {isNumeric} from "../../../lib/lib"
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
 import {fetchPropAutofillData} from "../lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {SCHEMAS} from "@shared/schemas/schemas.ts";
 
 // Editable Product Properties
-export type EditableProductProps = {[K in keyof ProductData]?: EditableProductProp<K>}
+export type EditableProductProps = { [K in keyof ProductData]?: EditableProductProp<K> }
 export type EditableProductProp<T extends keyof ProductData> = {
     propName: T
     displayName: string
@@ -23,7 +24,7 @@ export type EditableProductProp<T extends keyof ProductData> = {
      * By default, all props are only editable under the `edit_products` permission, key allows specification of a
      * further required permission.<br>
      * These values also need to be kept up to date in `updateProductData` to be secure.
-    */
+     */
     permission?: string
     /** Boolean method which returns true if the value passed is a valid value for this prop, false if not. */
     constraint: (value: string) => boolean,
@@ -37,43 +38,51 @@ export type EditableProductProp<T extends keyof ProductData> = {
     fromStringParser: ((val: string) => Promise<ProductData[T] | null>) | ((val: string) => ProductData[T] | null)
 }
 
-function getDefaultProductProps<T extends keyof ProductData>(key: T) {
-    return {
-        propName: key,
-        displayName: key
-            .replace(/_/g, ' ') // Replace `_` with ` `
-            .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalise each word
-        constraint: (_value: string) => true, // Always editable
-        toStringParser: (product: ProductData | UnsubmittedProductData) => product[key]?.toString() || "",
-        fromStringParser: (val: string) => val ? val as ProductData[T] : null, // Parse to same string
-        autocompleteMode: "NONE"
-    } satisfies Partial<EditableProductProp<T>>
-}
+// Default settings for every property
+const prodDataProperties = SCHEMAS.ProductData.definitions.ProductData.properties
+export const defaults: EditableProductProps = Object.keys(
+    SCHEMAS.ProductData.definitions.ProductData.properties).map(
+    (key) => {
+        const propName = key as keyof ProductData;
+        const prop = prodDataProperties[propName]
+        return {
+            propName,
+            displayName: propName
+                .replace(/_/g, ' ') // Replace `_` with ` `
+                .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalise each word,
+            constraint: (_value: string) => true, // Always editable
+            toStringParser: (product: ProductData | UnsubmittedProductData) => product[propName]?.toString() || "",
+            fromStringParser: (val: string) => val ? val as ProductData[typeof propName] : null, // Parse to same string
+            autocompleteMode: "NONE",
+            tooltip: "description" in prop ? prop.description : undefined,
+        }
+    }).reduce((a, v) => ({...a, [v.propName]: v}), {} )
 
-export const editableProductProps = {
-    sku: { ...getDefaultProductProps("sku"),
+delete defaults.images
+delete defaults.category
+
+/** Product prop overrides */
+export const overrides = {
+    sku: {...defaults.sku!,
         displayName: "SKU",
-        tooltip: "The ID of this product.",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false, // Never editable
     },
-    name: { ...getDefaultProductProps("name"),
-        tooltip: "User facing name of the product. Max 50 characters.",
+    name: {...defaults.name!,
         constraint: (value: string) => value.length <= 50
     },
-    price: { ...getDefaultProductProps("price"),
-        tooltip: "The price of the product in GBP",
+    price: {...defaults.price!,
         postfix: "GBP",
         permission: "edit_price",
         constraint: (value: string) => isNumeric(value) && parseFloat(value) >= 0,
         fromStringParser: val => parseFloat(val)
     },
-    stock: { ...getDefaultProductProps("stock"),
+    stock: {...defaults.stock!,
         tooltip: "The number of this product left in stock",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
         fromStringParser: val => parseInt(val, 10)
     },
-    active: {...getDefaultProductProps("active"),
+    active: {...defaults.active!,
         tooltip: "Whether or not the product can be added to baskets or not. If it's already in a customers basket this does not remove it. Must be 'true' or 'false'",
         constraint: (value: string) => value.toLowerCase() === "true" || value.toLowerCase() === "false",
         fromStringParser: val => {
@@ -82,34 +91,25 @@ export const editableProductProps = {
             else throw new Error(`Invalid boolean ${val} wasn't caught by prop constraint.`)
         }
     },
-    weight: { ...getDefaultProductProps("weight"),
+    weight: {...defaults.weight!,
         postfix: "grams",
-        tooltip: "The weight of a single product in grams.",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
         fromStringParser: val => parseFloat(val)
     },
-    customs_description: { ...getDefaultProductProps("customs_description"),
-        tooltip: "A short description of the product for customs forms. Max length: 50 characters.",
+    customs_description: {...defaults.customs_description!,
         constraint: (value: string) => value.length < 50
     },
-    extended_customs_description: { ...getDefaultProductProps("extended_customs_description"),
-        tooltip: "An extended description for customs forms applicable to higher value orders. Max length: 300 characters.",
+    extended_customs_description: {...defaults.extended_customs_description!,
         constraint: (value: string) => value.length < 300
     },
-    origin_country_code: { ...getDefaultProductProps("origin_country_code"),
-        tooltip: "The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. \"CHN\" for \"China\"",
+    origin_country_code: {...defaults.origin_country_code!,
         constraint: (value: string) => value.length === 3
     },
-    sort_order: { ...getDefaultProductProps("sort_order"),
-        tooltip: "The order in which products are primarily sorted in, lower values appear sooner in the list.",
+    sort_order: {...defaults.sort_order!,
         constraint: (value: string) => isNumeric(value),
         fromStringParser: val => parseInt(val)
     },
-    description: { ...getDefaultProductProps("description"),
-        tooltip: "The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.)",
-        constraint: (_value: string) => true
-    },
-    category_id: { ...getDefaultProductProps("category_id"),
+    category_id: {...defaults.category_id!,
         displayName: "Category",
         tooltip: "The name of the category to place this product in, can be used to create new categories if one with the given name doesn't already exist",
         constraint: (_value: string) => true,
@@ -117,11 +117,13 @@ export const editableProductProps = {
         autocompleteMode: "SINGLE",
         fromStringParser: async (val) => {
             const ID: number = await getCategoryID(supabase, val)
-            if (isNaN(ID)) {throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)}
+            if (isNaN(ID)) {
+                throw new Error(`Failed to fetch Category ID for given Category Name ${val}`)
+            }
             return ID
         }
     },
-    tags: { ...getDefaultProductProps("tags"),
+    tags: {...defaults.tags!,
         tooltip: "A comma separated list of tags associated with this product",
         constraint: (_value: string) => true,
         updateProductOverride: updateTagsOverride,
@@ -143,31 +145,47 @@ export const editableProductProps = {
                     .toLowerCase() // Lower case the whole string
                     .replace(/[^a-z0-9-]+/g, "") // Cleanse characters down to just a-z | A-Z
             }).filter(tag => tag != "") // Filter out blank tags
-            return tags.map(tag => {return {name: tag, created_at: ""}})
+            return tags.map(tag => {
+                return {name: tag, created_at: ""}
+            })
         }
     },
-    group_name: { ...getDefaultProductProps("group_name"),
-        tooltip: "Products which have the same group name will be displayed together, with each of these products becoming variants of each other.",
+    group_name: {...defaults.group_name!,
         constraint: (_value: string) => true,
         autocompleteMode: "SINGLE"
     },
-    inserted_at: { ...getDefaultProductProps("inserted_at"),
+    inserted_at: {...defaults.inserted_at!,
         displayName: "Created At",
-        tooltip: "Timestamp at which this product was created",
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false, // Never editable
     },
-    last_edited: { ...getDefaultProductProps("last_edited"),
-        tooltip: "Timestamp at which this product was last edited",
+    last_edited: {...defaults.last_edited!,
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false, // Never editable
     },
-    last_edited_by: { ...getDefaultProductProps("last_edited_by"),
-        tooltip: "The ID of the last person to edit this product",
+    last_edited_by: {...defaults.last_edited_by!,
         permission: "NON-EDITABLE PROP",
         constraint: (_value: string) => false, // Never editable
+    },
+    metadata: {...defaults.metadata!,
+        tooltip: "JSON String contianing additional information on this product. Must be a valid JSON string.",
+        toStringParser: (p) => JSON.stringify(p.metadata, null, 2),
+        constraint: (value: string) => { // Attempt to convert to JSON, return false if it fails
+            let valid = true;
+            try {
+                JSON.parse(value)
+            }
+            catch (e: unknown) {
+                if (!(e instanceof SyntaxError)) {throw e}
+                valid = false
+            }
+            return valid
+        },
+        fromStringParser: val => JSON.parse(val)
     }
 } satisfies EditableProductProps
+
+export const editableProductProps = {...defaults, ...overrides}
 
 export interface ProductEditorContextType {
     originalProd: ProductData
@@ -177,6 +195,7 @@ export interface ProductEditorContextType {
     fetchNewData?: () => Promise<void>,
     propLists?: Awaited<ReturnType<typeof fetchPropAutofillData>>
 }
+
 export const ProductEditorContext = createContext<ProductEditorContextType>(
     {product: blank_product, originalProd: blank_product}
 )

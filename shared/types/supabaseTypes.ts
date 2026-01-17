@@ -15,8 +15,9 @@ export interface ProductData extends RawProductData {
 
 /** A product data record directly from Supabase, with no modifications made to it */
 export interface RawProductData {
+    /** The ID of this product */
     sku: number,
-    /** Customer facing name of the product */
+    /** Customer facing name of the product. Max 50 characters.*/
     name: string
     /** Price of product in GBP inc. Tax */
     price: number
@@ -37,21 +38,21 @@ export interface RawProductData {
     sort_order: number
     /** The ID of the category this product is in */
     category_id: number
-    /** The customer facing description of the product */
+    /** The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.) */
     description: string | null
     /** Time at which the product was added to the database as an ISO date string */
     inserted_at: string
     /** The time which this data was last edited as an ISO date string. */
     last_edited: string
-    /** The last person to edit this product */
+    /** The ID of the last person to edit this product. */
     last_edited_by: string | null
-    /** Short description for customs forms */
+    /** Short description for customs forms. Max length: 50 characters.*/
     customs_description: string | null
     /** The ISO 3166-1 alpha-3 country code of the country which this product had its final manufacturing stage in. e.g. "CHN" for "China" */
     origin_country_code: string | null
     /** For products which are too large to fit in smaller boxes, so require a specific minimum box size to send. */
     package_type_override: string | null
-    /** An extended description for customs forms applicable to higher value orders. */
+    /** An extended description for customs forms applicable to higher value orders. Max length: 300 characters. */
     extended_customs_description: string | null
 }
 
