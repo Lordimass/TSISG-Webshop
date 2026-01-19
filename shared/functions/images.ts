@@ -1,7 +1,7 @@
 import {ImageData} from "@shared/types/supabaseTypes.ts";
 import {UnsubmittedImageData} from "../../src/pages/products/productEditor/types.ts";
 import {supabase} from "../../src/lib/supabaseRPC.tsx";
-import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
+import {GenericProduct, UnsubmittedProductData} from "@shared/types/productTypes.ts";
 
 /**
  * Gets the public URL of a product image
@@ -31,9 +31,14 @@ export function getImageURL(image: ImageData | UnsubmittedImageData, highres = f
  * @param highres Whether to get the non-compressed version of the image
  * @returns The public URL of the image, or undefined if not found
  */
-export function getRepresentativeImageURL(group: UnsubmittedProductData[] | UnsubmittedProductData, highres = false): string | undefined {
-    const images = "map" in group ? group.map((prod: UnsubmittedProductData) => prod.images).flat(1) : group.images
-    const representatives = images.filter((img: ImageData | UnsubmittedImageData) => img.association_metadata?.group_representative)
+export function getRepresentativeImageURL(group: GenericProduct, highres = false): string | undefined {
+    const images = group instanceof Array
+        ? group.map((prod: UnsubmittedProductData) => prod.images).flat(1)
+        : group.images
+    const representatives = images.filter(
+        (img: ImageData | UnsubmittedImageData) => img.association_metadata?.group_representative
+    )
+
     if (representatives.length > 0) {
         return getImageURL(representatives[0], highres)
     } else {

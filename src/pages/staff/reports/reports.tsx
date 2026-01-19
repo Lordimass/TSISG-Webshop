@@ -1,22 +1,20 @@
 import "./reports.css"
 import AuthenticatedPage from "../../../components/page/authenticatedPage";
-import { supabase, useCallRPC } from "../../../lib/supabaseRPC";
+import {supabase, useCallRPC} from "../../../lib/supabaseRPC";
 import ObjectListItem from "../../../components/objectListItem/objectListItem";
-import { JSX, useContext, useEffect, useRef, useState } from "react";
-import { NotificationsContext } from "../../../components/notification/lib";
-import { LoginContext } from "../../../app";
-import { ReportData } from "./types";
-import { managePermission, ReportsContext, viewPermission } from "./consts";
+import {JSX, useContext, useEffect, useRef, useState} from "react";
+import {NotificationsContext} from "../../../components/notification/lib";
+import {LoginContext} from "../../../app";
+import {ReportData} from "./types";
+import {managePermission, ReportsContext, viewPermission} from "./consts";
 import {getReportPagePath} from "../../../lib/paths.ts";
 
 export default function Reports() {
     const title = "TSISG STAFF - Report Manager"
     const canonical = "https://thisshopissogay.com/staff/reports"
 
-    const {notify} = useContext(NotificationsContext)
-
     // Fetch reports
-    const reportsResp = useCallRPC("get_reports", undefined, notify)
+    const reportsResp = useCallRPC("get_reports", undefined)
     const [reports, setReports] = useState<ReportData[]>([])
     useEffect(()=>{
         if (!reportsResp.loading || reportsResp.data) {

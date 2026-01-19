@@ -1,19 +1,19 @@
-import { UnsubmittedImageData } from "../pages/products/productEditor/types.ts"
-import { ImageData, ProductData } from "@shared/types/types"
+import {UnsubmittedImageData} from "../pages/products/productEditor/types.ts"
+import {GenericProductGroup, GenericSingleProduct, ImageData} from "@shared/types/types"
 import {MergedOrder} from "@shared/types/supabaseTypes.ts";
 
-export function compareProducts(a: ProductData, b: ProductData) {
+export function compareProducts(a: GenericSingleProduct, b: GenericSingleProduct) {
   // Primary: Sort by sort_order
   if (a.sort_order < b.sort_order) return -1
   if (a.sort_order > b.sort_order) return 1
   // Secondary: Sort by category
-  if (a.category_id < b.category_id) return -1
-  if (a.category_id > b.category_id) return 1
+  if (a.category.id < b.category.id) return -1
+  if (a.category.id > b.category.id) return 1
   // Tertiary: Sort alphabetically
   return a.name.localeCompare(b.name)
 }
 
-export function compareProductGroups(a: ProductData[], b: ProductData[]) {
+export function compareProductGroups(a: GenericProductGroup, b: GenericProductGroup) {
   // Handle groups with no products
   if (a.length === 0 && b.length === 0) return 0
   if (a.length === 0 && b.length > 0) return -1

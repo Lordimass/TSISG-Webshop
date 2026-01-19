@@ -107,18 +107,16 @@
 }
 
 @media screen and (max-width: 1100px) {
-  .product {
+  .product:not(.vertical-product) {
     @include horizontal-product;
     min-width: 310px;
-
-    .product-name {
-      font-size: 14px;
-    }
 
     .prod-footer {
       width: 160%;
     }
+  }
 
+  .product {
     .product-text > a.product-name {
       font-size: 15px;
     }

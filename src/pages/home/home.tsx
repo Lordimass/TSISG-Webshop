@@ -4,6 +4,7 @@ import Products from '../../components/product/products';
 
 import "./home.css"
 import Page from '../../components/page/page';
+import FeaturedProducts from "../../components/productCarousel/featuredProducts.tsx";
 
 
 const words = ["GAY", "LESBIAN", "TRANS", "QUEER", "ACE", "ARO", "BISEXUAL"]
@@ -49,7 +50,7 @@ export default function Home() {
                 <h1 id='title-word' className='title-main-word' onClick={changeWord} ref={titleWordRef}>&lt; {word} &gt;</h1>
             </div>
         </div>
-
+        <FeaturedProducts/>
         <Products/>
 
     </Page>)

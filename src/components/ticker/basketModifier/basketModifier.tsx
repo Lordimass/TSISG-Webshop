@@ -71,8 +71,7 @@ export default function BasketModifier(
 
     // If the product is disabled, it cannot be in the cart
     useEffect(() => {
-        if (disabled.isDisabled) {
-            console.log("Product disabled")
+        if (disabled.isDisabled && reprProd.sku !== 0) {
             onTickerChange(0).then()
         }
     }, [disabled])
@@ -129,7 +128,7 @@ function ProductGroupBasketModifier({products, height = "50px"}: {
 }
 
 function ZeroQuantityBasketModifier(
-    {disabled, onTickerChange, height = "50px"}: {
+    {disabled, onTickerChange, height}: {
         /** Whether the basket modifier should be disabled, and an optional message to explain why it's disabled */
         disabled?: {isDisabled: boolean, message?: string}
         /** Function to call when the ticker value changes, used when this component changes quantity from 0 to 1 */
@@ -140,9 +139,9 @@ function ZeroQuantityBasketModifier(
 ) {
     const isDisabled = disabled?.isDisabled
 
-    return (<div className="zero-quantity-basket-modifier" style={{height}}>
+    return (<div className="zero-quantity-basket-modifier">
         {isDisabled && disabled.message ? <p>{disabled.message}</p> : null}
-        <button
+        <button style={{height}}
             onClick={() => onTickerChange(1)}
             disabled={isDisabled}
         >

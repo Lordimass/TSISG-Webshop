@@ -1,7 +1,8 @@
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {ProductData} from "@shared/types/types";
 import {createClient} from "@supabase/supabase-js";
 import {callRPC} from "@shared/functions/supabaseRPC.ts";
+import {NotificationsContext} from "../components/notification/lib.tsx";
 
 const SUPABASE_DATABASE_URL = import.meta.env.VITE_SUPABASE_DATABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -16,11 +17,11 @@ export type UseRPCReturn<T> = {
 export function useCallRPC(
     functionName: string, 
     params?: { [key: string]: any },
-    notify?: (msg: string) => void
 ) : UseRPCReturn<any> {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<any>(undefined);
     const [error, setError] = useState<Error | undefined>(undefined);
+    const {notify} = useContext(NotificationsContext)
 
     useEffect(() => {
         async function fetchData() {

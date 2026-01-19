@@ -9,7 +9,8 @@ import {ProductPrice} from "../price/productPrice/productPrice.tsx";
 import {GenericProduct, GenericSingleProduct} from "@shared/types/productTypes.ts";
 
 /** Displays a product or product group with an optional basket ticker. */
-export default function Product({prod, currency, horizontal = false, quantityLocked = false, admin = false}: {
+export default function Product(
+    {prod, currency, horizontal = false, quantityLocked = false, admin = false, forceVertical = false}: {
     /** The product or product group to display. */
     prod: GenericProduct;
     /**
@@ -27,6 +28,11 @@ export default function Product({prod, currency, horizontal = false, quantityLoc
     admin?: boolean
     /** Override currency to display. Only use to display a currency other than the user's local currency. */
     currency?: Currency
+    /**
+     * Forces the product to render vertically, even when horizontal space dictates that it should be horizontal.
+     * Defaults to `false`
+     */
+    forceVertical?: boolean
 }) {
     /** Name to display for the product, including SKU if in admin mode */
     let name: string;
@@ -66,8 +72,11 @@ export default function Product({prod, currency, horizontal = false, quantityLoc
     const prodPagePath = getProductPagePath(representativeProduct.sku)
 
     return (
-        <div className={"product" + (horizontal ? " horizontal-product" : "")}>
-            <HyperlinkedProductImage href={prodPagePath} prod={representativeProduct}/>
+        <div className={"product"
+            + (horizontal ? " horizontal-product" : "")
+            + (forceVertical ? " vertical-product" : "")
+        }>
+            <HyperlinkedProductImage href={prodPagePath} prod={prod}/>
 
             {/* Bottom half of the product display */}
             <div className="prod-footer">
@@ -96,7 +105,7 @@ export default function Product({prod, currency, horizontal = false, quantityLoc
 }
 
 /** Product Image + Link to dedicated product page **/
-function HyperlinkedProductImage({href, prod}: { href: string, prod: GenericSingleProduct }) {
+function HyperlinkedProductImage({href, prod}: { href: string, prod: GenericProduct }) {
     const reprImageUrl = getRepresentativeImageURL(prod)
     return (<a className="product-image-link" href={href}>
         <SquareImageBox image={reprImageUrl} size='100%'/>

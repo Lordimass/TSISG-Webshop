@@ -33,7 +33,7 @@ export default function Price({baseDinero, currency, simple = false, noConversio
             }
         }
         convert().then()
-    }, [curr, baseDinero]);
+    }, [baseDinero.getCurrency(), baseDinero.getAmount(), curr, noConversion]);
 
     const [dinero, setDinero] = useState<Dinero>(baseDinero);
 
