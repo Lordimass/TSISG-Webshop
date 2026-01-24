@@ -4,15 +4,46 @@ import Product from "../product/product.tsx";
 import {RefObject, UIEvent, useEffect, useRef, useState} from "react";
 import {blank_product} from "../../lib/consts.ts";
 
+/** An infinitely scrollable carousel of products. */
 export default function ProductCarousel(
     {
-        id, ref, products
+        id, ref, products, autoscroll = true
     }: {
         id?: string,
         ref?: RefObject<HTMLDivElement | null>,
         /** Products to show on the carousel */
-        products?: GenericProduct[]
+        products?: GenericProduct[],
+        /** Whether the carousel should automatically scroll through the product list */
+        autoscroll?: boolean
     }) {
+    /** Start autoscrolling the carousel */
+    function startAutoScroll() {
+        let lastTime = performance.now();
+
+        function step(delta: number, time: number) {
+            if (!carouselRef.current) return;
+            lastTime = time;
+
+            // scroll speed in px per second
+            const speed = 17;
+            const diff = Math.abs(speed * delta)/1000;
+            if (diff < 1) {
+                requestAnimationFrame(time => {
+                    const newDelta = time - lastTime;
+                    step(newDelta + delta, time)
+                });
+            } else {
+                // Don't move if the carousel is hovered
+                carouselRef.current.scrollLeft += isCarouselHovered.current ? 0 : diff;
+                requestAnimationFrame(time => {
+                    step(time - lastTime, time)
+                });
+            }
+        }
+        requestAnimationFrame(time => {step(0, time)});
+    }
+
+    /** Handle user scrolling the carousel */
     function handleScroll(e: UIEvent<HTMLDivElement>) {
         const el = e.currentTarget;
         const bw = baseWidth.current;
@@ -22,11 +53,19 @@ export default function ProductCarousel(
         const left = el.scrollLeft;
 
         // backwards wrap
-        if (left < bw) el.scrollLeft = 2 * bw - (bw - left)
+        if (left < bw) {
+            el.scrollLeft = 2 * bw - (bw - left)
+            isUserAdjustingScroll.current = true;
+        }
         // forward wrap
-        else if (left > bw * 2) el.scrollLeft = left % (bw * 2) + bw
+        else if (left > bw * 2) {
+            el.scrollLeft = left % (bw * 2) + bw;
+            isUserAdjustingScroll.current = true;
+        }
+        requestAnimationFrame(() => { isUserAdjustingScroll.current = false });
     }
 
+    /** Reinitialise the carousel, measuring width and automatically determining how many duplicates to make */
     function reinitialiseCarousel() {
         const carousel = carouselRef.current;
         const inner = innerRef.current;
@@ -35,14 +74,14 @@ export default function ProductCarousel(
         // Render ONE cycle first
         setRenderedProducts(safe_products);
 
+        // Wait for render to complete before measuring.
         requestAnimationFrame(() => {
             const singleCycleWidth = inner.scrollWidth;
             baseWidth.current = singleCycleWidth;
 
             const parentWidth = carousel.clientWidth;
 
-            const numCycles =
-                singleCycleWidth >= parentWidth
+            const numCycles = singleCycleWidth >= parentWidth
                     ? 3
                     : Math.ceil(parentWidth / singleCycleWidth) + 2;
 
@@ -63,10 +102,18 @@ export default function ProductCarousel(
 
     // Ref to the root carousel, also set to the ref passed as an argument in case it's needed externally.
     const carouselRef = ref ?? useRef<HTMLDivElement>(null);
-    // Ref to the inner element of the carousel
+    // Ref to the inner element of the carousel.
     const innerRef = useRef<HTMLDivElement>(null);
 
+    // Width of the full set of products without any duplication.
     const baseWidth = useRef<number>(0);
+
+    // Whether the user is currently the one scrolling, used to fix a jittering bug on rerender.
+    const isUserAdjustingScroll = useRef(false);
+
+    // Whether the user is hovering over the carousel.
+    const isCarouselHovered = useRef(false);
+
     // Use a blank product if no products supplied
     const safe_products = products && products.length > 0 ? products : [blank_product];
     const [renderedProducts, setRenderedProducts] = useState<GenericProduct[]>(safe_products);
@@ -80,12 +127,14 @@ export default function ProductCarousel(
             }).join("|")
             : "blank";
 
+    // Reinitialise the carousel if the products list changes
     useEffect(() => {
         if (lastCycleKey.current === cycleKey) return;
         lastCycleKey.current = cycleKey;
         reinitialiseCarousel();
     }, [cycleKey]);
 
+    // Reinitialise the carousel if the width available changes
     useEffect(() => {
         const carousel = carouselRef.current;
         if (!carousel) return;
@@ -105,11 +154,19 @@ export default function ProductCarousel(
         return () => observer.disconnect();
     }, [cycleKey]);
 
+    // Start autoscrolling on mount
+    useEffect(() => {
+        if (!autoscroll) return;
+        startAutoScroll();
+    }, []);
+
     return <div
         className="product-carousel"
         id={id}
         ref={carouselRef}
         onScroll={(e) => handleScroll(e)}
+        onMouseEnter={() => isCarouselHovered.current = true}
+        onMouseLeave={() => isCarouselHovered.current = false}
     >
         <div
             className="product-carousel-inner"
