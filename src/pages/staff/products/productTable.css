@@ -1,0 +1,13 @@
+#product-table {
+    overflow-x: scroll;
+
+    table {
+        border-collapse: collapse;
+    }
+
+    td {
+        text-wrap: nowrap;
+        border: 1px dotted black;
+        padding: 5px 3px 5px 3px;
+    }
+}

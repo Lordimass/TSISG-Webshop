@@ -10,6 +10,7 @@ const PATHS = {
     // Staff pages
     ORDERS: "/staff/orders",
     REPORTS: "/staff/reports",
+    STAFF_PRODUCTS: "/staff/products",
 
     // Policies
     PRIVACY_POLICY: "/privacy",

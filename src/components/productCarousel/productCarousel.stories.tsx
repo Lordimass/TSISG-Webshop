@@ -7,7 +7,16 @@ const meta = {
     component: ProductCarousel,
     args: {
         products: fakeProductGroup
-    }
+    },
+    argTypes: {
+        autoscroll: {control: {type: "boolean"}}
+    },
+    decorators: [
+        Story => <div style={{ maxWidth: "700px" }}>
+            <Story/>
+        </div>
+    ],
+
 } satisfies Meta<typeof ProductCarousel>;
 
 export default meta;

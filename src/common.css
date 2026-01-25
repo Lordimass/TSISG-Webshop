@@ -99,7 +99,8 @@ button {
 
 .tooltipable .tooltip {
     visibility: hidden;
-    width: 20vw;
+    width: 30vw;
+    text-wrap: wrap;
     background-color: white;
     color: black;
     border: 1px black solid;
