@@ -1,8 +1,8 @@
 import {NotificationsContext} from "../src/components/notification/lib.tsx";
-import {ReactNode} from "react";
+import {ReactNode, useState} from "react";
 import {DEFAULT_COUNTRY, DEFAULT_CURRENCY, DEFAULT_LOCALE, LocaleContext} from "../src/localeHandler.ts";
 import {LoginContext, SiteSettingsContext} from "../src/app.tsx";
-import {useNotifs, useSiteSettings} from "../src/appHooks.tsx";
+import {useSiteSettings} from "../src/appHooks.tsx";
 import {SiteSettings} from "@shared/types/types.ts";
 
 export function DefaultContextWrapper({children, permissions = [], kill_switch}: {
@@ -20,6 +20,7 @@ export function DefaultContextWrapper({children, permissions = [], kill_switch}:
 }) {
     const notify = (msg: string) => {console.log(`Notification: ${msg}`)}
     const siteSettings = {...useSiteSettings(notify), kill_switch}
+    const [tooltips, setTooltips] = useState<ReactNode[]>([])
 
     return (
         <LoginContext.Provider value={{
@@ -30,7 +31,7 @@ export function DefaultContextWrapper({children, permissions = [], kill_switch}:
         }}>
         <SiteSettingsContext.Provider value={siteSettings}>
         <NotificationsContext.Provider value={{
-            newNotif: {current: {id: Date.now(), message: "NullMessage"}}, notify
+            newNotif: {current: {id: Date.now(), message: "NullMessage"}}, notify, tooltips, setTooltips
         }}>
         <LocaleContext.Provider value={{
             locale: DEFAULT_LOCALE,

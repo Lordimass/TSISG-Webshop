@@ -1,0 +1,22 @@
+/* Tooltip functionality when hovering over tooltipables */
+.tooltipable {
+    text-decoration: underline dotted;
+}
+
+
+.tooltip {
+    display: inline;
+    min-width: 30vw;
+    text-wrap: wrap;
+    background-color: white;
+    color: black;
+    border: 1px black solid;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-size: 1rem;
+
+    /* Position the tooltip text */
+    position: fixed;
+    z-index: 10;
+}

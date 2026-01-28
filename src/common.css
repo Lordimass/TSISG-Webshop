@@ -92,33 +92,6 @@ button {
     cursor: pointer;
 }
 
-/* Tooltip functionality when hovering over tooltipables */
-.tooltipable {
-    text-decoration: underline dotted;
-}
-
-.tooltipable .tooltip {
-    visibility: hidden;
-    width: 30vw;
-    text-wrap: wrap;
-    background-color: white;
-    color: black;
-    border: 1px black solid;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
-    font-size: 1rem;
-
-    /* Position the tooltip text */
-    position: absolute;
-    z-index: 10;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltipable:hover .tooltip {
-    visibility: visible;
-}
-
 /* Superscript and subscript text */
 .superscript, .subscript {
     font-size: xx-small;

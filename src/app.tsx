@@ -23,6 +23,7 @@ import {getRoute} from "./lib/paths.ts";
 import {ErrorBoundary} from "react-error-boundary"
 import Fallback from "./pages/fallback/fallback.tsx";
 import Products from "./pages/staff/products/products.tsx";
+import {ReactNode, useState} from "react";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -39,6 +40,8 @@ export function App() {
     const localeContext = useLocale();
     useConditionalBasketUpdate()
 
+    const [tooltips, setTooltips] = useState<ReactNode[]>([])
+
     return (<ErrorBoundary
             fallbackRender={(props) => <Fallback {...props}/>}
             FallbackComponent={undefined}
@@ -52,7 +55,7 @@ export function App() {
         <meta name='creator' content='Lordimass'/>
         <meta name='generator' content='react'/>
 
-        <NotificationsContext.Provider value={{newNotif, notify}}>
+        <NotificationsContext.Provider value={{newNotif, notify, tooltips, setTooltips}}>
         <LoginContext.Provider value={{loggedIn, user, permissions, loading}}>
         <SiteSettingsContext.Provider value={siteSettings}>
         <LocaleContext.Provider value={localeContext}>

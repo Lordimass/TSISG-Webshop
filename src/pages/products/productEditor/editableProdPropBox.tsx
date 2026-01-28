@@ -8,6 +8,7 @@ import {NotificationsContext} from "../../../components/notification/lib.tsx";
 import {SingleProdPropContext} from "./lib.ts";
 import {AutocompleteInput, MultiAutocomplete} from "../../../components/autocompleteInput/autocompleteInput.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
+import Tooltip from "../../../components/tooltip/tooltip.tsx";
 
 export function ProdPropEditor() {
     /**
@@ -106,8 +107,7 @@ export function ProdPropEditor() {
     return (<div className="editable-prop" id={`${propName}-editable-prop`}>
         <div className="editable-prop-title">
             {params.displayName}
-            {params.tooltip ? <span className="superscript tooltipable">[?]<span
-                className="tooltip">{params.tooltip}</span></span> : <></>}
+            <Tooltip msg={params.tooltip}/>
         </div>
         <div className="editable-prop-input-box">
             {params.prefix ? <p>{params.prefix}</p> : <></>}

@@ -1,8 +1,9 @@
 import {GenericSingleProduct} from "@shared/types/productTypes.ts";
-import {EditableProductProp, editableProductProps} from "../../products/productEditor/editableProductProps.ts";
+import {editableProductProps} from "../../products/productEditor/editableProductProps.ts";
 import "./productTable.css"
 import React from "react";
 import {compareProductTableHeaderKeys} from "./lib.tsx";
+import Tooltip from "../../../components/tooltip/tooltip.tsx";
 
 export default function ProductTable({prods}: {
     /** Products to display in the table */
@@ -21,7 +22,7 @@ export default function ProductTable({prods}: {
                     const props = editableProductProps[keys[i] as keyof typeof editableProductProps];
                     return (<td key={i}>
                         {col}
-                        <Tooltip props={props} />
+                        <Tooltip msg={props?.tooltip} />
                     </td>)})}
             </tr>
             </thead>
@@ -35,15 +36,4 @@ export default function ProductTable({prods}: {
             </tbody>
         </table>
     </div>
-}
-
-function Tooltip({props}: {props?: EditableProductProp<any>}) {
-    return (props?.tooltip
-        ? (
-            <span className="superscript tooltipable">
-            [?]
-            <span className="tooltip">{props.tooltip}</span>
-            </span>
-        )
-        : <></>)
 }
