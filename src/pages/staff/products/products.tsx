@@ -1,18 +1,24 @@
 import AuthenticatedPage from "../../../components/page/authenticatedPage.tsx";
 import {useGetProducts} from "../../../lib/supabaseRPC.tsx";
 import {PageSelector} from "../../../components/ticker/pageSelector/pageSelector.tsx";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import ProductTable from "./productTable.tsx";
+import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 
 export default function Products() {
     // Fetch all products and sort by SKU
     const getProdsResp = useGetProducts(undefined, false, false);
-    const prods = getProdsResp.data?.sort((a, b) => a.sku - b.sku) ?? []
+    const [prods, setProds] = useState<ProductData[]>([])
+    useEffect(() => {
+        setProds(getProdsResp.data?.sort((a, b) => a.sku - b.sku) ?? [])
+    }, [getProdsResp.loading]);
 
     // Separate products into pages
-    const PRODS_PER_PAGE = 20;
-    const [prodsOnPage, setProdsOnPage] = useState<ProductData[]>([]);
+    const PRODS_PER_PAGE = 50;
+    const prodsOnPageState = useState<(ProductData | UnsubmittedProductData)[]>([]);
+    const setProdsOnPage = prodsOnPageState[1];
+    const originalProdsOnPage = useRef<ProductData[]>([])
     const [page, setPage] = useState(1);
     const pageSelector = <PageSelector
         id={"product-table-page-selector"}
@@ -25,11 +31,15 @@ export default function Products() {
             PRODS_PER_PAGE*(page-1),
             PRODS_PER_PAGE*page
         ) ?? []);
+        originalProdsOnPage.current = prods.slice(
+            PRODS_PER_PAGE*(page-1),
+            PRODS_PER_PAGE*page
+        ) ?? [];
     }, [page, prods]);
 
     return (<AuthenticatedPage requiredPermission={"edit_products"}>
         {pageSelector}
-        <ProductTable prods={prodsOnPage}/>
+        <ProductTable prodsState={prodsOnPageState} originalProds={originalProdsOnPage.current} />
         {pageSelector}
     </AuthenticatedPage>)
 }

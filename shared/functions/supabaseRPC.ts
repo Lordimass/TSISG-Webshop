@@ -20,6 +20,7 @@ export async function callRPC(
 
 export async function getProducts(supabase: SupabaseClient, skus?: number[], in_stock_only = false, active_only = true
 ): Promise<ProductData[]> {
+    if (skus && skus.length === 0) return []
     const prods = await callRPC(
         "get_products",
         supabase,

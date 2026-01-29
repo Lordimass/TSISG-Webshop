@@ -7,7 +7,44 @@
 
     td {
         text-wrap: nowrap;
-        border: 1px dotted black;
-        padding: 5px 3px 5px 3px;
+        background-color: white;
+        border: black 1px dotted;
+        padding: 0 0 0px 3px;
+
+        .editable-prop {
+            min-width: 300px;
+            height: min-content;
+
+            .editable-prop-input-box {
+                border: none;
+                textarea {
+                    background-color: transparent;
+                }
+            }
+
+            @media screen and (max-width: 1100px)  {
+                flex-direction: row;
+
+                .prop-buttons {
+                    flex-direction: column;
+                }
+            }
+
+            .prop-buttons button {
+                display: flex;
+                padding: 0;
+                line-height: 0.7em;
+                width: 15px;
+                height: 15px;
+            }
+        }
+
+        #price-editable-prop, #sort_order-editable-prop, #stock-editable-prop, #weight-editable-prop,
+        #active-editable-prop, #origin_country_code-editable-prop {
+            min-width: auto;
+            textarea {
+                min-width: 6ch
+            }
+        }
     }
 }

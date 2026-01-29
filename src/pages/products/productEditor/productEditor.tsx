@@ -6,9 +6,8 @@ import {ProductImageEditor} from "../imageEditor/imageEditor.tsx"
 import "./productEditor.css"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {ProductEditorContext, editableProductProps} from "./editableProductProps.ts";
+import {editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
 import {ProdPropEditor} from "./editableProdPropBox.tsx";
-import { SingleProdPropContext } from "./lib.ts"
 
 export default function ProductEditor() {
     /**
@@ -29,7 +28,7 @@ export default function ProductEditor() {
         async function fetch() {
             setPropLists(await fetchPropAutofillData());
         }
-        fetch()
+        fetch().then()
     }, [])
 
     return (<><div className="product-editor">
@@ -39,12 +38,7 @@ export default function ProductEditor() {
         <div className="product-editor-grid">
             {/* All standard text field properties */}
             {Object.keys(editableProductProps).map((key) => {
-                return <SingleProdPropContext.Provider
-                    value={{propName: key as keyof typeof editableProductProps}}
-                    key={key as keyof typeof editableProductProps}
-                >
-                    <ProdPropEditor/>
-                </SingleProdPropContext.Provider>
+                return <ProdPropEditor propName={key as keyof typeof editableProductProps} key={key} />
             })}
         </div>
         </ProductEditorContext.Provider>

@@ -35,7 +35,7 @@ export function useCallRPC(
                 setLoading(false);
             }
         }
-        fetchData();
+        fetchData().then();
     }, []);
 
     return {loading, data, error};

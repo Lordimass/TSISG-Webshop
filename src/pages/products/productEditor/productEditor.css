@@ -22,6 +22,7 @@
 
 .prop-editor-input {
     width: 100%;
+    height: min-content;
     border: none;
     box-sizing: border-box;
     resize: none;
@@ -29,21 +30,28 @@
 }
 
 .editable-prop {
-    display: grid;
-    grid-template-columns: 100px 1fr auto;
+    display: flex;
     width: 100%;
-    gap: 0 0;
     height: min-content;
+}
+
+.editable-prop:has(.editable-prop-title) {
+    grid-template-columns: 100px 1fr auto;
 }
 
 .editable-prop-title {
     height: min-content;
+    width: 20%;
 }
 
 .editable-prop-input-box {
     display: flex;
     border: 1px black solid;
-    margin-left: 10px;
+    width: 100%;
+    textarea {
+        padding: 0;
+        margin: 0;
+    }
 }
 
 .editable-prop-input-box p {
@@ -65,17 +73,11 @@
 
 @media screen and (max-width: 1100px)  {
     .editable-prop {
-        grid-template-columns: 85vw;
-        grid-template-rows: auto auto auto;
-        max-width: 100%;
-    }
-
-    .product-editor {
-        grid-template-columns: 1fr;
-    }
-
-    .editable-prop-input-box {
-        margin-left: 0;
+        flex-direction: column;
+        max-width: 83vw;
+        .editable-prop-title {
+            width: 100%;
+        }
     }
     
     .prop-buttons {

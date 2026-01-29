@@ -1,4 +1,4 @@
-import React, {createContext} from "react"
+import {createContext} from "react"
 import {ProductData, UnsubmittedProductData} from "@shared/types/types"
 import {blank_product} from "../../../lib/consts.ts"
 import {isNumeric} from "../../../lib/lib"
@@ -190,8 +190,7 @@ export const editableProductProps = {...defaults, ...overrides}
 export interface ProductEditorContextType {
     originalProd: ProductData
     product: ProductData | UnsubmittedProductData,
-    setProduct?: React.Dispatch<React.SetStateAction<ProductData | UnsubmittedProductData>>
-    resetOverride?: () => void,
+    setProduct?: (p: ProductData | UnsubmittedProductData) => void,
     fetchNewData?: () => Promise<void>,
     propLists?: Awaited<ReturnType<typeof fetchPropAutofillData>>
 }

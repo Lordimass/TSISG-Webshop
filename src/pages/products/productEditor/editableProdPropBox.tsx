@@ -5,12 +5,19 @@ import {cleanseUnsubmittedProduct} from "../lib.tsx";
 import {updateProductData} from "../../../lib/netlifyFunctions.tsx";
 import {LoginContext} from "../../../lib/auth.tsx";
 import {NotificationsContext} from "../../../components/notification/lib.tsx";
-import {SingleProdPropContext} from "./lib.ts";
 import {AutocompleteInput, MultiAutocomplete} from "../../../components/autocompleteInput/autocompleteInput.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import Tooltip from "../../../components/tooltip/tooltip.tsx";
 
-export function ProdPropEditor() {
+/** The editor for a single property of a single product. Must be wrapped in `ProductEditorContext` */
+export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextArea = true}: {
+    /** The name of the property that this editor controls */
+    propName: keyof typeof editableProductProps;
+    /** If truthy, the component will include the name of the property, as well as a tooltip. Defaults to `true`. */
+    showName?: boolean
+    /** Whether text area should automatically resize to fit their content. Defaults to `true`. */
+    shouldAutoResizeTextArea?: boolean;
+}) {
     /**
      * Updates the given product live on screen and internally within Supabase.
      * @param value A value to set the product property to, leave undefined to fetch from the text area automatically
@@ -77,7 +84,6 @@ export function ProdPropEditor() {
 
     const loginContext = useContext(LoginContext)
     const {notify} = useContext(NotificationsContext)
-    const {propName} = useContext(SingleProdPropContext)
     const editorContext = useContext(ProductEditorContext)
     const prod = editorContext.product
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
@@ -100,20 +106,23 @@ export function ProdPropEditor() {
         if (textArea.current) {
             // Get the new displayable string to put in the text area
             textArea.current.value = params.toStringParser(prod)
-            autoResizeTextarea(textArea.current)
+            if (shouldAutoResizeTextArea) autoResizeTextarea(textArea.current)
         }
     }, [prod])
 
     return (<div className="editable-prop" id={`${propName}-editable-prop`}>
-        <div className="editable-prop-title">
+        {/* Property name and tooltip */}
+        {showName ? <div className="editable-prop-title">
             {params.displayName}
             <Tooltip msg={params.tooltip}/>
-        </div>
+        </div> : null}
+
+        {/* Main input box for the property editor */}
         <div className="editable-prop-input-box">
             {params.prefix ? <p>{params.prefix}</p> : <></>}
             {
-                params.autocompleteMode === "NONE"
-                ? <NoAutoCompleteTextArea prod={prod} editable={editable} propName={propName} ref={textArea}/>
+                params.autocompleteMode === "NONE" || !editorContext.propLists?.[propName]
+                ? <NoAutoCompleteTextArea prod={prod} editable={editable} propName={propName} ref={textArea} shouldAutoResizeTextArea={shouldAutoResizeTextArea} />
                 : params.autocompleteMode === "SINGLE" && editorContext.propLists?.[propName]
                 ? <AutocompleteInput values={editorContext.propLists[propName]} defaultValue={params.toStringParser(prod)} id={`${propName}-editor-input`} ref={textArea}/>
                 : params.autocompleteMode === "MULTI" && editorContext.propLists?.[propName]
@@ -122,12 +131,14 @@ export function ProdPropEditor() {
             }
             {params.postfix ? <p>{params.postfix}</p> : <></>}
         </div>
+
+        {/* Submission and reset buttons */}
         <div className="prop-buttons">
             <button
                 className="update-prop-button"
                 onClick={() => updateProduct()}
                 disabled={!editable}
-            >Update
+            >✔
             </button>
             <button
                 className="reset-prop-button"
@@ -138,26 +149,27 @@ export function ProdPropEditor() {
                     ).then()
                 }}
                 disabled={!editable}
-            >Reset
+            >⟳
             </button>
         </div>
     </div>)
 }
 
 function NoAutoCompleteTextArea(
-    {editable, propName, prod, ref}:
+    {editable, propName, prod, ref, shouldAutoResizeTextArea}:
     {
         editable: boolean,
         propName: keyof ProductData,
         prod: ProductData | UnsubmittedProductData,
         ref: React.RefObject<HTMLTextAreaElement | null>
+        shouldAutoResizeTextArea: boolean
     }
 ) {
     return <textarea
         className="prop-editor-input"
         id={propName.toString() + "-editor-input"}
         defaultValue={prod[propName] ? prod[propName]?.toString() : "Error: Invalid Key Value"}
-        onInput={(e) => autoResizeTextarea(e.currentTarget)}
+        onInput={(e) => {if (shouldAutoResizeTextArea) autoResizeTextarea(e.currentTarget)}}
         disabled={!editable}
         ref={ref}
     />

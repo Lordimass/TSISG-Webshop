@@ -1,20 +1,6 @@
 import {ImageData, ProductData, UnsubmittedProductData} from "@shared/types/types";
-import { UnsubmittedImageData } from "./types.ts";
-import {createContext, Dispatch, SetStateAction} from "react";
-import {editableProductProps} from "./editableProductProps.ts";
-
-/**
- * Context required for a single product property editor
- *
- * @see ProdPropEditor
- * @see AutocompleteProdPropEditor
- * @see Multi
- */
-export const SingleProdPropContext = createContext<{
-    propName: keyof typeof editableProductProps
-}>({
-    propName: "sku",
-})
+import {UnsubmittedImageData} from "./types.ts";
+import {Dispatch, SetStateAction} from "react";
 
 /**
  * Shifts an image left or right in the product image array
