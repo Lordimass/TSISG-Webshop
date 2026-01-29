@@ -78,9 +78,9 @@ function GitCommit({c, published=false} : {c: Commit, published?: boolean}) {
     const {permissions} = useContext(LoginContext)
     const {r, viewMode, setReportMeta} = useContext(ReportContext)
     const editMode = !viewMode && permissions.includes(managePermission)
-    const selectedSHAs = published 
+    const [selectedSHAs, setSelectedSHAs] = useState(published
         ? r?.metadata.publishedGitCommits
-        : r?.metadata.unpublishedGitCommits
+        : r?.metadata.unpublishedGitCommits)
     const [checked, setChecked] = useState(selectedSHAs?.includes(c.sha) ?? false)
 
     async function handleCheck(e: ChangeEvent<HTMLInputElement>) {
@@ -95,6 +95,8 @@ function GitCommit({c, published=false} : {c: Commit, published?: boolean}) {
             published ? "publishedGitCommits" : "unpublishedGitCommits", 
             newSHAs
         )
+        setSelectedSHAs(newSHAs)
+        console.log(newSHAs)
         setChecked(newChecked)
     }
 

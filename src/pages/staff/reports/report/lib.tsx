@@ -81,7 +81,7 @@ export async function updateReport(
         const updateResp = await supabase.from("reports").update(r).eq("id", r.id)
         if (updateResp.error) notify(updateResp.error.message);
         localStorage.setItem("lastReportSave", String(Date.now()))
-        console.log("Saved.")
+        console.log(`Saved. `, r.metadata.publishedGitCommits)
     } else {
         // Still on cooldown, try again once cooldown has expired
         const id = window.setTimeout(() => {updateReport(r, rRef, notify)}, timeRemaining)
