@@ -20,6 +20,7 @@ import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {ProductGroup} from "./productGroup.tsx";
 import BasketModifier from "../../components/ticker/basketModifier/basketModifier.tsx";
+import {snakeToTitleCase} from "@shared/functions/functions.ts";
 
 /** Dedicated page for a product, including an editor for admins. */
 export default function ProdPage(
@@ -125,6 +126,7 @@ export default function ProdPage(
         title={`TSISG - ${product.group_name ?? product.name}`}
         metaDescription={product.description}
         canonical={`https://thisshopissogay.com/products/${sku}`}
+        id="product-page"
     >
 
         <ProductContext.Provider value={{
@@ -143,7 +145,7 @@ export default function ProdPage(
                     access.
                 </p> : <></>}
 
-            {/* Actual box containing this product's information */}
+            {/* Actual box containing this product's primary information */}
             <div className="product-box">
                 <div className="image" ref={carouselContainerRef}>{hoveredVariant
                     ? <div className="hover-product-image">
@@ -178,7 +180,34 @@ export default function ProdPage(
                 </div>
             </div>
 
+            <AdditionalInformation prod={product}/>
+
             {isEditMode ? <ProductEditor/> : <></>}
 
         </ProductContext.Provider></Page>)
+}
+
+/** Displays additional information about the given product */
+function AdditionalInformation({prod}: {prod: UnsubmittedProductData}) {
+    if (!prod.customer_metadata) return null;
+    const data = {
+        "SKU": prod.sku,
+        "weight": prod.weight && prod.weight > 500 // Convert weight to appropriate units
+            ? Math.round(prod.weight/100)/10 + "kg"
+            : prod.weight + "g",
+        "category": prod.category.name,
+        ...prod.customer_metadata
+    }
+    const keys = Object.keys(data)
+    const values = Object.values(data)
+
+    return <div className="product-box additional-product-information">
+        <h2>Item Details</h2>
+        <div className="additional-product-information-container">
+            {keys.map(key => <div>
+                <span>{snakeToTitleCase(key)}</span>
+                <span>{data[key as keyof typeof data]}</span>
+            </div>)}
+        </div>
+    </div>
 }
