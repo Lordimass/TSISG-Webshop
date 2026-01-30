@@ -1,18 +1,19 @@
-import { useContext, useRef, ChangeEvent, useState } from "react";
-import { ImageData } from "@shared/types/types.ts";
-import { getFilenameExtension, openObjectInNewTab } from "../../../lib/lib.tsx";
+import {ChangeEvent, useContext, useRef, useState} from "react";
+import {ImageData} from "@shared/types/types.ts";
+import {getFilenameExtension, openObjectInNewTab} from "../../../lib/lib.tsx";
 
 import "./imageEditor.css"
-import { UnsubmittedImageData } from "../productEditor/types.ts";
-import { compareImages } from "../../../lib/sortMethods.tsx";
-import { updateProductData } from "../../../lib/netlifyFunctions.tsx";
-import { ProductContext } from "../lib.tsx";
-import { removeImage, shiftImage } from "../productEditor/lib.ts";
+import {UnsubmittedImageData} from "../productEditor/types.ts";
+import {compareImages} from "../../../lib/sortMethods.tsx";
+import {updateProductData} from "../../../lib/netlifyFunctions.tsx";
+import {ProductContext} from "../lib.tsx";
+import {removeImage, shiftImage} from "../productEditor/lib.ts";
 import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
-import { NotificationsContext } from "../../../components/notification/lib.tsx";
+import {NotificationsContext} from "../../../components/notification/lib.tsx";
 import {AssociationMetadata} from "@shared/types/supabaseTypes.ts";
 
 import {getImageURL} from "@shared/functions/images.ts";
+import Tooltip from "../../../components/tooltip/tooltip.tsx";
 
 export function ProductImageEditor({fetchNewData}: {fetchNewData: () => Promise<void>}) {
     async function handleSubmit(e: React.FormEvent) {
@@ -167,7 +168,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             />
 
             {/* Global Image Input */}
-            <label>Global 
+            <label><div>Global<Tooltip msg={"This image will be shown in the carousels for all products in the group"}/></div>
                 <input 
                     type="Checkbox" 
                     defaultChecked={image.association_metadata?.global || undefined}
@@ -179,7 +180,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             </label>
 
             {/* Variant Icon Input */}
-            <label>Variant Icon 
+            <label><div>Variant Icon<Tooltip msg={"This image will be used as an icon to represent the product in a list of its variants. It will not be shown in the product carousel."}/></div>
                 <input 
                     type="Checkbox" 
                     defaultChecked={image.association_metadata?.group_product_icon || undefined}
@@ -190,7 +191,7 @@ function ProdImage({image}: {image: ImageData | UnsubmittedImageData}) {
             </label>
 
             {/* Group Representative Input */}
-            <label>Group Representative 
+            <label><div>Group Representative<Tooltip msg={"This image will be used to represent the group that this product is a part of as a whole. It will not be shown in the product carousel."}/></div>
                 <input 
                     type="Checkbox" 
                     defaultChecked={image.association_metadata?.group_representative || undefined}
