@@ -934,6 +934,10 @@
             "description": "The ID of the category this product is in",
             "type": "number"
           },
+          "customer_metadata": {
+            "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
+            "type": "object"
+          },
           "customs_description": {
             "description": "Short description for customs forms. Max length: 50 characters.",
             "type": [
@@ -1050,6 +1054,7 @@
           "active",
           "category",
           "category_id",
+          "customer_metadata",
           "customs_description",
           "description",
           "extended_customs_description",
@@ -1104,6 +1109,10 @@
           "category_id": {
             "description": "The ID of the category this product is in",
             "type": "number"
+          },
+          "customer_metadata": {
+            "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
+            "type": "object"
           },
           "customs_description": {
             "description": "Short description for customs forms. Max length: 50 characters.",
@@ -1221,7 +1230,8 @@
           "customs_description",
           "origin_country_code",
           "package_type_override",
-          "extended_customs_description"
+          "extended_customs_description",
+          "customer_metadata"
         ],
         "type": "object"
       }
@@ -1663,6 +1673,10 @@
             "description": "The ID of the category this product is in",
             "type": "number"
           },
+          "customer_metadata": {
+            "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
+            "type": "object"
+          },
           "customs_description": {
             "description": "Short description for customs forms. Max length: 50 characters.",
             "type": [
@@ -1787,6 +1801,7 @@
           "active",
           "category",
           "category_id",
+          "customer_metadata",
           "customs_description",
           "description",
           "extended_customs_description",
@@ -2360,6 +2375,10 @@
             "description": "The ID of the category this product is in",
             "type": "number"
           },
+          "customer_metadata": {
+            "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
+            "type": "object"
+          },
           "customs_description": {
             "description": "Short description for customs forms. Max length: 50 characters.",
             "type": [
@@ -2484,6 +2503,7 @@
           "active",
           "category",
           "category_id",
+          "customer_metadata",
           "customs_description",
           "description",
           "extended_customs_description",

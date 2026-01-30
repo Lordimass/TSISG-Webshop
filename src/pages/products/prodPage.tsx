@@ -20,6 +20,7 @@ import {LocaleContext} from "../../localeHandler.ts";
 import {getPath} from "../../lib/paths.ts";
 import {ProductGroup} from "./productGroup.tsx";
 import BasketModifier from "../../components/ticker/basketModifier/basketModifier.tsx";
+import {snakeToTitleCase} from "@shared/functions/functions.ts";
 
 /** Dedicated page for a product, including an editor for admins. */
 export default function ProdPage(
@@ -28,7 +29,6 @@ export default function ProdPage(
         sku?: number
     }
 ) {
-    const loginContext = useContext(LoginContext)
     const {notify} = useContext(NotificationsContext)
     const {currency} = useContext(LocaleContext)
 
@@ -38,23 +38,25 @@ export default function ProdPage(
     const [basketQuant, setBasketQuant] = useState(0)
     // The product being viewed
     const [product, setProduct] = useState<UnsubmittedProductData>(blank_product);
+    // Products in a group with this one
+    const [group, setGroup] = useState<ProductData[]>([])
+
     // Original prod used for reset buttons in editor
     const [originalProd, setOriginalProd] = useState<ProductData>(blank_product);
     // Ensure originalProd is only set once
     const originalProdSet = useRef(false);
-    // Products in a group with this one    
-    const [group, setGroup] = useState<ProductData[]>([])
+
     // Used to set hovered image width to be the same as the carousel
     const carouselContainerRef = useRef<HTMLDivElement>(null)
+    // Displays the first image of the hovered product in place of the carousel if set.
+    const [hoveredVariant, setHoveredVariant] = useState<UnsubmittedProductData | undefined>(undefined);
+
+    // Whether to show a 404 error instead of the page, which happens when the product doesn't exist.
     const return404 = useRef(false)
 
-    // Whether the user is logged in with edit permissions
-    const [isEditMode, setIsEditMode] = useState(false)
     // Fetch product data from backend, then assign it to product state and originalProd if not already set
     const resp = useGetProducts([sku], false);
-    if (resp.error) {
-        notify(resp.error.message)
-    }
+    if (resp.error) notify(resp.error.message)
     const prod = resp.data?.[0]
     useEffect(() => {
         if (!resp.loading && prod) {
@@ -70,18 +72,16 @@ export default function ProdPage(
         }
     }, [resp.loading])
 
+    // Fetch products in group with this one
     useEffect(() => {
         if (product.sku === 0) return
         // Fetch any products in group
         getGroup(product.group_name).then(
             async (g) => {
                 setGroup(g);
-                if (g.length > 0) await triggerViewItemList(
-                    g,
-                    `product-group-page`,
-                    `Product Group Page`,
-                    currency
-                )
+                if (g.length > 0) {
+                    await triggerViewItemList(g, `product-group-page`, `Product Group Page`, currency)
+                }
             },
             (error) => {
                 setGroup([]);
@@ -90,33 +90,47 @@ export default function ProdPage(
         )
     }, [product])
 
-    // Set isEditMode based on loginContext permissions
+    // Whether the user is logged in with edit permissions
+    const [isEditMode, setIsEditMode] = useState(false)
+    const loginContext = useContext(LoginContext)
     useEffect(() => setIsEditMode(loginContext.permissions.includes("edit_products")), [loginContext])
-
-    // Displays the first image of the hovered product in place of the carousel if set.
-    const [hoveredVariant, setHoveredVariant] = useState<UnsubmittedProductData | undefined>(undefined);
 
     // Prices in the database are in Decimal Pounds (GBP), create a Dinero object holding that data to allow us
     // to convert it to the users locale later.
     const priceUnits = Math.round(product.price * 100)
     const dinero = DineroFactory({amount: priceUnits, currency: "GBP", precision: 2})
 
+    // Images to display on the carousel
+    const images = [
+        // Images from this product
+        ...cleanseUnsubmittedProduct(product)
+            .images
+            // Filter out the group_product_icon if there is one
+            .filter(img =>
+                !img.association_metadata?.group_product_icon &&
+                !img.association_metadata?.group_representative
+            ),
+            // Global images from products in group
+            ...group.map(
+                variant => {
+                    return variant.images?.filter(img =>
+                        img.product_sku !== product.sku &&
+                        img.association_metadata?.global
+                    ) ?? []
+                }
+            ).flat(1)
+        ].sort(compareImages)
+
     if (return404.current) return <Page404/>
     return (<Page
         title={`TSISG - ${product.group_name ?? product.name}`}
         metaDescription={product.description}
         canonical={`https://thisshopissogay.com/products/${sku}`}
+        id="product-page"
     >
 
         <ProductContext.Provider value={{
-            basketQuant,
-            setBasketQuant,
-            product,
-            setProduct,
-            originalProd,
-            group,
-            hoveredVariant,
-            setHoveredVariant
+            basketQuant, setBasketQuant, product, setProduct, originalProd, group, hoveredVariant, setHoveredVariant
         }}>
 
             {/* Above actual product */}
@@ -131,7 +145,7 @@ export default function ProdPage(
                     access.
                 </p> : <></>}
 
-            {/* Actual box containing this product's information */}
+            {/* Actual box containing this product's primary information */}
             <div className="product-box">
                 <div className="image" ref={carouselContainerRef}>{hoveredVariant
                     ? <div className="hover-product-image">
@@ -140,65 +154,60 @@ export default function ProdPage(
                             size={(carouselContainerRef.current?.offsetWidth ?? 0) + "px"}
                             loading="eager"
                         /></div> : <></>}
+                    {/* Must always display the true carousel underneath to keep the space on the document */}
                     <SquareImageBox
-                        images={
-                            // Images from this product
-                            [...cleanseUnsubmittedProduct(product)
-                                .images
-                                // Filter out the group_product_icon if there is one
-                                .filter(img =>
-                                    !img.association_metadata?.group_product_icon &&
-                                    !img.association_metadata?.group_representative
-                                ),
-                                // Global images from products in group
-                                ...group.map(
-                                    variant => {
-                                        return variant.images?.filter(img =>
-                                            img.product_sku !== product.sku &&
-                                            img.association_metadata?.global
-                                        ) ?? []
-                                    }
-                                ).flat(1)
-                            ].sort(compareImages)
-                        }
+                        images={images}
                         size="100%"
                         loading="eager"
                     />
                 </div>
-                <h1 className="title">
-                    {product.group_name ?? product.name}
-                    {isEditMode
-                        ? group.length === 0
-                            ? <><br/>
-                                <div className="sku">SKU{sku}</div>
-                            </>
-                            : <><br/>
-                                <div
-                                    className="sku">SKUS{group.map(prod => prod.sku).sort().map(sku => " " + sku).toString()}</div>
-                            </>
-                        : <></>}
-                </h1>
-                <div className="price-container">
-                    <Price baseDinero={dinero}/>
-                </div>
+
+                <h1 className="title">{product.group_name ?? product.name}</h1>
+
+                <div className="price-container"><Price baseDinero={dinero}/></div>
 
                 <div className="tags">{product.tags.map((tag: any) => (
                     <div className="tag" key={tag.name}>{tag.name}</div>
                 ))}</div>
+
                 <div className="desc">
                     <Markdown>{product.description}</Markdown>
                 </div>
+
                 <div className="prod-ticker">
                     <ProductGroup/>
-                    {prod
-                        ? <BasketModifier inputId={"prod-page-basket-modifier"} product={product} height={"50px"}/>
-                        : null
-                    }
-
+                    <BasketModifier inputId={"prod-page-basket-modifier"} product={product} height={"50px"}/>
                 </div>
             </div>
+
+            <AdditionalInformation prod={product}/>
 
             {isEditMode ? <ProductEditor/> : <></>}
 
         </ProductContext.Provider></Page>)
+}
+
+/** Displays additional information about the given product */
+function AdditionalInformation({prod}: {prod: UnsubmittedProductData}) {
+    if (!prod.customer_metadata) return null;
+    const data = {
+        "SKU": prod.sku,
+        "weight": prod.weight && prod.weight > 500 // Convert weight to appropriate units
+            ? Math.round(prod.weight/100)/10 + "kg"
+            : prod.weight + "g",
+        "category": prod.category.name,
+        ...prod.customer_metadata
+    }
+    const keys = Object.keys(data)
+    const values = Object.values(data)
+
+    return <div className="product-box additional-product-information">
+        <h2>Item Details</h2>
+        <div className="additional-product-information-container">
+            {keys.map(key => <div>
+                <span>{snakeToTitleCase(key)}</span>
+                <span>{data[key as keyof typeof data]}</span>
+            </div>)}
+        </div>
+    </div>
 }

@@ -7,6 +7,7 @@ import {fetchPropAutofillData} from "../lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {SCHEMAS} from "@shared/schemas/schemas.ts";
+import {snakeToTitleCase} from "@shared/functions/functions.ts";
 
 // Editable Product Properties
 export type EditableProductProps = { [K in keyof ProductData]?: EditableProductProp<K> }
@@ -47,9 +48,7 @@ export const defaults: EditableProductProps = Object.keys(
         const prop = prodDataProperties[propName]
         return {
             propName,
-            displayName: propName
-                .replace(/_/g, ' ') // Replace `_` with ` `
-                .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalise each word,
+            displayName: snakeToTitleCase(propName),
             constraint: (_value: string) => true, // Always editable
             toStringParser: (product: ProductData | UnsubmittedProductData) => product[propName]?.toString() || "",
             fromStringParser: (val: string) => val ? val as ProductData[typeof propName] : null, // Parse to same string
@@ -170,22 +169,35 @@ export const overrides = {
     metadata: {...defaults.metadata!,
         tooltip: "JSON String contianing additional information on this product. Must be a valid JSON string.",
         toStringParser: (p) => JSON.stringify(p.metadata, null, 2),
-        constraint: (value: string) => { // Attempt to convert to JSON, return false if it fails
-            let valid = true;
-            try {
-                JSON.parse(value)
-            }
-            catch (e: unknown) {
-                if (!(e instanceof SyntaxError)) {throw e}
-                valid = false
-            }
-            return valid
-        },
+        constraint: isValidJson,
+        fromStringParser: val => JSON.parse(val),
+    },
+    customer_metadata: {...defaults.customer_metadata!,
+        toStringParser: (p) => JSON.stringify(p.customer_metadata, null, 2),
+        constraint: isValidJson,
         fromStringParser: val => JSON.parse(val)
     }
 } satisfies EditableProductProps
 
 export const editableProductProps = {...defaults, ...overrides}
+
+/**
+ * Checks whether the given value is a valid JSON string.
+ * @param value The value to check for validity
+ * @return `true` if `value` represents a valid JSON string, `false` otherwise.
+ */
+function isValidJson(value: string){
+    // Attempt to convert to JSON, return false if it fails
+    let valid = true;
+    try {
+        JSON.parse(value)
+    }
+    catch (e: unknown) {
+        if (!(e instanceof SyntaxError)) {throw e}
+        valid = false
+    }
+    return valid
+}
 
 export interface ProductEditorContextType {
     originalProd: ProductData

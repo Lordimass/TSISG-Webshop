@@ -1,5 +1,5 @@
 .product-editor {
-    margin: 1em;
+    margin: 0 10px 0 10px;
     padding: 1em;
     width: calc(100% - 2em);
     background-color: white;
@@ -79,8 +79,16 @@
             width: 100%;
         }
     }
-    
+
+    .editable-prop-input-box {
+        margin-left: 0;
+    }
+
     .prop-buttons {
         flex-direction: row;
+    }
+
+    .product-editor-grid {
+        grid-template-columns: 1fr;
     }
 }

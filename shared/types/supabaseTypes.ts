@@ -54,6 +54,8 @@ export interface RawProductData {
     package_type_override: string | null
     /** An extended description for customs forms applicable to higher value orders. Max length: 300 characters. */
     extended_customs_description: string | null
+    /** Additional information about the product which is displayed to the customer. Every key-value pair is shown as is. */
+    customer_metadata: {[key: string]: any}
 }
 
 export type ImageData = {
