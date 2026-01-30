@@ -50,7 +50,8 @@ export default function IssueTracking() {
 function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
     const id = "issues_"+type
 
-    const {r} = useContext(ReportContext)
+    const {rRef} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return null
 
     const lastVal = r.metadata[id+"_last"]
@@ -87,41 +88,42 @@ function IssuesTable({type}: {type: "OPEN" | "CLOSED"}) {
 
 function IssueTrackingGraph({type}: {type: "PRIORITY" | "TYPE"}) {
     const {permissions} = useContext(LoginContext)
-    const {r, viewMode} = useContext(ReportContext)
+    const {rRef, viewMode} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return null
     
     const id = "issue_tracking_"+type+"_"
     const rows = type === "PRIORITY" ? ["Low-Priority", "Medium-Priority", "High-Priority"] : ["Enhancement", "Feature", "Bug"]
     const data = type === "PRIORITY" ? [
         {name: "Low-Priority", 
-            "Average": r?.metadata[id+rows[0]+"_average"], 
-            "Last Month": r?.metadata[id+rows[0]+"_last"], 
+            "Average": r?.metadata[id+rows[0]+"_average"],
+            "Last Month": r?.metadata[id+rows[0]+"_last"],
             "This Month": r?.metadata[id+rows[0]+"_this"]
         },
         {name: "Medium-Priority", 
-            "Average": r?.metadata[id+rows[1]+"_average"], 
-            "Last Month": r?.metadata[id+rows[1]+"_last"], 
+            "Average": r?.metadata[id+rows[1]+"_average"],
+            "Last Month": r?.metadata[id+rows[1]+"_last"],
             "This Month": r?.metadata[id+rows[1]+"_this"]
         },
         {name: "High-Priority", 
-            "Average": r?.metadata[id+rows[2]+"_average"], 
-            "Last Month": r?.metadata[id+rows[2]+"_last"], 
+            "Average": r?.metadata[id+rows[2]+"_average"],
+            "Last Month": r?.metadata[id+rows[2]+"_last"],
             "This Month": r?.metadata[id+rows[2]+"_this"]
         }
     ] : [
         { name: "Enhancement", 
-            "Average": r?.metadata[id+rows[0]+"_average"], 
-            "Last Month": r?.metadata[id+rows[0]+"_last"], 
+            "Average": r?.metadata[id+rows[0]+"_average"],
+            "Last Month": r?.metadata[id+rows[0]+"_last"],
             "This Month": r?.metadata[id+rows[0]+"_this"]
         },
         { name: "Feature", 
-            "Average": r?.metadata[id+rows[1]+"_average"], 
-            "Last Month": r?.metadata[id+rows[1]+"_last"], 
+            "Average": r?.metadata[id+rows[1]+"_average"],
+            "Last Month": r?.metadata[id+rows[1]+"_last"],
             "This Month": r?.metadata[id+rows[1]+"_this"]
         },
         { name: "Bug", 
-            "Average": r?.metadata[id+rows[2]+"_average"], 
-            "Last Month": r?.metadata[id+rows[2]+"_last"], 
+            "Average": r?.metadata[id+rows[2]+"_average"],
+            "Last Month": r?.metadata[id+rows[2]+"_last"],
             "This Month": r?.metadata[id+rows[2]+"_this"]
         }
     ]

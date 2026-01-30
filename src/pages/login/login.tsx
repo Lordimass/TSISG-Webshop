@@ -1,6 +1,6 @@
 import "./login.css"
 
-import {FormEvent, useContext, useEffect, useRef, useState} from "react";
+import {FormEvent, useContext, useState} from "react";
 import {page_title} from "../../lib/consts.ts";
 import {LoginContext} from "../../app";
 import {forgotPassword, login, logout} from "../../lib/auth";
@@ -32,7 +32,10 @@ export function Login() {
 
         // At this stage, login was successful, and we go back to
         // whatever the user was doing that needed logging in.
-        history.back()
+        // requestAnimationFrame(() => {
+        //     history.back()
+        // })
+
     }
 
     const [email, setEmail] = useState<string>("")
@@ -93,17 +96,24 @@ export function Login() {
 }
 
 export function LoggedIn() {
+    function goBack() {
+        if (!redirectUrl) return
+        window.location.assign(redirectUrl)
+    }
+    const redirectUrl = sessionStorage.getItem("postLoginRedirect")
+
     const {user} = useContext(LoginContext)
     if (!user) throw new Error("No user found, are you logged in?")
     const email = user.email;
 
     return (
         <div className="login-box">
-            <h1>Hi again!</h1>
+            <h1>Hi {email ? " "+email.split("@")[0] : null}!</h1>
             <p id="already-logged-in">
-                You're already logged in as {email}! Did you want to log out?
+                You're logged in as <u>{email}</u>!
             </p>
             <button id="logout" onClick={logout}>Log out</button>
+            {redirectUrl ? <button id="go-back" onClick={goBack}>Go back</button> : null}
         </div>
     )
 }

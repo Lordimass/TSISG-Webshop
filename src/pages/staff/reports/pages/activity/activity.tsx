@@ -1,4 +1,4 @@
-import {ChangeEvent, JSX, useContext, useEffect, useState} from "react";
+import {ChangeEvent, JSX, RefObject, useContext, useEffect, useRef, useState} from "react";
 import MDXEditorAuth from "../../components/MDXEditorAuth";
 import ReportSubtitle from "../../components/reportSubtitle";
 import {ReportContext} from "../../report/lib";
@@ -9,7 +9,8 @@ import {LoginContext} from "../../../../../app";
 import {managePermission} from "../../consts";
 
 export function Activity() {
-    const {r, setReportMeta: setR} = useContext(ReportContext)
+    const {rRef, setReportMeta: setR} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return
 
     const [commits, setCommits] = useState<Commit[]>()
@@ -21,7 +22,7 @@ export function Activity() {
         fetch().then()
     }, [])
     
-    if (!r) {return null}
+    if (!rRef) {return null}
     return (<div id="report-activity-page" className="report-page">
         <ReportSubtitle>
             <h2>Activity</h2>
@@ -64,42 +65,44 @@ export function Activity() {
 }
 
 function GitCommits({commits, published, title, subtitle}: {commits?: Commit[], published?: boolean, title:JSX.Element, subtitle:JSX.Element}) {
-    return (<div className="box git-commits" id="published-git-commits">
+    const {rRef} = useContext(ReportContext)
+    const selectedSHAs = useRef(published
+        ? rRef?.current?.metadata.publishedGitCommits ?? []
+        : rRef?.current?.metadata.unpublishedGitCommits ?? [])
+
+    return (<div className="box git-commits" id={(published ? "published" : "unpublished") + "-git-commits"}>
         <h2>{title}</h2>
         <p className="subtitle">{subtitle}</p>
         {<>{commits && commits.length>0 ? <div className="commit-list">
-            {commits.map(c => <GitCommit c={c} published={published} key={c.sha}/>)}
+            {commits.map(c => <GitCommit c={c} published={published} key={c.sha} selectedSHAs={selectedSHAs}/>)}
         </div> : <p>GitHub API Limit Reached, please try again later</p>}</>}
         <br/>
     </div>)
 }
 
-function GitCommit({c, published=false} : {c: Commit, published?: boolean}) {
+function GitCommit({c, published=false, selectedSHAs} : {c: Commit, published?: boolean, selectedSHAs: RefObject<string[]>}) {
     const {permissions} = useContext(LoginContext)
-    const {r, viewMode, setReportMeta} = useContext(ReportContext)
+    const {viewMode, setReportMeta} = useContext(ReportContext)
     const editMode = !viewMode && permissions.includes(managePermission)
-    const selectedSHAs = published 
-        ? r?.metadata.publishedGitCommits
-        : r?.metadata.unpublishedGitCommits
-    const [checked, setChecked] = useState(selectedSHAs?.includes(c.sha) ?? false)
+
+    const [checked, setChecked] = useState(selectedSHAs.current?.includes(c.sha) ?? false)
 
     async function handleCheck(e: ChangeEvent<HTMLInputElement>) {
         const newChecked = !checked
-        let newSHAs
         if (newChecked) { // Show the commit
-            newSHAs = selectedSHAs ? [...selectedSHAs, c.sha] : [c.sha]
+            selectedSHAs.current.push(c.sha)
         } else { // Hide the commit
-            newSHAs = selectedSHAs!.filter((sha) => sha !== c.sha)
+            selectedSHAs.current = selectedSHAs.current.filter((sha) => sha !== c.sha)
         }
         await setReportMeta(
-            published ? "publishedGitCommits" : "unpublishedGitCommits", 
-            newSHAs
+            published ? "publishedGitCommits" : "unpublishedGitCommits",
+            selectedSHAs.current
         )
         setChecked(newChecked)
     }
 
     if (!editMode && !checked) return null
-    return (<div className="git-commit" key={c.sha}>
+    return (<div className="git-commit" id={`commit-${c.sha}`} key={c.sha}>
         {editMode ? <input 
             type="checkbox"
             checked={checked}

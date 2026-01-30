@@ -9,7 +9,8 @@ import {SiteSettingsContext} from "../../../../../app";
 import ReportSubtitle from "../../components/reportSubtitle";
 
 export default function EmployeeHours() {
-    const {r} = useContext(ReportContext)
+    const {rRef} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return
 
     // TODO: Allow manage_reports to add or remove userIDs to display hours for.

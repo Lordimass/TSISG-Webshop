@@ -4,7 +4,8 @@ import ReportSubtitle from "../../components/reportSubtitle"
 import {ReportContext} from "../../report/lib"
 
 export default function Plan() {
-    const {r, setReportMeta: setR} = useContext(ReportContext)
+    const {rRef, setReportMeta: setR} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return null
 
     return (<div id="plan-page" className="report-page">
@@ -20,14 +21,14 @@ export default function Plan() {
             markdown={r.metadata.plan ?? ""}
             background={true}
             toolbar={true}
-            onChange={(md) => {setR("plan", md)}}
+            onChange={(md) => {setR("plan", md).then()}}
         />
         <MDXEditorAuth
             id="plan-box-2"
             markdown={r.metadata.planBox2 ?? ""}
             background={true}
             toolbar={true}
-            onChange={(md) => {setR("planBox2", md)}}
+            onChange={(md) => {setR("planBox2", md).then()}}
         />
     </div>)
 }

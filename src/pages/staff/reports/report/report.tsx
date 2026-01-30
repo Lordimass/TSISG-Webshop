@@ -54,7 +54,7 @@ export function Report() {
         loadCondition={!loading} loadingText="Loading Report..."
     >{!loading ?
     <ReportContext.Provider value={{
-        r: reportRef.current,
+        rRef: reportRef,
         setReport: updateReportData, 
         setReportMeta: updateReportMetadata,
         viewMode, forceRerender
