@@ -14,7 +14,8 @@ import JSONTable from "../../components/JSONTable.tsx";
 import {NotificationsContext} from "../../../../../components/notification/lib.tsx";
 
 export default function SiteAnalytics() {
-    const {r, setReportMeta: setRMeta, setReport, viewMode, forceRerender} = useContext(ReportContext)
+    const {rRef, setReportMeta: setRMeta, setReport, viewMode, forceRerender} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return
 
     const {notify} = useContext(NotificationsContext)
@@ -36,8 +37,6 @@ export default function SiteAnalytics() {
             await setReport({...r, ga4_saved_analytics: data});
         }
     }
-
-    if (!r) return null
 
     return (<div id="site-analytics-page" className="report-page">
         <ReportSubtitle>

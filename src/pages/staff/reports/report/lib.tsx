@@ -8,7 +8,7 @@ const SAVE_INTERVAL = 5
 
 export const ReportContext = createContext<{
     /** The data of the report */
-    r?: ReportData
+    rRef?: RefObject<ReportData | undefined>
     /** Set report contents, updates Supabase too */
     setReport: (r: ReportData) => Promise<void>
     /** Shortcut method to set the `metadata` property oon the report. */
@@ -81,7 +81,7 @@ export async function updateReport(
         const updateResp = await supabase.from("reports").update(r).eq("id", r.id)
         if (updateResp.error) notify(updateResp.error.message);
         localStorage.setItem("lastReportSave", String(Date.now()))
-        console.log(`Saved. `, r.metadata.publishedGitCommits)
+        console.log(`Saved. `)
     } else {
         // Still on cooldown, try again once cooldown has expired
         const id = window.setTimeout(() => {updateReport(r, rRef, notify)}, timeRemaining)

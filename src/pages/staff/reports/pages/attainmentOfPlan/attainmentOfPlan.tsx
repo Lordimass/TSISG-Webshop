@@ -4,7 +4,8 @@ import ReportSubtitle from "../../components/reportSubtitle"
 import {ReportContext} from "../../report/lib"
 
 export default function AttainmentOfPlan() {
-    const {r, setReportMeta: setR} = useContext(ReportContext)
+    const {rRef, setReportMeta: setR} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return null
 
     return (<div id="attainment-of-plan-page" className="report-page">

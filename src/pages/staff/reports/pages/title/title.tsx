@@ -8,7 +8,8 @@ import {managePermission} from "../../consts"
 
 export function Title() {
     const {permissions} = useContext(LoginContext)
-    const {r, setReport: setR, setReportMeta, viewMode} = useContext(ReportContext)
+    const {rRef, setReport: setR, setReportMeta, viewMode} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return
 
     const [dateStart, setDateStart] = useState(r.start_date)
@@ -30,7 +31,7 @@ export function Title() {
     <img id="title-page-logo" src="https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/logo.svg"/>
     <div id="title-page-text">
         <MDXEditorAuth
-            markdown={"# "+ (r.metadata.title ?? "Insert Title")} 
+            markdown={"# "+ (r.metadata.title ?? "Insert Title")}
             onChange={async (md) => {await setReportMeta("title", md.substring(2))}}
         />
         <div className="date-range">

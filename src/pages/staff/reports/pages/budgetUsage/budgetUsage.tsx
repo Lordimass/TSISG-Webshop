@@ -8,7 +8,8 @@ import "./budgetUsage.css"
 import {ReportDataMeta} from "../../types";
 
 export default function BudgetUsage() {
-    const {r} = useContext(ReportContext)
+    const {rRef} = useContext(ReportContext)
+    const r = rRef?.current
     if (!r) return
     
     const usageTable = r.metadata.budgetUsageTable ?? DEFAULT_BUDGET_USAGE_TABLE

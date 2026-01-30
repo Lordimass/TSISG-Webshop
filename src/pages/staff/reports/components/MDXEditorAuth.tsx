@@ -100,7 +100,8 @@ export function InputAuth({
   numericOnly?: boolean;
   defaultValue?: string | number
 }) {
-  const { r: r, viewMode, setReportMeta: setR } = useContext(ReportContext);
+  const { rRef, viewMode, setReportMeta: setR } = useContext(ReportContext);
+  const r = rRef?.current
   const { permissions } = useContext(LoginContext);
   const inputRef = useRef<HTMLSpanElement>(null);
 
@@ -152,8 +153,8 @@ export function InputAuth({
         }
       }
     }
-    setR(id, inputRef.current!.innerText ?? defaultValue);
-  };
+    setR(id, inputRef.current!.innerText ?? defaultValue).then();
+  }
 
   if (!r) return null;
   return (
