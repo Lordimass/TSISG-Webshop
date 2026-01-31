@@ -91,7 +91,7 @@ export const overrides = {
         }
     },
     weight: {...defaults.weight!,
-        postfix: "grams",
+        postfix: "g",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
         fromStringParser: val => parseFloat(val)
     },

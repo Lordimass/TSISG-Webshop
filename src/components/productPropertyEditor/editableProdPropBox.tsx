@@ -78,9 +78,9 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         const newProduct: ProductData = cleanseUnsubmittedProduct({...prod})
         // Assign the changed value
         await parseValueIntoObj(propName, value, newProduct)
+        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Update on Supabase
         await updateProductData(newProduct)
-        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         if (editorContext.fetchNewData) await editorContext.fetchNewData()
     }
@@ -91,12 +91,10 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
     const prod = editorContext.product
     const textArea = useRef<HTMLTextAreaElement | null>(null);
 
-    const originalProd = useRef(editorContext.originalProd)
+    const originalProd = editorContext.originalProd
 
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
-    const isEdited = params.toStringParser(originalProd.current) !== textArea.current?.value;
-    if (prod.sku === 1 && propName === "name") console.log(isEdited, params.toStringParser(originalProd.current), textArea.current?.value)
 
     // Set edit permissions
     const [editable, setEditable] = useState(false);
@@ -137,27 +135,57 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             {params.postfix ? <p>{params.postfix}</p> : <></>}
         </div>
 
-        {/* Submission and reset buttons */}
-        <div className="prop-buttons">
-            <button
-                className="update-prop-button"
-                onClick={() => updateProduct()}
-                disabled={!editable}
-            >✔
-            </button>
-            <button
-                className="reset-prop-button"
-                onClick={() => {
-                    updateProduct(
-                        originalProd.current[propName],
-                        () => true // Always allow, since we're resetting to an old value.
-                    ).then()
-                }}
-                disabled={!editable}
-            >⟳
-            </button>
-        </div>
+        <PropButtons
+            propName={propName} updateProduct={updateProduct} textArea={textArea} originalProd={originalProd}
+            editable={editable}
+        />
     </div>)
+}
+
+/** Submission and reset buttons */
+function PropButtons({propName, updateProduct, textArea, originalProd, editable}: {
+    propName: keyof typeof editableProductProps;
+    updateProduct: (value?: any, constraint?: (value: string) => boolean) => Promise<void>,
+    textArea: React.RefObject<HTMLTextAreaElement | null>,
+    originalProd: ProductData,
+    editable: boolean
+}
+) {
+    const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
+
+    const [isEdited, setIsEdited] = useState<boolean>(false)
+    useEffect(() => {
+        if (textArea.current) {
+            textArea.current.onfocus = () => setIsEdited(true)
+            textArea.current.onblur = () => {
+                setIsEdited(params.toStringParser(originalProd) !== textArea.current?.value
+            )}
+        }
+    }, []);
+
+    useEffect(() => {
+        setIsEdited(params.toStringParser(originalProd) !== textArea.current?.value)
+    }, [textArea.current?.value]);
+
+    return <div className="prop-buttons" style={{display: isEdited ? "flex" : "none"}}>
+        <button
+            className="update-prop-button"
+            onClick={() => updateProduct()}
+            disabled={!editable}
+        >✔
+        </button>
+        <button
+            className="reset-prop-button"
+            onClick={() => {
+                updateProduct(
+                    originalProd[propName],
+                    () => true // Always allow, since we're resetting to an old value.
+                ).then()
+            }}
+            disabled={!editable}
+        >⟳
+        </button>
+    </div>
 }
 
 function NoAutoCompleteTextArea(
