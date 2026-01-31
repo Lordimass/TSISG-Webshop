@@ -46,6 +46,7 @@ export const blank_product: ProductData = {
     origin_country_code: "",
     package_type_override: "",
     metadata: {},
+    customer_metadata: {},
     group_name: null,
     customs_description: null,
     extended_customs_description: null,

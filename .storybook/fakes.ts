@@ -136,7 +136,8 @@ export const fakeProductData: ProductData = {
     "customs_description": "large magnet with cat design",
     "origin_country_code": "CHN",
     "package_type_override": null,
-    "extended_customs_description": ""
+    "extended_customs_description": "",
+    customer_metadata: {}
 }
 
 export const fakeProductInBasket: ProductInBasket = {
@@ -174,7 +175,7 @@ export const fakeProductGroup: ProductData[] = [
                 ],
                 "product_sku": 373,
                 "display_order": 1,
-                "association_metadata": {}
+                "association_metadata": {},
             },
             {
                 "id": "d5db91d0-ae83-4c38-a6e7-b8597212f14d",
@@ -220,7 +221,8 @@ export const fakeProductGroup: ProductData[] = [
         "customs_description": "multicoloured canvas tote bag",
         "origin_country_code": "CHN",
         "package_type_override": null,
-        "extended_customs_description": null
+        "extended_customs_description": null,
+        "customer_metadata": {}
     },
     {
         "sku": 372,
@@ -272,7 +274,8 @@ export const fakeProductGroup: ProductData[] = [
         "customs_description": "pink purple blue tote bag",
         "origin_country_code": "CHN",
         "package_type_override": null,
-        "extended_customs_description": null
+        "extended_customs_description": null,
+        "customer_metadata": {}
     },
     {
         "sku": 371,
@@ -324,7 +327,8 @@ export const fakeProductGroup: ProductData[] = [
         "customs_description": "green white blue canvas tote bag",
         "origin_country_code": "CHN",
         "package_type_override": null,
-        "extended_customs_description": null
+        "extended_customs_description": null,
+        "customer_metadata": {}
     },
     {
         "sku": 370,
@@ -376,7 +380,8 @@ export const fakeProductGroup: ProductData[] = [
         "customs_description": "pink white purple canvas tote bag",
         "origin_country_code": "CHN",
         "package_type_override": null,
-        "extended_customs_description": null
+        "extended_customs_description": null,
+        "customer_metadata": {}
     }
 ]
 
