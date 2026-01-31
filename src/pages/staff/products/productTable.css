@@ -2,14 +2,38 @@
     overflow-x: scroll;
 
     table {
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 3px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    tr {
+        border: 1px solid lightgray;
+        border-radius: 4px;
+    }
+
+    td:first-of-type {
+        padding-left: 10px;
+        border-bottom-left-radius: 7px;
+        border-top-left-radius: 7px;
+    }
+    td:last-of-type {
+        padding-right: 20px;
+        border-bottom-right-radius: 7px;
+        border-top-right-radius: 7px;
     }
 
     td {
         text-wrap: nowrap;
+        padding: 2px 0 2px 3px;
+        margin-bottom: 10px;
+
         background-color: white;
-        border: black 1px dotted;
-        padding: 0 0 0px 3px;
+        text-align: center;
+        font-family: "Perfect Penmanship", sans-serif;
+        font-size: 13px;
+
 
         .editable-prop {
             min-width: 300px;
@@ -17,8 +41,22 @@
 
             .editable-prop-input-box {
                 border: none;
-                textarea {
+                p {
+                    font-size: 13px;
+                }
+
+                .prop-editor-input {
                     background-color: transparent;
+                    text-align: center;
+                    font-family: "Perfect Penmanship", sans-serif;
+                    font-size: 13px;
+                }
+
+                /* Don't center align text for certain props */
+                #customer_metadata-editor-input, #metadata-editor-input {
+                    text-align: left;
+                    font-family: monospace;
+                    font-size: 14px
                 }
             }
 
@@ -46,5 +84,6 @@
                 min-width: 6ch
             }
         }
+
     }
 }

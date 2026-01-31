@@ -86,12 +86,11 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
     const {notify} = useContext(NotificationsContext)
     const editorContext = useContext(ProductEditorContext)
     const prod = editorContext.product
+    const textArea = useRef<HTMLTextAreaElement | null>(null);
+
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
-
-    // Fetch the input box by ID, since in some cases the box isn't defined in this component so we aren't able to set
-    // a ref.
-    const textArea = useRef<HTMLTextAreaElement | null>(null);
+    const isEdited = params.toStringParser(editorContext.originalProd) === textArea.current?.value;
 
     // Set edit permissions
     const [editable, setEditable] = useState(false);
