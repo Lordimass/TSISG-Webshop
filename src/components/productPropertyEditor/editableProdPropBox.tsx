@@ -78,9 +78,9 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         const newProduct: ProductData = cleanseUnsubmittedProduct({...prod})
         // Assign the changed value
         await parseValueIntoObj(propName, value, newProduct)
+        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Update on Supabase
         await updateProductData(newProduct)
-        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         if (editorContext.fetchNewData) await editorContext.fetchNewData()
     }
@@ -96,7 +96,6 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
     const isEdited = params.toStringParser(originalProd.current) !== textArea.current?.value;
-    if (prod.sku === 1 && propName === "name") console.log(isEdited, params.toStringParser(originalProd.current), textArea.current?.value)
 
     // Set edit permissions
     const [editable, setEditable] = useState(false);
@@ -138,7 +137,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         </div>
 
         {/* Submission and reset buttons */}
-        <div className="prop-buttons">
+        <div className="prop-buttons" style={{display: isEdited ? "flex" : "none"}}>
             <button
                 className="update-prop-button"
                 onClick={() => updateProduct()}
@@ -158,6 +157,14 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             </button>
         </div>
     </div>)
+}
+
+/** Submission and reset buttons */
+function PropButtons({updateProduct}: {
+    updateProduct: (value?: any, constraint?: (value: string) => boolean) => Promise<void>
+}
+) {
+
 }
 
 function NoAutoCompleteTextArea(
