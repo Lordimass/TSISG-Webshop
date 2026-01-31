@@ -1,6 +1,9 @@
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
 
-const productTableHeaderKeysOrder: (keyof typeof editableProductProps)[] = ["sku", "name", "price", "sort_order", "stock", "weight"]
+const productTableHeaderKeysOrder: (keyof typeof editableProductProps)[] = [
+    "sku", "name", "price", "sort_order", "stock", "weight", "active", "category_id", "group_name", "last_edited_by",
+    "last_edited"
+]
 export function compareProductTableHeaderKeys(a: string, b: string) {
     const aIndex = productTableHeaderKeysOrder.indexOf(a as keyof typeof editableProductProps)
     const bIndex = productTableHeaderKeysOrder.indexOf(b as keyof typeof editableProductProps)

@@ -1,9 +1,8 @@
-import {createContext} from "react"
+import {ContextType, createContext} from "react"
 import {ProductData, UnsubmittedProductData} from "@shared/types/types.ts"
-import {blank_product} from "../../lib/consts.ts"
 import {isNumeric} from "../../lib/lib.tsx"
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
-import {fetchPropAutofillData} from "../../pages/products/lib.tsx";
+import {fetchPropAutofillData, ProductContext} from "../../pages/products/lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {SCHEMAS} from "@shared/schemas/schemas.ts";
@@ -32,7 +31,11 @@ export type EditableProductProp<T extends keyof ProductData> = {
     /** Mode of any autocompletion applied to the input field */
     autocompleteMode: "NONE" | "SINGLE" | "MULTI"
     /** A function to run to update this property on the remote, instead of the default functionality */
-    updateProductOverride?: (value: string, editorContext: ProductEditorContextType) => Promise<void> | void
+    updateProductOverride?: (
+        value: string,
+        editorContext: ProductEditorContextType,
+        productContext: ContextType<typeof ProductContext>
+    ) => Promise<void> | void
     /** Function to extract a display string for this property from the product. */
     toStringParser: (product: ProductData | UnsubmittedProductData) => string
     /** A function to parse a display string for this property back to a value that can be used to update the product */
@@ -91,7 +94,7 @@ export const overrides = {
         }
     },
     weight: {...defaults.weight!,
-        postfix: "grams",
+        postfix: "g",
         constraint: (value: string) => isNumeric(value) && parseInt(value, 10) >= 0,
         fromStringParser: val => parseFloat(val)
     },
@@ -112,7 +115,7 @@ export const overrides = {
         displayName: "Category",
         tooltip: "The name of the category to place this product in, can be used to create new categories if one with the given name doesn't already exist",
         constraint: (_value: string) => true,
-        toStringParser: (product: ProductData | UnsubmittedProductData) => product.category.name,
+        toStringParser: (product: ProductData | UnsubmittedProductData) => product.category?.name ?? "",
         autocompleteMode: "SINGLE",
         fromStringParser: async (val) => {
             const ID: number = await getCategoryID(supabase, val)
@@ -200,13 +203,8 @@ function isValidJson(value: string){
 }
 
 export interface ProductEditorContextType {
-    originalProd: ProductData
-    product: ProductData | UnsubmittedProductData,
-    setProduct?: (p: ProductData | UnsubmittedProductData) => void,
     fetchNewData?: () => Promise<void>,
     propLists?: Awaited<ReturnType<typeof fetchPropAutofillData>>
 }
 
-export const ProductEditorContext = createContext<ProductEditorContextType>(
-    {product: blank_product, originalProd: blank_product}
-)
+export const ProductEditorContext = createContext<ProductEditorContextType>({})

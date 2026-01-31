@@ -14,25 +14,24 @@
     }
 
     td:first-of-type {
-        padding-left: 10px;
         border-bottom-left-radius: 7px;
         border-top-left-radius: 7px;
     }
     td:last-of-type {
-        padding-right: 20px;
         border-bottom-right-radius: 7px;
         border-top-right-radius: 7px;
     }
 
     td {
         text-wrap: nowrap;
-        padding: 2px 0 2px 3px;
+        padding: 2px 4px 2px 4px;
         margin-bottom: 10px;
 
         background-color: white;
         text-align: center;
         font-family: "Perfect Penmanship", sans-serif;
         font-size: 13px;
+        border: 1px solid lightgray;
 
 
         .editable-prop {
@@ -82,6 +81,13 @@
             min-width: auto;
             textarea {
                 min-width: 6ch
+            }
+        }
+
+        #category_id-editable-prop, #group_name-editable-prop, #last_edited-editable-prop, #last_edited_by-editable-prop {
+            min-width: auto;
+            textarea {
+                min-width: 18ch
             }
         }
 

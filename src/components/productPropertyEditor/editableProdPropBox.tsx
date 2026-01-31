@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {EditableProductProp, editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
-import {cleanseUnsubmittedProduct} from "../../pages/products/lib.tsx";
+import {cleanseUnsubmittedProduct, ProductContext} from "../../pages/products/lib.tsx";
 import {updateProductData} from "../../lib/netlifyFunctions.tsx";
 import {LoginContext} from "../../lib/auth.tsx";
 import {NotificationsContext} from "../notification/lib.tsx";
@@ -30,7 +30,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         value?: any,
         constraint?: (value: string) => boolean
     ) {
-        if (!params || !editorContext.setProduct) return;
+        if (!params || !prodContext.setProduct) return;
 
         // Use default constraint for the property if not supplied
         constraint = constraint ?? params.constraint
@@ -41,7 +41,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
          * @param val The new value to assign to `target[key]`
          * @param target The target product to perform the operation to.
          */
-        async function parseValueIntoObj<K extends keyof ProductData>( // Parse string to right type using mapped parser from productTypeMap
+        async function parseValueIntoObj<K extends keyof ProductData>(
             key: K,
             val: string,
             target: ProductData
@@ -65,7 +65,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
 
         // Run override if it exists
         if (params.updateProductOverride) {
-            await params.updateProductOverride(value, editorContext);
+            await params.updateProductOverride(value, editorContext, prodContext);
             return;
         }
 
@@ -78,9 +78,9 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         const newProduct: ProductData = cleanseUnsubmittedProduct({...prod})
         // Assign the changed value
         await parseValueIntoObj(propName, value, newProduct)
+        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Update on Supabase
         await updateProductData(newProduct)
-        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
         if (editorContext.fetchNewData) await editorContext.fetchNewData()
     }
@@ -88,15 +88,12 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
     const loginContext = useContext(LoginContext)
     const {notify} = useContext(NotificationsContext)
     const editorContext = useContext(ProductEditorContext)
-    const prod = editorContext.product
+    const prodContext = useContext(ProductContext)
+    const prod = prodContext.product
     const textArea = useRef<HTMLTextAreaElement | null>(null);
-
-    const originalProd = useRef(editorContext.originalProd)
 
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
-    const isEdited = params.toStringParser(originalProd.current) !== textArea.current?.value;
-    if (prod.sku === 1 && propName === "name") console.log(isEdited, params.toStringParser(originalProd.current), textArea.current?.value)
 
     // Set edit permissions
     const [editable, setEditable] = useState(false);
@@ -137,27 +134,55 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             {params.postfix ? <p>{params.postfix}</p> : <></>}
         </div>
 
-        {/* Submission and reset buttons */}
-        <div className="prop-buttons">
-            <button
-                className="update-prop-button"
-                onClick={() => updateProduct()}
-                disabled={!editable}
-            >✔
-            </button>
-            <button
-                className="reset-prop-button"
-                onClick={() => {
-                    updateProduct(
-                        originalProd.current[propName],
-                        () => true // Always allow, since we're resetting to an old value.
-                    ).then()
-                }}
-                disabled={!editable}
-            >⟳
-            </button>
-        </div>
+        <PropButtons propName={propName} updateProduct={updateProduct} textArea={textArea}/>
     </div>)
+}
+
+/** Submission and reset buttons */
+function PropButtons({propName, updateProduct, textArea}: {
+    propName: keyof typeof editableProductProps;
+    updateProduct: (value?: any, constraint?: (value: string) => boolean) => Promise<void>,
+    textArea: React.RefObject<HTMLTextAreaElement | null>,
+}
+) {
+    function eq() {
+        return (params.toStringParser(originalProd) ?? "") !== (textArea.current?.value ?? "")
+    }
+
+    const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
+    const {originalProd} = useContext(ProductContext)
+
+    const [isEdited, setIsEdited] = useState<boolean>(false)
+    useEffect(() => {
+        if (textArea.current) {
+            textArea.current.onfocus = () => setIsEdited(true)
+            textArea.current.onblur = () => {
+                setIsEdited(eq())
+            }
+        }
+    }, [originalProd, textArea.current]);
+
+    useEffect(() => {
+        setIsEdited(eq())
+    }, [textArea.current?.value, originalProd]);
+
+    return <div className="prop-buttons" style={{display: isEdited ? "flex" : "none"}}>
+        <button
+            className="update-prop-button"
+            onClick={() => updateProduct()}
+        >✔
+        </button>
+        <button
+            className="reset-prop-button"
+            onClick={() => {
+                updateProduct(
+                    params.toStringParser(originalProd),
+                    () => true // Always allow, since we're resetting to an old value.
+                ).then()
+            }}
+        >⟳
+        </button>
+    </div>
 }
 
 function NoAutoCompleteTextArea(
@@ -173,7 +198,7 @@ function NoAutoCompleteTextArea(
     return <textarea
         className="prop-editor-input"
         id={propName.toString() + "-editor-input"}
-        defaultValue={prod[propName] ? prod[propName]?.toString() : "Error: Invalid Key Value"}
+        defaultValue={editableProductProps[propName]?.toStringParser(prod)}
         onInput={(e) => {if (shouldAutoResizeTextArea) autoResizeTextarea(e.currentTarget)}}
         disabled={!editable}
         ref={ref}

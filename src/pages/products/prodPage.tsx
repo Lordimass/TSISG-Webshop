@@ -63,6 +63,7 @@ export default function ProdPage(
             // Set the product state
             setProduct(prod)
             if (!originalProdSet.current) {
+                console.log(`Setting original prod to ${prod.sku}`)
                 setOriginalProd(structuredClone(prod))
                 originalProdSet.current = true;
             }
@@ -195,7 +196,7 @@ function AdditionalInformation({prod}: {prod: UnsubmittedProductData}) {
         "weight": prod.weight && prod.weight > 500 // Convert weight to appropriate units
             ? Math.round(prod.weight/100)/10 + "kg"
             : prod.weight + "g",
-        "category": prod.category.name,
+        "category": prod.category?.name,
         ...prod.customer_metadata
     }
     const keys = Object.keys(data)
@@ -204,10 +205,13 @@ function AdditionalInformation({prod}: {prod: UnsubmittedProductData}) {
     return <div className="product-box additional-product-information">
         <h2>Item Details</h2>
         <div className="additional-product-information-container">
-            {keys.map(key => <div>
-                <span>{snakeToTitleCase(key)}</span>
-                <span>{data[key as keyof typeof data]}</span>
-            </div>)}
+            {keys.map(key => {
+                if (!data[key as keyof typeof data]) return null
+                return <div key={key}>
+                    <span>{snakeToTitleCase(key)}</span>
+                    <span>{data[key as keyof typeof data]}</span>
+                </div>
+            })}
         </div>
     </div>
 }
