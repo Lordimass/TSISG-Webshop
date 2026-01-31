@@ -1,13 +1,15 @@
 import React, {useContext, useEffect, useRef, useState} from "react";
 import {EditableProductProp, editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
-import {cleanseUnsubmittedProduct} from "../lib.tsx";
-import {updateProductData} from "../../../lib/netlifyFunctions.tsx";
-import {LoginContext} from "../../../lib/auth.tsx";
-import {NotificationsContext} from "../../../components/notification/lib.tsx";
-import {AutocompleteInput, MultiAutocomplete} from "../../../components/autocompleteInput/autocompleteInput.tsx";
+import {cleanseUnsubmittedProduct} from "../../pages/products/lib.tsx";
+import {updateProductData} from "../../lib/netlifyFunctions.tsx";
+import {LoginContext} from "../../lib/auth.tsx";
+import {NotificationsContext} from "../notification/lib.tsx";
+import {AutocompleteInput, MultiAutocomplete} from "../autocompleteInput/autocompleteInput.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
-import Tooltip from "../../../components/tooltip/tooltip.tsx";
+import Tooltip from "../tooltip/tooltip.tsx";
+
+import "./productPropertyEditor.css"
 
 /** The editor for a single property of a single product. Must be wrapped in `ProductEditorContext` */
 export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextArea = true}: {
@@ -28,7 +30,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         value?: any,
         constraint?: (value: string) => boolean
     ) {
-        if (!params || !editorContext.fetchNewData || !editorContext.setProduct) return;
+        if (!params || !editorContext.setProduct) return;
 
         // Use default constraint for the property if not supplied
         constraint = constraint ?? params.constraint
@@ -78,8 +80,9 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         await parseValueIntoObj(propName, value, newProduct)
         // Update on Supabase
         await updateProductData(newProduct)
+        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
-        await editorContext.fetchNewData()
+        if (editorContext.fetchNewData) await editorContext.fetchNewData()
     }
 
     const loginContext = useContext(LoginContext)
@@ -88,9 +91,12 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
     const prod = editorContext.product
     const textArea = useRef<HTMLTextAreaElement | null>(null);
 
+    const originalProd = useRef(editorContext.originalProd)
+
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     if (!params) throw new Error(`No product prop defined for ${propName}.`)
-    const isEdited = params.toStringParser(editorContext.originalProd) === textArea.current?.value;
+    const isEdited = params.toStringParser(originalProd.current) !== textArea.current?.value;
+    if (prod.sku === 1 && propName === "name") console.log(isEdited, params.toStringParser(originalProd.current), textArea.current?.value)
 
     // Set edit permissions
     const [editable, setEditable] = useState(false);
@@ -143,7 +149,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
                 className="reset-prop-button"
                 onClick={() => {
                     updateProduct(
-                        editorContext.originalProd[propName],
+                        originalProd.current[propName],
                         () => true // Always allow, since we're resetting to an old value.
                     ).then()
                 }}

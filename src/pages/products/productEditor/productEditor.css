@@ -20,74 +20,11 @@
     overflow: hidden;
 }
 
-.prop-editor-input {
-    width: 100%;
-    height: min-content;
-    border: none;
-    box-sizing: border-box;
-    resize: none;
-    min-height: 1em;
-}
-
-.editable-prop {
-    display: flex;
-    width: 100%;
-    height: min-content;
-}
-
-.editable-prop:has(.editable-prop-title) {
-    grid-template-columns: 100px 1fr auto;
-}
-
-.editable-prop-title {
-    height: min-content;
-    width: 20%;
-}
-
-.editable-prop-input-box {
-    display: flex;
-    border: 1px black solid;
-    width: 100%;
-    textarea {
-        padding: 0;
-        margin: 0;
-    }
-}
-
-.editable-prop-input-box p {
-    user-select: none;
-}
-
-.update-prop-button {
-    height: min-content;
-}
-
-.prop-buttons {
-    display: flex;
-    flex-direction: column;
-}
-
 .product-editor-function-button {
     margin-top: 10px;
 }
 
 @media screen and (max-width: 1100px)  {
-    .editable-prop {
-        flex-direction: column;
-        max-width: 83vw;
-        .editable-prop-title {
-            width: 100%;
-        }
-    }
-
-    .editable-prop-input-box {
-        margin-left: 0;
-    }
-
-    .prop-buttons {
-        flex-direction: row;
-    }
-
     .product-editor-grid {
         grid-template-columns: 1fr;
     }

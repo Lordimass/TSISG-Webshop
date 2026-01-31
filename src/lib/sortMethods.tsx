@@ -13,6 +13,10 @@ export function compareProducts(a: GenericSingleProduct, b: GenericSingleProduct
   return a.name.localeCompare(b.name)
 }
 
+export function compareProductsBySku(a: GenericSingleProduct, b: GenericSingleProduct) {
+    return a.sku - b.sku
+}
+
 export function compareProductGroups(a: GenericProductGroup, b: GenericProductGroup) {
   // Handle groups with no products
   if (a.length === 0 && b.length === 0) return 0

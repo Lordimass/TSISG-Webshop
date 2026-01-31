@@ -1,11 +1,11 @@
 import {createContext} from "react"
-import {ProductData, UnsubmittedProductData} from "@shared/types/types"
-import {blank_product} from "../../../lib/consts.ts"
-import {isNumeric} from "../../../lib/lib"
+import {ProductData, UnsubmittedProductData} from "@shared/types/types.ts"
+import {blank_product} from "../../lib/consts.ts"
+import {isNumeric} from "../../lib/lib.tsx"
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
-import {fetchPropAutofillData} from "../lib.tsx";
+import {fetchPropAutofillData} from "../../pages/products/lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
-import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {supabase} from "../../lib/supabaseRPC.tsx";
 import {SCHEMAS} from "@shared/schemas/schemas.ts";
 import {snakeToTitleCase} from "@shared/functions/functions.ts";
 

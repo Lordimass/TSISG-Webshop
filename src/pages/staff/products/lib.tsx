@@ -1,4 +1,4 @@
-import {editableProductProps} from "../../products/productEditor/editableProductProps.ts";
+import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
 
 const productTableHeaderKeysOrder: (keyof typeof editableProductProps)[] = ["sku", "name", "price", "sort_order", "stock", "weight"]
 export function compareProductTableHeaderKeys(a: string, b: string) {

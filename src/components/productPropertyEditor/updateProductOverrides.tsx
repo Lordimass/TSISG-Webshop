@@ -4,7 +4,7 @@
 
 import {editableProductProps, ProductEditorContextType} from "./editableProductProps.ts";
 import {setProductTags} from "@shared/functions/supabase.ts";
-import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {supabase} from "../../lib/supabaseRPC.tsx";
 
 /**
  * Updates the tags property of a product.

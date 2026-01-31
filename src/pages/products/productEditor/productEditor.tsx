@@ -6,8 +6,8 @@ import {ProductImageEditor} from "../imageEditor/imageEditor.tsx"
 import "./productEditor.css"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {editableProductProps, ProductEditorContext} from "./editableProductProps.ts";
-import {ProdPropEditor} from "./editableProdPropBox.tsx";
+import {editableProductProps, ProductEditorContext} from "../../../components/productPropertyEditor/editableProductProps.ts";
+import {ProdPropEditor} from "../../../components/productPropertyEditor/editableProdPropBox.tsx";
 
 export default function ProductEditor() {
     /**

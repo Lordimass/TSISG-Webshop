@@ -1,13 +1,14 @@
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
-import {editableProductProps, ProductEditorContext} from "../../products/productEditor/editableProductProps.ts";
+import {editableProductProps, ProductEditorContext} from "../../../components/productPropertyEditor/editableProductProps.ts";
 import "./productTable.css"
 import React from "react";
 import {compareProductTableHeaderKeys} from "./lib.tsx";
 import Tooltip from "../../../components/tooltip/tooltip.tsx";
-import {ProdPropEditor} from "../../products/productEditor/editableProdPropBox.tsx";
+import {ProdPropEditor} from "../../../components/productPropertyEditor/editableProdPropBox.tsx";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
+import {compareProducts, compareProductsBySku} from "../../../lib/sortMethods.tsx";
 
 export default function ProductTable({prodsState, originalProds}: {
     /** Products to display in the table */
@@ -28,7 +29,17 @@ export default function ProductTable({prodsState, originalProds}: {
                 k => k.sku !== prod.sku
             ),
             prod
-        ])
+        ].sort(compareProductsBySku))
+    }
+
+    async function fetchNewProductData(prod: ProductData | UnsubmittedProductData) {
+        const new_prod = await getProducts(supabase, [prod.sku], false, false)
+        setProds([
+            ...prods.filter(
+                k => k.sku !== prod.sku
+            ),
+            new_prod[0]
+        ].sort(compareProductsBySku))
     }
 
     const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
@@ -54,7 +65,7 @@ export default function ProductTable({prodsState, originalProds}: {
             </thead>
 
             <tbody>
-            {prods.map((prod, i) => (<tr key={i}>
+            {prods.map((prod, i) => <tr key={i}>
                 {keys.map((key) => {
                     const typedKey = key as keyof typeof editableProductProps;
                     switch (typedKey) {
@@ -65,12 +76,13 @@ export default function ProductTable({prodsState, originalProds}: {
                         <ProductEditorContext value={{
                             originalProd: originalProds[i],
                             product: prod,
-                            setProduct
+                            setProduct,
+                            fetchNewData: async () => {await fetchNewProductData(prod)}
                         }}><ProdPropEditor propName={typedKey} showName={false} shouldAutoResizeTextArea={false}/>
                         </ProductEditorContext>
                     </td>
                 })}
-            </tr>))}
+            </tr>)}
             </tbody>
 
         </table>
