@@ -1,6 +1,6 @@
 import {ContextType, createContext} from "react"
 import {ProductData, UnsubmittedProductData} from "@shared/types/types.ts"
-import {isNumeric} from "../../lib/lib.tsx"
+import {getUserString, isNumeric} from "../../lib/lib.tsx"
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
 import {fetchPropAutofillData, ProductContext} from "../../pages/products/lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
@@ -37,7 +37,7 @@ export type EditableProductProp<T extends keyof ProductData> = {
         productContext: ContextType<typeof ProductContext>
     ) => Promise<void> | void
     /** Function to extract a display string for this property from the product. */
-    toStringParser: (product: ProductData | UnsubmittedProductData) => string
+    toStringParser: (product: ProductData | UnsubmittedProductData) => (string | Promise<string>)
     /** A function to parse a display string for this property back to a value that can be used to update the product */
     fromStringParser: ((val: string) => Promise<ProductData[T] | null>) | ((val: string) => ProductData[T] | null)
 }
@@ -138,7 +138,7 @@ export const overrides = {
         autocompleteMode: "MULTI",
         fromStringParser: async (val) => {
             if (!val) throw new Error("Tags string is empty");
-            // Split string by commas andr remove trailing white space
+            // Split string by commas and remove trailing white space
             let tags = val.split(",").map(tag => {
                 return tag
                     .trim() // Remove trailing spaces
@@ -163,10 +163,12 @@ export const overrides = {
     },
     last_edited: {...defaults.last_edited!,
         permission: "NON-EDITABLE PROP",
+        toStringParser: (product: ProductData | UnsubmittedProductData) => (new Date(product.last_edited)).toLocaleString(),
         constraint: (_value: string) => false, // Never editable
     },
     last_edited_by: {...defaults.last_edited_by!,
         permission: "NON-EDITABLE PROP",
+        toStringParser: async (product: ProductData | UnsubmittedProductData) => await getUserString(product.last_edited_by),
         constraint: (_value: string) => false, // Never editable
     },
     metadata: {...defaults.metadata!,

@@ -6,7 +6,6 @@ import {updateProductData} from "../../lib/netlifyFunctions.tsx";
 import {LoginContext} from "../../lib/auth.tsx";
 import {NotificationsContext} from "../notification/lib.tsx";
 import {AutocompleteInput, MultiAutocomplete} from "../autocompleteInput/autocompleteInput.tsx";
-import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import Tooltip from "../tooltip/tooltip.tsx";
 
 import "./productPropertyEditor.css"
@@ -78,7 +77,7 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         const newProduct: ProductData = cleanseUnsubmittedProduct({...prod})
         // Assign the changed value
         await parseValueIntoObj(propName, value, newProduct)
-        if (textArea.current) textArea.current.value = params.toStringParser(newProduct)
+        if (textArea.current) textArea.current.value = await params.toStringParser(newProduct)
         // Update on Supabase
         await updateProductData(newProduct)
         // Fetch new data to update anything else that changed (last_edited, last_edited_by, etc.)
@@ -103,14 +102,20 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             setEditable(loginContext.permissions.includes("edit_products"))
     }, [loginContext])
 
-    // Auto-resize text field when value is updated by anything.
+    const [stringParsedValue, setStringParsedValue] = useState<string>("");
+    // Auto-resize text field when value is updated by anything. Also regenerate the parsed string
     useEffect(() => {
-        if (textArea.current) {
-            // Get the new displayable string to put in the text area
-            textArea.current.value = params.toStringParser(prod)
-            if (shouldAutoResizeTextArea) autoResizeTextarea(textArea.current)
+        async function fetch() {
+            if (textArea.current) {
+                // Get the new displayable string to put in the text area
+                const parsedVal = await params.toStringParser(prod)
+                textArea.current.value = parsedVal;
+                setStringParsedValue(parsedVal)
+                if (shouldAutoResizeTextArea) autoResizeTextarea(textArea.current)
+            }
         }
-    }, [prod])
+        fetch().then()
+    }, [prod]);
 
     return (<div className="editable-prop" id={`${propName}-editable-prop`}>
         {/* Property name and tooltip */}
@@ -124,25 +129,26 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             {params.prefix ? <p>{params.prefix}</p> : <></>}
             {
                 params.autocompleteMode === "NONE" || !editorContext.propLists?.[propName]
-                ? <NoAutoCompleteTextArea prod={prod} editable={editable} propName={propName} ref={textArea} shouldAutoResizeTextArea={shouldAutoResizeTextArea} />
+                ? <NoAutoCompleteTextArea editable={editable} defaultValue={stringParsedValue} propName={propName} shouldAutoResizeTextArea={shouldAutoResizeTextArea} ref={textArea} />
                 : params.autocompleteMode === "SINGLE" && editorContext.propLists?.[propName]
-                ? <AutocompleteInput values={editorContext.propLists[propName]} defaultValue={params.toStringParser(prod)} id={`${propName}-editor-input`} ref={textArea}/>
+                ? <AutocompleteInput values={editorContext.propLists[propName]} defaultValue={stringParsedValue} id={`${propName}-editor-input`} ref={textArea}/>
                 : params.autocompleteMode === "MULTI" && editorContext.propLists?.[propName]
-                ? <MultiAutocomplete values={editorContext.propLists[propName]} defaultValue={params.toStringParser(prod)} id={`${propName}-editor-input`} ref={textArea}/>
+                ? <MultiAutocomplete values={editorContext.propLists[propName]} defaultValue={stringParsedValue} id={`${propName}-editor-input`} ref={textArea}/>
                 : null
             }
             {params.postfix ? <p>{params.postfix}</p> : <></>}
         </div>
 
-        <PropButtons propName={propName} updateProduct={updateProduct} textArea={textArea}/>
+        <PropButtons propName={propName} updateProduct={updateProduct} textArea={textArea} editable={editable} />
     </div>)
 }
 
 /** Submission and reset buttons */
-function PropButtons({propName, updateProduct, textArea}: {
+function PropButtons({propName, updateProduct, textArea, editable}: {
     propName: keyof typeof editableProductProps;
     updateProduct: (value?: any, constraint?: (value: string) => boolean) => Promise<void>,
     textArea: React.RefObject<HTMLTextAreaElement | null>,
+    editable: boolean,
 }
 ) {
     function eq() {
@@ -154,6 +160,7 @@ function PropButtons({propName, updateProduct, textArea}: {
 
     const [isEdited, setIsEdited] = useState<boolean>(false)
     useEffect(() => {
+        if (!editable) {setIsEdited(false); return}
         if (textArea.current) {
             textArea.current.onfocus = () => setIsEdited(true)
             textArea.current.onblur = () => {
@@ -163,6 +170,7 @@ function PropButtons({propName, updateProduct, textArea}: {
     }, [originalProd, textArea.current]);
 
     useEffect(() => {
+        if (!editable) {setIsEdited(false); return}
         setIsEdited(eq())
     }, [textArea.current?.value, originalProd]);
 
@@ -186,11 +194,11 @@ function PropButtons({propName, updateProduct, textArea}: {
 }
 
 function NoAutoCompleteTextArea(
-    {editable, propName, prod, ref, shouldAutoResizeTextArea}:
+    {editable, propName, defaultValue, ref, shouldAutoResizeTextArea}:
     {
         editable: boolean,
         propName: keyof ProductData,
-        prod: ProductData | UnsubmittedProductData,
+        defaultValue?: string,
         ref: React.RefObject<HTMLTextAreaElement | null>
         shouldAutoResizeTextArea: boolean
     }
@@ -198,7 +206,7 @@ function NoAutoCompleteTextArea(
     return <textarea
         className="prop-editor-input"
         id={propName.toString() + "-editor-input"}
-        defaultValue={editableProductProps[propName]?.toStringParser(prod)}
+        defaultValue={defaultValue}
         onInput={(e) => {if (shouldAutoResizeTextArea) autoResizeTextarea(e.currentTarget)}}
         disabled={!editable}
         ref={ref}

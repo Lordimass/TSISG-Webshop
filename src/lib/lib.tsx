@@ -8,6 +8,7 @@ import {DEFAULT_CURRENCY} from "../localeHandler.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {logValidationErrors, VALIDATORS} from "@shared/schemas/schemas.ts";
 import {Basket, ProductInBasket} from "@shared/types/productTypes.ts";
+import {fetchFromNetlifyFunction} from "./netlifyFunctions.tsx";
 
 /**
  * Refresh the data associated with products in the basket, to prevent data getting stale
@@ -218,4 +219,32 @@ export function getBasket(): Basket {
  */
 export function getBasketProducts(): ProductInBasket[] {
     return getBasket().products
+}
+
+/**
+ * Returns a string that represents the user attached to the given ID, e.g. an email if the ID is a user ID.
+ * @param id The ID that represents the user.
+ * @example "dashboard:postgres" or "auth:9f76379b-8c04-47c6-b950-b7e159e7859b"
+ */
+export async function getUserString(id?: string | null): Promise<string> {
+    if (!id) return ""
+    const s = id.split(':')
+    if (s[1].split("-").length === 5) { // UUID
+        // Check if email is cached, if not, fetch fresh.
+        const sessionStorageString = sessionStorage.getItem("cachedUserEmails")
+        let cachedUserEmails: {[key: string]: string} = {}
+        if (sessionStorageString) { // Cache exists
+            cachedUserEmails = JSON.parse(sessionStorageString)
+            if (cachedUserEmails[s[1]]) return cachedUserEmails[s[1]] // Was cached, return.
+        }
+         // Was not cached, refetch and cache.
+        const email = (await fetchFromNetlifyFunction("getSupabaseUserEmail", JSON.stringify({uid: s[1]}))).data
+        cachedUserEmails[s[1]] = email
+        sessionStorage.setItem("cachedUserEmails", JSON.stringify(cachedUserEmails))
+        return email
+    } else { // Unknown, return id as is
+        return id
+    }
+
+
 }
