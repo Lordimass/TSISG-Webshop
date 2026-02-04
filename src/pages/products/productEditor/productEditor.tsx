@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
-import {fetchPropAutofillData, ProductContext} from "../lib"
+import {ProductContext} from "../lib"
 import {openObjectInNewTab} from "../../../lib/lib"
 import {ProductImageEditor} from "../imageEditor/imageEditor.tsx"
 
@@ -11,6 +11,7 @@ import {
     ProductEditorContext
 } from "../../../components/productPropertyEditor/editableProductProps.ts";
 import {ProdPropEditor} from "../../../components/productPropertyEditor/editableProdPropBox.tsx";
+import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 
 export default function ProductEditor() {
     /**

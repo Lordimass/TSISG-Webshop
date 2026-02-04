@@ -1,6 +1,10 @@
 #product-table {
     overflow-x: scroll;
 
+    p {
+        font-size: 13px;
+    }
+
     table {
         border-collapse: separate;
         border-spacing: 0 3px;

@@ -2,11 +2,12 @@ import {ContextType, createContext} from "react"
 import {ProductData, UnsubmittedProductData} from "@shared/types/types.ts"
 import {getUserString, isNumeric} from "../../lib/lib.tsx"
 import {updateTagsOverride} from "./updateProductOverrides.tsx";
-import {fetchPropAutofillData, ProductContext} from "../../pages/products/lib.tsx";
+import {ProductContext} from "../../pages/products/lib.tsx";
 import {getCategoryID} from "@shared/functions/supabase.ts";
 import {supabase} from "../../lib/supabaseRPC.tsx";
 import {SCHEMAS} from "@shared/schemas/schemas.ts";
 import {snakeToTitleCase} from "@shared/functions/functions.ts";
+import {fetchPropAutofillData} from "./lib.ts";
 
 // Editable Product Properties
 export type EditableProductProps = { [K in keyof ProductData]?: EditableProductProp<K> }

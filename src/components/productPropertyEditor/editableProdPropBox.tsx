@@ -9,15 +9,18 @@ import {AutocompleteInput, MultiAutocomplete} from "../autocompleteInput/autocom
 import Tooltip from "../tooltip/tooltip.tsx";
 
 import "./productPropertyEditor.css"
+import {autoResizeTextarea, useParsedPropertyString} from "./lib.ts";
 
 /** The editor for a single property of a single product. Must be wrapped in `ProductEditorContext` */
-export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextArea = true}: {
+export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextArea = true, autoFocus = false}: {
     /** The name of the property that this editor controls */
     propName: keyof typeof editableProductProps;
     /** If truthy, the component will include the name of the property, as well as a tooltip. Defaults to `true`. */
     showName?: boolean
     /** Whether text area should automatically resize to fit their content. Defaults to `true`. */
     shouldAutoResizeTextArea?: boolean;
+    /** Whether text area should be put in focus when the component renders. Defaults to `false` */
+    autoFocus?: boolean;
 }) {
     /**
      * Updates the given product live on screen and internally within Supabase.
@@ -84,10 +87,12 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
         if (editorContext.fetchNewData) await editorContext.fetchNewData()
     }
 
-    const loginContext = useContext(LoginContext)
-    const {notify} = useContext(NotificationsContext)
-    const editorContext = useContext(ProductEditorContext)
-    const prodContext = useContext(ProductContext)
+    const [loginContext, {notify}, editorContext, prodContext] = [
+        useContext(LoginContext),
+        useContext(NotificationsContext),
+        useContext(ProductEditorContext),
+        useContext(ProductContext)
+    ]
     const prod = prodContext.product
     const textArea = useRef<HTMLTextAreaElement | null>(null);
 
@@ -102,20 +107,17 @@ export function ProdPropEditor({propName, showName = true, shouldAutoResizeTextA
             setEditable(loginContext.permissions.includes("edit_products"))
     }, [loginContext])
 
-    const [stringParsedValue, setStringParsedValue] = useState<string>("");
-    // Auto-resize text field when value is updated by anything. Also regenerate the parsed string
+    const stringParsedValue = useParsedPropertyString(propName, prod)
+
+    // Auto-resize text field when value is updated by anything.
+    useEffect(
+        () => {if (textArea.current && shouldAutoResizeTextArea) autoResizeTextarea(textArea.current)},
+        [textArea.current]
+    );
+
     useEffect(() => {
-        async function fetch() {
-            if (textArea.current) {
-                // Get the new displayable string to put in the text area
-                const parsedVal = await params.toStringParser(prod)
-                textArea.current.value = parsedVal;
-                setStringParsedValue(parsedVal)
-                if (shouldAutoResizeTextArea) autoResizeTextarea(textArea.current)
-            }
-        }
-        fetch().then()
-    }, [prod]);
+        if (textArea.current && autoFocus) textArea.current?.focus()
+    }, []);
 
     return (<div className="editable-prop" id={`${propName}-editable-prop`}>
         {/* Property name and tooltip */}
@@ -158,21 +160,20 @@ function PropButtons({propName, updateProduct, textArea, editable}: {
     const params = editableProductProps[propName] as EditableProductProp<typeof propName>;
     const {originalProd} = useContext(ProductContext)
 
-    const [isEdited, setIsEdited] = useState<boolean>(false)
+    const [isEdited, setIsEdited] = useState<boolean>(eq())
     useEffect(() => {
         if (!editable) {setIsEdited(false); return}
         if (textArea.current) {
             textArea.current.onfocus = () => setIsEdited(true)
-            textArea.current.onblur = () => {
-                setIsEdited(eq())
-            }
+            textArea.current.onblur = () => setIsEdited(eq())
+            textArea.current.onkeyup = () => setIsEdited(eq())
         }
     }, [originalProd, textArea.current]);
 
     useEffect(() => {
         if (!editable) {setIsEdited(false); return}
         setIsEdited(eq())
-    }, [textArea.current?.value, originalProd]);
+    }, [originalProd, textArea.current?.value]);
 
     return <div className="prop-buttons" style={{display: isEdited ? "flex" : "none"}}>
         <button
@@ -211,11 +212,4 @@ function NoAutoCompleteTextArea(
         disabled={!editable}
         ref={ref}
     />
-}
-
-function autoResizeTextarea(el: HTMLTextAreaElement | null) {
-    if (el) {
-        el.style.height = 'auto'; // Reset
-        el.style.height = `${el.scrollHeight + 10}px`; // Set to scroll height
-    }
 }
