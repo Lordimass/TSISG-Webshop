@@ -104,4 +104,8 @@
         }
 
     }
+
+    .square-image-box {
+        border-radius: 0;
+    }
 }

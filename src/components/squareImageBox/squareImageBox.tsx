@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import "./squareImageBox.css";
 import {ImageData} from "@shared/types/types";
 
@@ -274,7 +274,7 @@ export function SquareImageBox({
                         loading={loading}
                     />
                     <div className="square-image-center">
-                        <img
+                        <Image
                             src={normalizedImage}
                             alt={normalizedAlt ?? undefined}
                             className="square-image-foreground"
@@ -318,4 +318,21 @@ export function SquareImageBox({
             )}
         </div>
     );
+}
+
+function Image({src, alt, className, loading}:
+               {src?: string, alt?: string, className: string, loading?: "eager" | "lazy"}
+) {
+    if (!src) {
+        return <div className="no-image">
+            <span>?</span>
+        </div>
+    }
+
+    return <img
+        src={src}
+        alt={alt}
+        className={className}
+        loading={loading}
+    />
 }
