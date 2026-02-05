@@ -19,7 +19,8 @@ export default function DoubleClickEditableProdPropBox(
         // Focus the text area.
         if (newEditMode) {
             requestAnimationFrame(()=>{
-                const textArea = containerRef.current!.getElementsByTagName("textarea")[0]
+                const textAreas = containerRef.current!.getElementsByTagName("textarea")
+                const textArea = textAreas[textAreas.length-1];
                 textArea.focus()
                 textArea.setSelectionRange(textArea.textLength, textArea.textLength);
             })
