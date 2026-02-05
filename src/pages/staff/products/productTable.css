@@ -18,8 +18,10 @@
     }
 
     td:first-of-type {
+        background-color: var(--jamie-grey);
         border-bottom-left-radius: 7px;
         border-top-left-radius: 7px;
+        color: white;
     }
     td:last-of-type {
         border-bottom-right-radius: 7px;
@@ -37,6 +39,12 @@
         font-size: 13px;
         border: 1px solid lightgray;
 
+        .double-click-editable-prod-prop:has(p) {
+            max-width: 300px;
+            width: max-content;
+            text-wrap: wrap;
+            overflow-y: scroll;
+        }
 
         .editable-prop {
             min-width: 300px;

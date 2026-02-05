@@ -4,27 +4,31 @@ import {
     ProductEditorContext
 } from "../../../components/productPropertyEditor/editableProductProps.ts";
 import "./productTable.css"
-import React, {useEffect, useState} from "react";
+import React, {useContext} from "react";
 import Tooltip from "../../../components/tooltip/tooltip.tsx";
-import {ProductData} from "@shared/types/supabaseTypes.ts";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {compareProductsBySku} from "../../../lib/sortMethods.tsx";
 import {openObjectInNewTab} from "../../../lib/lib.tsx";
 import {ProductContext} from "../../products/lib.tsx";
-import {compareProductTableHeaderKeys} from "./lib.tsx";
-import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
+import {compareProductTableHeaderKeys, ProductTableContext} from "./lib.tsx";
 import DoubleClickEditableProdPropBox
     from "../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
+import {getRepresentativeImageURL} from "@shared/functions/images.ts";
+import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
 
-export default function ProductTable({prodsState, originalProds, setParentProd}: {
-    /** Products to display in the table */
-    prodsState: [UnsubmittedProductData[], (prods: UnsubmittedProductData[]) => void]
-    /** Method to set a product in the full, unfiltered list of products in the parent component */
-    setParentProd?: (p: UnsubmittedProductData) => void;
-    /** Original products before any edits were made */
-    originalProds: ProductData[]
-}) {
+export default function ProductTable() {
+    /** Fetch new data from the remote on the given product, updating the page with the most up-to-date information. */
+    async function fetchNewProductData(prod: UnsubmittedProductData) {
+        const new_prod = await getProducts(supabase, [prod.sku], false, false)
+        setProds([
+            ...prods.filter(
+                k => k.sku !== prod.sku
+            ),
+            new_prod[0]
+        ].sort(compareProductsBySku))
+        if (setParentProd) setParentProd(new_prod[0])
+    }
 
     /** Set the data of the given product in the product list */
     function setProduct(prod: UnsubmittedProductData) {
@@ -37,39 +41,21 @@ export default function ProductTable({prodsState, originalProds, setParentProd}:
         if (setParentProd) setParentProd(prod)
     }
 
-    /** Fetch new data from the remote on a specific product, updating the page with the most up-to-date information. */
-    async function fetchNewProductData(prod: UnsubmittedProductData) {
-        const new_prod = await getProducts(supabase, [prod.sku], false, false)
-        setProds([
-            ...prods.filter(
-                k => k.sku !== prod.sku
-            ),
-            new_prod[0]
-        ].sort(compareProductsBySku))
-        if (setParentProd) setParentProd(new_prod[0])
-    }
-
-    // Fetch prop lists
-    const [propLists, setPropLists] = useState<Awaited<ReturnType<typeof fetchPropAutofillData>>>()
-    useEffect(() => {
-        async function fetch() {
-            setPropLists(await fetchPropAutofillData());
-        }
-        fetch().then()
-    }, [])
-
     const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
     const displayNames = keys.map(
         propName => editableProductProps[propName as keyof typeof editableProductProps]?.displayName
     )
-
+    const {setProd: setParentProd, prodsState} = useContext(ProductTableContext)
     const [prods, setProds] = prodsState
 
     return <div id="product-table">
         <table>
             <thead>
             <tr>
+                <td>{editableProductProps["sku"].displayName}<Tooltip msg={editableProductProps["sku"].tooltip}/></td>
+                <td></td>
                 {displayNames.map((col, i) => {
+                    if (i === 0) return; // Skip SKU since that's defined manually
                     const props = editableProductProps[
                         keys[i] as keyof typeof editableProductProps
                         ];
@@ -82,32 +68,50 @@ export default function ProductTable({prodsState, originalProds, setParentProd}:
             </thead>
 
             <tbody>
-            {prods.map((prod, i) => <tr key={i}>
-                {keys.map((key) => {
-                    const typedKey = key as keyof typeof editableProductProps;
-                    switch (typedKey) {
-                        case "sku":
-                            return (<td key={key}>{prod.sku}</td>)
-                    }
-                    return <td key={i+key}>
-                        <ProductContext.Provider value={{
-                            product: prod,
-                            originalProd: originalProds[i],
-                            setProduct,
-                            group: [prod],
-                            hoveredVariant: prod
-                        }}>
-                        <ProductEditorContext.Provider value={{
-                            propLists, fetchNewData: async () => {await fetchNewProductData(prod)}
-                        }}>
-                            <DoubleClickEditableProdPropBox propName={typedKey}/>
-                        </ProductEditorContext.Provider></ProductContext.Provider>
-                    </td>
-                })}
-                <td><button onClick={() => openObjectInNewTab(prod)}>View JSON</button></td>
-            </tr>)}
+            {prods.map((prod, i) =>
+                <TableRow
+                    prod={prod} i={i} fetchNewProductData={fetchNewProductData} setProduct={setProduct}
+                />
+            )}
             </tbody>
 
         </table>
     </div>
+}
+
+function TableRow({prod, i, fetchNewProductData, setProduct}: {
+    prod: UnsubmittedProductData,
+    i: number,
+    fetchNewProductData: (prod: UnsubmittedProductData) => Promise<void>,
+    setProduct: (prod: UnsubmittedProductData) => void,
+}) {
+
+    const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
+    const {originalProds, propLists} = useContext(ProductTableContext)
+    const imageURL = getRepresentativeImageURL(prod)
+
+    return <tr key={i}>
+        <td>{prod.sku}</td>
+        <SquareImageBox image={imageURL} size={"50px"} />
+        <ProductContext.Provider value={{
+            product: prod,
+            originalProd: originalProds[i],
+            setProduct,
+            group: [prod],
+            hoveredVariant: prod
+        }}>
+        {keys.map((key) => {
+            if (key === "sku") return; // Skip SKU since that's defined manually.
+            const typedKey = key as keyof typeof editableProductProps;
+            return <td key={i+key}>
+                    <ProductEditorContext.Provider value={{
+                        propLists, fetchNewData: async () => {await fetchNewProductData(prod)}
+                    }}>
+                        <DoubleClickEditableProdPropBox propName={typedKey}/>
+                    </ProductEditorContext.Provider>
+            </td>
+        })}</ProductContext.Provider><td>
+
+        <button onClick={() => openObjectInNewTab(prod)}>View JSON</button></td>
+    </tr>
 }

@@ -1,4 +1,7 @@
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
+import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
+import {ProductData} from "@shared/types/supabaseTypes.ts";
+import {createContext} from "react";
 
 const productTableHeaderKeysOrder: (keyof typeof editableProductProps)[] = [
     "sku", "name", "price", "sort_order", "stock", "weight", "active", "category_id", "group_name", "last_edited_by",
@@ -12,3 +15,18 @@ export function compareProductTableHeaderKeys(a: string, b: string) {
     else if (aIndex == -1 && bIndex != -1) return 1
     return 0
 }
+
+export const ProductTableContext = createContext<{
+    /** Method to set a product in the full, unfiltered list of products. */
+    setProd?: (p: UnsubmittedProductData) => void,
+    /** List of the original versions of products on this table before any edits were made */
+    originalProds: ProductData[],
+    /** Products to display in the table */
+    prodsState: [UnsubmittedProductData[], (prods: UnsubmittedProductData[]) => void]
+    /** Lists of properties for autofill */
+    propLists?: Partial<Record<keyof ProductData, string[]>>
+}>({
+    setProd: () => {},
+    originalProds: [],
+    prodsState: [[], (_prods: UnsubmittedProductData[]) => {}]
+})

@@ -7,6 +7,8 @@ import ProductTable from "./productTable.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import {compareProductsBySku} from "../../../lib/sortMethods.tsx";
 import {cleanseUnsubmittedProduct} from "../../products/lib.tsx";
+import {ProductTableContext} from "./lib.tsx";
+import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 
 export default function Products() {
     /** Set the data of the given product in the product list */
@@ -18,6 +20,15 @@ export default function Products() {
             cleanseUnsubmittedProduct(prod)
         ].sort(compareProductsBySku))
     }
+
+    // Fetch prop lists
+    const [propLists, setPropLists] = useState<Awaited<ReturnType<typeof fetchPropAutofillData>>>()
+    useEffect(() => {
+        async function fetch() {
+            setPropLists(await fetchPropAutofillData());
+        }
+        fetch().then()
+    }, [])
 
     // Fetch all products and sort by SKU
     const getProdsResp = useGetProducts(undefined, false, false);
@@ -50,7 +61,14 @@ export default function Products() {
 
     return (<AuthenticatedPage requiredPermission={"edit_products"}>
         {pageSelector}
-        <ProductTable prodsState={[prodsOnPage, setProdsOnPage]} originalProds={originalProdsOnPage.current} setParentProd={setProduct}/>
+        <ProductTableContext.Provider value={{
+            setProd: setProduct,
+            originalProds: originalProdsOnPage.current,
+            prodsState: [prodsOnPage, setProdsOnPage],
+            propLists: propLists
+        }}>
+            <ProductTable/>
+        </ProductTableContext.Provider>
         {pageSelector}
     </AuthenticatedPage>)
 }

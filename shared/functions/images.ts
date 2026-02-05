@@ -28,7 +28,7 @@ export function getImageURL(image: ImageData | UnsubmittedImageData, highres = f
 /**
  * Gets the public URL of the image which represents a product group
  * @param group The group of products from which to fetch URL from.
- * @param highres Whether to get the non-compressed version of the image
+ * @param highres Whether to get the non-compressed version of the image. Defaults to `false`.
  * @returns The public URL of the image, or undefined if not found
  */
 export function getRepresentativeImageURL(group: GenericProduct, highres = false): string | undefined {
