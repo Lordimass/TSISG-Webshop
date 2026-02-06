@@ -1,14 +1,26 @@
 import {Meta, StoryObj} from "@storybook/react-vite";
 import {SquareImageBox} from "./squareImageBox.tsx";
 import {fakeProductData} from "../../../.storybook/fakes.ts";
-import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 
 const meta = {
     title: 'components/SquareImageBox',
     component: SquareImageBox,
-    argTypes: {
-        loading: { control: 'radio', options: ['eager', 'lazy'] },
+    args: {
+        hoverable: false
     },
+    argTypes: {
+        image: {control: "object"},
+        alt: {control: "text"},
+        size: {control: "text"},
+        images: {control: "object"},
+        loading: { control: 'radio', options: ['eager', 'lazy'] },
+        hoverable: { control: 'boolean'},
+    },
+    decorators: [
+        Story => (<div style={{ display: "flex", width: "100%", justifyContent: "center" }}>
+            <Story/>
+        </div>)
+    ]
 } satisfies Meta<typeof SquareImageBox>;
 
 export default meta;
@@ -24,7 +36,8 @@ export const SingleURL: SquareImageBox = {
         alt: fakeProductData.images[0].alt,
         size: "200px",
         images: undefined,
-        loading: "eager"
+        loading: "eager",
+        hoverable: true
     }
 };
 

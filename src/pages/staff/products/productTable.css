@@ -105,6 +105,10 @@
 
     }
 
+
+    td:has(.square-image-box) {
+        padding: 0
+    }
     .square-image-box {
         border-radius: 0;
     }

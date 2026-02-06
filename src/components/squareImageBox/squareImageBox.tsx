@@ -3,13 +3,15 @@ import "./squareImageBox.css";
 import {ImageData} from "@shared/types/types";
 
 import {getImageURL} from "@shared/functions/images.ts";
+import {UnsubmittedImageData} from "../../pages/products/productEditor/types.ts";
+import {AnimatePresence, motion} from "motion/react";
 
 type SquareImageBoxProps = {
     /**
      * Source path of the image, ONLY use if displaying only one image, otherwise use images parameter.
      * This parameter also supports ImageData objects
      */
-    image?: ImageData | string;
+    image?: ImageData | UnsubmittedImageData | string;
     /**
      * Alt text of the image, ONLY use if displaying only one image, otherwise use images parameter. Not
      * required if using ImageData for image parameter.
@@ -19,13 +21,16 @@ type SquareImageBoxProps = {
     size?: string;
     /**
      * An array of objects with image_url:string and alt:string (optional). Will render an image carousel
-     * if this is supplied. Also supports ImageData objects
+     * if this is supplied. Also supports ImageData objects.
      */
     images?: (ImageData | { image_url?: string; alt?: string })[];
-    /**
-     * Loading eagerness of images, "eager" or "lazy"
-     */
+    /** Loading eagerness of images, "eager" or "lazy". Defaults to `lazy`. */
     loading?: "eager" | "lazy";
+    /**
+     * Whether hovering over the image should blow it up into a full screen preview. Defaults to `false`.
+     * <br>**NOTE** - This only works on single images, not on carousels.
+     */
+    hoverable?: boolean;
 };
 
 /**
@@ -36,11 +41,7 @@ type SquareImageBoxProps = {
  * is displayed in this same square box.
  */
 export function SquareImageBox({
-   image,
-   alt,
-   size = "200px",
-   images,
-   loading = "lazy",
+   image, alt, size = "200px", images, loading = "lazy", hoverable = false,
 }: SquareImageBoxProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const touchStartX = useRef<number | null>(null);
@@ -54,6 +55,7 @@ export function SquareImageBox({
     const [index, setIndex] = useState(images && images.length > 1 ? 1 : 0);
     const [dragOffset, setDragOffset] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
+    const [isHoverShowing, setIsHoverShowing] = useState(false);
 
     const isCarousel = !!images && images.length > 1;
     const areImagesData =
@@ -76,17 +78,20 @@ export function SquareImageBox({
         });
     }
 
+    let normalizedImageHighRes = image as string | undefined
     let normalizedImage = image as string | undefined;
     let normalizedAlt = alt;
 
     if (areImagesData && !isCarousel && image) {
         normalizedAlt = (image as ImageData).alt;
         normalizedImage = getImageURL(image as ImageData, loading === "eager");
+        normalizedImageHighRes = getImageURL(image as ImageData, true);
     }
 
     if (!isCarousel && normalizedImages?.length === 1) {
-        normalizedImage = normalizedImages[0].image_url;
         normalizedAlt = normalizedImages[0].alt;
+        normalizedImage = normalizedImages[0].image_url;
+        normalizedImageHighRes = normalizedImages[0].image_url;
     }
 
     const extendedImages = isCarousel
@@ -212,7 +217,31 @@ export function SquareImageBox({
         }
     }, [index, isCarousel, normalizedImages]);
 
-    return (
+    // Handle showing hover popup when appropriate
+    useEffect(() => {
+        let tempHovered = isHoverShowing; // Prevents issues with state not being updated yet
+        function handleMouseMove(e: MouseEvent) {
+            if (!containerRef.current || !hoverable) return
+            const b = containerRef.current.getBoundingClientRect();
+            if (
+                (e.clientX > b.x) && (e.clientX < b.x + b.width) &&
+                (e.clientY > b.y) && (e.clientY < b.y + b.height)
+            ) {
+                if (tempHovered) return;
+                setIsHoverShowing(true);
+                tempHovered = true;
+            } else {
+                if (!tempHovered) return;
+                setIsHoverShowing(false);
+                tempHovered = false;
+            }
+        }
+        window.addEventListener("mousemove", handleMouseMove)
+        return () => {window.removeEventListener("mousemove", handleMouseMove)}
+    }, [hoverable]);
+
+    return (<>
+        <HoverPopup src={normalizedImageHighRes} alt={normalizedAlt ?? undefined} isHoverShowing={isHoverShowing}/>
         <div
             className="square-image-box"
             ref={containerRef}
@@ -317,7 +346,7 @@ export function SquareImageBox({
                 </>
             )}
         </div>
-    );
+    </>);
 }
 
 function Image({src, alt, className, loading}:
@@ -335,4 +364,23 @@ function Image({src, alt, className, loading}:
         className={className}
         loading={loading}
     />
+}
+
+function HoverPopup({src, alt, isHoverShowing}: {src?: string, alt?: string, isHoverShowing?: boolean}) {
+    if (!src) return null;
+
+    return <AnimatePresence>{isHoverShowing ? <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2 }}
+
+        className="image-box-hover"
+        key="box"
+    >
+        <img
+            src={src}
+            alt={alt}
+        />
+    </motion.div> : null}</AnimatePresence>
 }

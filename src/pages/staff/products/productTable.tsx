@@ -14,7 +14,7 @@ import {ProductContext} from "../../products/lib.tsx";
 import {compareProductTableHeaderKeys, ProductTableContext} from "./lib.tsx";
 import DoubleClickEditableProdPropBox
     from "../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
-import {getRepresentativeImageURL} from "@shared/functions/images.ts";
+import {getRepresentativeImage} from "@shared/functions/images.ts";
 import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
 
 export default function ProductTable() {
@@ -88,11 +88,11 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
 
     const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
     const {originalProds, propLists} = useContext(ProductTableContext)
-    const imageURL = getRepresentativeImageURL(prod)
+    const image = getRepresentativeImage(prod)
 
     return <tr key={i}>
         <td>{prod.sku}</td>
-        <SquareImageBox image={imageURL} size={"50px"} />
+        <td><SquareImageBox image={image} size={"50px"} hoverable /></td>
         <ProductContext.Provider value={{
             product: prod,
             originalProd: originalProds[i],

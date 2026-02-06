@@ -26,12 +26,11 @@ export function getImageURL(image: ImageData | UnsubmittedImageData, highres = f
 }
 
 /**
- * Gets the public URL of the image which represents a product group
+ * Gets the image that represents a product group
  * @param group The group of products from which to fetch URL from.
- * @param highres Whether to get the non-compressed version of the image. Defaults to `false`.
- * @returns The public URL of the image, or undefined if not found
+ * @returns An `ImageData` object of the image that represents the group, or undefined if not found
  */
-export function getRepresentativeImageURL(group: GenericProduct, highres = false): string | undefined {
+export function getRepresentativeImage(group: GenericProduct): ImageData | UnsubmittedImageData | undefined {
     const images = group instanceof Array
         ? group.map((prod: UnsubmittedProductData) => prod.images).flat(1)
         : group.images
@@ -40,8 +39,19 @@ export function getRepresentativeImageURL(group: GenericProduct, highres = false
     )
 
     if (representatives.length > 0) {
-        return getImageURL(representatives[0], highres)
+        return representatives[0]
     } else {
-        return getImageURL(images[0], highres)
+        return images[0]
     }
+}
+
+/**
+ * Gets the public URL of the image which represents a product group
+ * @param group The group of products from which to fetch URL from.
+ * @param highres Whether to get the non-compressed version of the image. Defaults to `false`.
+ * @returns The public URL of the image, or undefined if not found
+ */
+export function getRepresentativeImageURL(group: GenericProduct, highres = false): string | undefined {
+    const representativeImage = getRepresentativeImage(group)
+    if (representativeImage) return getImageURL(representativeImage, highres)
 }
