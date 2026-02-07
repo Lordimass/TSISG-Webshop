@@ -5,10 +5,10 @@ import {useEffect, useRef, useState} from "react";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import ProductTable from "./productTable.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
-import {compareProductsBySku} from "../../../lib/sortMethods.tsx";
 import {cleanseUnsubmittedProduct} from "../../products/lib.tsx";
-import {ProductTableContext} from "./lib.tsx";
+import {compareProductByKey, ProductTableContext} from "./lib.tsx";
 import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
+import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
 
 export default function Products() {
     /** Set the data of the given product in the product list */
@@ -18,8 +18,23 @@ export default function Products() {
                 k => k.sku !== prod.sku
             ),
             cleanseUnsubmittedProduct(prod)
-        ].sort(compareProductsBySku))
+        ].sort(compare.current))
     }
+
+    /** Sort the products in order of a given key */
+    function sort(key: keyof typeof editableProductProps, reverse: boolean = false) {
+        console.log(`Sort by ${key}`)
+        compare.current = (a: UnsubmittedProductData, b: UnsubmittedProductData) => compareProductByKey(a,b, key, reverse)
+        setProds((prods.sort(compare.current)));
+
+        setProdsOnPage(prods.slice(
+            PRODS_PER_PAGE*(page-1),
+            PRODS_PER_PAGE*page
+        ) ?? []);
+    }
+    const compare = useRef(
+        (a: UnsubmittedProductData, b: UnsubmittedProductData) => compareProductByKey(a,b, "sku")
+    )
 
     // Fetch prop lists
     const [propLists, setPropLists] = useState<Awaited<ReturnType<typeof fetchPropAutofillData>>>()
@@ -34,7 +49,7 @@ export default function Products() {
     const getProdsResp = useGetProducts(undefined, false, false);
     const [prods, setProds] = useState<ProductData[]>([])
     useEffect(() => {
-        setProds(getProdsResp.data?.sort(compareProductsBySku) ?? [])
+        setProds(getProdsResp.data?.sort(compare.current) ?? [])
     }, [getProdsResp.loading]);
 
     // Separate products into pages
@@ -49,6 +64,7 @@ export default function Products() {
     />
 
     useEffect(() => {
+        console.log("Test")
         originalProdsOnPage.current = prods.slice(
             PRODS_PER_PAGE*(page-1),
             PRODS_PER_PAGE*page
@@ -65,7 +81,7 @@ export default function Products() {
             setProd: setProduct,
             originalProds: originalProdsOnPage.current,
             prodsState: [prodsOnPage, setProdsOnPage],
-            propLists: propLists
+            propLists, sort,
         }}>
             <ProductTable/>
         </ProductTableContext.Provider>

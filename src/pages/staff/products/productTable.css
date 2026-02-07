@@ -112,4 +112,32 @@
     .square-image-box {
         border-radius: 0;
     }
+
+    thead td div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .superscript {
+            align-self: flex-start;
+        }
+
+        button {
+            margin-left: 5px;
+            border: none;
+            border-radius: 25%;
+            height: 17px;
+
+            i {
+                .reversed {
+                    transform: rotateX(45deg);
+                }
+                font-size: 15px;
+            }
+        }
+        button.selected {
+            background-color: var(--dark-grey);
+            color: white;
+        }
+    }
 }

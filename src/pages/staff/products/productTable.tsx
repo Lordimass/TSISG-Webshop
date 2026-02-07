@@ -4,7 +4,7 @@ import {
     ProductEditorContext
 } from "../../../components/productPropertyEditor/editableProductProps.ts";
 import "./productTable.css"
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Tooltip from "../../../components/tooltip/tooltip.tsx";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
@@ -46,6 +46,8 @@ export default function ProductTable() {
     const displayNames = keys.map(
         propName => editableProductProps[propName as keyof typeof editableProductProps]?.displayName
     )
+    const sortSelectedState = useState<keyof typeof editableProductProps>("sku")
+
     const {setProd: setParentProd, prodsState} = useContext(ProductTableContext)
     const [prods, setProds] = prodsState
 
@@ -53,17 +55,26 @@ export default function ProductTable() {
         <table>
             <thead>
             <tr>
-                <td>{editableProductProps["sku"].displayName}<Tooltip msg={editableProductProps["sku"].tooltip}/></td>
+                <td><div>{editableProductProps["sku"].displayName}
+                    <Tooltip msg={editableProductProps["sku"].tooltip}/>
+                    <SortOrderButton
+                        propName="sku"
+                        sortSelectedState={sortSelectedState}
+                    /></div>
+                </td>
                 <td></td>
                 {displayNames.map((col, i) => {
                     if (i === 0) return; // Skip SKU since that's defined manually
                     const props = editableProductProps[
-                        keys[i] as keyof typeof editableProductProps
-                        ];
-                    return (<td key={i}>
+                        keys[i] as keyof typeof editableProductProps];
+                    return (<td key={i}><div>
                         {col}
                         <Tooltip msg={props?.tooltip}/>
-                    </td>)
+                        <SortOrderButton
+                            propName={keys[i] as keyof typeof editableProductProps}
+                            sortSelectedState={sortSelectedState}
+                        />
+                    </div></td>)
                 })}
             </tr>
             </thead>
@@ -84,8 +95,8 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
     prod: UnsubmittedProductData,
     i: number,
     fetchNewProductData: (prod: UnsubmittedProductData) => Promise<void>,
-    setProduct: (prod: UnsubmittedProductData) => void,
-}) {
+    setProduct: (prod: UnsubmittedProductData) => void}
+) {
 
     const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
     const {originalProds, propLists} = useContext(ProductTableContext)
@@ -114,8 +125,37 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
                 </td>
             })}</ProductEditorContext.Provider></ProductContext.Provider>
         <td>
-
             <button onClick={() => openObjectInNewTab(prod)}>View JSON</button>
         </td>
     </tr>
+}
+
+function SortOrderButton({propName, sortSelectedState}: {
+    propName: keyof typeof editableProductProps
+    sortSelectedState: [keyof typeof editableProductProps, (propName: keyof typeof editableProductProps) => void]
+}) {
+    function handleClick() {
+        let newIsReversed = isReversed
+        if (isSelected) {
+            newIsReversed = !newIsReversed
+            setIsReversed(newIsReversed)
+        }
+        sortSelectedState[1](propName)
+        sort(propName, newIsReversed)
+    }
+    const {sort} = useContext(ProductTableContext)
+    const isSelected = sortSelectedState[0] === propName;
+    const [isReversed, setIsReversed] = useState(false)
+
+    useEffect(() => { // Reset isReversed
+        if (!isSelected) setIsReversed(false)
+    }, [sortSelectedState[0]]);
+
+    return <button className={`sort-order-button${isSelected ? " selected" : ""}`} onClick={handleClick}>
+        {isReversed
+            ? <i className="fi fi-sr-angle-small-up"/>
+            : <i className={"fi fi-sr-angle-small-down"}/>
+        }
+
+    </button>
 }
