@@ -16,6 +16,7 @@ import DoubleClickEditableProdPropBox
     from "../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
 import {getRepresentativeImage} from "@shared/functions/images.ts";
 import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
+import {getProductPagePath} from "../../../lib/paths.ts";
 
 export default function ProductTable() {
     /** Fetch new data from the remote on the given product, updating the page with the most up-to-date information. */
@@ -92,26 +93,29 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
 
     return <tr key={i}>
         <td>{prod.sku}</td>
-        <td><SquareImageBox image={image} size={"50px"} hoverable /></td>
+        <td><a href={getProductPagePath(prod.sku)}><SquareImageBox image={image} size={"50px"} hoverable/></a></td>
         <ProductContext.Provider value={{
             product: prod,
             originalProd: originalProds[i],
             setProduct,
             group: [prod],
             hoveredVariant: prod
+        }}><ProductEditorContext.Provider value={{
+            propLists, fetchNewData: async () => {
+                await fetchNewProductData(prod)
+            }
         }}>
-        {keys.map((key) => {
-            if (key === "sku") return; // Skip SKU since that's defined manually.
-            const typedKey = key as keyof typeof editableProductProps;
-            return <td key={i+key}>
-                    <ProductEditorContext.Provider value={{
-                        propLists, fetchNewData: async () => {await fetchNewProductData(prod)}
-                    }}>
-                        <DoubleClickEditableProdPropBox propName={typedKey}/>
-                    </ProductEditorContext.Provider>
-            </td>
-        })}</ProductContext.Provider><td>
+            {keys.map((key) => {
+                // Skip some since they're defined manually.
+                if (["sku"].includes(key)) return;
+                const typedKey = key as keyof typeof editableProductProps;
+                return <td key={i + key}>
+                    <DoubleClickEditableProdPropBox propName={typedKey}/>
+                </td>
+            })}</ProductEditorContext.Provider></ProductContext.Provider>
+        <td>
 
-        <button onClick={() => openObjectInNewTab(prod)}>View JSON</button></td>
+            <button onClick={() => openObjectInNewTab(prod)}>View JSON</button>
+        </td>
     </tr>
 }

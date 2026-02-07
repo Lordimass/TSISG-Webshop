@@ -57,6 +57,7 @@
         "npm:google-auth-library@^10.4.2",
         "npm:json-schema-to-ts@^3.1.1",
         "npm:locale-currency@1",
+        "npm:motion@^12.33.0",
         "npm:nodemon@^3.1.11",
         "npm:octokit@^5.0.4",
         "npm:playwright@^1.57.0",
