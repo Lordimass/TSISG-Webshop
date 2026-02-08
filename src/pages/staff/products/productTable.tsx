@@ -82,7 +82,7 @@ export default function ProductTable() {
             <tbody>
             {prods.map((prod, i) =>
                 <TableRow
-                    prod={prod} i={i} fetchNewProductData={fetchNewProductData} setProduct={setProduct}
+                    prod={prod} i={i} fetchNewProductData={fetchNewProductData} setProduct={setProduct} key={i}
                 />
             )}
             </tbody>
@@ -102,15 +102,11 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
     const {originalProds, propLists} = useContext(ProductTableContext)
     const image = getRepresentativeImage(prod)
 
-    return <tr key={i}>
+    return <tr>
         <td>{prod.sku}</td>
         <td><a href={getProductPagePath(prod.sku)}><SquareImageBox image={image} size={"50px"} hoverable/></a></td>
         <ProductContext.Provider value={{
-            product: prod,
-            originalProd: originalProds[i],
-            setProduct,
-            group: [prod],
-            hoveredVariant: prod
+            product: prod, originalProd: originalProds[i], setProduct, group: [prod], hoveredVariant: prod
         }}><ProductEditorContext.Provider value={{
             propLists, fetchNewData: async () => {
                 await fetchNewProductData(prod)

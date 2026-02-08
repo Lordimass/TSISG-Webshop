@@ -9,6 +9,7 @@ import {cleanseUnsubmittedProduct} from "../../products/lib.tsx";
 import {compareProductByKey, ProductTableContext} from "./lib.tsx";
 import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
+import {Dropdown} from "react-bootstrap";
 
 export default function Products() {
     /** Set the data of the given product in the product list */
@@ -64,7 +65,6 @@ export default function Products() {
     />
 
     useEffect(() => {
-        console.log("Test")
         originalProdsOnPage.current = prods.slice(
             PRODS_PER_PAGE*(page-1),
             PRODS_PER_PAGE*page
@@ -83,8 +83,21 @@ export default function Products() {
             prodsState: [prodsOnPage, setProdsOnPage],
             propLists, sort,
         }}>
+            <Filter/>
             <ProductTable/>
         </ProductTableContext.Provider>
         {pageSelector}
     </AuthenticatedPage>)
+}
+
+function Filter() {
+    return <Dropdown>
+            <Dropdown.Toggle>Filter</Dropdown.Toggle>
+            <Dropdown.Menu>
+                <Dropdown.Item>Hello</Dropdown.Item>
+                <Dropdown.Item>World</Dropdown.Item>
+                <Dropdown.Item>This</Dropdown.Item>
+                <Dropdown.Item>Is a test</Dropdown.Item>
+            </Dropdown.Menu>
+        </Dropdown>
 }

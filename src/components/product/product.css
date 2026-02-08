@@ -44,6 +44,7 @@
 .basket-modifier-container {
   height: 50px;
   padding: 10px;
+  box-sizing: content-box;
 }
 
 .product.horizontal-product {

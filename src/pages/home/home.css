@@ -45,6 +45,10 @@
     border-radius: 5em;
     line-height: 8.2em;
     transition: width 1s;
+
+    h1 {
+        font-weight: 700 !important;
+    }
 }
 
 .title-text.title-text-rotate {
