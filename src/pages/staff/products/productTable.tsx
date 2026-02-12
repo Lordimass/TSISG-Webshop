@@ -11,7 +11,7 @@ import {supabase} from "../../../lib/supabaseRPC.tsx";
 import {compareProductsBySku} from "../../../lib/sortMethods.tsx";
 import {openObjectInNewTab} from "../../../lib/lib.tsx";
 import {ProductContext} from "../../products/lib.tsx";
-import {compareProductTableHeaderKeys, ProductTableContext} from "./lib.tsx";
+import {compareProductTableHeaderKeys, ProductTableContext} from "./lib.ts";
 import DoubleClickEditableProdPropBox
     from "../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
 import {getRepresentativeImage} from "@shared/functions/images.ts";

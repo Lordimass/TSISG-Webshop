@@ -217,9 +217,8 @@ export function SquareImageBox({
         }
     }, [index, isCarousel, normalizedImages]);
 
-    // Handle showing hover popup when appropriate
+    // Handle hiding hover popup when appropriate
     useEffect(() => {
-        let tempHovered = isHoverShowing; // Prevents issues with state not being updated yet
         function handleMouseMove(e: MouseEvent) {
             if (!containerRef.current || !hoverable) return
             const b = containerRef.current.getBoundingClientRect();
@@ -227,13 +226,8 @@ export function SquareImageBox({
                 (e.clientX > b.x) && (e.clientX < b.x + b.width) &&
                 (e.clientY > b.y) && (e.clientY < b.y + b.height)
             ) {
-                if (tempHovered) return;
-                setIsHoverShowing(true);
-                tempHovered = true;
             } else {
-                if (!tempHovered) return;
                 setIsHoverShowing(false);
-                tempHovered = false;
             }
         }
         window.addEventListener("mousemove", handleMouseMove)
@@ -249,6 +243,7 @@ export function SquareImageBox({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            onMouseOver={() => setIsHoverShowing(true)}
         >
             <div className="square-image-spacer"/>
 

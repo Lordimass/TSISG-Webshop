@@ -6,10 +6,12 @@ import {ProductData} from "@shared/types/supabaseTypes.ts";
 import ProductTable from "./productTable.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import {cleanseUnsubmittedProduct} from "../../products/lib.tsx";
-import {compareProductByKey, ProductTableContext} from "./lib.tsx";
+import {compareProductByKey, productFilters, ProductTableContext} from "./lib.ts";
 import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
-import {Dropdown} from "react-bootstrap";
+
+import "./products.css"
+import ProductsFilter from "./filters.tsx";
 
 export default function Products() {
     /** Set the data of the given product in the product list */
@@ -33,6 +35,16 @@ export default function Products() {
             PRODS_PER_PAGE*page
         ) ?? []);
     }
+
+    function applyFilters(ps: ProductData[]) {
+        Object.keys(filters).forEach(key => {
+            if (filters[key].value === "Hide") {
+                ps = ps.filter(p => !filters[key].filter(p))
+            }
+        })
+        return ps
+    }
+
     const compare = useRef(
         (a: UnsubmittedProductData, b: UnsubmittedProductData) => compareProductByKey(a,b, "sku")
     )
@@ -46,12 +58,17 @@ export default function Products() {
         fetch().then()
     }, [])
 
+    // Handle filtering
+    const [filters, setFilters] = useState(productFilters);
+
     // Fetch all products and sort by SKU
     const getProdsResp = useGetProducts(undefined, false, false);
     const [prods, setProds] = useState<ProductData[]>([])
     useEffect(() => {
-        setProds(getProdsResp.data?.sort(compare.current) ?? [])
-    }, [getProdsResp.loading]);
+        if (!getProdsResp.data) return
+        const filteredProds = applyFilters(getProdsResp.data);
+        setProds(filteredProds.sort(compare.current) ?? [])
+    }, [getProdsResp.loading, filters]);
 
     // Separate products into pages
     const PRODS_PER_PAGE = 20;
@@ -73,31 +90,22 @@ export default function Products() {
             PRODS_PER_PAGE*(page-1),
             PRODS_PER_PAGE*page
         ) ?? []);
-    }, [page, prods]);
+    }, [page, prods, filters]);
 
-    return (<AuthenticatedPage requiredPermission={"edit_products"}>
-        {pageSelector}
+    return (<AuthenticatedPage requiredPermission={"edit_products"} id={"staff-products"}>
         <ProductTableContext.Provider value={{
             setProd: setProduct,
             originalProds: originalProdsOnPage.current,
             prodsState: [prodsOnPage, setProdsOnPage],
             propLists, sort,
         }}>
-            <Filter/>
-            <ProductTable/>
-        </ProductTableContext.Provider>
-        {pageSelector}
-    </AuthenticatedPage>)
-}
+            <div className="top-bar">
+                <ProductsFilter filterStates={[filters, setFilters]}/>
+                {pageSelector}
+            </div>
 
-function Filter() {
-    return <Dropdown>
-            <Dropdown.Toggle>Filter</Dropdown.Toggle>
-            <Dropdown.Menu>
-                <Dropdown.Item>Hello</Dropdown.Item>
-                <Dropdown.Item>World</Dropdown.Item>
-                <Dropdown.Item>This</Dropdown.Item>
-                <Dropdown.Item>Is a test</Dropdown.Item>
-            </Dropdown.Menu>
-        </Dropdown>
+            <ProductTable/>
+            {pageSelector}
+        </ProductTableContext.Provider>
+    </AuthenticatedPage>)
 }

@@ -1,9 +1,9 @@
 import type {Preview} from '@storybook/react-vite'
 
-import '../src/common.css'
+import '../src/common.scss'
 import '@flaticon/flaticon-uicons/css/all/all.css';
 import '@mdxeditor/editor/style.css'
-import { spyOn } from 'storybook/test';
+import {spyOn} from 'storybook/test';
 import {INITIAL_VIEWPORTS, MINIMAL_VIEWPORTS} from "storybook/viewport";
 
 const preview: Preview = {

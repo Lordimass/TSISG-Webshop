@@ -1,7 +1,6 @@
-import "./common.css"
+import "./common.scss"
 import '@flaticon/flaticon-uicons/css/all/all.css';
 import '@mdxeditor/editor/style.css'
-import "bootstrap/dist/css/bootstrap.min.css"
 
 import Home from './pages/home/home';
 import Checkout from './pages/checkout/checkout';

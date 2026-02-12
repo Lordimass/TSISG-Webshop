@@ -1,12 +1,14 @@
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
-import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
+import {GenericSingleProduct, UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
 import {createContext} from "react";
+import {getRepresentativeImage} from "@shared/functions/images.ts";
 
 const productTableHeaderKeysOrder: (keyof typeof editableProductProps)[] = [
     "sku", "name", "price", "sort_order", "stock", "weight", "active", "category_id", "group_name", "last_edited_by",
     "last_edited"
 ]
+
 export function compareProductTableHeaderKeys(a: string, b: string) {
     const aIndex = productTableHeaderKeysOrder.indexOf(a as keyof typeof editableProductProps)
     const bIndex = productTableHeaderKeysOrder.indexOf(b as keyof typeof editableProductProps)
@@ -49,3 +51,28 @@ export const ProductTableContext = createContext<{
     prodsState: [[], (_prods: UnsubmittedProductData[]) => {}],
     sort: (_key: keyof typeof editableProductProps, _reversed?: boolean) => {}
 })
+
+export type ProductFilter = {
+    filter: (p: GenericSingleProduct) => boolean,
+    value: "Show" | "Hide",
+}
+
+export const productFilters: {[key: string]: ProductFilter} = {
+    "Inactive": {
+        filter: p => !p.active,
+        value: "Hide"
+    },
+    "0-Stock": {
+        filter: p => p.stock === 0,
+        value: "Hide"
+
+    },
+    "Missing Image": {
+        filter: p => !getRepresentativeImage(p),
+        value: "Show"
+    },
+    "Name": {
+        filter: _p => true,
+        value: "Show"
+    }
+}
