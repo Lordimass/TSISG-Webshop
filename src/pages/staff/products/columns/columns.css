@@ -1,0 +1,13 @@
+.columns-dropdown .dropdown-menu.show {
+    column-count: 2;
+}
+
+.column-selector {
+    display: flex;
+    gap: 5px;
+    font-family: "Perfect Penmanship", sans-serif;
+
+    > div {
+        width: max-content;
+    }
+}

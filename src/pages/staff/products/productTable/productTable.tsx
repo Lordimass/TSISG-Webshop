@@ -2,21 +2,21 @@ import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import {
     editableProductProps,
     ProductEditorContext
-} from "../../../components/productPropertyEditor/editableProductProps.ts";
+} from "../../../../components/productPropertyEditor/editableProductProps.ts";
 import "./productTable.css"
 import React, {useContext, useEffect, useState} from "react";
-import Tooltip from "../../../components/tooltip/tooltip.tsx";
+import Tooltip from "../../../../components/tooltip/tooltip.tsx";
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
-import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {compareProductsBySku} from "../../../lib/sortMethods.tsx";
-import {openObjectInNewTab} from "../../../lib/lib.tsx";
-import {ProductContext} from "../../products/lib.tsx";
-import {compareProductTableHeaderKeys, ProductTableContext} from "./lib.ts";
+import {supabase} from "../../../../lib/supabaseRPC.tsx";
+import {compareProductsBySku} from "../../../../lib/sortMethods.tsx";
+import {openObjectInNewTab} from "../../../../lib/lib.tsx";
+import {ProductContext} from "../../../products/lib.tsx";
+import {compareProductTableHeaderKeys, ProductTableContext} from "../lib.ts";
 import DoubleClickEditableProdPropBox
-    from "../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
+    from "../../../../components/productPropertyEditor/doubleClickEditableProdPropBox.tsx";
 import {getRepresentativeImage} from "@shared/functions/images.ts";
-import {SquareImageBox} from "../../../components/squareImageBox/squareImageBox.tsx";
-import {getProductPagePath} from "../../../lib/paths.ts";
+import {SquareImageBox} from "../../../../components/squareImageBox/squareImageBox.tsx";
+import {getProductPagePath} from "../../../../lib/paths.ts";
 
 export default function ProductTable() {
     /** Fetch new data from the remote on the given product, updating the page with the most up-to-date information. */
@@ -42,14 +42,21 @@ export default function ProductTable() {
         if (setParentProd) setParentProd(prod)
     }
 
-    const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
+    const {setProd: setParentProd, prodsState, columnsState} = useContext(ProductTableContext)
+    const [prods, setProds] = prodsState
+
+    const keys = columnsState ? Object
+            .keys(columnsState[0])
+            .filter(k => {
+                const key = k as keyof typeof editableProductProps
+                return columnsState[0][key]
+            })
+            .sort(compareProductTableHeaderKeys)
+        : []
     const displayNames = keys.map(
         propName => editableProductProps[propName as keyof typeof editableProductProps]?.displayName
     )
     const sortSelectedState = useState<keyof typeof editableProductProps>("sku")
-
-    const {setProd: setParentProd, prodsState} = useContext(ProductTableContext)
-    const [prods, setProds] = prodsState
 
     return <div id="product-table">
         <table>
@@ -97,10 +104,16 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
     fetchNewProductData: (prod: UnsubmittedProductData) => Promise<void>,
     setProduct: (prod: UnsubmittedProductData) => void}
 ) {
-
-    const keys = Object.keys(editableProductProps).sort(compareProductTableHeaderKeys)
-    const {originalProds, propLists} = useContext(ProductTableContext)
+    const {originalProds, propLists, columnsState} = useContext(ProductTableContext)
     const image = getRepresentativeImage(prod)
+    const keys = columnsState ? Object
+            .keys(columnsState[0])
+            .filter(k => {
+                const key = k as keyof typeof editableProductProps
+                return columnsState[0][key]
+            })
+            .sort(compareProductTableHeaderKeys)
+        : []
 
     return <tr>
         <td>{prod.sku}</td>
@@ -120,9 +133,8 @@ function TableRow({prod, i, fetchNewProductData, setProduct}: {
                     <DoubleClickEditableProdPropBox propName={typedKey}/>
                 </td>
             })}</ProductEditorContext.Provider></ProductContext.Provider>
-        <td>
-            <button onClick={() => openObjectInNewTab(prod)}>View JSON</button>
-        </td>
+        <td className="spacer-table-field"/>
+        <td><button onClick={() => openObjectInNewTab(prod)}>View JSON</button></td>
     </tr>
 }
 

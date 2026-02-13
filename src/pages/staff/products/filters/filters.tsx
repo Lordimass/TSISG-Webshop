@@ -2,7 +2,7 @@ import {Dropdown, DropdownButton, ToggleButton, ToggleButtonGroup} from "react-b
 import {useState} from "react";
 
 import "./filters.css"
-import {productFilters} from "./lib.ts";
+import {productFilters} from "../lib.ts";
 
 export default function ProductsFilter({filterStates}: {filterStates: [typeof productFilters, (pfs: typeof productFilters) => void]}) {
     const [filters, setFilters] = filterStates;

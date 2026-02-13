@@ -3,15 +3,16 @@ import {useGetProducts} from "../../../lib/supabaseRPC.tsx";
 import {PageSelector} from "../../../components/ticker/pageSelector/pageSelector.tsx";
 import {useEffect, useRef, useState} from "react";
 import {ProductData} from "@shared/types/supabaseTypes.ts";
-import ProductTable from "./productTable.tsx";
+import ProductTable from "./productTable/productTable.tsx";
 import {UnsubmittedProductData} from "@shared/types/productTypes.ts";
 import {cleanseUnsubmittedProduct} from "../../products/lib.tsx";
-import {compareProductByKey, productFilters, ProductTableContext} from "./lib.ts";
+import {compareProductByKey, productFilters, ProductTableContext, selectedColumns} from "./lib.ts";
 import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 import {editableProductProps} from "../../../components/productPropertyEditor/editableProductProps.ts";
 
 import "./products.css"
-import ProductsFilter from "./filters.tsx";
+import ProductsFilter from "./filters/filters.tsx";
+import ProductTableColumnsChoice from "./columns/columns.tsx";
 
 export default function Products() {
     /** Set the data of the given product in the product list */
@@ -35,7 +36,11 @@ export default function Products() {
             PRODS_PER_PAGE*page
         ) ?? []);
     }
+    const compare = useRef(
+        (a: UnsubmittedProductData, b: UnsubmittedProductData) => compareProductByKey(a,b, "sku")
+    )
 
+    /** Apply the current filters to the product list */
     function applyFilters(ps: ProductData[]) {
         Object.keys(filters).forEach(key => {
             if (filters[key].value === "Hide") {
@@ -45,25 +50,17 @@ export default function Products() {
         return ps
     }
 
-    const compare = useRef(
-        (a: UnsubmittedProductData, b: UnsubmittedProductData) => compareProductByKey(a,b, "sku")
-    )
-
     // Fetch prop lists
     const [propLists, setPropLists] = useState<Awaited<ReturnType<typeof fetchPropAutofillData>>>()
     useEffect(() => {
-        async function fetch() {
-            setPropLists(await fetchPropAutofillData());
-        }
+        async function fetch() {setPropLists(await fetchPropAutofillData());}
         fetch().then()
     }, [])
-
-    // Handle filtering
-    const [filters, setFilters] = useState(productFilters);
 
     // Fetch all products and sort by SKU
     const getProdsResp = useGetProducts(undefined, false, false);
     const [prods, setProds] = useState<ProductData[]>([])
+    const [filters, setFilters] = useState(productFilters);
     useEffect(() => {
         if (!getProdsResp.data) return
         const filteredProds = applyFilters(getProdsResp.data);
@@ -81,6 +78,9 @@ export default function Products() {
         onChange={setPage}
     />
 
+    // Choose columns to display
+    const columnsState = useState(selectedColumns)
+
     useEffect(() => {
         originalProdsOnPage.current = prods.slice(
             PRODS_PER_PAGE*(page-1),
@@ -97,10 +97,13 @@ export default function Products() {
             setProd: setProduct,
             originalProds: originalProdsOnPage.current,
             prodsState: [prodsOnPage, setProdsOnPage],
-            propLists, sort,
+            propLists, sort, columnsState
         }}>
             <div className="top-bar">
-                <ProductsFilter filterStates={[filters, setFilters]}/>
+                <div className="top-bar-left">
+                    <ProductsFilter filterStates={[filters, setFilters]}/>
+                    <ProductTableColumnsChoice/>
+                </div>
                 {pageSelector}
             </div>
 

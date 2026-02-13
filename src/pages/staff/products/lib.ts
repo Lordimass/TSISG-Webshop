@@ -45,6 +45,8 @@ export const ProductTableContext = createContext<{
     propLists?: Partial<Record<keyof ProductData, string[]>>
     /** Sort the products in order of a given key */
     sort: (key: keyof typeof editableProductProps, reversed?: boolean) => void;
+    /** Columns to show on the table */
+    columnsState?: [typeof selectedColumns, (cols: typeof selectedColumns) => void]
 }>({
     setProd: () => {},
     originalProds: [],
@@ -58,21 +60,19 @@ export type ProductFilter = {
 }
 
 export const productFilters: {[key: string]: ProductFilter} = {
-    "Inactive": {
-        filter: p => !p.active,
-        value: "Hide"
-    },
-    "0-Stock": {
-        filter: p => p.stock === 0,
-        value: "Hide"
-
-    },
-    "Missing Image": {
-        filter: p => !getRepresentativeImage(p),
-        value: "Show"
-    },
-    "Name": {
-        filter: _p => true,
-        value: "Show"
-    }
+    "Inactive": {filter: p => !p.active, value: "Hide"},
+    "0-Stock": {filter: p => p.stock === 0, value: "Hide"},
+    "Missing Image": {filter: p => !getRepresentativeImage(p), value: "Show"},
+    "Name": {filter: _p => true, value: "Show"}
 }
+
+const DEFAULT_SELECTED_COLUMNS: (keyof typeof editableProductProps)[] = ["sku", "name", "price", "stock", "weight", "category_id", "group_name"]
+export const selectedColumns: {
+    [K in keyof typeof editableProductProps]?: boolean
+} = {}
+Object
+    .keys(editableProductProps)
+    .forEach(k => {
+        const key = k as keyof typeof editableProductProps
+        selectedColumns[key] = DEFAULT_SELECTED_COLUMNS.includes(key)
+    })
