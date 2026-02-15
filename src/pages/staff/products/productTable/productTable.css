@@ -122,7 +122,8 @@
             min-width: auto;
             textarea {
                 min-width: 6ch;
-                max-width: 6ch
+                max-width: 6ch;
+                height: 36px;
             }
         }
 
@@ -130,7 +131,8 @@
             min-width: auto;
             textarea {
                 min-width: 18ch;
-                max-width: 18ch
+                max-width: 18ch;
+                max-height: 36px;
             }
         }
 
