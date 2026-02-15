@@ -18,7 +18,7 @@ export function compareProductTableHeaderKeys(a: string, b: string) {
     return 0
 }
 
-export function compareProductByKey(
+export function compareProductsByKey(
     a: UnsubmittedProductData,
     b: UnsubmittedProductData,
     T: keyof typeof editableProductProps,
@@ -34,13 +34,39 @@ export function compareProductByKey(
     return 0
 }
 
+export function compareProductGroupsByKey(
+    a: UnsubmittedProductData[],
+    b: UnsubmittedProductData[],
+    T: keyof typeof editableProductProps,
+    reverse: boolean = false
+) {
+    if (!a || !b) return 0
+
+    // Empty groups
+    if (a.length === 0 && b.length === 0) return 0
+    // Just `a` empty
+    if (a.length === 0) return reverse ? 1 : -1
+    // Just `b` empty
+    if (a.length === 0) return reverse ? -1 : 1
+
+    // Use the first element of the group as a representative
+    const reprA = {...a[0]}
+    const reprB = {...b[0]}
+
+    // Override names of representatives to make sorting by name use group name for groups.
+    if (a.length > 1) reprA.name = reprA.group_name || ""
+    if (b.length > 1) reprB.name = reprB.group_name || ""
+
+    return compareProductsByKey(reprA,reprB,T,reverse)
+}
+
 export const ProductTableContext = createContext<{
     /** Method to set a product in the full, unfiltered list of products. */
-    setProd?: (p: UnsubmittedProductData) => void,
+    setProd: (p: UnsubmittedProductData) => void,
     /** List of the original versions of products on this table before any edits were made */
-    originalProds: ProductData[],
+    originalGroups: ProductData[][],
     /** Products to display in the table */
-    prodsState: [UnsubmittedProductData[], (prods: UnsubmittedProductData[]) => void]
+    groupsState: [UnsubmittedProductData[][], (prods: UnsubmittedProductData[][]) => void]
     /** Lists of properties for autofill */
     propLists?: Partial<Record<keyof ProductData, string[]>>
     /** Sort the products in order of a given key */
@@ -49,8 +75,8 @@ export const ProductTableContext = createContext<{
     columnsState?: [typeof selectedColumns, (cols: typeof selectedColumns) => void]
 }>({
     setProd: () => {},
-    originalProds: [],
-    prodsState: [[], (_prods: UnsubmittedProductData[]) => {}],
+    originalGroups: [],
+    groupsState: [[], (_prods: UnsubmittedProductData[][]) => {}],
     sort: (_key: keyof typeof editableProductProps, _reversed?: boolean) => {}
 })
 

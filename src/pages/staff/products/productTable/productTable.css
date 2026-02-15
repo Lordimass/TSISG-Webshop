@@ -43,9 +43,10 @@
     tr {
         border: 1px solid lightgray;
         border-radius: 4px;
+        height: max-content;
     }
 
-    td:first-of-type {
+    tr.single td:first-of-type, tr.group td:first-of-type {
         background-color: var(--jamie-grey);
         border-bottom-left-radius: 7px;
         border-top-left-radius: 7px;
@@ -120,15 +121,21 @@
         #active-editable-prop, #origin_country_code-editable-prop {
             min-width: auto;
             textarea {
-                min-width: 6ch
+                min-width: 6ch;
+                max-width: 6ch
             }
         }
 
         #category_id-editable-prop, #group_name-editable-prop, #last_edited-editable-prop, #last_edited_by-editable-prop {
             min-width: auto;
             textarea {
-                min-width: 18ch
+                min-width: 18ch;
+                max-width: 18ch
             }
+        }
+
+        .accordion-body {
+            text-wrap: wrap;
         }
 
     }
@@ -144,5 +151,57 @@
 
     .square-image-box {
         border-radius: 0;
+    }
+
+    .hiddenRow {
+        position: relative;
+        top: -3px;
+
+        > td {
+            background-color: transparent !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        table {
+            table-layout: fixed;
+            border-spacing: 0 0;
+
+            td {
+                background-color: rgb(236, 236, 236);
+            }
+
+            tr.single td {
+                border-radius: 0;
+            }
+            tr.single:last-of-type td:first-of-type {
+                border-bottom-left-radius: 7px;
+            }
+            tr.single:last-of-type td:last-of-type {
+                border-bottom-right-radius: 7px;
+            }
+        }
+    }
+
+    .hiddenRow:not(:has(.show, .collapsing)) {
+        display: none;
+    }
+
+    .group {
+        cursor: pointer;
+
+        #name {
+            border-right: none;
+        }
+        .spacer-table-field {
+            border-left: none;
+        }
+    }
+
+    .group[aria-expanded="true"] {
+        td:first-of-type, td:last-of-type {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
     }
 }

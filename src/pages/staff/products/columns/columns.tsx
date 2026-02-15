@@ -10,7 +10,6 @@ export default function ProductTableColumnsChoice() {
     const {columnsState} = useContext(ProductTableContext);
     if (!columnsState) return null
     const keys = Object.keys(columnsState[0]).sort(compareProductTableHeaderKeys)
-    console.log(keys)
 
     return <DropdownButton title={"Columns"} className="columns-dropdown" autoClose={false}>
         {keys.map(k => {
