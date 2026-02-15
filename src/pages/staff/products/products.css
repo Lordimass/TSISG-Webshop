@@ -1,0 +1,19 @@
+#staff-products {
+    padding: 10px;
+
+    .page-selector-container {
+        margin-top: 0; margin-bottom: 0;
+    }
+
+    .top-bar {
+        display: grid;
+        grid-template-areas: "top-bar-left top-bar-middle top-bar-right";
+        grid-template-columns: 1fr min-content 1fr;
+
+        > .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+    }
+}

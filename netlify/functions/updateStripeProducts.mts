@@ -9,6 +9,7 @@ import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {generateStripeCurrencyOptions, getImageURL} from "../lib/lib.ts";
 import {ExchangeRates} from "@shared/functions/price.ts";
 import dotenv from "dotenv";
+
 dotenv.config({path: ".env.production", override: true}); // Production keys for updating Live Mode
 
 /**
@@ -176,8 +177,8 @@ async function updateStripeProduct(
         name: supabaseProduct.name,
         images: imageURL ? [imageURL] : [],
         metadata: {
-            category_id: supabaseProduct.category.id,
-            category: supabaseProduct.category.name,
+            category_id: supabaseProduct.category?.id ?? null,
+            category: supabaseProduct.category?.name ?? null,
             sku: supabaseProduct.sku
         },
         url: `https://thisshopissogay.com/products/${supabaseProduct.sku}`,
@@ -237,8 +238,8 @@ async function createStripeProduct(
         name: supabaseProduct.name,
         images: imageURL ? [imageURL] : [],
         metadata: {
-            category_id: supabaseProduct.category.id,
-            category: supabaseProduct.category.name,
+            category_id: supabaseProduct.category?.id ?? null,
+            category: supabaseProduct.category?.name ?? null,
             sku: supabaseProduct.sku
         },
         url: `https://thisshopissogay.com/products/${supabaseProduct.sku}`,

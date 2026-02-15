@@ -1,0 +1,207 @@
+#product-table {
+    min-width: 100%;
+    overflow-x: scroll;
+
+    p {
+        font-size: 13px;
+    }
+
+    table {
+        border-collapse: separate;
+        border-spacing: 0 3px;
+    }
+
+    thead td div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .superscript {
+            align-self: flex-start;
+        }
+
+        button {
+            margin-left: 5px;
+            border: none;
+            border-radius: 25%;
+            height: 17px;
+
+            i {
+                .reversed {
+                    transform: rotateX(45deg);
+                }
+                font-size: 15px;
+                line-height: 100%;
+            }
+        }
+        button.selected {
+            background-color: var(--dark-grey);
+            color: white;
+        }
+    }
+
+    tr {
+        border: 1px solid lightgray;
+        border-radius: 4px;
+        height: max-content;
+    }
+
+    tr.single td:first-of-type, tr.group td:first-of-type {
+        background-color: var(--jamie-grey);
+        border-bottom-left-radius: 7px;
+        border-top-left-radius: 7px;
+        color: white;
+    }
+    td:last-of-type {
+        border-bottom-right-radius: 7px;
+        border-top-right-radius: 7px;
+    }
+
+    td {
+        text-wrap: nowrap;
+        padding: 2px 4px 2px 4px;
+        margin-bottom: 10px;
+
+        background-color: white;
+        text-align: center;
+        font-family: "Perfect Penmanship", sans-serif;
+        font-size: 13px;
+        border: 1px solid lightgray;
+
+        .double-click-editable-prod-prop:has(p) {
+            max-width: 300px;
+            width: max-content;
+            text-wrap: wrap;
+            overflow-y: scroll;
+        }
+
+        .editable-prop {
+            min-width: 300px;
+            height: min-content;
+
+            .editable-prop-input-box {
+                border: none;
+                p {
+                    font-size: 13px;
+                }
+
+                .prop-editor-input {
+                    background-color: transparent;
+                    text-align: center;
+                    font-family: "Perfect Penmanship", sans-serif;
+                    font-size: 13px;
+                }
+
+                /* Don't center align text for certain props */
+                #customer_metadata-editor-input, #metadata-editor-input {
+                    text-align: left;
+                    font-family: monospace;
+                    font-size: 14px
+                }
+            }
+
+            @media screen and (max-width: 1100px)  {
+                flex-direction: row;
+
+                .prop-buttons {
+                    flex-direction: column;
+                }
+            }
+
+            .prop-buttons button {
+                display: flex;
+                padding: 0;
+                line-height: 0.7em;
+                width: 15px;
+                height: 15px;
+            }
+        }
+
+        #price-editable-prop, #sort_order-editable-prop, #stock-editable-prop, #weight-editable-prop,
+        #active-editable-prop, #origin_country_code-editable-prop {
+            min-width: auto;
+            textarea {
+                min-width: 6ch;
+                max-width: 6ch
+            }
+        }
+
+        #category_id-editable-prop, #group_name-editable-prop, #last_edited-editable-prop, #last_edited_by-editable-prop {
+            min-width: auto;
+            textarea {
+                min-width: 18ch;
+                max-width: 18ch
+            }
+        }
+
+        .accordion-body {
+            text-wrap: wrap;
+        }
+
+    }
+
+
+    td:has(.square-image-box) {
+        padding: 0
+    }
+
+    .spacer-table-field {
+        width: 100%;
+    }
+
+    .square-image-box {
+        border-radius: 0;
+    }
+
+    .hiddenRow {
+        position: relative;
+        top: -3px;
+
+        > td {
+            background-color: transparent !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        table {
+            table-layout: fixed;
+            border-spacing: 0 0;
+
+            td {
+                background-color: rgb(236, 236, 236);
+            }
+
+            tr.single td {
+                border-radius: 0;
+            }
+            tr.single:last-of-type td:first-of-type {
+                border-bottom-left-radius: 7px;
+            }
+            tr.single:last-of-type td:last-of-type {
+                border-bottom-right-radius: 7px;
+            }
+        }
+    }
+
+    .hiddenRow:not(:has(.show, .collapsing)) {
+        display: none;
+    }
+
+    .group {
+        cursor: pointer;
+
+        #name {
+            border-right: none;
+        }
+        .spacer-table-field {
+            border-left: none;
+        }
+    }
+
+    .group[aria-expanded="true"] {
+        td:first-of-type, td:last-of-type {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+    }
+}

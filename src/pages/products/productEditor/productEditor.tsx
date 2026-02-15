@@ -1,13 +1,17 @@
 import React, {useContext, useEffect, useState} from "react"
-import {fetchPropAutofillData, ProductContext} from "../lib"
+import {ProductContext} from "../lib"
 import {openObjectInNewTab} from "../../../lib/lib"
 import {ProductImageEditor} from "../imageEditor/imageEditor.tsx"
 
 import "./productEditor.css"
 import {getProducts} from "@shared/functions/supabaseRPC.ts";
 import {supabase} from "../../../lib/supabaseRPC.tsx";
-import {editableProductProps, ProductEditorContext} from "../../../components/productPropertyEditor/editableProductProps.ts";
+import {
+    editableProductProps,
+    ProductEditorContext
+} from "../../../components/productPropertyEditor/editableProductProps.ts";
 import {ProdPropEditor} from "../../../components/productPropertyEditor/editableProdPropBox.tsx";
+import {fetchPropAutofillData} from "../../../components/productPropertyEditor/lib.ts";
 
 export default function ProductEditor() {
     /**
@@ -34,7 +38,7 @@ export default function ProductEditor() {
     return (<><div className="product-editor">
         <h2> Basic Product Data </h2>
         {/******************** Main property editors ********************/}
-        <ProductEditorContext.Provider value={{product, setProduct, originalProd, fetchNewData, propLists}}>
+        <ProductEditorContext.Provider value={{fetchNewData, propLists}}>
         <div className="product-editor-grid">
             {/* All standard text field properties */}
             {Object.keys(editableProductProps).map((key) => {

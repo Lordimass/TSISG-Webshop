@@ -1,5 +1,5 @@
-import { ProductData } from "@shared/types/types.ts"
-import { GA4Product } from "./types";
+import {ProductData} from "@shared/types/types.ts"
+import {GA4Product} from "./types";
 import {DEFAULT_CURRENCY} from "../../localeHandler.ts";
 import DineroFactory, {Currency} from "dinero.js";
 import {convertDinero} from "@shared/functions/price.ts";
@@ -63,10 +63,11 @@ async function convertToGA4Product(
     const dinero = DineroFactory({amount: Math.round(p.price*100), currency: DEFAULT_CURRENCY, precision: 2});
     const convertedDinero = await convertDinero(dinero, currency);
 
+    console.log(p)
     return {
         item_id: p.sku.toString(),
         item_name: p.name,
-        item_category: p.category.name,
+        item_category: p.category?.name,
         item_variant: p.metadata.variant_name,
         price: convertedDinero.getAmount(),
         quantity: "basketQuantity" in p ? p.basketQuantity : undefined

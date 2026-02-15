@@ -2,7 +2,6 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 
 import {ProdPropEditor} from './editableProdPropBox';
 import {ProductEditorContext} from "./editableProductProps.ts";
-import {fakeProductData} from "../../../.storybook/fakes.ts";
 import {fn} from "storybook/test";
 import {DefaultContextWrapper} from "../../../.storybook/lib.tsx";
 
@@ -21,9 +20,6 @@ const meta = {
         Story => <DefaultContextWrapper
             permissions={["edit_products"]}
         ><ProductEditorContext value={{
-            product: fakeProductData,
-            originalProd: fakeProductData,
-            setProduct: fn(),
             fetchNewData: fn(),
         }}><div style={{maxWidth: "400px", marginLeft: "auto", marginRight: "auto"}}>
             <Story/>

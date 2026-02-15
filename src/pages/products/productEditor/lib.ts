@@ -1,6 +1,5 @@
 import {ImageData, ProductData, UnsubmittedProductData} from "@shared/types/types";
 import {UnsubmittedImageData} from "./types.ts";
-import {Dispatch, SetStateAction} from "react";
 
 /**
  * Shifts an image left or right in the product image array
@@ -13,7 +12,7 @@ import {Dispatch, SetStateAction} from "react";
 export function shiftImage(
     image: ImageData | UnsubmittedImageData, 
     product: ProductData | UnsubmittedProductData, 
-    setProduct: Dispatch<SetStateAction<ProductData | UnsubmittedProductData>> | undefined,
+    setProduct?: (p: UnsubmittedProductData) => void,
     left = true
 ) {
     if (!setProduct) return;
@@ -59,7 +58,7 @@ export function shiftImage(
 export function removeImage(
     image: ImageData | UnsubmittedImageData, 
     product: ProductData | UnsubmittedProductData, 
-    setProduct: React.Dispatch<React.SetStateAction<UnsubmittedProductData>> | undefined
+    setProduct?: (p: UnsubmittedProductData) => void,
 ) {
     if (!setProduct) return;
     let newImages: (ImageData | UnsubmittedImageData)[]

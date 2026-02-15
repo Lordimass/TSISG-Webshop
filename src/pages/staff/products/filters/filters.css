@@ -1,0 +1,18 @@
+.filter-opt {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+
+    input[type="radio"]:checked + label {
+        background-color: var(--bs-btn-disabled-bg);
+    }
+    input[type="radio"]:not(:checked) + label {
+        background-color: var(--bs-btn-active-bg);
+    }
+}
+
+#text-filter-opt {
+    input {
+        width: 50%;
+    }
+}

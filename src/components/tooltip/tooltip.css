@@ -4,8 +4,8 @@
 }
 
 
-.tooltip {
-    display: inline;
+.tooltipp {
+    display: inline !important;
     min-width: 30vw;
     text-wrap: wrap;
     background-color: white;
@@ -18,5 +18,5 @@
 
     /* Position the tooltip text */
     position: fixed;
-    z-index: 10;
+    z-index: 10000;
 }

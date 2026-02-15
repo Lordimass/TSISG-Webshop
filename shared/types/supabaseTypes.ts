@@ -3,10 +3,8 @@ import type {RmOrder} from "@shared/types/royalMailTypes.ts";
 import {OrderProdCompressed} from "@shared/types/productTypes.ts";
 
 export interface ProductData extends RawProductData {
-    /** @DEPRECATED Please use `category.id` instead */
-    category_id: number
     /** The category the product belongs to */
-    category: CategoryData
+    category: CategoryData | null
     /** All images associated with this product */
     images: ImageData[]
     /** The tags attached to the product */
@@ -37,7 +35,7 @@ export interface RawProductData {
     group_name: string | null
     sort_order: number
     /** The ID of the category this product is in */
-    category_id: number
+    category_id: number | null
     /** The user facing description of the product, supports markdown (*italics*, **bold**, (links)[URL], etc.) */
     description: string | null
     /** Time at which the product was added to the database as an ISO date string */

@@ -927,12 +927,22 @@
             "type": "boolean"
           },
           "category": {
-            "$ref": "#/definitions/CategoryData",
+            "anyOf": [
+              {
+                "$ref": "#/definitions/CategoryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The category the product belongs to"
           },
           "category_id": {
             "description": "The ID of the category this product is in",
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "customer_metadata": {
             "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
@@ -1108,7 +1118,10 @@
           },
           "category_id": {
             "description": "The ID of the category this product is in",
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "customer_metadata": {
             "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
@@ -1666,12 +1679,22 @@
             "type": "boolean"
           },
           "category": {
-            "$ref": "#/definitions/CategoryData",
+            "anyOf": [
+              {
+                "$ref": "#/definitions/CategoryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The category the product belongs to"
           },
           "category_id": {
             "description": "The ID of the category this product is in",
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "customer_metadata": {
             "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",
@@ -2368,12 +2391,22 @@
             "type": "boolean"
           },
           "category": {
-            "$ref": "#/definitions/CategoryData",
+            "anyOf": [
+              {
+                "$ref": "#/definitions/CategoryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The category the product belongs to"
           },
           "category_id": {
             "description": "The ID of the category this product is in",
-            "type": "number"
+            "type": [
+              "number",
+              "null"
+            ]
           },
           "customer_metadata": {
             "description": "Additional information about the product which is displayed to the customer. Every key-value pair is shown as is.",

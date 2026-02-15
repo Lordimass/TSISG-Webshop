@@ -17,11 +17,10 @@ export default function Tooltip({msg}: {
 
         // Render tooltip at max width first then use that sizing to position it after.
         const tooltip = <div
-            className="tooltip"
+            className="tooltipp"
             id={`tooltip-${id.current}`}
             key={id.current}
             style={{
-                //left: (-1000)+"px",
                 top: (-1000)+"px",
             }}
         >
