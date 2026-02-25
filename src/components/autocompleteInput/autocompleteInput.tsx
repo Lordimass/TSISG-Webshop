@@ -1,4 +1,4 @@
-import React, {TextareaHTMLAttributes, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import "./autocompleteInput.css";
 import {AutocompleteProps} from "./lib.ts";
 
@@ -170,16 +170,8 @@ function useAutocomplete(defaultValue?: string) {
 /**
  * Helper component to actually construct the autocomplete component.
  */
-function AutoCompleteField({
-                               ghostRef,
-                               ghostText,
-                               inputRef,
-                               inputValue,
-                               placeholder,
-                               handleChange,
-                               handleKeyDown,
-                               id
-                           }: {
+function AutoCompleteField(
+    {ghostRef, ghostText, inputRef, inputValue, placeholder, handleChange, handleKeyDown, id}: {
     ghostRef: React.RefObject<HTMLTextAreaElement | null>
     ghostText: string
     inputRef: React.RefObject<HTMLTextAreaElement | null>

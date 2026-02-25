@@ -243,7 +243,7 @@ export function SquareImageBox({
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            onMouseOver={() => setIsHoverShowing(true)}
+            onMouseOver={() => {hoverable ? setIsHoverShowing(true) : null}}
         >
             <div className="square-image-spacer"/>
 

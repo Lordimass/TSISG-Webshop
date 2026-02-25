@@ -12,110 +12,112 @@ $headings-color: white;
 
 /************************ Variables ************************/
 :root, [data-bs-theme=light] {
-    --dark-purple: #501212;
-    --purple: #692230;
-    --light-purple: #b53a52;
-    --bone-white: #fdfaf4;
-    --yellow: #d7cfb5;
-    --bright-yellow: #ffd970;
-    --light-grey: #cfcfcf;
-    --jamie-grey: #838383;
-    --dark-grey: #4d4d4d;
-    --blue-black: #011335;
-    --red: #FB4141;
-    --green: #16C47F;
-    --light-green: #b3ffe1;
+  --dark-purple: #501212;
+  --purple: #692230;
+  --light-purple: #b53a52;
+  --bone-white: #fdfaf4;
+  --yellow: #d7cfb5;
+  --bright-yellow: #ffd970;
+  --light-grey: #cfcfcf;
+  --jamie-grey: #838383;
+  --dark-grey: #4d4d4d;
+  --blue-black: #011335;
+  --red: #FB4141;
+  --green: #16C47F;
+  --light-green: #b3ffe1;
 }
 
 /************************ Fonts ************************/
 
 @font-face {
-    font-family: "Perfect Penmanship";
-    src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//KGPerfectPenmanship.otf") format("opentype");
+  font-family: "Perfect Penmanship";
+  src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//KGPerfectPenmanship.otf") format("opentype");
 }
 
 @font-face {
-    font-family: "Backso";
-    src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//Backso.otf");
+  font-family: "Backso";
+  src: url("https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets//Backso.otf");
 }
 
 /************************ Common Styling ************************/
 body {
-    margin: 0;
-    max-width: 100%;
-    overflow-x: hidden;
+  margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 #root {
-    display: flex;
-    min-height: 100vh;
-    flex-direction: column;
-    justify-content: space-between;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 p {
-    margin: 0 !important;
-    font-size: 16px;
-    font-family: "Perfect Penmanship", sans-serif;
+  margin: 0 !important;
+  font-size: 16px;
+  font-family: "Perfect Penmanship", sans-serif;
 }
 
 ul {
-    font-family: "Perfect Penmanship", sans-serif;
+  font-family: "Perfect Penmanship", sans-serif;
 }
 
 .p-small {
-    font-size: 12px;
+  font-size: 12px;
 }
 
 h1 {
-    position: relative;
-    top: 0.1em;
-    margin: 0 !important;
-    color: white;
-    font-family: "Backso", sans-serif;
+  position: relative;
+  top: 0.1em;
+  margin: 0 !important;
+  color: white;
+  font-family: "Backso", sans-serif;
 }
 
 h2 {
-    margin: 0;
-    color: white;
-    font-family: "Backso", sans-serif;
+  margin: 0;
+  color: white;
+  font-family: "Backso", sans-serif;
 }
 
 a {
-    font-family: "Perfect Penmanship", sans-serif;
-    color: black;
+  font-family: "Perfect Penmanship", sans-serif;
+  color: black;
 }
 
 hr {
-    margin: 0;
-    width: 100%;
-    height: 1px;
-    background-color: var(--jamie-grey);
-    border: none;
+  margin: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--jamie-grey);
+  border: none;
 }
 
 .content {
-    display: flex;
-    min-height: 75vh;
-    flex-direction: column;
-    flex-grow: 1;
-    background-color: var(--yellow);
-    overflow-x: hidden;
+  display: flex;
+  width: 100vw;
+  max-width: 100vw;
+  min-height: 75vh;
+  flex-direction: column;
+  flex-grow: 1;
+  background-color: var(--yellow);
+  overflow-x: hidden;
 }
 
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 /* Superscript and subscript text */
 .superscript, .subscript {
-    font-size: xx-small;
+  font-size: xx-small;
 }
 
 .superscript {
-    vertical-align: top;
+  vertical-align: top;
 }
 
 .subscript {
-    vertical-align: bottom;
+  vertical-align: bottom;
 }

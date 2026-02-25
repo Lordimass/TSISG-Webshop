@@ -21,6 +21,7 @@ import {getPath} from "../../lib/paths.ts";
 import {ProductGroup} from "./productGroup.tsx";
 import BasketModifier from "../../components/ticker/basketModifier/basketModifier.tsx";
 import {snakeToTitleCase} from "@shared/functions/functions.ts";
+import RelatedProducts from "../../components/productCarousel/relatedProducts/relatedProducts.tsx";
 
 /** Dedicated page for a product, including an editor for admins. */
 export default function ProdPage(
@@ -184,6 +185,8 @@ export default function ProdPage(
             <AdditionalInformation prod={product}/>
 
             {isEditMode ? <ProductEditor/> : <></>}
+
+            <RelatedProducts sku={sku}/>
 
         </ProductContext.Provider></Page>)
 }

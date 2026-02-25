@@ -4,13 +4,13 @@
  * @returns Human-readable string
  */
 export function formatBytes(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let i = 0;
-    while (bytes >= 1024 && i < units.length - 1) {
-        bytes /= 1024;
-        i++;
-    }
-    return `${bytes.toFixed(2)} ${units[i]}`;
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let i = 0;
+  while (bytes >= 1024 && i < units.length - 1) {
+    bytes /= 1024;
+    i++;
+  }
+  return `${bytes.toFixed(2)} ${units[i]}`;
 }
 
 /**
@@ -19,7 +19,7 @@ export function formatBytes(bytes: number): string {
  * @returns The given string, but in `Title Case`.
  */
 export function snakeToTitleCase(str: string): string {
-        return str
-            .replace(/_/g, ' ') // Replace `_` with ` `
-            .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalise each word,
+  return str
+    .replace(/_/g, " ") // Replace `_` with ` `
+    .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalise each word,
 }

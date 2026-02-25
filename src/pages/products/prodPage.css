@@ -2,6 +2,12 @@
     gap: 10px;
     padding-bottom: 10px;
     align-items: center;
+
+    h2 {
+        color: var(--blue-black);
+        margin-bottom: 5px;
+        font-size: 25px;
+    }
 }
 
 .go-home-button {
@@ -185,11 +191,6 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     min-height: min-content;
-
-    h2 {
-        color: var(--blue-black);
-        margin-bottom: 5px;
-    }
 
     .additional-product-information-container {
         display: flex;

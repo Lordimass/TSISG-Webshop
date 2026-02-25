@@ -1,0 +1,42 @@
+.product-relation-editor {
+    width: calc(100% - 2em);
+    background: white;
+    border-radius: 1.5em;
+    padding: 16px;
+    h2 {
+        color: black;
+    }
+
+    .list-group-item {
+        display: flex;
+        button {
+            width: 2ch;
+            height: 2ch;
+            padding: 0;
+            line-height: 2ch;
+        }
+    }
+
+    .list-group-item:first-of-type {
+        flex-direction: column;
+        gap: 10px;
+        .refresh-carousel-button {
+            width: max-content;
+            height: max-content;
+            padding: 5px;
+        }
+    }
+
+    form {
+        display: flex;
+        width: 100%;
+
+        input[type="submit"], button {
+            height: 2em;
+        }
+    }
+
+    .csa-container .ghost-input {
+        background: white;
+    }
+}

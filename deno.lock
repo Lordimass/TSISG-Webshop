@@ -62,6 +62,7 @@
         "npm:nodemon@^3.1.11",
         "npm:octokit@^5.0.4",
         "npm:playwright@^1.57.0",
+        "npm:prettier@^3.8.1",
         "npm:react-bootstrap@^2.10.10",
         "npm:react-docgen-typescript@^2.4.0",
         "npm:react-dom@^19.1.1",
