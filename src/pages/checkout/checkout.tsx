@@ -12,7 +12,7 @@ import {SiteSettingsContext} from "../../app";
 import {checkStock, isSessionExpired, redirectIfEmptyBasket, validateEmail} from "./checkoutFunctions.ts";
 import {page_title} from "../../lib/consts.ts";
 import React, {FormEvent, useContext, useEffect, useRef, useState} from "react";
-import {StripeCheckoutTotalSummary} from '@stripe/stripe-js';
+import {StripeCheckoutContact, StripeCheckoutTotalSummary} from '@stripe/stripe-js';
 import {
     AddressElement,
     CheckoutProvider,
@@ -20,7 +20,7 @@ import {
     PaymentElement,
     useCheckout
 } from '@stripe/react-stripe-js';
-import {addressElementOpts, checkoutProviderOpts, paymentElementOpts, stripePromise} from "./consts.ts";
+import {checkoutProviderOpts, paymentElementOpts, stripePromise} from "./consts.ts";
 import {NotificationsContext} from "../../components/notification/lib";
 import {triggerAddPaymentInfo, triggerAddShippingInfo, triggerBeginCheckout} from "../../lib/analytics/analytics";
 import Page from "../../components/page/page";
@@ -96,10 +96,17 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         setIsLoading(true);
         
         console.log("Attempting to check out...")
-        const error: any = await checkout.confirm();
-        if (error) {
-            notify(error.error.message)
+        try {
+            const res = await checkout.updateBillingAddress(shippingAddress.current);
+            console.log(res)
+            const error: any = await checkout.confirm();
+            if (error) {
+                notify(error.error.message)
+            }
+        } catch (e) {
+            notify("Something went wrong!: "+ e)
         }
+
         setIsLoading(false);
     }
 
@@ -116,15 +123,13 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     const [addressComplete, setAddressComplete] = useState(false);
     const countryChanged = useRef(true);
     const paymentInfoComplete = useRef(false)
-    const country = useRef<string>("")
+    const shippingAddress = useRef<StripeCheckoutContact>(null)
 
     // Handle changes in address and update shipping options
     const addressElement = checkout.getShippingAddressElement()
-    const shippingAddressElement = checkout.getShippingAddressElement()
     addressElement?.once("change", async (e) => {
-        countryChanged.current = (e.value.address.country !== country.current) || countryChanged.current
-        country.current = e.value.address.country
-
+        countryChanged.current = (e.value.address.country !== shippingAddress.current?.address.country) || countryChanged.current
+        shippingAddress.current = e.value
         // Don't bother checking until the full address is complete
         if (!e.complete) {
             setAddressComplete(false);
@@ -175,7 +180,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
 
     // Run checks to see if checkout is ready or not once fields have all been validated
     useEffect(() => {async function checkReadyToCheckout() {
-        let ready = isEmailValid && addressComplete
+        let ready = isEmailValid && addressComplete && paymentInfoComplete.current;
 
         console.log("Ready to checkout: ", ready);
         if (ready) {
@@ -199,7 +204,7 @@ function CheckoutAux({onReady}: {onReady: Function}) {
         }
         setReadyToCheckout(ready);
 
-    } checkReadyToCheckout().then()}, [isEmailValid, addressComplete])
+    } checkReadyToCheckout().then()}, [isEmailValid, addressComplete, paymentInfoComplete.current]);
 
     // Kill switch
     const siteSettings = useContext(SiteSettingsContext)
@@ -217,7 +222,8 @@ function CheckoutAux({onReady}: {onReady: Function}) {
     return (<>
         <div className="checkout-left" id="checkout-left">
             <form id="payment-form" ref={formRef}>
-                <AddressElement options={addressElementOpts}/>
+                <AddressElement options={{mode: "shipping"}}/>
+
                 <EmailElement
                     setIsValid={setIsEmailValid} 
                     value={email} 
@@ -269,7 +275,8 @@ function EmailElement({
     type?: string, 
     placeholder?: string
     validate: (value: string) => Promise<{isValid: boolean, message?: string}>
-}) {
+}
+) {
     async function handleChange(e: any) {
         setValue(e.target.value)
         await update(e.target.value);
