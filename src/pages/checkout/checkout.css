@@ -1,6 +1,14 @@
 #checkout-content {
     display: flex;
     flex-direction: row;
+  > div {
+    width: 100%;
+    flex-grow: 1;
+    padding: 0 0 20px 0;
+  }
+  .embedded-checkout {
+    background-color: var(--dark-purple);
+  }
 }
 
 .checkout-left, .checkout-right {

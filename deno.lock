@@ -40,7 +40,7 @@
         "npm:@vitest/browser-playwright@^4.0.16",
         "npm:@vitest/coverage-v8@^4.0.16",
         "npm:ajv-formats@^3.0.1",
-        "npm:ajv@^8.17.1",
+        "npm:ajv@8.18.0",
         "npm:baseline-browser-mapping@^2.9.9",
         "npm:browser-image-compression@^2.0.2",
         "npm:chokidar-cli@3",

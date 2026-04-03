@@ -1,10 +1,10 @@
-import { JSX } from "react"
+import {ReactNode} from "react"
 
 
 // TODO: Merge canonical, metaDescription, & noindex into one object param with each of these keys
 // TODO: Merge loadCondition & loadingText into one object param with each of these keys.
 export type PageParams = {
-    children?: JSX.Element[] | JSX.Element
+    children?: ReactNode
     /** The ID of the div holding the page content */
     id?: string
     /** Canonical URL for the page, will be embedded in the page header. */

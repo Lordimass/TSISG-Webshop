@@ -1,4 +1,4 @@
-import { getGAClientId, getGASessionId } from "../../lib/analytics/analytics"
+import {getGAClientId, getGASessionId} from "../../lib/analytics/analytics"
 import {StockDiscrepency} from "@shared/types/types"
 import {DEFAULT_CURRENCY, DEFAULT_LOCALE} from "../../localeHandler.ts";
 import {getCurrency} from "locale-currency";
@@ -9,6 +9,7 @@ import {supabase} from "../../lib/supabaseRPC.tsx";
 import {Stripe as StripeNS} from "stripe";
 import {CheckoutContextValue} from "@stripe/react-stripe-js";
 import {ProductInBasket} from "@shared/types/productTypes.ts";
+import {StripeEmbeddedCheckoutShippingDetails} from "@stripe/stripe-js";
 
 export function redirectIfEmptyBasket() {
     const basketString: string | null = localStorage.getItem("basket")
@@ -23,7 +24,7 @@ export function redirectIfEmptyBasket() {
 
 /**
  * Creates a Stripe Checkout Session.
- * @return The client secrete for the created checkout session.
+ * @return The client secret for the created checkout session.
  */
 export async function createCheckoutSession(): Promise<string> {
     // Get the user's location from the query string since we can't access Context here.
@@ -33,7 +34,7 @@ export async function createCheckoutSession(): Promise<string> {
     const currency: Currency = getCurrency(locale) as Currency || DEFAULT_CURRENCY;
 
     // Construct parameters for request to createCheckoutSession
-    const prices: Array<Object> = await fetchStripePrices()
+    const prices = await fetchStripePrices()
     const basketString = localStorage.getItem("basket")
     const gaClientID = getGAClientId();
     const gaSessionID = await getGASessionId();
@@ -57,7 +58,15 @@ export async function createCheckoutSession(): Promise<string> {
     return body.client_secret
 }
 
-export async function fetchStripePrices(): Promise<Array<Object>> {
+export async function updateShippingOptions(checkoutID: string, shippingDetails: StripeEmbeddedCheckoutShippingDetails) {
+    return await fetch(window.location.origin + "/.netlify/functions/getShippingOptions", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({checkoutID, shipping_details: shippingDetails})
+    })
+}
+
+export async function fetchStripePrices(): Promise<any[]> {
     const oldBasket: ProductInBasket[] = getBasketProducts()
     const {stripePrices, basket} = await fetch(".netlify/functions/getStripePrices", {
         method: "POST",

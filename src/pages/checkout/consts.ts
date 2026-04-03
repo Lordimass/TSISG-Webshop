@@ -1,12 +1,13 @@
 import {loadStripe, Stripe, StripeAddressElementOptions, StripePaymentElementOptions} from "@stripe/stripe-js";
-import {createCheckoutSession} from "./checkoutFunctions.ts";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY
 if (!STRIPE_KEY) {
     console.error("No VITE_STRIPE_KEY!")
 }
 export const stripePromise: Promise<Stripe | null> = STRIPE_KEY ? loadStripe(
-    STRIPE_KEY
+    STRIPE_KEY, {
+        betas: ["custom_checkout_server_updates_1"]
+    }
 ) : new Promise(() => {
 });
 
@@ -36,17 +37,6 @@ export const appearance: any = {
             marginBottom: "6px"
         }
     }
-};
-
-export const checkoutProviderOpts = {
-    fetchClientSecret: createCheckoutSession,
-    elementsOptions: {
-        appearance,
-        fonts: [{
-            cssSrc: "https://iumlpfiybqlkwoscrjzt.supabase.co/storage/v1/object/public/other-assets/PerfectPenmanship.css"
-        }]
-    },
-    adaptivePricing: {allowed: true},
 };
 
 export const paymentElementOpts: StripePaymentElementOptions = {
