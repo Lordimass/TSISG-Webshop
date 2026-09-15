@@ -22,6 +22,7 @@ import useLocale, {LocaleContext} from "./localeHandler.ts";
 import {getRoute} from "./lib/paths.ts";
 import {ErrorBoundary} from "react-error-boundary"
 import Fallback from "./pages/fallback/fallback.tsx";
+import GlowRedirect from "./pages/glowRedirect/glowRedirect.tsx";
 
 // Run ./launch-dev-server.ps1 to launch development environment. This does the following things:
 //  - Runs stripe listen --forward-to localhost:8888/.netlify/functions/createOrder --events checkout.session.completed
@@ -85,6 +86,8 @@ export function App() {
                         <Policy file_name='cancellation' title='Cancellation Policy' canonical='cancellation'/>}/>
                     <Route path={getRoute("SHIPPING_POLICY")} element={
                         <Policy file_name='shipping' title='Shipping Policy' canonical='shipping'/>}/>
+
+                    <Route path={getRoute("GLOW_REDIRECT")} element={<GlowRedirect/>}/>
 
                     <Route path={getRoute("404")} element={<Page404/>}/>
                 </Routes>

@@ -7,24 +7,6 @@ import ShippingCurrencyOptions = Stripe.ShippingRate.FixedAmount.CurrencyOptions
 import PriceCurrencyOptions = Stripe.ProductCreateParams.DefaultPriceData.CurrencyOptions;
 
 /**
- * Checks if two objects contain the same data
- * @param obj1 First object
- * @param obj2 Second object
- * @returns True if objects are equal, false otherwise
- */
-export function checkObjectsEqual(obj1: any, obj2: any) {
-    const obj1Length = Object.keys(obj1).length;
-    const obj2Length = Object.keys(obj2).length;
-
-    if(obj1Length === obj2Length) {
-        return Object.keys(obj1).every(
-            key => obj2.hasOwnProperty(key)
-                && obj2[key] === obj1[key]);
-    }
-    return false;
-}
-
-/**
  * Sends a GA4 event.
  * @param payload - The event payload.
  * @param debug - Whether to enable debug mode. Enabling this prevents events from

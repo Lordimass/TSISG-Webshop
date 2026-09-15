@@ -26,6 +26,7 @@ const ROUTES = {
     REPORT: "/staff/reports/*",
     PRODUCT: "/products/*",
     REFUNDS_POLICY: "/refunds",
+    GLOW_REDIRECT: "/glow/*",
     "404": "*"
 }
 

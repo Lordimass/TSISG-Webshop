@@ -6,8 +6,6 @@ import {Currency} from "dinero.js";
 import {getPath} from "../../lib/paths.ts";
 import {getBasketProducts} from "../../lib/lib.tsx";
 import {supabase} from "../../lib/supabaseRPC.tsx";
-import {Stripe as StripeNS} from "stripe";
-import {CheckoutContextValue} from "@stripe/react-stripe-js";
 import {ProductInBasket} from "@shared/types/productTypes.ts";
 import {StripeEmbeddedCheckoutShippingDetails} from "@stripe/stripe-js";
 
@@ -85,12 +83,6 @@ export async function fetchStripePrices(): Promise<any[]> {
     return stripePrices;
 }
 
-export async function validateEmail(email: string, checkout: any) {
-    const updateResult = await checkout.updateEmail(email);
-    const isValid = updateResult.type !== "error";
-    return { isValid, message: !isValid ? updateResult.error.message : null};
-}
-
 /**
  * Find discrepencies between the basket quantities and fresh stock numbers from the database.
  */
@@ -131,23 +123,4 @@ export async function checkStock() {
         })
     })
     return discrepencies
-}
-
-/**
- * Gets the current status of the session. (i.e. whether it's currently expired.)
- * @returns <code>true</code> if the session is expired,
- * <code>false</code> if it is not
- */
-export async function isSessionExpired(checkout: CheckoutContextValue) {
-    const response = await fetch("/.netlify/functions/getCheckoutSession", {
-        method: "POST",
-        body: checkout.id
-    })
-    const body = await new Response(response.body).text()
-    if (!response.ok) {
-        console.error(body)
-        return true;
-    }
-    const session: StripeNS.Checkout.Session = JSON.parse(body)
-    return session.status != "open";
 }

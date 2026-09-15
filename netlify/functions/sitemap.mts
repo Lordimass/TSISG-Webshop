@@ -3,7 +3,7 @@
  * otherwise, navigate directly to this function for testing.
  */
 
-import type { Context } from "@netlify/functions";
+import type {Context} from "@netlify/functions";
 
 export type Route = {
   /** The path to the page, e.g. products/256 */
@@ -18,7 +18,7 @@ export const baseUrl = "https://thisshopissogay.com";
 
 export default async function handler(_request: Request, _context: Context) {
   const xml = `
-  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" generatedBy="WIX">
+  <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
       <loc>${baseUrl}/sitemapStatic.xml</loc>
     </sitemap>
