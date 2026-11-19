@@ -1,0 +1,4 @@
+.price-range {
+    display: flex;
+    gap: 0.5ch;
+}

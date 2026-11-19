@@ -1,0 +1,9 @@
+.toast-container {
+  margin: min(5rem, 10vh) 5px;
+  position: fixed;
+  width: max(300px, 35vw);
+}
+
+.toast-header > img {
+  max-height: 2em;
+}

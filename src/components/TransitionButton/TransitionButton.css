@@ -1,0 +1,12 @@
+.lightsChangeVideoLink {
+    display: flex;
+}
+
+.lightsChangeVideoLink.square {
+    width: min(400px, 40%);
+    aspect-ratio: 1 / 1;
+}
+
+.lightsChangeVideo {
+    width: 100%;
+}

@@ -1,321 +1,147 @@
-import {useEffect, useRef, useState} from "react";
-import "./squareImageBox.css";
-import {ImageData} from "@shared/types/types";
+"use client";
 
-import {getImageURL} from "@shared/functions/images.ts";
+import React, {useEffect, useRef, useState} from "react";
+import {AnimatePresence, motion} from "motion/react";
+import {isVideo, MinimalImage} from "@/lib";
+import {Carousel, type CarouselProps} from "react-bootstrap";
+import {type CarouselRef} from "react-bootstrap/cjs/Carousel";
+import "./SquareImageBox.css"
+import TransitionVideo from "@/components/TransitionButton/TransitionVideo.tsx";
 
-type SquareImageBoxProps = {
-    /**
-     * Source path of the image, ONLY use if displaying only one image, otherwise use images parameter.
-     * This parameter also supports ImageData objects
-     */
-    image?: ImageData | string;
-    /**
-     * Alt text of the image, ONLY use if displaying only one image, otherwise use images parameter. Not
-     * required if using ImageData for image parameter.
-     */
-    alt?: string | null;
+interface SquareImageBoxProps extends CarouselProps {
+    /** Image or images to display. */
+    image?: MinimalImage | MinimalImage[];
     /** Size of the box as a dynamic CSS string, defaults to 200px. */
     size?: string;
-    /**
-     * An array of objects with image_url:string and alt:string (optional). Will render an image carousel
-     * if this is supplied. Also supports ImageData objects
-     */
-    images?: (ImageData | { image_url?: string; alt?: string })[];
-    /**
-     * Loading eagerness of images, "eager" or "lazy"
-     */
+    /** Loading eagerness of images, "eager" or "lazy". Defaults to `lazy`. */
     loading?: "eager" | "lazy";
-};
+    /** Whether hovering over the image should blow it up into a full screen preview. Defaults to `false`. */
+    hoverable?: boolean;
+}
 
 /**
- * Displays an image coerced into a square box by using
- * blurred versions of the image as letterboxing.
- *
- * When multiple images are supplied, a reactive image carousel
- * is displayed in this same square box.
+ * Displays an image coerced into a square box by using blurred versions of the image as letterboxing.
+ * When multiple images are supplied, a reactive image carousel is displayed in this same square box.
  */
-export function SquareImageBox({
-   image,
-   alt,
-   size = "200px",
-   images,
-   loading = "lazy",
-}: SquareImageBoxProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const touchStartX = useRef<number | null>(null);
-    const oldImages = useRef(images);
-    const fullyLoaded = useRef(false);
-    const hasMounted = useRef(false); // used to skip first loop-detection pass
+export default function SquareImageBox({
+                                           image,
+                                           size = "200px",
+                                           loading = "lazy",
+                                           hoverable = false,
+                                           ...props
+                                       }: SquareImageBoxProps) {
+    const images = image instanceof Array ? image : [image];
+    const isCarousel = images.length > 1;
 
-    // Set true by default to suppress the initial transition/jump
-    const [isDragging, setIsDragging] = useState(true);
-
-    const [index, setIndex] = useState(images && images.length > 1 ? 1 : 0);
-    const [dragOffset, setDragOffset] = useState(0);
-    const [containerWidth, setContainerWidth] = useState(0);
-
-    const isCarousel = !!images && images.length > 1;
-    const areImagesData =
-        (isCarousel && (images?.[0] as ImageData)?.id !== undefined) ||
-        (!isCarousel && image && typeof image !== "string");
-
-    // Normalize image data
-    let normalizedImages: { image_url?: string; alt?: string }[] | undefined = undefined;
-    if (images) {
-        normalizedImages = images.map((img) => {
-            if ((img as ImageData).id !== undefined) {
-                const data = img as ImageData;
-                return {
-                    image_url: getImageURL(data, loading === "eager"),
-                    alt: data.alt,
-                };
-            } else {
-                return {image_url: (img as any).image_url, alt: (img as any).alt};
-            }
-        });
-    }
-
-    let normalizedImage = image as string | undefined;
-    let normalizedAlt = alt;
-
-    if (areImagesData && !isCarousel && image) {
-        normalizedAlt = (image as ImageData).alt;
-        normalizedImage = getImageURL(image as ImageData, loading === "eager");
-    }
-
-    if (!isCarousel && normalizedImages?.length === 1) {
-        normalizedImage = normalizedImages[0].image_url;
-        normalizedAlt = normalizedImages[0].alt;
-    }
-
-    const extendedImages = isCarousel
-        ? [
-            normalizedImages![normalizedImages!.length - 1],
-            ...normalizedImages!,
-            normalizedImages![0],
-        ]
-        : [];
-
-    function handleTouchStart(e: React.TouchEvent) {
-        touchStartX.current = e.touches[0].clientX;
-        setIsDragging(true);
-    }
-
-    function handleTouchEnd(e: React.TouchEvent) {
-        if (touchStartX.current === null || !isCarousel) return;
-        const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-
-        if (deltaX > 200) handlePrev();
-        else if (deltaX < -200) handleNext();
-
-        setDragOffset(0);
-        touchStartX.current = null;
-        setTimeout(() => setIsDragging(false), 50);
-    }
-
-    function handleTouchMove(e: React.TouchEvent) {
-        if (touchStartX.current === null || !isCarousel) return;
-        const deltaX = e.touches[0].clientX - touchStartX.current;
-        setDragOffset(Math.max(-containerWidth, Math.min(containerWidth, deltaX)));
-    }
-
-    function handlePrev() {
-        setIndex((prev) => prev - 1);
-    }
-
-    function handleNext() {
-        setIndex((prev) => prev + 1);
-    }
-
-    function getRealIndex(currentIndex: number, imagesLength: number) {
-        if (currentIndex === 0) return imagesLength - 1;
-        if (currentIndex === imagesLength + 1) return 0;
-        return currentIndex - 1;
-    }
-
-    // Watch images for changes
+    // Patches issue with hot swapping to a single image carousel where the image wouldn't otherwise show if the carousel
+    // had been scrolled past the first image.
+    const carouselRef = useRef<CarouselRef>(null);
     useEffect(() => {
-        if (!normalizedImages) return;
-        const changed = normalizedImages.some(
-            (img, i) =>
-                img.image_url !== oldImages.current?.[i]?.image_url ||
-                img.alt !== oldImages.current?.[i]?.alt
-        );
-        if (changed) {
-            setIndex(normalizedImages.length > 1 ? 1 : 0);
-            oldImages.current = normalizedImages;
-            fullyLoaded.current = true;
+        if (carouselRef.current && !(image instanceof Array)) {
+            carouselRef.current.next();
         }
-    }, [normalizedImages]);
+    }, [image]);
 
-    // Track container width
-    useEffect(() => {
-        if (!containerRef.current) return;
-        const updateSize = () => {
-            if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth);
-            }
-        };
-        // Run immediately
-        updateSize();
-        // Observe the element
-        const observer = new ResizeObserver(updateSize);
-        observer.observe(containerRef.current);
-        return () => {
-            observer.disconnect();
-        };
-    }, []);
-
-    // Re-enable transitions **only** after layout is established.
-    // Wait until containerWidth is measured (non-zero) and, for carousels,
-    // normalizedImages are present (so initial index is meaningful).
-    useEffect(() => {
-        if (containerWidth <= 0) return;
-        if (isCarousel && !normalizedImages) return;
-
-        // Give the browser one paint/frame where the initial transform (no-transition)
-        // is applied, then enable transitions so later moves animate.
-        let timeoutId: number | undefined;
-        const raf = requestAnimationFrame(() => {
-            timeoutId = window.setTimeout(() => setIsDragging(false), 500);
-        });
-
-        return () => {
-            cancelAnimationFrame(raf);
-            if (timeoutId) clearTimeout(timeoutId);
-        };
-    }, [containerWidth, normalizedImages, isCarousel]);
-
-    // Infinite loop jump logic
-    useEffect(() => {
-        if (!isCarousel || !fullyLoaded.current || !normalizedImages) return;
-
-        // Skip first run so we don't trigger "jump to last image" on mount
-        if (!hasMounted.current) {
-            hasMounted.current = true;
-            return;
-        }
-
-        if (index === 0) {
-            setTimeout(() => {
-                setIsDragging(true);
-                setIndex(normalizedImages.length);
-                setTimeout(() => setIsDragging(false), 20);
-            }, 300);
-        } else if (index === normalizedImages.length + 1) {
-            setTimeout(() => {
-                setIsDragging(true);
-                setIndex(1);
-                setTimeout(() => setIsDragging(false), 20);
-            }, 300);
-        }
-    }, [index, isCarousel, normalizedImages]);
+    const [isHoverShowing, setIsHoverShowing] = useState(false);
+    const [activeImage, setActiveImage] = useState<MinimalImage | undefined>(
+        images[0],
+    );
 
     return (
-        <div
-            className="square-image-box"
-            ref={containerRef}
-            style={{width: size, height: containerWidth}}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-        >
-            <div className="square-image-spacer"/>
+        <>
+            <HoverPopup image={activeImage} isHoverShowing={isHoverShowing}/>
 
-            {isCarousel && normalizedImages ? ( // Carousel mode
-                <div
-                    className="square-image-carousel-track"
-                    style={{
-                        transform: `translateX(${-index * containerWidth + dragOffset}px)`,
-                        transition: isDragging ? "none" : "transform 0.3s ease",
-                        width:
-                            containerWidth > 0
-                                ? `${containerWidth * extendedImages.length}px`
-                                : "100%",
-                        height: `${containerWidth}px`,
-                    }}
-                >
-                    {extendedImages.map((img, i) => (
-                        <div
-                            className="square-image-carousel-slide"
-                            key={i}
-                            style={{
-                                width: `${containerWidth}px`,
-                                minWidth: `${containerWidth}px`,
-                                flex: `0 0 ${containerWidth}px`,
-                            }}
-                        >
-                            <img
-                                src={img.image_url}
-                                alt=""
-                                aria-hidden="true"
-                                className="square-image-blur"
-                                loading={loading}
-                            />
-                            <div className="square-image-center">
-                                <img
-                                    src={img.image_url}
-                                    alt={img.alt}
-                                    className="square-image-foreground"
-                                    loading={loading}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : ( // Single image mode
-                <div className="square-image-center">
-                    <img
-                        src={normalizedImage}
-                        alt=""
-                        aria-hidden="true"
-                        className="square-image-blur"
-                        loading={loading}
-                    />
-                    <div className="square-image-center">
+            <Carousel
+                {...props}
+                className="square-image-box"
+                style={{width: size}}
+                indicators={isCarousel}
+                ref={carouselRef}
+                controls={isCarousel}
+                onMouseOver={() => setIsHoverShowing(hoverable)}
+                onMouseOut={() => setIsHoverShowing(false)}
+                onSelect={(eventKey) => setActiveImage(images[eventKey])}
+            >
+                {images.map((img, i) => (
+                    <Carousel.Item
+                        key={i}
+                        className="square-image-carousel-slide ratio ratio-1x1"
+                    >
                         <img
-                            src={normalizedImage}
-                            alt={normalizedAlt ?? undefined}
-                            className="square-image-foreground"
+                            src={img?.uri}
+                            alt=""
+                            aria-hidden="true"
+                            className="square-image-blur"
                             loading={loading}
                         />
-                    </div>
-                </div>
-            )}
 
-            {isCarousel && normalizedImages && ( // Navigation controls in carousel mode
-                <>
-                    <button
-                        onClick={handlePrev}
-                        className="square-image-nav square-image-prev"
-                        aria-label="Previous image"
-                    >
-                        ‹
-                    </button>
-                    <button
-                        onClick={handleNext}
-                        className="square-image-nav square-image-next"
-                        aria-label="Next image"
-                    >
-                        ›
-                    </button>
+                        <div className="square-image-center">
+                            {isVideo(img?.uri)
+                                ? <TransitionVideo videoSrc={img?.uri}/>
+                                : <Image className="square-image-foreground" img={img}/>
+                            }
+                        </div>
+                    </Carousel.Item>
+                ))}
+            </Carousel>
+        </>
+    );
+}
 
-                    <div className="square-image-dots">
-                        {normalizedImages.map((_, i) => (
-                            <span
-                                key={i}
-                                className={`square-image-dot${
-                                    i === getRealIndex(index, normalizedImages.length)
-                                        ? " active"
-                                        : ""
-                                }`}
-                                onClick={() => setIndex(i + 1)}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-        </div>
+function HoverPopup({
+                        image,
+                        isHoverShowing,
+                    }: {
+                        image?: MinimalImage;
+                        isHoverShowing?: boolean;
+                    }
+) {
+    if (!image?.uri) return null;
+
+    return (
+        <AnimatePresence>
+            {isHoverShowing ? (
+                <motion.div
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
+                    transition={{duration: 0.2}}
+                    className="image-box-hover"
+                    style={{pointerEvents: "none"}}
+                >
+                    <motion.img
+                        initial={{opacity: 0, y: 64}}
+                        animate={{opacity: 1, y: 0}}
+                        exit={{opacity: 0, y: -64}}
+                        src={image.uri}
+                        alt={image.alt}
+                        aria-hidden="true"
+                    />
+                </motion.div>
+            ) : null}
+        </AnimatePresence>
+    );
+}
+
+/** Provides an element with a placeholder instead of the image if no image exists */
+function Image({
+                   img,
+                   className,
+                   loading,
+               }: {
+    img?: MinimalImage;
+    className: string;
+    loading?: "eager" | "lazy";
+}) {
+    if (!img?.uri) {
+        return (
+            <div className="no-image">
+                <span>?</span>
+            </div>
+        );
+    }
+
+    return (
+        <img src={img.uri} alt={img.alt} className={className} loading={loading}/>
     );
 }

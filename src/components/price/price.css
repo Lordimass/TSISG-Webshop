@@ -1,49 +1,54 @@
 .price {
+  display: flex;
+  margin: 0 2px 0 2px;
+
+  p {
+    margin: 0;
+    letter-spacing: 1px;
+  }
+
+  .price-major, .price-minor {
+    position: relative;
+    bottom: 3px;
+  }
+
+  .price-major {
+    font-size: 22px;
+  }
+
+  .price-left {
     display: flex;
-    height: 22px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 2px;
+    text-align: end;
+    box-sizing: border-box;
+  }
 
-    .price-major {
-        font-size: 22px;
-        letter-spacing: 1px;
-    }
+  .price-symbol {
+    font-size: 15px;
+    height: 15px
+  }
 
-    .price-left {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        margin-right: 2px;
-        text-align: end;
-        box-sizing: border-box;
-    }
+  .price-minor {
+    font-size: 13px;
+    margin-left: 1px;
+  }
 
-    .price-symbol {
-        font-size: 15px;
-        height: 15px
-    }
+  .price-currency {
+    font-size: 9px;
+    height: 7px;
+    color: dimgray;
+    align-self: end;
+  }
 
-    .price-minor {
-        font-size: 13px;
-        height: 13px;
-        margin-left: 1px;
-        letter-spacing: 1px;
-    }
-
-    .price-currency {
-        font-size: 9px;
-        height: 7px;
-        color: var(--jamie-grey);
-        align-self: end;
-    }
-
-    .price-tax-disclaimer {
-        font-size: 12px;
-        height: 10px;
-        margin-left: 2px;
-        letter-spacing: -0.7px;
-        color: var(--jamie-grey);
-        align-self: end;
-    }
+  .price-tax-disclaimer {
+    font-size: 12px;
+    position: relative;
+    bottom: 2px;
+    letter-spacing: -0.7px;
+    color: dimgray;
+    align-self: end;
+  }
 
 }

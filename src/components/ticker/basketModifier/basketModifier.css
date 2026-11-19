@@ -1,75 +1,65 @@
 .zero-quantity-basket-modifier {
-    border: none;
-    height: 50px;
-    max-height: 100%;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+
+  p {
+    margin: 0;
     width: 100%;
-    min-width: 175px;
-    box-sizing: border-box;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 
-    button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-
-        color: white;
-        text-decoration: none;
-
-        width: 100%;
-        height: 100%;
-
-        background-color: var(--purple);
-        border-radius: 20px;
-        border: none;
-
-        transition-duration: 100ms, 200ms;
-        transition-property: font-size, background-color;
-
-        font-size: 26px;
-        font-family: "Backso", sans-serif;
-        gap: 3px;
-        font-weight: bold;
-
-        i {
-            height: 1em;
-            font-size: 26px;
-            margin-bottom: 3px;
-            transition: font-size 100ms;
-        }
-    }
-
-    button:hover:not(:disabled) {
-        font-size: 30px;
-        background-color: var(--light-purple);
-
-        i {
-            font-size: 32px
-        }
-    }
-
-    button:disabled {
-        cursor: not-allowed;
-        background-color: var(--jamie-grey);
-    }
-}
-
-.product-group-basket-modifier {
+  button {
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
+
     color: white;
     text-decoration: none;
-    padding: 0 10px 0 10px;
 
-    height: 50px;
-    max-height: 100%;
     width: 100%;
-    min-width: 175px;
-    box-sizing: border-box;
-    background-color: var(--purple);
-    border-radius: 20px;
+    height: 50px;
+
+    border-radius: 5px;
+    border: none;
+
+    transition-duration: 100ms, 200ms;
+    transition-property: font-size, background-color;
+
+    font-size: 26px;
+    font-family: "Backso", sans-serif;
+    gap: 3px;
+    font-weight: bold;
+
+    i {
+      height: 1em;
+      font-size: 26px;
+      margin-bottom: 3px;
+      transition: font-size 100ms;
+    }
+  }
+
+  button:disabled {
+    cursor: not-allowed !important;
+  }
+}
+
+.product-group-basket-modifier {
+  color: white;
+  text-decoration: none;
+  padding: 0 10px 0 10px;
+
+  height: 50px;
+  max-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 5px !important;
 }
 
 .product-group-basket-modifier:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

@@ -32,6 +32,10 @@ body {
     margin: 0;
     max-width: 100%;
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    background-color: var(--yellow);
 }
 
 #root {
@@ -78,15 +82,6 @@ hr {
     height: 1px;
     background-color: var(--jamie-grey);
     border: none;
-}
-
-.content {
-    display: flex;
-    min-height: 75vh;
-    flex-direction: column;
-    flex-grow: 1;
-    background-color: var(--yellow);
-    overflow-x: hidden;
 }
 
 button {

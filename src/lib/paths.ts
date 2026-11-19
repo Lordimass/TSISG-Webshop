@@ -12,10 +12,10 @@ const PATHS = {
     REPORTS: "/staff/reports",
 
     // Policies
-    PRIVACY_POLICY: "/privacy",
-    RETURNS_POLICY: "/returns",
-    CANCELLATIONS_POLICY: "/cancellations",
-    SHIPPING_POLICY: "/shipping",
+    PRIVACY_POLICY: "/policy/privacy",
+    RETURNS_POLICY: "/policy/returns",
+    CANCELLATIONS_POLICY: "/policy/cancellations",
+    SHIPPING_POLICY: "/policy/shipping",
 }
 
 /**
@@ -52,11 +52,15 @@ export function getRoute(
  */
 export function getPath(
     page: keyof typeof PATHS,
-    maintainQueryString = true
+    maintainQueryString = false
 ) {
-    const url = new URL(window.location.href)
-    url.pathname = PATHS[page]
-    return url.pathname+(maintainQueryString ? url.search : "")
+    if (maintainQueryString) {
+        const url = new URL(window.location.href)
+        url.pathname = PATHS[page]
+        return url.pathname+(maintainQueryString ? url.search : "")
+    } else {
+        return PATHS[page]
+    }
 }
 
 /**
@@ -68,7 +72,7 @@ export function getPath(
  * @example "/products/1?locale=en-GB"
  */
 export function getProductPagePath(
-    sku: number,
+    sku: number | string,
     maintainQueryString = true
 ) {
     const url = new URL(window.location.href)

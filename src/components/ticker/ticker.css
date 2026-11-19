@@ -1,111 +1,76 @@
 .ticker {
-    height: 50px;
-    max-height: 100%;
-    width: 100%;
-    min-width: 175px;
+  width: 100%;
 
-    display: flex;
-    align-self: center;
-
-    font-family: "Perfect Penmanship", sans-serif;
-    user-select: none;
+  display: flex;
+  align-self: center;
+  user-select: none;
 }
 
 .ticker-text {
-    width: 100%;
-    min-height: 100%;
+  background-color: white;
+  width: 100%;
+  min-height: 100%;
 
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    padding-left: 1em;
-    padding-right: 1em;
+  padding: 0 5px;
 
-    background-color: white;
-    border-color: var(--jamie-grey);
-    border-width: 1px;
-    border-style: solid;
-    border-left: none;
-    border-right: none;
-}
-
-.ticker-text p {
-    height: min-content;
+  border: 1px solid grey;
+  border-left: none;
+  border-right: none;
 }
 
 .ticker-input {
-    height: 100%;
-    padding: 0;
-    border: none;
+  height: 100%;
+  padding: 0;
+  border: none;
+  box-sizing: content-box;
 
-    font-family: "Perfect Penmanship", sans-serif;
-    font-size: 1em;
-    text-align: right;
+  font-size: 1em;
+  text-align: right;
 }
 
 .ticker-input.hidden-max-value {
-    text-align: center;
-    padding-left: 3ch;
-    padding-right: 3ch;
-    overflow-x: visible;
+  padding: 0 5px;
+  text-align: center;
+  overflow-x: visible;
 }
 
 .ticker-text:has(.hidden-max-value) {
-    padding-left: 0;
-    padding-right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .ticker-input:focus-visible {
-    outline: none;
+  outline: none;
 }
 
 .ticker-decrementer, .ticker-incrementer {
-    padding-right: 10px;
-    padding-left: 10px;
-
-    width: 20%;
-    box-sizing: content-box;
-    font-family: "Backso", sans-serif;
-
-    border: none;
-    background-color: var(--purple);
-    transition: background-color 100ms;
-}
-
-.ticker-decrementer span, .ticker-incrementer span {
-    font-size: 35px;
-    line-height: 1em;
-    font-family: "Perfect Penmanship", sans-serif;
-
-    user-select: none;
-    transition-duration: 100ms;
-    transition-property: font-size, line-height;
-
-    color: white;
+  padding-right: 10px;
+  padding-left: 10px;
+  box-sizing: content-box;
+  border: none;
+  display: flex;
+  align-items: center;
 }
 
 .ticker-decrementer {
-    border-bottom-left-radius: 20px;
-    border-top-left-radius: 20px;
+  border-radius: 20px 3px 3px 20px !important;
 }
 
 .ticker-incrementer {
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-.ticker-decrementer:hover, .ticker-incrementer:hover {
-    background-color: var(--light-purple);
-}
-
-.ticker-decrementer:hover span, .ticker-incrementer:hover span {
-    font-size: 43px;
+  border-radius: 3px 20px 20px 3px !important;
 }
 
 .ticker-slash {
-    color: var(--jamie-grey);
-    margin-left: 3px;
-    margin-right: 3px;
+  color: grey;
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
+.ticker-text p {
+  margin-bottom: 0 !important;
 }
