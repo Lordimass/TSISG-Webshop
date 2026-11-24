@@ -1,0 +1,73 @@
+.titleSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background-color: var(--primary);
+    background-size: cover;
+}
+
+.titleSection h1 {
+    user-select: none;
+    font-family: "Backso", sans-serif;
+    font-size: 5em;
+}
+
+.titleSection .titleMainWord {
+    font-size: 8em;
+    text-wrap: nowrap;
+}
+
+.titleSection .titleMainWord:hover {
+    cursor: pointer;
+}
+
+.titleTextRotate {
+    animation: rotation 0.5s linear
+}
+
+.titleText {
+    margin: 0 2rem 2rem 2rem;
+    padding: 1rem;
+    width: calc(100% - 4rem);
+    text-align: center;
+    background-color: whitesmoke;
+    border-radius: 5px;
+    h1 {
+        line-height: 7rem;
+        color: var(--primary-light);
+        text-shadow: var(--bs-box-shadow);
+    }
+}
+
+@keyframes rotation {
+    from {transform:rotateY(0deg);}
+    50% {transform:rotateY(90deg);}
+    to {transform: rotateY(0deg);}
+}
+
+@media screen and (max-width: 1100px) {
+    .titleSection {
+        background-position: 0 0;
+    }
+
+    .titleSection h1 {
+        user-select: none;
+        font-family: "Backso", sans-serif;
+        font-size: 8vw;
+    }
+
+    .titleSection .titleMainWord {
+        font-size: 15vw;
+    }
+
+    .titleText {
+        padding: 0.5em;
+        margin: 1em;
+        text-align: center;
+        backdrop-filter: blur(7px);
+        border-radius: 5vw;
+        line-height: 14vw;
+    }
+}

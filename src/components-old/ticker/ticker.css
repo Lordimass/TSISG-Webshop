@@ -70,7 +70,7 @@
     font-family: "Backso", sans-serif;
 
     border: none;
-    background-color: var(--purple);
+    background-color: var(--primary);
     transition: background-color 100ms;
 }
 

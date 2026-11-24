@@ -13,7 +13,6 @@ import "./BasketManager.css"
 import {trackViewCart} from "@/lib/ga/events.ts";
 import {GAItem} from "@/lib/types/ga.ts";
 import {DEFAULT_LOCALE} from "@/config.ts";
-import {RiShoppingBagLine} from "react-icons/ri";
 
 export interface BasketProps {
   /** Path to the checkout page. Defaults to `"/checkout"` */
@@ -152,7 +151,7 @@ export default function BasketManager({
         onClick={toggleBasket}
         ref={buttonRef}
       >
-        <RiShoppingBagLine />
+        <FaShoppingBasket />
         <div className="basket-item-count" id="basket-item-count">
           <p>{basketQuantity}</p>
         </div>

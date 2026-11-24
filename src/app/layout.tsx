@@ -17,7 +17,9 @@ export const metadata: Metadata = {
         {name: "Sam Knight", url: "https://lordimass.net"}
     ],
     creator: "Lordimass",
-    generator: "Next.js"
+    generator: "Next.js",
+    description: "The official online shop for This Shop Is So Gay in York! We sell queer and LGBTQ merchandise of " +
+        "all kinds and deliver it straight to your door :D"
 }
 
 export default function RootLayout({

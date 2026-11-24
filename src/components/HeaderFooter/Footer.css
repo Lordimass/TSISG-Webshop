@@ -4,7 +4,7 @@
     flex-direction: column;
     
     justify-self: flex-end;
-    background-color: var(--purple);
+    background-color: var(--primary);
     min-height: 2vw;
 
     align-items: center;

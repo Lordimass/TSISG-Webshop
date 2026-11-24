@@ -33,7 +33,7 @@
   width: 30px;
   padding: 3px;
 
-  /* TODO: background-color: var(--primary-translucent);*/
+  background-color: var(--primary-translucent);
 
   color: white;
   text-align: center;
@@ -57,19 +57,18 @@
 .basket-display {
   display: flex;
   flex-direction: column;
-  /* TODO: background-color: var(--secondary);*/
+  background-color: var(--secondary);
 
   position: absolute;
   width: 540px;
   max-width: 90vw;
   height: 70vh;
   right: 5px;
-  top: 50px;
+  top: 25px;
   z-index: 100;
   border-radius: 10px;
   padding: 15px;
-  box-shadow:
-      15px 45px 15px rgba(0, 0, 0, 0.425);
+  box-shadow: var(--bs-box-shadow-md), 0 0 100vw rgba(0, 0, 0, 0.5);
   color: white;
 
   > p, #subtotal p {

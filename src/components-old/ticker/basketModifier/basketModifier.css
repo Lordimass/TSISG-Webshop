@@ -18,7 +18,7 @@
         width: 100%;
         height: 100%;
 
-        background-color: var(--purple);
+        background-color: var(--primary);
         border-radius: 20px;
         border: none;
 
@@ -66,7 +66,7 @@
     width: 100%;
     min-width: 175px;
     box-sizing: border-box;
-    background-color: var(--purple);
+    background-color: var(--primary);
     border-radius: 20px;
 }
 

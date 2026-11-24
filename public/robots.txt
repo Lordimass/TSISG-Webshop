@@ -1,3 +1,33 @@
-User-agent: *
-Disallow: /staff/
-Allow: /
+# Block OpenAI (ChatGPT)
+User-agent: GPTBot
+Disallow: /
+
+# Block Anthropic (Claude)
+User-agent: ClaudeBot
+Disallow: /
+User-agent: anthropic-ai
+Disallow: /
+
+# Block Google (Gemini/Vertex AI)
+User-agent: Google-Extended
+Disallow: /
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Block Perplexity AI
+User-agent: PerplexityBot
+Disallow: /
+
+# Block Meta (Facebook/Instagram AI)
+User-agent: FacebookBot
+Disallow: /
+
+# Block Apple (Applebot-Extended)
+User-agent: Applebot-Extended
+Disallow: /
+
+# Block generic common AI scrapers
+User-agent: CCBot
+Disallow: /
+User-agent: ChatGPT-User
+Disallow: /

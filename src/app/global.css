@@ -4,7 +4,6 @@
     --purple: #692230;
     --light-purple: #b53a52;
     --bone-white: #fdfaf4;
-    --yellow: #d7cfb5;
     --bright-yellow: #ffd970;
     --light-grey: #cfcfcf;
     --jamie-grey: #838383;
@@ -13,6 +12,24 @@
     --red: #FB4141;
     --green: #16C47F;
     --light-green: #b3ffe1;
+
+    --bs-body-bg: white;
+    --body-bg-translucent: rgba(255,255,255,0.6);
+
+    --primary: #111139;
+    --primary-light: #2d2d71;
+    --primary-translucent: rgb(17 17 57 / 0.6);
+
+    --secondary-light: #a8b3b3;
+    --secondary: #6b797c;
+    --secondary-dark: #404a4a;
+    --secondary-darker: #2b3031;
+
+    --bs-primary: var(--primary) !important;
+    --bs-secondary: var(--secondary) !important;
+
+    --bs-box-shadow: 1px 0 2px rgba(0, 0, 0, 0.3);
+    --bs-box-shadow-md: 2px 2px 2px rgba(0, 0, 0, 0.4);
 }
 
 /************************ Fonts ************************/
@@ -28,6 +45,7 @@
 }
 
 /************************ Common Styling ************************/
+
 body {
     margin: 0;
     max-width: 100%;
@@ -35,7 +53,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    background-color: var(--yellow);
+    background-color: whitesmoke;
 }
 
 #root {
@@ -43,6 +61,12 @@ body {
     min-height: 100vh;
     flex-direction: column;
     justify-content: space-between;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 p {

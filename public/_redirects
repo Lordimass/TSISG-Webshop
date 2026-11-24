@@ -2,4 +2,3 @@
 /sitemap.xml            /.netlify/functions/sitemap             200
 /sitemapStatic.xml      /.netlify/functions/sitemapStatic       200
 /sitemapProducts.xml    /.netlify/functions/sitemapProducts     200
-/*                      /index.html                             200

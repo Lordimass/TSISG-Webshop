@@ -19,7 +19,6 @@ export default function Header() {
                 {/*<ProductSearch/>*/}
                 <BasketManager/>
             </div>
-            <div className="header-lower"></div>
         </div>
     </>)
 }

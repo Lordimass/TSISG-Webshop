@@ -1,7 +1,17 @@
+import React from "react";
+import HomePageTitle from "@/app/HomePageTitle.tsx";
 
-// TODO: public/_redirects
-// TODO: Glow Me! Redirects
 
 export default function Page() {
-    return <p>Hello World!</p>
+    // TODO: Products
+    // TODO: public/_redirects
+    // TODO: Glow Me! Redirects
+
+
+    return <>
+        <HomePageTitle/>
+
+        {/*<Products/>*/}
+
+    </>
 }
