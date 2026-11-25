@@ -1,0 +1,19 @@
+.go-home-button {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  user-select: none;
+  text-decoration: none;
+  margin: 1rem 0 0.2rem 1rem;
+
+  i {
+    height: 1em;
+  }
+
+  h1, i {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 2em;
+    line-height: 1em;
+  }
+}

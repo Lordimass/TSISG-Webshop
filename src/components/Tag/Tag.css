@@ -1,0 +1,19 @@
+.tags {
+  display: flex;
+  gap: 0 3px;
+  height: min-content;
+
+  .tag {
+    background-color: var(--secondary);
+    height: min-content;
+    padding: 5px;
+    border-radius: 10px;
+    font-family: "Perfect Penmanship", sans-serif;
+    font-size: 0.8em;
+    user-select: none;
+
+    a, p {
+      color: white;
+    }
+  }
+}

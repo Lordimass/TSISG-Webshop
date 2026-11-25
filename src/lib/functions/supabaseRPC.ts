@@ -20,11 +20,8 @@ export async function callRPC(
     // Check that the client exists
     if (!supabase) {
         console.error("`supabase` was not defined.");
-        if (toast) {
-            toast(
-                `An error occurred while calling the "${functionName}" function because the Supabase client was not defined"`,
-            );
-        }
+        if (toast) toast(`An error occurred while calling the "${functionName}" function because the Supabase client was not defined"`,);
+
         return undefined;
     }
 
@@ -32,10 +29,7 @@ export async function callRPC(
     const { data, error } = await supabase.rpc(functionName, params);
     if (error) {
         console.error(`Error calling RPC function "${functionName}":`, error);
-        if (toast)
-            toast(
-                `An error occurred while calling the "${functionName}" function. Please try again later.`,
-            );
+        if (toast) toast(`An error occurred while calling the "${functionName}" function. Please try again later.`);
         return Promise.reject(error);
     } else {
         return data;
@@ -44,7 +38,7 @@ export async function callRPC(
 
 export async function getProducts(
     supabase: SupabaseClient,
-    ids?: string[],
+    skus?: (string | number)[],
     in_stock_only = false,
     tags?: string[],
     toast?: (toast: IToast | string) => void,
@@ -52,7 +46,7 @@ export async function getProducts(
     const products: any[] = await callRPC(
         supabase,
         "get_products",
-        {ids, in_stock_only, p_tags: tags},
+        {skus, in_stock_only, p_tags: tags},
         toast
     );
 
@@ -61,7 +55,7 @@ export async function getProducts(
 
 export async function getGroupedProducts(
     supabase: SupabaseClient,
-    ids?: string[],
+    skus?: (string | number)[],
     in_stock_only = false,
     tags?: string[],
     toast?: (toast: IToast | string) => void,
@@ -69,7 +63,7 @@ export async function getGroupedProducts(
     const groups: any[][] = await callRPC(
         supabase,
         "get_grouped_products",
-        {ids, in_stock_only, p_tags: tags},
+        {skus, in_stock_only, p_tags: tags},
         toast
     );
 

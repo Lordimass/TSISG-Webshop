@@ -7,6 +7,7 @@ export * from "./types";
 
 export * from "./assets.ts";
 export * from "./currencySymbols.ts"
+export * from "./formatting.ts"
 
 export function isVideo(src?: string) {
     if (!src) return false;

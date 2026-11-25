@@ -289,7 +289,7 @@ interface ProductMetadata {
     /**
      * Short informational strings used to identify this product.
      */
-    tags?: string[];
+    tags?: {name: string, created_at: string}[];
     options?: {
         name: string;
         product_id: string;
