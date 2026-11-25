@@ -1,0 +1,12 @@
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 20px;
+}
+
+.products-box {
+  display: flex;
+  flex-direction: column;
+}

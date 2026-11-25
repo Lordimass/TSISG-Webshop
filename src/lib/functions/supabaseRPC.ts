@@ -46,15 +46,13 @@ export async function getProducts(
     supabase: SupabaseClient,
     ids?: string[],
     in_stock_only = false,
-    livemode = true,
     tags?: string[],
     toast?: (toast: IToast | string) => void,
 ): Promise<ProductData[]> {
-    // TODO: Change this to get TSISG Products
     const products: any[] = await callRPC(
         supabase,
-        "gm_get_products",
-        {ids, in_stock_only, p_livemode: livemode, p_tags: tags},
+        "get_products",
+        {ids, in_stock_only, p_tags: tags},
         toast
     );
 
@@ -65,15 +63,13 @@ export async function getGroupedProducts(
     supabase: SupabaseClient,
     ids?: string[],
     in_stock_only = false,
-    livemode = true,
     tags?: string[],
     toast?: (toast: IToast | string) => void,
 ): Promise<ProductCollection> {
-    // TODO: Change this to get TSISG Products
     const groups: any[][] = await callRPC(
         supabase,
-        "gm_get_grouped_products",
-        {ids, in_stock_only, p_livemode: livemode, p_tags: tags},
+        "get_grouped_products",
+        {ids, in_stock_only, p_tags: tags},
         toast
     );
 
@@ -94,23 +90,19 @@ export function handleGetProductsResponse(respData: any[] | undefined): ProductD
                 uri,
             };
         });
-        if (!images || images.length == 0) {
-            images = p.stripe_images.map((uri: string) => {
-                return {uri};
-            });
-        }
+
         const opts = {
             ...p,
             ...p.metadata,
             images,
-            price: (p.price.unit_amount ?? 0) / 100,
+            // price: (p.price.unit_amount ?? 0) / 100,
             priceId: p.price.id,
             groupName: p.group_name,
         };
 
         delete opts.metadata;
 
-        return new ProductData(p.id, opts);
+        return new ProductData(p.sku, opts);
     }) satisfies ProductData[];
 }
 

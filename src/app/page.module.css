@@ -6,6 +6,7 @@
 
     background-color: var(--primary);
     background-size: cover;
+    margin-bottom: 20px;
 }
 
 .titleSection h1 {
